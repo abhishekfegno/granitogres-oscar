@@ -1,0 +1,10 @@
+.idea
+.idea/*
+db.sqlite3
+*.pyc
+__pycache__/
+.env
+.env
+public/media/*
+public/static/*
+*.sql

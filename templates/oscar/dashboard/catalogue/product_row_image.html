@@ -1,0 +1,11 @@
+{% load image_tags %}
+{% if record.primary_image.original.url %}
+    {% with image=record.primary_image %}
+        {% oscar_thumbnail image.original "70x70" upscale=False as thumb %}
+            <a href="#" data-original="{{ image.original.url }}" class="sub-image">
+                {% if thumb and thumb.url %}<img src="{{ thumb.url }}" alt="" height="70" width="auto" style="min-width:30px">{% else %} IMAGE {% endif %}
+            </a>
+    {% endwith %}
+{% else %}
+    —
+{% endif %}

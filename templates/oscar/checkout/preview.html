@@ -1,0 +1,17 @@
+{% extends 'oscar/checkout/preview.html' %}
+
+{% block hiddenforms %}
+        {{ token_form }}
+{% endblock %}
+
+{% comment %}
+    {% if True %}
+    {# Razorpay #}
+        {% include 'oscar/checkout/razorpay/preview.html' %}
+    {% elif False %}
+    {# Stripe #}
+        {% include 'oscar/checkout/stripe/preview.html' %}
+    {% else %}
+        ...
+    {% endif %}
+{% endcomment %}

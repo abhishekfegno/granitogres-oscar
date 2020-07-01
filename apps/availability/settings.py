@@ -1,0 +1,10 @@
+from django.conf import settings
+
+ALLOW_CHOOSE_COUNTRY_FROM_DASHBOARD = getattr(settings, 'ALLOW_CHOOSE_COUNTRY_FROM_STATE', False)
+ALLOW_CHOOSE_COUNTRY_FROM_STATE = getattr(settings, 'ALLOW_CHOOSE_COUNTRY_FROM_STATE', True)
+LOAD_INITIAL_COUNTRIES = ('IN', )
+
+
+
+
+

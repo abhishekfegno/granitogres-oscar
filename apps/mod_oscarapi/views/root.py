@@ -1,0 +1,104 @@
+import collections
+
+from django.conf import settings
+from oscarapi.views.root import ADMIN_APIS, PUBLIC_APIS as DEFAULT_PUBLIC_APIS
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
+
+
+def PUBLIC_APIS(r, f):
+    return [
+        ("Index Page", collections.OrderedDict([
+            ("Home", reverse("api-home", request=r, format=f)),
+            ("Index", reverse("api-index", request=r, format=f)),
+            ("Offers", reverse("api-offers", request=r, format=f)),
+        ])),
+        ("Catalogue", collections.OrderedDict([
+            ("Category API", reverse("wnc-categories-list", request=r, format=f)),
+            ("Products API", reverse("wnc-all-product-list", request=r, format=f)),
+            ("Product Suggestion API", reverse("wnc-product-suggestions", request=r, format=f) + '?q=8GB'),
+            ("Product Filter Options", reverse("wnc-filter-options", request=r, format=f,
+                                               kwargs={'pk': 2})),
+            ("Products for Category API", reverse("wnc-category-product-list", request=r, format=f,
+                                                  kwargs={"category": 'table'})),
+            ("Product Details Web", reverse("wnc-category-product-detail-web", request=r, format=f,
+                                            kwargs={"product": '16'})),
+        ])),
+        ("Basket", collections.OrderedDict([
+            ("Display Basket ", reverse("wnc-get-basket", request=r, format=f)),
+            ("OscarAPI Default Basket APIs", collections.OrderedDict([
+                ("basket", reverse("api-basket", request=r, format=f)),
+                ("basket-add-product", reverse("api-basket-add-product", request=r, format=f)),
+                ("basket-add-voucher", reverse("api-basket-add-voucher", request=r, format=f)),
+            ]))
+        ])),
+        ("Buy Now", collections.OrderedDict([
+            ("Get Basket ", reverse("django_oscar_buy_now_api:get-basket", request=r, format=f)),
+            ("Checkout ", reverse("django_oscar_buy_now_api:checkout", request=r, format=f, kwargs={'basket': 165})),
+        ])),
+        # ("Pincode", collections.OrderedDict([
+        #     ("Check Product Availability At Location", reverse("availability-api:check-availability", request=r, format=f)),
+        #     ("Set Pincode To Session", reverse("availability-api:set-pincode", request=r, format=f)),
+        # ])),
+        ("Wish List", collections.OrderedDict([
+            ("My Wish List", reverse("wnc-wish-list", request=r, format=f)),
+        ])),
+        ("Order History & Tracking", collections.OrderedDict([
+            ("My Orders", reverse("api-orders", request=r, format=f)),
+        ])),
+        ("Checkout", collections.OrderedDict([
+            ("Payment Methods", reverse("api-checkout-payment-methods", request=r, format=f)),
+            ("API Payment Status", reverse("api-payment", request=r, format=f)),
+            ("API Payment Status Detail", reverse("api-payment", request=r, format=f, kwargs={"pk": 1})),
+            ("API Checkout", reverse("api-checkout", request=r, format=f)),
+        ])),
+        ("Authentication and Registration", collections.OrderedDict([
+            ("send OTP", reverse("api-v1--send-otp", request=r, format=f)),
+            ("Verify OTP", reverse("api-v1--verify-otp", request=r, format=f)),
+            ("Register User", reverse("rest_register", request=r, format=f)),
+            ("New User Register With OTP", reverse("api-v1--user-register", request=r, format=f)),
+            ("Login", reverse("rest_login", request=r, format=f)),
+            ("Profile Update", reverse("update-profile", request=r, format=f)),
+            ("API Password Change", reverse("rest_password_change", request=r, format=f)),
+
+            # ("Password Reset With API", reverse("rest_password_reset", request=r, format=f)),
+            # ("Password Reset Confirm", reverse("rest_password_reset_confirm", request=r, format=f)),
+            # ("API Logout", reverse("rest_logout", request=r, format=f)),
+        ])),
+
+        ("Addresses", collections.OrderedDict([
+            ("User Addresses", reverse("useraddress-list", request=r, format=f)),
+            ("basket", reverse("api-basket", request=r, format=f)),
+            ("basket-add-product", reverse("api-basket-add-product", request=r, format=f)),
+            ("basket-add-voucher", reverse("api-basket-add-voucher", request=r, format=f)),
+        ])),
+        # ("Elastic Search", collections.OrderedDict([
+        #     # # ("List All Products", reverse("product-list", request=r, format=f)),
+        #     # # ("List Products With Category Slug", reverse("categorized-product-list", kwargs={'category': 'table'}, request=r, format=f)),
+        # ])),
+        ("DEFAULT_PUBLIC_APIS", collections.OrderedDict(DEFAULT_PUBLIC_APIS(r, f))),
+    ]
+
+
+@api_view(("GET",))
+def api_root(request, format=None):  # pylint: disable=redefined-builtin
+    """
+    GET:
+    Display all available urls.
+
+    Since some urls have specific permissions, you might not be able to access
+    them all.
+    """
+
+    apis = PUBLIC_APIS(request, format)
+    if (
+            not getattr(settings, "OSCARAPI_BLOCK_ADMIN_API_ACCESS", True)
+            and request.user.is_staff
+    ):
+        apis += [("admin", collections.OrderedDict(ADMIN_APIS(request, format)))]
+
+    return Response(collections.OrderedDict(apis))
+
+

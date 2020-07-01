@@ -1,0 +1,23 @@
+
+
+# RAZORPAY
+import os
+
+
+RAZOR_PAY_LIVE_MODE = os.environ.get("STRIPE_LIVE_MODE", 'off').lower() in ('true', 'on')
+
+RAZOR_PAY_EMAIL = os.environ.get("RAZOR_PAY_EMAIL")
+RAZOR_PAY_MERCHANT_ID = os.environ["RAZOR_PAY_MERCHANT_ID"]
+
+if RAZOR_PAY_LIVE_MODE:
+    RAZOR_PAY_PUBLIC_KEY = os.environ["RAZOR_PAY_LIVE_PUBLIC_KEY"]
+    RAZOR_PAY_SECRET_KEY = os.environ["RAZOR_PAY_LIVE_SECRET_KEY"]
+else:
+    RAZOR_PAY_PUBLIC_KEY = os.environ["RAZOR_PAY_TEST_PUBLIC_KEY"]
+    RAZOR_PAY_SECRET_KEY = os.environ["RAZOR_PAY_TEST_SECRET_KEY"]
+
+
+
+
+
+
