@@ -18,11 +18,14 @@ ORMCategory = get_model('catalogue', 'Category')
 
 
 def remove_ancestor_slugs(apps, schema_editor):
-    MigrationCategory = apps.get_model('catalogue', 'Category')
-    for category in MigrationCategory.objects.all():
-        category.slug = category.slug.split(ORMCategory._slug_separator)[-1]
-        category.save()
-
+    try:
+        MigrationCategory = apps.get_model('catalogue', 'Category')
+        for category in MigrationCategory.objects.all():
+            category.slug = category.slug.split(ORMCategory._slug_separator)[-1]
+            category.save()
+    except Exception as e:
+        print(e)
+        print("")
 
 def add_ancestor_slugs(apps, schema_editor):
     MigrationCategory = apps.get_model('catalogue', 'Category')

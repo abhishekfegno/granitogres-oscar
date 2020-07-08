@@ -66,5 +66,5 @@ def populate_pincode(apps, schema_editor):
 
 
 def populate_pincode_reverse(apps, schema_editor):
-    from apps.availability.models import PinCode
-    PinCode.objects.all().delete()
+        from apps.availability.models import PinCode
+        PinCode.objects.all().delete()
