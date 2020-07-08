@@ -15,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 
 from lib import cache_key
 from lib.cache import cache_library
+from sorl.thumbnail import ImageField
 
 StockRecord = get_model('partner', 'StockRecord')
 
@@ -120,14 +121,19 @@ class Product(AbstractProduct):
 
 class Category(AbstractCategory):
 
+    image = ImageField(_('Image'), upload_to='categories', blank=True,
+                       null=True, max_length=255)
+
     @property
     def thumbnail_web_listing(self):
         if self.image:
-            return get_thumbnail(self.image, '255x283', crop='center', quality=98).url
+            return get_thumbnail(self.image, '500x600', crop='center', quality=98).url
         return image_not_found()
 
 
 class ProductImage(AbstractProductImage):
+
+    original = ImageField(_("Original"), upload_to=settings.OSCAR_IMAGE_FOLDER, max_length=255)
 
     @property
     def thumbnail_web_listing(self):
@@ -168,7 +174,6 @@ class ProductImage(AbstractProductImage):
 
 class ProductAttribute(AbstractProductAttribute):
     is_varying = models.BooleanField(_('Is Varying For Child'), default=False)
-
 
 
 from oscar.apps.catalogue.models import *  # noqa isort:skip

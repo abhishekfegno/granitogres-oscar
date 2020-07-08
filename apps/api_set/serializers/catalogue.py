@@ -21,16 +21,28 @@ AvailabilitySerializer = get_api_class('serializers.product', 'AvailabilitySeria
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ('name', 'thumbnail_web_listing', 'slug', 'breadcrumbs', 'numchild', 'depth', 'children',)
+        fields = ('name', 'thumbnail_web_listing', 'slug', 'numchild', 'depth', 'product_count', 'children', )
 
-    breadcrumbs = serializers.CharField(source="full_name", read_only=True)
+    # breadcrumbs = serializers.CharField(source="full_name", read_only=True)
     children = serializers.SerializerMethodField()
     thumbnail_web_listing = serializers.SerializerMethodField()
+    product_count = serializers.SerializerMethodField()
 
     # product_url = serializers.SerializerMethodField()
 
     def get_children(self, instance):
-        return self.__class__(instance.get_children(), many=True, context={'request': self.context['request']}).data
+        return self.__class__(
+            instance.get_children(),
+            many=True,
+            context={'request': self.context['request']}
+        ).data
+
+    def get_product_count(self, instance):
+        return Product.browsable.browsable().filter(
+            id__in=Product.browsable.browsable().filter(
+                categories__in=Category.objects.all().filter(path__startswith=instance.path, numchild=0)
+            )
+        ).count()
 
     def get_thumbnail_web_listing(self, instance):
         img = instance.thumbnail_web_listing
@@ -48,13 +60,13 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, serializers.Mod
 
 class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite, serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
-    # price = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
 
     class Meta:
         model = Product
         fields = ('id', 'title', 'slug', 'rating', 'num_approved_reviews',
-                  'primary_image', 'url', 'effective_price', 'retail_price')
+                  'primary_image', 'url', 'price')
 
 
 class ProductListSerializerExpanded(ProductPriceFieldMixin, ProductListSerializer):

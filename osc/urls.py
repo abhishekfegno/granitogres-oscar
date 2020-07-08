@@ -31,11 +31,11 @@ view_checkout = never_cache(CheckoutView.as_view())
 
 urlpatterns = [
     path('api/v1/checkout/', view_checkout, name='api-checkout'),               # Must be before oscar_api.urls
-    path('api/v1/', include(apps.get_app_config("oscarapicheckout").urls[0])),  # Must be before oscar_api.urls
+    # path('api/v1/', include(apps.get_app_config("oscarapicheckout").urls[0])),  # Must be before oscar_api.urls
 
     path('api/v1/', include('oscarapi.urls')),
     path('api/v1/buy-now/', include('django_oscar_buy_now_api.urls')),
-    path('api/', include('apps.api_set.urls')),
+    path('api/', include('apps.api_set.urls')),                                 # prone to versioning
 
     path('api/v1/avalilability/', include('apps.availability.api')),
     path('dashboard/avalilability/', include('apps.availability.urls')),
@@ -49,6 +49,7 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),  # > Django-2.0
     path('admin/', admin.site.urls),
 
+    path('api/push/', include('apps.api_set.push_notification_registration')),
     path('', include('apps.users.urls')),
     path('', include('apps.dashboard.custom.urls')),
     path('', include(apps.get_app_config('oscar').urls[0])),  # > Django-2.0

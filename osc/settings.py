@@ -128,11 +128,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # HANDS_ON
-    'apps.availability.middleware.AvailabilityMiddleware',
+    'apps.availability.middleware.AvailabilityMiddleware',      # mist be before basket middleware
     'lib.middlewares.BypassCSRF',
 
     # THIRD PARTY
-    'oscar.apps.basket.middleware.BasketMiddleware',
+    'apps.basket.middleware.BasketMiddleware',          # over-rided Basket middleware of oscar
     'oscarapi.middleware.ApiBasketMiddleWare',
     # 'oscarapi.middleware.HeaderSessionMiddleware',
     # 'oscarapi.middleware.ApiGatewayMiddleWare',

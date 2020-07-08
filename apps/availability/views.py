@@ -10,6 +10,7 @@ from rest_framework.response import Response
 
 from apps.api_set.serializers.mixins import ProductPriceFieldMixin
 from apps.availability.facade import PincodeFacade
+from apps.availability.signals import pincode_changed
 
 from apps.partner.strategy import Selector
 from oscar.core.loading import get_model
@@ -137,6 +138,9 @@ def set_pincode(request):
         out['error'] = PINCODE_REQUIRED
         return Response(out, status=400)
     out['status'] = success = PincodeFacade.set_pincode(request, request.GET['pincode'])
+    if not request.session.get('pincode') and request.user._profile and request.user._profile.pincode:
+        request.session['pincode'] = request.user._profile.pincode.code
+        pincode_changed.send(user=request.user, pincode=request.GET['pincode'])
     if not success:
         out['error'] = NOT_DELIVERABLE
     return Response(out, status=200 if success else 400)

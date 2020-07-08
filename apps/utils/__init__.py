@@ -17,6 +17,7 @@ def image_not_found(request=None):
 
 def get_purchase_info(product, request=None, user=None):
     strategy = Selector().strategy(request, user)
+
     if product.is_parent:
         return strategy.fetch_for_parent(product=product)
     else:

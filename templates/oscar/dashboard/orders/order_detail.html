@@ -1,5 +1,4 @@
 {% extends 'oscar/dashboard/orders/order_detail.html' %}
-{% load ecommerce_additionals %}
 {% load currency_filters %}
 {% load i18n %}
 
@@ -19,10 +18,7 @@
                 <td>{{ order.email }}</td>
             </tr>
         {% elif order.user %}
-            {% gst order.user as gst_number %}
             <tr>
-                <th>{% trans "Name" %}</th>
-                {% if gst_number %}<th>{% trans "GST Number" %}</th>{% endif  %}
                 <th>{% trans "Email address" %}</th>
             </tr>
             <tr>

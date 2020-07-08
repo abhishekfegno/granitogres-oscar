@@ -1,5 +1,4 @@
 {% extends 'oscar/dashboard/orders/order_list.html' %}
-{% load ecommerce_additionals %}
 {% load currency_filters %}
 {% load sorting_tags %}
 {% load i18n %}
@@ -31,7 +30,6 @@
             <th>{% trans "Number of items" %}</th>
             <th>{% trans "Status" %}</th>
             <th>{% trans "Customer" %}</th>
-            <th>{% trans "GST" %}</th>
             <th>{% trans "Shipping address" %}</th>
             <th>{% trans "Billing address" %}</th>
             <th>{% trans "Date of purchase" %}</th>
@@ -54,10 +52,6 @@
                     {% else %}
                         &lt;{% trans "Deleted" %}&gt;
                     {% endif %}
-                </td>
-                <td>
-                    {% gst order.user as gst_number %}
-                    {{ gst_number|default:"" }}
                 </td>
                 <td>{{ order.shipping_address|default:"-" }}</td>
                 <td>{{ order.billing_address|default:"-" }}</td>

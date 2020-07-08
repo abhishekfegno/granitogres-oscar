@@ -27,7 +27,6 @@ TEMPLATES = [
                 'lib.context_processors.terms',
             ],
             'libraries': {
-                'ecommerce_additionals': 'apps.dashboard.templatetags.ecommerce_additionals',
             }
         },
     },

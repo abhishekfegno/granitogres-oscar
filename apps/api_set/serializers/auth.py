@@ -49,6 +49,7 @@ class PinSerializer(serializers.Serializer):
 class OtpSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True, )
     code = serializers.IntegerField(required=True, max_value=999999, min_value=100000)
+    profile = serializers.IntegerField(required=True, max_value=999999, min_value=100000)
 
     def update(self, instance, validated_data):
         pass

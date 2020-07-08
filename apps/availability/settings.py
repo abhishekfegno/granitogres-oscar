@@ -2,9 +2,9 @@ from django.conf import settings
 
 ALLOW_CHOOSE_COUNTRY_FROM_DASHBOARD = getattr(settings, 'ALLOW_CHOOSE_COUNTRY_FROM_STATE', False)
 ALLOW_CHOOSE_COUNTRY_FROM_STATE = getattr(settings, 'ALLOW_CHOOSE_COUNTRY_FROM_STATE', True)
-LOAD_INITIAL_COUNTRIES = ('IN', )
+LOAD_INITIAL_COUNTRIES = getattr(settings, 'FN_LOAD_PINCODE_FOR_USER', [])
 
-
+FN_LOAD_PINCODE_FOR_USER = getattr(settings, 'FN_LOAD_PINCODE_FOR_USER', None)
 
 
 

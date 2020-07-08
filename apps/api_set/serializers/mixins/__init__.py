@@ -85,12 +85,15 @@ class ProductPriceFieldMixin(object):
 class ProductPriceFieldMixinLite(object):
 
     def get_price(self, product):
-        purchase_info = get_purchase_info(product, request=self.request)  # noqa
-        from oscarapi.serializers.product import AvailabilitySerializer
-        availability = AvailabilitySerializer(purchase_info.availability).data[
-            'is_available_to_buy'
-        ] if purchase_info else False
-        return purchase_info_lite_as_dict(purchase_info, availability=availability)
+        key = 'ProductPriceFieldMixinLite__{0}__{1}'
+        def _inner():
+            purchase_info = get_purchase_info(product, request=self.context['request'])  # noqa
+            from oscarapi.serializers.product import AvailabilitySerializer
+            availability = AvailabilitySerializer(purchase_info.availability).data[
+                'is_available_to_buy'
+            ] if purchase_info else False
+            return purchase_info_lite_as_dict(purchase_info, availability=availability)
+        return _inner()
 
 
 class ProductDetailSerializerMixin(object):

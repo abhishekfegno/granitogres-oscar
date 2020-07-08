@@ -34,25 +34,21 @@ def PUBLIC_APIS(r, f):
                 ("basket-add-voucher", reverse("api-basket-add-voucher", request=r, format=f)),
             ]))
         ])),
-        ("Buy Now", collections.OrderedDict([
-            ("Get Basket ", reverse("django_oscar_buy_now_api:get-basket", request=r, format=f)),
-            ("Checkout ", reverse("django_oscar_buy_now_api:checkout", request=r, format=f, kwargs={'basket': 165})),
-        ])),
-        # ("Pincode", collections.OrderedDict([
-        #     ("Check Product Availability At Location", reverse("availability-api:check-availability", request=r, format=f)),
-        #     ("Set Pincode To Session", reverse("availability-api:set-pincode", request=r, format=f)),
-        # ])),
-        ("Wish List", collections.OrderedDict([
-            ("My Wish List", reverse("wnc-wish-list", request=r, format=f)),
-        ])),
-        ("Order History & Tracking", collections.OrderedDict([
-            ("My Orders", reverse("api-orders", request=r, format=f)),
-        ])),
         ("Checkout", collections.OrderedDict([
             ("Payment Methods", reverse("api-checkout-payment-methods", request=r, format=f)),
             ("API Payment Status", reverse("api-payment", request=r, format=f)),
             ("API Payment Status Detail", reverse("api-payment", request=r, format=f, kwargs={"pk": 1})),
             ("API Checkout", reverse("api-checkout", request=r, format=f)),
+        ])),
+        ("Buy Now", collections.OrderedDict([
+            ("Get Basket ", reverse("django_oscar_buy_now_api:get-basket", request=r, format=f)),
+            ("Checkout ", reverse("django_oscar_buy_now_api:checkout", request=r, format=f, kwargs={'basket': 165})),
+        ])),
+        ("Wish List", collections.OrderedDict([
+            ("My Wish List", reverse("wnc-wish-list", request=r, format=f)),
+        ])),
+        ("Order History & Tracking", collections.OrderedDict([
+            ("My Orders", reverse("api-orders", request=r, format=f)),
         ])),
         ("Authentication and Registration", collections.OrderedDict([
             ("send OTP", reverse("api-v1--send-otp", request=r, format=f)),
@@ -62,10 +58,9 @@ def PUBLIC_APIS(r, f):
             ("Login", reverse("rest_login", request=r, format=f)),
             ("Profile Update", reverse("update-profile", request=r, format=f)),
             ("API Password Change", reverse("rest_password_change", request=r, format=f)),
-
+            ("API Logout", reverse("rest_logout", request=r, format=f)),
             # ("Password Reset With API", reverse("rest_password_reset", request=r, format=f)),
             # ("Password Reset Confirm", reverse("rest_password_reset_confirm", request=r, format=f)),
-            # ("API Logout", reverse("rest_logout", request=r, format=f)),
         ])),
 
         ("Addresses", collections.OrderedDict([
@@ -73,6 +68,11 @@ def PUBLIC_APIS(r, f):
             ("basket", reverse("api-basket", request=r, format=f)),
             ("basket-add-product", reverse("api-basket-add-product", request=r, format=f)),
             ("basket-add-voucher", reverse("api-basket-add-voucher", request=r, format=f)),
+        ])),
+
+        ("Pincode", collections.OrderedDict([
+            ("Check Product Availability At Location", reverse("availability-api:check-availability", request=r, format=f)),
+            ("Set Pincode To Session", reverse("availability-api:set-pincode", request=r, format=f)),
         ])),
         # ("Elastic Search", collections.OrderedDict([
         #     # # ("List All Products", reverse("product-list", request=r, format=f)),

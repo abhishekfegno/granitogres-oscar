@@ -1,9 +1,5 @@
-from oscar.core.loading import get_model, get_class
-from oscarapi.utils.loading import get_api_classes
 from rest_framework import serializers
-
-from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin
-from apps.users.models import GSTNumber, UserProfile
+from apps.users.models import UserProfile
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -16,4 +12,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "gst_number",
             "pincode",
         )
+
+    def __init__(self, instance=None, **kwargs):
+        instance = self.context['request'].user._profile
+        super(UserProfileSerializer, self).__init__(instance=instance, **kwargs)
+
 

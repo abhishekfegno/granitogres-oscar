@@ -1,6 +1,7 @@
 import os
 
 from django.urls import reverse_lazy
+from django.utils.functional import lazy
 
 DEBUG_TOOLBAR_PANELS = (
     # Defaults
@@ -67,3 +68,11 @@ DEFAULT_PAGE_SIZE = 12
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 COOKIE_STORAGE_PINCODE_KEY = 'pincode'
+
+FN_LOAD_PINCODE_FOR_USER = lazy(lambda request: (
+        request.user.is_authenticated and
+        request.user._profile and
+        request.user._profile.pincode and
+        request.user._profile.pincode.code
+))
+LOAD_INITIAL_COUNTRIES = ('IN', )

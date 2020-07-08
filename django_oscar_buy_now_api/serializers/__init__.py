@@ -19,7 +19,9 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
         super().__init__(*args, **kwargs)
 
         # Build PaymentMethods field
-        self.fields['payment'] = PaymentMethodsSerializer(context=self.context)
+        print(self.context)
+
+
         # We require a request because we need to know what accounts are valid for the
         # user to be drafting from. This is derived from the user when authenticated or
         # the session store when anonymous
@@ -36,6 +38,7 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
                 " context. Add `context={'request': request, 'view': self}` when instantiating "
                 "the serializer." % self.__class__.__name__
         )
+        self.fields['payment'] = PaymentMethodsSerializer(context={'request': request, 'view': view})
 
         # Limit baskets to only the one that is active and owned by the user.
         # basket = get_basket(request)

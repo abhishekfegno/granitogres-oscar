@@ -10,15 +10,15 @@ from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from apps.api_set.serializers.catalogue import CategorySerializer, Category, Product, ProductListSerializer, \
-    SimpleOfferBannerSerializer, ProductListSerializerExpanded
-from apps.api_set.views.catalogue import __get_category_cached
+from apps.api_set.serializers.catalogue import (
+    CategorySerializer, Category, Product,
+    ProductListSerializer, SimpleOfferBannerSerializer
+)
 from apps.basket.models import Basket
 from apps.dashboard.custom.models import OfferBanner
-from apps.mod_oscarapi.serializers.login import UserSerializer
-from apps.users.models import GSTNumber
 from apps.utils.urls import list_api_formatter
 from lib.cache import get_featured_path
+
 
 BasketSerializer = get_api_class("serializers.basket", "BasketSerializer")
 Order = get_model('order', 'Order')
@@ -29,6 +29,7 @@ BasketLine = get_model('basket', 'Line')
 def home(request, *a, **k):
     user = None
     b_count = 0
+    profile = None
     if request.user.is_authenticated:
         user_fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', ]
         user = {field: getattr(request.user, field) for field in user_fields}
@@ -37,16 +38,15 @@ def home(request, *a, **k):
 
         request.session['has_address'] = request.session.get('has_address', False) or request.user.addresses.all().exists()
         b_count = Basket.open.filter(owner=request.user).last().num_lines
+        profile = {
+            'mobile': request.user._profile.mobile,
+            'gst_number': request.user._profile.gst_number,
+            'pincode': request.user._profile.pincode and request.user._profile.pincode.code,
+        }
+
     else:
         request.session['has_address'] = None
         request.session['is_email_verified'] = None
-    profile = None
-    if request.user._profile:
-        profile = {
-         'mobile': request.user._profile.mobile,
-         'gst_number': request.user._profile.gst_number,
-         'pincode': request.user._profile.pincode and request.user._profile.pincode.code,
-        }
 
     return Response({
         "user": user,
