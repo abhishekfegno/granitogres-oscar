@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 
 from factory.django import get_model
 from oscar.apps.offer.models import ConditionalOffer
+from oscar.core.loading import get_class
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -18,6 +19,9 @@ from apps.catalogue.models import Product, ProductAttribute, AttributeOption
 from apps.utils.urls import list_api_formatter
 from lib import cache_key
 from lib.cache import cache_library
+
+get_product_search_handler_class = get_class(
+    'catalogue.search_handlers', 'get_product_search_handler_class')
 
 
 _ = lambda x: x
@@ -93,6 +97,7 @@ def product_list(request, category='all', **kwargs):
     page_number = int(str(request.GET.get('page', 1)))
     page_size = int(str(request.GET.get('page_size', settings.DEFAULT_PAGE_SIZE)))
     out = {}
+    search_handler = get_product_search_handler_class(request.GET, request.get_full_path(), [])
 
     if _offer_category:
         offer_banner_object = get_object_or_404(OfferBanner, code=_offer_category, offer__status=ConditionalOffer.OPEN)
@@ -172,7 +177,7 @@ def __(val):
         return val.value
 
 
-def  to_client_dict(value_array):
+def to_client_dict(value_array):
     return [{
         'label': value,
         'is_checked': False
@@ -185,7 +190,7 @@ def filter_options(request, pk):
         is_varying=True, product_class__id=pk
     ).prefetch_related('productattributevalue_set')
     return Response({
-        'results': [ {
+        'results': [{
             'code': attr.code,
             'label': attr.name,
             'val': to_client_dict({__(value) for value in attr.productattributevalue_set.all()})

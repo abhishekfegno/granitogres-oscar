@@ -1,24 +1,35 @@
-            <form action="" method="POST" id="payment_token_form" onsubmit="submission_interceptor(event)">
-                <script
-                    src="https://checkout.razorpay.com/v1/checkout.js"
-                    data-key="{{ settings.RAZOR_PAY_PUBLIC_KEY }}"
-                    data-amount="5100"
-                    data-name="WoodN'Cart"
-                    data-description="Payment of #{{ request.basket.id }}"
-                    data-image="/assets/cart.jpg"
-                    data-netbanking="true"
-                    data-prefill.name="{{ user.full_name }}"
-                    data-prefill.email="{{ user.email }}"
-                    data-prefill.contact="{{ user.mobile }}"
-                    data-notes.shopping_order_id="{{ request.basket.id }}">
-                </script>
-            <input type="hidden" name="shopping_order_id" value="{{ request.basket.id }}">
-        </form>
-        {# pay_F0Trojj2Q3p2hl #}
-        <script type="text/javascript" defer async>
-            function submission_interceptor(event) {
-                    event.preventDefault();
-                    debugger;
-                    return false;
-            }
-        </script>
+{% load currency_filters %}
+
+<form action="{% url 'checkout:preview' %}" method="POST" id="payment_token_form" onsubmit="submission_interceptor(event)">
+    <script
+            src="https://checkout.razorpay.com/v1/checkout.js"
+            data-key="{{ settings.RAZOR_PAY_PUBLIC_KEY }}"
+            data-amount="{{ order_total_incl_tax_cents }}"
+            data-name="{{ shop_name|default:'WoodN\'Cart' }}"
+            data-description="Payment of {{ order_total.incl_tax|currency }} against #{{ request.basket.id }} of {{ basket.num_items }} items."
+            data-image="/assets/cart.jpg"
+            data-netbanking="true"
+            data-prefill.name="{{ user.full_name }}"
+            data-prefill.email="{{ user.email }}"
+            data-prefill.contact="{{ user.mobile }}"
+            data-notes.shopping_order_id="{{ request.basket.id }}">
+    </script>
+    <input type="hidden" name="shopping_order_id" value="{{ request.basket.id }}">
+</form>
+{# pay_F0Trojj2Q3p2hl #}
+<script type="text/javascript" defer async>
+    function submission_interceptor(event) {
+            // event.preventDefault();
+            // debugger;
+            // return false;
+    }
+</script>
+<!--
+<form action="{% url 'checkout:preview' %}" class="form-stacked" method="POST">
+<script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+    data-key="{{ stripe_publishable_key }}" data-amount="{{ order_total_incl_tax_cents }}"
+    data-name="{{ shop_name }}"
+    data-description="{{ basket.num_items }} items ({{ order_total.incl_tax|currency }})">
+</script>
+</form>
+-->

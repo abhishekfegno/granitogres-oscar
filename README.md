@@ -64,6 +64,7 @@ Create a database and a user in postgres database.
     grant all privileges on database grocery to grocery_user;
     \c grocery;
     Create Extension postgis;
+    CREATE EXTENSION pg_trgm;
     \q
     
 update values properly in  `.env`

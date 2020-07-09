@@ -18,6 +18,10 @@ User = get_user_model()
 OTP_EXPIRY = getattr(settings, 'OTP_EXPIRY', 1500)
 
 
+# class User(AbstractUser):
+#     mobile = models.CharField(max_length=12, unique=True, null=True)
+
+
 class UserProfile(models.Model):
     GST_CACHE_KEY = cache_key.gst_in__cache_key
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='profile')

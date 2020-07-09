@@ -1,6 +1,5 @@
 {% extends "oscar/checkout/checkout.html" %}
 {% load i18n %}
-{% load currency_filters %}
 
 {% block title %}
     {% trans "Payment details" %} | {{ block.super }}
@@ -11,23 +10,10 @@
 {% endblock %}
 
 {% block checkout_title %}{% trans "Enter payment details" %}{% endblock %}
+{% block content %}
 
-{% block order_contents %}{% endblock %}
-{% block shipping_address %}{% endblock %}
-{% block shipping_method %}{% endblock %}
-{% block payment_method %}{% endblock %}
-
-{% block payment_details %}
     {% block payment_details_content %}
-        {% if True %}
-            {% comment %}Razorpay{% endcomment %}
-            {% include 'oscar/checkout/razorpay/payment_details.html' %}
-        {% elif False %}
-            {% comment %}Stripe{% endcomment %}
-            {% include 'oscar/checkout/stripe/payment_details.html' %}
-        {% else %}
-            {% comment %}{% endcomment %}
-            ...
-        {% endif %}
-    {% endblock payment_details_content %}
-{% endblock payment_details %}
+        {% include 'oscar/checkout/razorpay/payment_details.html' %}
+    {% endblock %}
+
+{% endblock %}
