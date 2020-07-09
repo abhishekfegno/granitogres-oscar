@@ -25,12 +25,12 @@ class MinimumValueStrategy(MinimumPriceStockRecord, IndianGST, strategy.StockReq
         super().__init__(request)
         if not request and user:
             self.user = user
-        print(f"MinimumValueStrategy > pin not set")
+        # print(f"MinimumValueStrategy > pin not set")
 
-    def availability_policy(self, product, stockrecord):
-        return PinCodeNotFound()
-
-    def parent_availability_policy(self, product, children_stock):
-        return PinCodeNotFound()
+    # def availability_policy(self, product, stockrecord):
+    #     return PinCodeNotFound()
+    #
+    # def parent_availability_policy(self, product, children_stock):
+    #     return PinCodeNotFound()
 
 
