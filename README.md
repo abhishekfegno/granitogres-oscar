@@ -56,3 +56,33 @@ pip install -e git+https://github.com/michaelkuty/django-oscar-cash-on-delivery#
 ```
 
 
+#### How to deploy?
+Create a database and a user in postgres database.
+
+    create database grocery;
+    create user  grocery_user with password 'password';
+    grant all privileges on database grocery to grocery_user;
+    \c grocery;
+    Create Extension postgis;
+    \q
+    
+update values properly in  `.env`
+
+    DB_HOST=localhost
+    DB_NAME=grocery
+    DB_USER=grocery_user
+    DB_PASSWORD=password
+
+
+migrate the project. Run the server.
+    
+    python manage.py migrate
+    python manage.py runserver
+    
+
+
+
+
+
+
+

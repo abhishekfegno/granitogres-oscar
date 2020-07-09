@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name='CommunicationEventType',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', oscar.models.fields.autoslugfield.AutoSlugField(populate_from='name', unique=True, verbose_name='Code', editable=False, separator='_', max_length=128, help_text='Code used for looking up this event programmatically', blank=True)),
+                ('code', oscar.models.fields.autoslugfield.AutoSlugField(populate_from='name', unique=True, verbose_name='Code', editable=False, separator='_', max_length=128, help_text='Code used for looking scripted this event programmatically', blank=True)),
                 ('name', models.CharField(verbose_name='Name', max_length=255, help_text='This is just used for organisational purposes')),
                 ('category', models.CharField(default='Order related', max_length=255, verbose_name='Category', choices=[('Order related', 'Order related'), ('User related', 'User related')])),
                 ('email_subject_template', models.CharField(verbose_name='Email Subject Template', max_length=255, blank=True, null=True)),

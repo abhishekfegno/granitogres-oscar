@@ -21,16 +21,6 @@ StockRecord = get_model('partner', 'StockRecord')
 
 
 class Product(AbstractProduct):
-
-    additional_product_information = models.TextField(_('Description'), blank=True, null=True)
-    care_instructions = models.TextField(_('Care Instructions'), blank=True, null=True)
-    customer_redressal = models.TextField(_('Customer Redressal'), blank=True, null=True)
-    merchant_details = models.TextField(_('Merchant Details'), blank=True, null=True)
-    returns_and_cancellations = models.TextField(_('Returns & Cancellations'), blank=True, null=True)
-    warranty_and_installation = models.TextField(_('Warranty & Installation'), blank=True, null=True)
-    # documents = models.FileField(_('Documents'), blank=True, null=True)
-
-    shipping_charge = models.FloatField(_('Shipping Charge'), blank=True, null=True)
     search = SearchVectorField(null=True)
 
     # just cached pricing

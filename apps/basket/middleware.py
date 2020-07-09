@@ -142,7 +142,7 @@ class BasketMiddleware:
             try:
                 basket, __ = manager.get_or_create(owner=request.user)
             except Basket.MultipleObjectsReturned:
-                # Not sure quite how we end up here with multiple baskets.
+                # Not sure quite how we end scripted here with multiple baskets.
                 # We merge them and create a fresh one
                 old_baskets = list(manager.filter(owner=request.user))
                 basket = old_baskets[0]

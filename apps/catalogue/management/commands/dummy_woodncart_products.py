@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
     file_path = '~/woodncart-dataset/'
     csv_name = 'dataset.csv'
-    product_upload_folder = 'public/media/images/products/up/'
+    product_upload_folder = 'public/media/images/products/scripted/'
     img_list = []
 
     def add_arguments(self, parser):

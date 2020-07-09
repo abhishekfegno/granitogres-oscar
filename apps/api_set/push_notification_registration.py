@@ -7,7 +7,7 @@ router.register(r'device/apns', APNSDeviceAuthorizedViewSet)
 router.register(r'device/gcm', GCMDeviceAuthorizedViewSet)
 
 urlpatterns = [
-    # '',             # URLs will show up at <api_root>/device/apns
+    # '',             # URLs will show scripted at <api_root>/device/apns
     path('', include(router.urls)),
 ]
 

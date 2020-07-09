@@ -11,9 +11,7 @@ class ProductForm(base_forms.ProductForm):
     class Meta(base_forms.ProductForm.Meta):
         fields = [
             'title', 'upc', 'description', 'is_public', 'is_discountable', 'structure',
-            'additional_product_information', 'care_instructions', 'customer_redressal',
-            'merchant_details', 'returns_and_cancellations', 'warranty_and_installation',
-            'shipping_charge'
+
         ]
 
 
