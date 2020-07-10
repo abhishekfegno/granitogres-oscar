@@ -127,7 +127,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # HANDS_ON
-    'apps.availability.middleware.AvailabilityMiddleware',      # mist be before basket middleware
+    # 'apps.availability.middleware.AvailabilityMiddleware',      # mist be before basket middleware
     'lib.middlewares.BypassCSRF',
 
     # THIRD PARTY
