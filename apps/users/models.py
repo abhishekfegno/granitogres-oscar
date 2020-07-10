@@ -5,6 +5,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from random import randint
 
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils import timezone
 from oscar.core.compat import get_user_model
 
@@ -20,7 +22,7 @@ from lib.utils.sms import send_otp
 class User(AbstractUser):
     # mobile = models.CharField(max_length=12, unique=True, null=True)
     username_validator = UnicodeMobileNumberValidator()
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['email']
 
     username = models.CharField(
         'mobile',
@@ -136,3 +138,9 @@ class OTP(models.Model):
         self.user.save()
         self.save()
         return self.user
+
+
+@receiver(pre_save, sender=User)
+def update_email(sender, instance, **kwargs):
+    instance.email = f"{instance.username}@grocery.app"
+
