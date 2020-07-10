@@ -97,7 +97,7 @@ def product_list(request, category='all', **kwargs):
     page_number = int(str(request.GET.get('page', 1)))
     page_size = int(str(request.GET.get('page_size', settings.DEFAULT_PAGE_SIZE)))
     out = {}
-    search_handler = get_product_search_handler_class(request.GET, request.get_full_path(), [])
+    # search_handler = get_product_search_handler_class()(request.GET, request.get_full_path(), [])
 
     if _offer_category:
         offer_banner_object = get_object_or_404(OfferBanner, code=_offer_category, offer__status=ConditionalOffer.OPEN)

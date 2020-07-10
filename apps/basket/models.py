@@ -1,10 +1,10 @@
 from oscar.apps.basket.abstract_models import AbstractBasket
-from django_oscar_buy_now_api.basket_utils.models import AbstractBuyNowBasket
+# from django_oscar_buy_now_api.basket_utils.models import AbstractBuyNowBasket
 
 
-class Basket(AbstractBuyNowBasket):
+class Basket(AbstractBasket):
     """
-    With "django_oscar_buy_now_api's"  "AbstractBuyNowBasket" integration
+    Moking up the real basket
     """
 
 

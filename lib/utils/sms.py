@@ -3,6 +3,7 @@ import requests
 
 FAST_2_SMS_BASE_URL = "https://www.fast2sms.com/dev/bulk"
 
+
 def format_otp_message(otp):
     return f"Your Verification Code is : {otp}; this will be active for {settings.OTP_EXPIRY / 15} minute(s) - WoodN\'Cart"
 
@@ -16,13 +17,15 @@ def send_otp(phone_no: str, otp):
         "route": "qt",
         "numbers": phone_no,
         "message": settings.FAST_2_SMS_TEMPLATE_ID,
-        "variables": "{AA}",
+        "variables": "{BB}",
         "variables_values": otp
     }
     headers = {'cache-control': "no-cache"}
-    response = requests.request("GET", FAST_2_SMS_BASE_URL, headers=headers, params=querystring)
-    print(response.text)
-    return True
+    try:
+        response = requests.request("GET", FAST_2_SMS_BASE_URL, headers=headers, params=querystring)
+        return True
+    except Exception as e:
+        return False
 
 
 def send_welcome_message(phone_no):

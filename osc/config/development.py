@@ -76,3 +76,9 @@ FN_LOAD_PINCODE_FOR_USER = lazy(lambda request: (
         request.user._profile.pincode.code
 ))
 LOAD_INITIAL_COUNTRIES = ('IN', )
+
+
+MOBILE_NUMBER_VALIDATOR = {
+    'LENGTH': 10
+}
+OTP_LENGTH = 6

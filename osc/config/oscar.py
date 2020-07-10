@@ -5,14 +5,14 @@ OSCARAPI_OVERRIDE_MODULES = ["apps.mod_oscarapi"]
 OSCARAPI_BLOCK_ADMIN_API_ACCESS = True
 
 OSCAR_DEFAULT_CURRENCY = 'INR'
-OSCAR_SHOP_NAME = 'WOOD`N CART'
-OSCAR_SHOP_TAGLINE = "We ship more than 35000 categories"
+OSCAR_SHOP_NAME = 'Shopprix'
+OSCAR_SHOP_TAGLINE = "Shopprix Super Center"
 OSCAR_HOMEPAGE = reverse_lazy('catalogue:index')
 OSCAR_ACCOUNTS_REDIRECT_URL = 'customer:profile-view'
 OSCAR_RECENTLY_VIEWED_PRODUCTS = 20
 OSCAR_RECENTLY_VIEWED_COOKIE_LIFETIME = 604800  # 1 week
 OSCAR_RECENTLY_VIEWED_COOKIE_NAME = 'oscar_history'
-OSCAR_HIDDEN_FEATURES = []
+OSCAR_HIDDEN_FEATURES = ['reviews', ]
 
 # PAGINATION
 OSCAR_PRODUCTS_PER_PAGE = 20
@@ -179,11 +179,11 @@ OSCAR_DASHBOARD_NAVIGATION = [{
             'label': _('Reviews'),
             'url_name': 'dashboard:reviews-list',
         },
-        {
-            'label': _('Dealer Registration'),
-            'url_name': 'dealer_registration_list',
-            'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_superuser,
-        },
+        # {
+        #     'label': _('Dealer Registration'),
+        #     'url_name': 'dealer_registration_list',
+        #     'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_superuser,
+        # },
         {
             'label': _('Stock alert requests'),
             'url_name': 'dashboard:user-alert-list',
@@ -244,7 +244,7 @@ OSCAR_DASHBOARD_NAVIGATION = [{
         'label': _('Configurations'),
         'icon': 'icon-double-angle-down',
         'children': [
-            {'label': _('Pin Codes'), 'url_name': 'availability:pincode-selector',
+            {'label': _('Availability: Pincode'), 'url_name': 'availability:pincode-selector',
              'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
             {'label': _('Offer Banners'),
              'url_name': 'dashboard-offer-banner-list',
@@ -264,3 +264,4 @@ API_ENABLED_PAYMENT_METHODS = [
         'permission': 'apps.utils.oscar_api_checkout.AuthorizedUsers',
     },
 ]
+

@@ -36,6 +36,9 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.flatpages',
 
+    'apps.users',
+    'apps.api_set',
+    'apps.mod_oscarapi',
 
     'oscar',
     'django_oscar_buy_now_api',
@@ -75,10 +78,6 @@ INSTALLED_APPS = [
     # 'oscar.apps.checkout.apps.CheckoutConfig',
     # 'oscar.apps.dashboard.users',
     # 'oscar.apps.dashboard.catalogue',
-
-    'apps.users',
-    'apps.api_set',
-    'apps.mod_oscarapi',
 
     'allauth',
     'allauth.account',
@@ -153,7 +152,7 @@ ASGI_APPLICATION = 'osc.asgi.application'
 
 SITE_ID = 1
 
-# AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.User'
 
 from .config.cache import *
 from .config.database import *

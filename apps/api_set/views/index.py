@@ -29,31 +29,18 @@ BasketLine = get_model('basket', 'Line')
 def home(request, *a, **k):
     user = None
     b_count = 0
-    profile = None
     if request.user.is_authenticated:
-        user_fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', ]
+        user_fields = ['id', 'mobile', 'email', 'first_name', 'last_name', 'is_active', ]
         user = {field: getattr(request.user, field) for field in user_fields}
         request.session['is_email_verified'] = request.session.get(
             'is_email_verified', False) or EmailAddress.objects.filter(user=request.user, verified=True).exists()
-
         request.session['has_address'] = request.session.get('has_address', False) or request.user.addresses.all().exists()
         b_count = Basket.open.filter(owner=request.user).last().num_lines
-        profile = {
-            'mobile': request.user._profile.mobile,
-            'gst_number': request.user._profile.gst_number,
-            'pincode': request.user._profile.pincode and request.user._profile.pincode.code,
-        }
-
     else:
-        request.session['has_address'] = None
-        request.session['is_email_verified'] = None
-
+        b_count = Basket.open.filter(id=request.basket_id).last().num_lines
     return Response({
         "user": user,
-        "profile":  profile,
-        "user_email_verified": request.session['is_email_verified'],
         "cart_item_count": b_count,
-        "user_has_address":  request.session['has_address'],
     })
 
 

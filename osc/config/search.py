@@ -5,7 +5,7 @@ from .base_dir import _is_env_set_as
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': os.environ.get('HAYSTACK_ENGINE', 'haystack.backends.simple_backend.SimpleEngine'),
-        'URL': os.environ.get('HAYSTACK_URL'),
+        # 'URL': os.environ.get('HAYSTACK_URL'),
         'INCLUDE_SPELLING': _is_env_set_as('HAYSTACK_INCLUDE_SPELLING', True)
     },
 }

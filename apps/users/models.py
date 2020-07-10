@@ -1,102 +1,138 @@
-
-# Create your models here.
 from datetime import timedelta, datetime
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.core.cache import cache
 from django.db import models
-from django.db.models.signals import pre_save, post_save
-from django.dispatch import receiver
-from oscar.core.compat import get_user_model
 from random import randint
-from lib import cache_key
-from lib.cache import cache_library
+
+from django.utils import timezone
+from oscar.core.compat import get_user_model
+
+from apps.api_set import app_settings
+from apps.users.manger import ActiveOTPManager
+from apps.users.validators import UnicodeMobileNumberValidator
 from lib.utils.sms import send_otp
 
-User = get_user_model()
-OTP_EXPIRY = getattr(settings, 'OTP_EXPIRY', 1500)
+
+# User = get_user_model()
 
 
-# class User(AbstractUser):
-#     mobile = models.CharField(max_length=12, unique=True, null=True)
+class User(AbstractUser):
+    # mobile = models.CharField(max_length=12, unique=True, null=True)
+    username_validator = UnicodeMobileNumberValidator()
+    REQUIRED_FIELDS = []
 
+    username = models.CharField(
+        'mobile',
+        max_length=10,
+        unique=True,
+        help_text='Required. Your 10 digit Mobile number.',
+        validators=[UnicodeMobileNumberValidator()],
+        error_messages={
+            'unique': "This mobile number already exists.",
+        },
+    )
 
-class UserProfile(models.Model):
-    GST_CACHE_KEY = cache_key.gst_in__cache_key
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='profile')
-    gst_number = models.CharField(max_length=32, unique=True, null=True, blank=True)
-    name = models.CharField(max_length=32, null=True, )
-    mobile = models.CharField(max_length=12, unique=True, null=True)
-    email = models.CharField(max_length=32, unique=True, null=True, blank=True)
-    pincode = models.ForeignKey('availability.PinCode', on_delete=models.SET_NULL, null=True, blank=True)
+    @property
+    def mobile(self):
+        return self.username
 
-    @classmethod
-    def get_gst(cls, user):
-        _user_id = user.id
-        data = cache.get(GSTNumber.GST_CACHE_KEY, {})
-        gst = data.get(_user_id, ...)   # using ellipsis instead of None as 'key_not_found' case identifier
-        if gst and gst is not ...:
-            return gst
-        # only one time for a user
-        has_gst = hasattr(user, 'gst')
-        gst = user.gst.gst_number if has_gst else None
-        data[_user_id] = gst
-        cache.set(GSTNumber.GST_CACHE_KEY, data)
-        return gst
+    @mobile.setter
+    def mobile(self, mobile):
+        self.username = mobile
 
+    @property
+    def otp(self):
+        return hasattr(self, '_otp') and self._otp or None
 
-@receiver(pre_save, sender=User)
-def update_email_as_username(sender, instance, **kwargs):
-    if sender == User:
-        instance.username = instance.email
-
-
-@receiver(post_save, sender=UserProfile)
-def update_gst_on_cache(sender, instance, **kwargs):
-    data = cache.get(sender.GST_CACHE_KEY, {})
-    data[instance.user_id] = instance.gst_number
-    cache.set(sender.GST_CACHE_KEY, data)
+    def get_short_name(self):
+        return self.first_name or self.last_name or self.username
 
 
 class OTP(models.Model):
-    user_profile = models.OneToOneField('users.UserProfile', on_delete=models.CASCADE, related_name='otp')
-                                                                        # We need not need to be log all the otp's.
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                             related_name='otp_set', null=True, blank=True)
+    mobile_number = models.CharField(
+        validators=[UnicodeMobileNumberValidator()],
+        max_length=10,
+    )
     code = models.CharField(max_length=6)
+    is_active = models.BooleanField(default=True)
+    no_of_times_send = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(blank=True)
 
+    active = ActiveOTPManager()
+
+    @property
+    def user_profile(self):
+        return self.user
+
+    @user_profile.setter
+    def user_profile(self, user):
+        self.user = user
+
+    @property
+    def is_verified(self):
+        return not self.is_active
+
+    @is_verified.setter
+    def is_verified(self, value):
+        self.is_active = not bool(value)
+
     @classmethod
-    def generate(cls, user_profile):
-        if hasattr(user_profile, 'otp'):
-            otp = user_profile.otp
-            old_otp = otp.code
-            otp.code = f'{randint(100000, 999999)}'
-            while old_otp == otp.code:
-                # avoid any case of otp duplication
-                # Wont enter this loop 99.99% cases
-                otp.code = f'{randint(100000, 999999)}'
-        else:
-            otp = cls(user_profile=user_profile, code=f'{randint(100000, 999999)}')
+    def generate(cls, mobile):
+        User = get_user_model()
+        otp = cls(mobile_number=mobile)
+        otp.code = f'{randint(app_settings.OTP_MIN_VALUE, app_settings.OTP_MAX_VALUE)}'
+        otp.user = User.objects.filter(username=mobile).first()
         otp.save()
         return otp
 
     def send_message(self):
-        return send_otp(phone_no=self.user_profile.mobile, otp=str(self.code))
+        if app_settings.MOBILE_NUMBER_VALIDATOR['MAX_RETRIES'] > self.no_of_times_send:
+            self.no_of_times_send += 1
+            status = send_otp(phone_no=self.mobile_number, otp=self.code)   # returns a bool
+            if status:
+                self.save()
+            return status
 
     @property
     def valid_upto(self):
-        return self.created_at + timedelta(seconds=settings.OTP_EXPIRY)
+        return self.created_at + timedelta(seconds=app_settings.OTP_EXPIRY)
+
+    @property
+    def is_valid(self):
+        return self.is_active and (self.created_at + timedelta(seconds=app_settings.OTP_EXPIRY) > timezone.now())
 
     @classmethod
     def validate(cls, **kwargs):
         from django.utils import timezone
-        otp = cls.objects.filter(**kwargs, created_at__gt=(timezone.now()-timedelta(seconds=settings.OTP_EXPIRY))).last()
-        return getattr(otp, 'user_profile') if otp else None
+        otp = cls.objects.filter(**kwargs,
+                                 created_at__gt=(timezone.now()-timedelta(seconds=app_settings.OTP_EXPIRY))).last()
+        if otp:
+            otp.is_verified = True
+            otp.save()
+        return otp
 
     def save(self, *args, **kwargs):
         if not self.pk:
             self.created_at = datetime.now()
         return super(OTP, self).save(*args, **kwargs)
 
+    objects = models.Manager()
 
-GSTNumber = UserProfile     # backward Compatability
+    def generate_user(self):
+        if self.is_active:
+            raise Exception('user cannot be verified before otp verification getting completed!')
+        if self.user:
+            raise Exception('User with this Mobile number already exists!')
+        if User.objects.filter(username=self.mobile_number).exists():
+            raise Exception('User with this Mobile number already exists!')
+
+        self.user = User.objects.create_user(
+            username=self.mobile_number
+        )
+        self.user.set_unusable_password()
+        self.user.save()
+        self.save()
+        return self.user

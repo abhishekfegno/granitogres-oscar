@@ -3,11 +3,9 @@ from django.urls import path, include
 
 from allauth.account.views import confirm_email
 
-from apps.api_set.views.accounts import update_profile
 from apps.api_set.views.basket import get_basket
 from apps.api_set.views.catalogue import (
-    categories_list_cached, product_list, product_detail_web, product_detail_mobile, product_suggestions,
-    filter_options,
+    categories_list_cached, product_list, product_detail_web, product_suggestions, filter_options,
 )
 from apps.api_set.views.index import (
     index, home, offers, offer_products
@@ -17,14 +15,13 @@ from apps.api_set.views.public import availability
 from apps.api_set.views.wishlist import wish_list
 
 from apps.api_set.views.auth import (
-    SendOTP, VerifyOTP, UserRegister,
+    SendOTP, resend_otp, LoginWithOTP,
 )
-
 
 v1__registration_apis = [
     path('v1/send-otp/', SendOTP.as_view(), name="api-v1--send-otp"),
-    path('v1/verify-otp/', VerifyOTP.as_view(), name="api-v1--verify-otp"),
-    path('v1/complete-registration/', UserRegister.as_view(), name="api-v1--user-register"),
+    path('v1/resend-otp/', resend_otp, name="api-v1--resend-otp"),
+    path('v1/login-with-otp/', LoginWithOTP.as_view(), name="api-v1--login-otp"),
 ]
 
 home_urlpatterns = [
@@ -35,14 +32,12 @@ home_urlpatterns = [
     path("v1/_orders/", orders, name="api-orders"),
     path("v1/_orders/<int:pk>/", orders_detail, name="api-orders-detail"),
     path("v1/auth/", include(v1__registration_apis)),
-
 ]
 
 account_urlpatterns = [
     path('v1/rest-auth/registration/', include('rest_auth.registration.urls')),
     path('v1/rest-auth/', include('rest_auth.urls')),
     path('account/', include('allauth.urls')),
-    path('update-profile/', update_profile, name="update-profile"),
     url(r'^accounts-rest/registration/account-confirm-email/(?P<key>.+)/$', confirm_email,
         name='account_confirm_email'),
 ]
