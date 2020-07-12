@@ -109,6 +109,6 @@ class LoginWithOTP(APIView):
             basket.merge(anonymous_basket)
 
         operations.store_basket_in_session(basket, request.session)
-        out['basket'] = WncBasketSerializer(instance=basket, context={'request': request})
+        out['basket'] = WncBasketSerializer(instance=basket, context={'request': request}).data
         out["cart_item_count"] = basket.lines.all().count()
         return Response(out, status=200)
