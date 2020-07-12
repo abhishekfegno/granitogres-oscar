@@ -101,7 +101,8 @@ class LoginWithOTP(APIView):
         out['user'] = UserSerializer(instance=otp_object.user, context={'request': request}).data
         anonymous_basket = operations.get_anonymous_basket(request)
         request.user = user
-        login_and_upgrade_session(request._request, user)
+        request.user = backend = 'django.contrib.auth.backends.ModelBackend'
+        login_and_upgrade_session(request._request, user, backend='django.contrib.auth.backends.ModelBackend')
         # merge anonymous basket with authenticated basket.
         basket = operations.get_user_basket(user)
         if anonymous_basket is not None:
