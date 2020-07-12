@@ -21,7 +21,7 @@ class MobileNumberSerializer(serializers.Serializer):
         pass
 
     def validate(self, mobile):
-        is_valid_number = re.match(mobile_number_format, attrs)
+        is_valid_number = re.match(mobile_number_format, mobile)
         if not is_valid_number:
             raise serializers.ValidationError('Mobile number is not valid')
         return mobile
