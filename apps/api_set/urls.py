@@ -46,8 +46,6 @@ account_urlpatterns = [
 catalogue_urlpatterns = [
     path("v1/catalogue/", include([
         path("c/", categories_list_cached, name="wnc-categories-list"),                             # category
-        path("c/all/", product_list, name="wnc-categories-list"),                             # category
-
         path("c/all/", product_list, name="wnc-all-product-list"),                                  # category
         path("c/<slug:category>/", product_list, name="wnc-category-product-list"),                 # category
         path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web"),      # detail
