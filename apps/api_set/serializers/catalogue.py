@@ -21,6 +21,12 @@ OptionSerializer = get_api_class('serializers.product', 'OptionSerializer')
 AvailabilitySerializer = get_api_class('serializers.product', 'AvailabilitySerializer')
 
 
+class FakeSerializerForCompatibility(object):
+
+    def __init__(self, data):
+        self.data = data
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -85,6 +91,32 @@ class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixi
         model = Product
         fields = ('id', 'title', 'slug', 'rating', 'num_approved_reviews',
                   'primary_image', 'url', 'price')
+
+
+def custom_ProductListSerializer(queryset, context,
+                                 price_serializer_mixin=ProductPriceFieldMixinLite(),
+                                 primary_image_serializer_mixin=ProductPrimaryImageFieldMixin()):
+    primary_image_serializer_mixin.context = context
+    price_serializer_mixin.context = context
+
+    if not queryset:
+        return FakeSerializerForCompatibility(None)
+
+    out = [{
+        "id": product.id,
+        "title": product.title,
+        "primary_image": primary_image_serializer_mixin.get_primary_image(product),
+        "url": context['request'].build_absolute_uri(reverse('product-detail', kwargs={'pk': product.id})),
+        "price": price_serializer_mixin.get_price(product),
+        'search_products': context['request'].build_absolute_uri(
+            reverse('wnc-categories-list') + '?product_range=' + product.id),
+        'variants': custom_ProductListSerializer(product.children.all(), context,
+                                                 price_serializer_mixin=ProductPriceFieldMixinLite(),
+                                                 primary_image_serializer_mixin=ProductPrimaryImageFieldMixin()).data,
+    } for product in queryset]
+
+    # keeping original serializer compatibility so that they can take data as serializer(queryset, context).data
+    return FakeSerializerForCompatibility(out)
 
 
 class ProductListSerializerExpanded(ProductPriceFieldMixin, ProductListSerializer):

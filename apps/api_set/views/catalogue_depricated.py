@@ -79,7 +79,7 @@ def product_list(request, category='all', **kwargs):
     PRODUCT LISTING API, (powering,  list /c/all/, /c/<category_slug>/,  )
 
     q = " A search term "
-    offer_category = '<offer-banner-slug>'
+    product_range = '<product-range-id>'
     sort = any one from ['relevancy', 'rating', 'newest', 'price-desc', 'price-asc', 'title-asc', 'title-desc']
     filter = minprice:25::maxprice:45::available_only:1::color=Red,Black,Blue::weight:25,30,35::ram:4 GB,8 GB
         Where minprice, maxprice and  available_only are common for all.

@@ -1,8 +1,11 @@
 from django.core.cache import cache
 from django.db.models import F
+from oscar.apps.catalogue.abstract_models import MissingProductImage
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
-from apps.utils import get_purchase_info, purchase_info_as_dict, purchase_info_lite_as_dict
+
+from apps.catalogue.models import ProductImage
+from apps.utils import get_purchase_info, purchase_info_as_dict, purchase_info_lite_as_dict, image_not_found
 from lib import cache_key
 from lib.algorithms.product import siblings_pointer
 from lib.cache import cache_library, get_featured_path
@@ -21,12 +24,17 @@ class ProductPrimaryImageFieldMixin(object):
 
     def get_primary_image(self, instance):
         img = instance.primary_image()
+        # product_ids = [instance.parent_id, instance.id]
+        # img = ProductImage.objects.filter(
+        #     product__id__in=product_ids,
+        # ).order_by('product__structure', 'display_order').first()    # child first, then in its display order
+        # img = img or MissingProductImage()
         img_web = img['original'] if type(img) is dict else img.thumbnail_web_listing
         img_mob = img['original'] if type(img) is dict else img.thumbnail_mobile_listing
         req = self.context['request']
         return {
-            'web': req.build_absolute_uri(img_web),
-            'mobile': req.build_absolute_uri(img_mob),
+            # 'web': req.build_absolute_uri(img_web),
+            'mobile': req.build_absolute_uri(img_mob or image_not_found()),
         }
 
 
@@ -86,6 +94,7 @@ class ProductPriceFieldMixinLite(object):
 
     def get_price(self, product):
         key = 'ProductPriceFieldMixinLite__{0}__{1}'
+
         def _inner():
             purchase_info = get_purchase_info(product, request=self.context['request'])  # noqa
             from oscarapi.serializers.product import AvailabilitySerializer
@@ -93,6 +102,7 @@ class ProductPriceFieldMixinLite(object):
                 'is_available_to_buy'
             ] if purchase_info else False
             return purchase_info_lite_as_dict(purchase_info, availability=availability)
+
         return _inner()
 
 
@@ -100,8 +110,6 @@ class ProductDetailSerializerMixin(object):
 
     def get_name(self, instance):
         return self.context['product'].get_title()
-
-
 
     def get_description(self, instance):
         # return striptags(self.context['product'].description)

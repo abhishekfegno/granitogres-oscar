@@ -4,15 +4,21 @@ from django.core.paginator import Paginator
 from elasticsearch_dsl.query import Exists
 
 from factory.django import get_model
+from haystack.query import EmptySearchQuerySet
+from haystack.views import FacetedSearchView
 from oscar.apps.offer.models import ConditionalOffer, Range
+from oscar.apps.search.facets import base_sqs
+from oscar.apps.search.forms import SearchForm, BrowseCategoryForm
+from oscar.apps.search.search_handlers import SearchHandler
 from oscar.core.loading import get_class
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
+from apps.api_set.search import GrocerySearchHandler
 from apps.api_set.serializers.catalogue import (
     CategorySerializer, ProductListSerializer,
-    ProductDetailMobileSerializer, ProductDetailWebSerializer
+    ProductDetailMobileSerializer, ProductDetailWebSerializer, custom_ProductListSerializer
 )
 from apps.dashboard.custom.models import OfferBanner
 from lib.product_utils import category_filter, apply_filter, apply_search, apply_sort, recommended_class
@@ -25,34 +31,6 @@ get_product_search_handler_class = get_class(
     'catalogue.search_handlers', 'get_product_search_handler_class')
 _ = lambda x: x
 Category = get_model('catalogue', 'Category')
-# sorting
-RELEVANCY = "relevancy"
-TOP_RATED = "rating"
-NEWEST = "newest"
-PRICE_HIGH_TO_LOW = "price-desc"
-PRICE_LOW_TO_HIGH = "price-asc"
-TITLE_A_TO_Z = "title-asc"
-TITLE_Z_TO_A = "title-desc"
-
-SORT_BY_CHOICES = [
-    (RELEVANCY, _("Relevancy")), (TOP_RATED, _("Customer rating")), (NEWEST, _("Newest")),
-    (PRICE_HIGH_TO_LOW, _("Price high to low")), (PRICE_LOW_TO_HIGH, _("Price low to high")),
-    (TITLE_A_TO_Z, _("Title A to Z")), (TITLE_Z_TO_A, _("Title Z to A")),
-]
-
-SORT_BY_MAP = {
-    TOP_RATED: '-rating', NEWEST: '-date_created', PRICE_HIGH_TO_LOW: '-effective_price',
-    PRICE_LOW_TO_HIGH: 'effective_price', TITLE_A_TO_Z: 'title', TITLE_Z_TO_A: '-title',
-}
-
-# FILTERING
-FILTER_BY_CHOICES = [
-    ('exclude_out_of_stock', _("Exclude Out Of Stock")),
-    ('price__range', _("Price Range")),
-    ('width', _("Width")),
-    ('height', _("Height")),
-    ('material', _('Material')),
-]
 
 
 def __get_category_cached(request):
@@ -80,48 +58,44 @@ def product_list(request, category='all', **kwargs):
     filter = <depricated>
     """
 
-    queryset = Product.browsable.browsable()
-    serializer_class = ProductListSerializer
+    queryset = Product.browsable.browsable().base_queryset()
+    serializer_class = custom_ProductListSerializer
     _search = request.GET.get('q')
     _sort = request.GET.get('sort')
-    # _filter = request.GET.get('filter')
     _product_range = request.GET.get('product_range')
     page_number = int(str(request.GET.get('page', 1)))
     page_size = int(str(request.GET.get('page_size', settings.DEFAULT_PAGE_SIZE)))
-    out = {}
-    # search_handler = get_product_search_handler_class()(request.GET, request.get_full_path(), [])
+    search_form_class = BrowseCategoryForm
+    out = {
+        'query': None,
+        'suggestion': None,
+        'count': 0,
+    }
 
     if _product_range:
         _product_range_object = get_object_or_404(Range, id=_product_range)
-        queryset = _product_range_object.all_products()
+        queryset = _product_range_object.all_products().base_queryset()
 
     if category != 'all':
-        queryset = category_filter(queryset=queryset, category_slug=category)
+        queryset, cat = category_filter(queryset=queryset, category_slug=category)
 
-    if _search:
-        queryset = apply_search(queryset=queryset, search=_search)
-
-    # if _sort:
-    #     _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
-    #     queryset = apply_sort(queryset=queryset, sort=_sort)
+    # if _search:
+    handler = GrocerySearchHandler(request.GET, request.get_full_path(), form_class=search_form_class,
+                                   paginate_by=page_size)
+    out['query'] = handler.search_form.cleaned_data['q']
+    out['suggestion'] = handler.search_form.get_suggestion()
+    out['count'] = handler.results.facet_counts()
 
     def _inner():
-        nonlocal queryset
-        paginator = Paginator(queryset, page_size)  # Show 18 contacts per page.
-        page_obj = paginator.get_page(page_number)
-        product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
-        rc = None
-        if category != 'all':
-            rc = recommended_class(queryset)
-        return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc)
+        nonlocal handler, queryset, out
+        page_obj = handler.paginator.get_page(page_number)
+        product_data = serializer_class(page_obj.object_list, context={'request': request}).data
+        return list_api_formatter(
+            request, page_obj=page_obj,
+                                  results=product_data,
+                                  # product_class=rc,
+                                  **out)
 
-    # if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not _search and not _filter and not _sort:
-    #     c_key = cache_key.product_list__key.format(page_number, page_size, category)
-    #     if settings.DEBUG:
-    #         cache.delete(c_key)
-    #     out = cache_library(c_key, cb=_inner)
-    # else:
-    #     out = _inner()
     return Response(_inner())
 
 

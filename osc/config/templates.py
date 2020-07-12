@@ -25,6 +25,10 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'lib.context_processors._settings',
                 'lib.context_processors.terms',
+                'oscar.apps.search.context_processors.search_form',
+                'oscar.apps.checkout.context_processors.checkout',
+                'oscar.apps.customer.notifications.context_processors.notifications',
+                'oscar.core.context_processors.metadata',
             ],
             'libraries': {
             }

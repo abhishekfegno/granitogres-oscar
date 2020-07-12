@@ -8,3 +8,4 @@ public/media/*
 public/static/*
 *.sql
 push
+whoosh-index-file

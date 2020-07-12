@@ -4,7 +4,7 @@ from django.urls import path, include
 from allauth.account.views import confirm_email
 
 from apps.api_set.views.basket import get_basket
-from apps.api_set.views.catalogue import (
+from apps.api_set.views.catalogue_depricated import (
     categories_list_cached, product_list, product_detail_web, product_suggestions, filter_options,
 )
 from apps.api_set.views.index import (
