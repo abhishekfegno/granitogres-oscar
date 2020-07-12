@@ -7,3 +7,4 @@ __pycache__/
 public/media/*
 public/static/*
 *.sql
+push
