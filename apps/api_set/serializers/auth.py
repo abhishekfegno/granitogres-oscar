@@ -20,12 +20,11 @@ class MobileNumberSerializer(serializers.Serializer):
     def create(self, validated_data):
         pass
 
-    def validate_mobile(self, attrs):
-        is_valid_number = re.match(mobile_number_format, attrs['mobile'])
+    def validate(self, mobile):
+        is_valid_number = re.match(mobile_number_format, attrs)
         if not is_valid_number:
             raise serializers.ValidationError('Mobile number is not valid')
-        attrs['mobile_number'] = attrs['mobile']
-        return attrs['mobile']
+        return mobile
 
 
 class OtpSerializer(MobileNumberSerializer):
@@ -39,7 +38,7 @@ class OtpSerializer(MobileNumberSerializer):
         pass
 
     def validate(self, attrs):
-        attrs['object'] = OTP.validate(**attrs)
+        attrs['object'] = OTP.validate(mobile_number=attrs['mobile'], id=attrs['id'], code=attrs['code'], )
         if not attrs['object']:
             raise serializers.ValidationError('OTP is not valid!')
         return attrs
