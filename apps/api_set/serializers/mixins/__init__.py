@@ -29,7 +29,7 @@ class ProductPrimaryImageFieldMixin(object):
         #     product__id__in=product_ids,
         # ).order_by('product__structure', 'display_order').first()    # child first, then in its display order
         # img = img or MissingProductImage()
-        img_web = img['original'] if type(img) is dict else img.thumbnail_web_listing
+        # img_web = img['original'] if type(img) is dict else img.thumbnail_web_listing
         img_mob = img['original'] if type(img) is dict else img.thumbnail_mobile_listing
         req = self.context['request']
         return {

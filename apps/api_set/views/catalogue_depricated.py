@@ -11,7 +11,7 @@ from rest_framework.response import Response
 
 from apps.api_set.serializers.catalogue import (
     CategorySerializer, ProductListSerializer,
-    ProductDetailMobileSerializer, ProductDetailWebSerializer
+    ProductDetailMobileSerializer, ProductDetailWebSerializer, custom_ProductListSerializer
 )
 from apps.dashboard.custom.models import OfferBanner
 from lib.product_utils import category_filter, apply_filter, apply_search, apply_sort, recommended_class
@@ -88,7 +88,7 @@ def product_list(request, category='all', **kwargs):
     """
 
     queryset = Product.browsable.browsable()
-    serializer_class = ProductListSerializer
+    serializer_class = custom_ProductListSerializer
     _search = request.GET.get('q')
     _sort = request.GET.get('sort')
     _filter = request.GET.get('filter')
@@ -124,8 +124,8 @@ def product_list(request, category='all', **kwargs):
         page_obj = paginator.get_page(page_number)
         product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
         rc = None
-        if category != 'all':
-            rc = recommended_class(queryset)
+        # if category != 'all':
+        #     rc = recommended_class(queryset)
         return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc)
 
     # if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not _search and not _filter and not _sort:

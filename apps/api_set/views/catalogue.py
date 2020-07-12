@@ -85,16 +85,15 @@ def product_list(request, category='all', **kwargs):
     out['query'] = handler.search_form.cleaned_data['q']
     out['suggestion'] = handler.search_form.get_suggestion()
     out['count'] = handler.results.facet_counts()
-
     def _inner():
         nonlocal handler, queryset, out
         page_obj = handler.paginator.get_page(page_number)
         product_data = serializer_class(page_obj.object_list, context={'request': request}).data
         return list_api_formatter(
             request, page_obj=page_obj,
-                                  results=product_data,
-                                  # product_class=rc,
-                                  **out)
+            results=product_data,
+            # product_class=rc,
+            **out)
 
     return Response(_inner())
 

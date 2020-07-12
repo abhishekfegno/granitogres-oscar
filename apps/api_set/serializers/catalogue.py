@@ -89,13 +89,13 @@ class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixi
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'slug', 'rating', 'num_approved_reviews',
+        fields = ('id', 'title', 'rating', 'num_approved_reviews',
                   'primary_image', 'url', 'price')
 
 
 def custom_ProductListSerializer(queryset, context,
                                  price_serializer_mixin=ProductPriceFieldMixinLite(),
-                                 primary_image_serializer_mixin=ProductPrimaryImageFieldMixin()):
+                                 primary_image_serializer_mixin=ProductPrimaryImageFieldMixin(), **kwargs):
     primary_image_serializer_mixin.context = context
     price_serializer_mixin.context = context
 
@@ -109,7 +109,7 @@ def custom_ProductListSerializer(queryset, context,
         "url": context['request'].build_absolute_uri(reverse('product-detail', kwargs={'pk': product.id})),
         "price": price_serializer_mixin.get_price(product),
         'search_products': context['request'].build_absolute_uri(
-            reverse('wnc-categories-list') + '?product_range=' + product.id),
+            reverse('wnc-categories-list') + '?product_range=' + str(product.id)),
         'variants': custom_ProductListSerializer(product.children.all(), context,
                                                  price_serializer_mixin=ProductPriceFieldMixinLite(),
                                                  primary_image_serializer_mixin=ProductPrimaryImageFieldMixin()).data,

@@ -12,11 +12,11 @@ from lib.product_utils.search import _trigram_search, _simple_search, _similarit
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
-def category_filter(queryset, category_slug, return_as_tuple=True):
+def category_filter(queryset, category_slug, return_as_tuple=False):
     cat = get_object_or_404(Category, slug=category_slug)
     out = [queryset.filter(
         productcategory__category__in=Category.objects.filter(path__startswith=cat.path)), cat]
-    return out if return_as_tuple else out[1]
+    return out if return_as_tuple else out[0]
 
 
 def apply_filter(queryset, _filter, null_value_compatability='__'):
