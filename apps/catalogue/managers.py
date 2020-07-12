@@ -1,3 +1,4 @@
+from django.db.models import Exists
 from oscar.apps.catalogue.managers import ProductManager
 
 
@@ -7,7 +8,8 @@ class BrowsableProductManager(ProductManager):
         """
         Excludes non-canonical products and non-public products
         """
-        return self.filter(structure__in=['standalone', 'child'], is_public=True, stockrecords__isnull=False)
+        return self.annotate(has_stock=Exists('stockrecord')).filter(
+            structure__in=['standalone', 'child'], is_public=True, has_stock=True)
 
     def get_queryset(self):
         return super().get_queryset()

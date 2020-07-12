@@ -1,10 +1,9 @@
 from django.conf import settings
 from django.core.cache import cache
 from django.core.paginator import Paginator
-from elasticsearch_dsl.query import Exists
 
 from factory.django import get_model
-from oscar.apps.offer.models import ConditionalOffer, Range
+from oscar.apps.offer.models import ConditionalOffer
 from oscar.core.loading import get_class
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
@@ -23,7 +22,11 @@ from lib.cache import cache_library
 
 get_product_search_handler_class = get_class(
     'catalogue.search_handlers', 'get_product_search_handler_class')
+
+
 _ = lambda x: x
+
+
 Category = get_model('catalogue', 'Category')
 # sorting
 RELEVANCY = "relevancy"
@@ -74,36 +77,46 @@ def categories_list_cached(request):
 def product_list(request, category='all', **kwargs):
     """
     PRODUCT LISTING API, (powering,  list /c/all/, /c/<category_slug>/,  )
-    q = "A search term "
-    product_range = '<product-range-id>'
-    sort = <depricated>
-    filter = <depricated>
+
+    q = " A search term "
+    offer_category = '<offer-banner-slug>'
+    sort = any one from ['relevancy', 'rating', 'newest', 'price-desc', 'price-asc', 'title-asc', 'title-desc']
+    filter = minprice:25::maxprice:45::available_only:1::color=Red,Black,Blue::weight:25,30,35::ram:4 GB,8 GB
+        Where minprice, maxprice and  available_only are common for all.
+        other dynamic parameters are available at  reverse('wnc-filter-options', kwarg={'pk': '<ProductClass: id>'})
+
     """
 
     queryset = Product.browsable.browsable()
     serializer_class = ProductListSerializer
     _search = request.GET.get('q')
     _sort = request.GET.get('sort')
-    # _filter = request.GET.get('filter')
-    _product_range = request.GET.get('product_range')
+    _filter = request.GET.get('filter')
+    _offer_category = request.GET.get('offer_category')
     page_number = int(str(request.GET.get('page', 1)))
     page_size = int(str(request.GET.get('page_size', settings.DEFAULT_PAGE_SIZE)))
     out = {}
     # search_handler = get_product_search_handler_class()(request.GET, request.get_full_path(), [])
 
-    if _product_range:
-        _product_range_object = get_object_or_404(Range, id=_product_range)
-        queryset = _product_range_object.all_products()
+    if _offer_category:
+        offer_banner_object = get_object_or_404(OfferBanner, code=_offer_category, offer__status=ConditionalOffer.OPEN)
+        queryset = offer_banner_object.products().filter(structure__in=['standalone', 'child'], is_public=True, stockrecords__isnull=False)
 
     if category != 'all':
         queryset = category_filter(queryset=queryset, category_slug=category)
 
+    if _filter:
+        """
+        input = weight__in:25,30,35|price__gte:25|price__lte:45
+        """
+        queryset = apply_filter(queryset=queryset, _filter=_filter)
+
     if _search:
         queryset = apply_search(queryset=queryset, search=_search)
 
-    # if _sort:
-    #     _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
-    #     queryset = apply_sort(queryset=queryset, sort=_sort)
+    if _sort:
+        _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
+        queryset = apply_sort(queryset=queryset, sort=_sort)
 
     def _inner():
         nonlocal queryset

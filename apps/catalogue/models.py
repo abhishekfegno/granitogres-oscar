@@ -120,6 +120,12 @@ class Category(AbstractCategory):
             return get_thumbnail(self.image, '500x600', crop='center', quality=98).url
         return image_not_found()
 
+    @property
+    def img_thumb_mob(self):
+        if self.image:
+            return get_thumbnail(self.image, '500x600', crop='center', quality=98).url
+        return image_not_found()
+
 
 class ProductImage(AbstractProductImage):
 

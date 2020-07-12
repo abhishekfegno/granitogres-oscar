@@ -50,7 +50,7 @@ def apply_filter(queryset, _filter, null_value_compatability='__'):
             filter_params[set_key(k, v)] = set_value(k, v)
 
     price_from = price_to = None
-    
+
     if 'minprice' in filter_params.keys() and filter_params['minprice'] == null_value_compatability:
         price_from = filter_params.pop('minprice')
 
@@ -78,7 +78,7 @@ def apply_filter(queryset, _filter, null_value_compatability='__'):
     return queryset
 
 
-def apply_search(queryset, search, mode='_trigram', extends=True):
+def apply_search(queryset, search: str, mode: str = '_trigram', extends: bool = True):
     """
     search : string
     mode : selector_functions
@@ -87,16 +87,16 @@ def apply_search(queryset, search, mode='_trigram', extends=True):
     extends : Want Unmatched products if not match found?
     """
 
-    filter_func = lambda queryset, search, extends: queryset
-
     if mode == '_trigram':  # default
         filter_func = _trigram_search
-    if mode == '_simple':
+    elif mode == '_simple':
         filter_func = _simple_search
-    if mode == '_similarity_rank':
+    elif mode == '_similarity_rank':
         filter_func = _similarity_with_rank_search
-    if mode == '_similarity':
+    elif mode == '_similarity':
         filter_func = _similarity_search
+    else:
+        raise Exception('Invalid Search Mode')
     return filter_func(queryset, search, extends=extends)
 
 
@@ -121,7 +121,7 @@ def recommended_class(queryset):
         if max_count <= struct[key]:
             max_id = key
             max_count = struct[key]
-    if len(values) and max_count * 1.0 > len(values) * 3 / 4 or settings.DEBUG:       # at least 3/4th are of same class.
+    if len(values) and max_count * 1.0 > len(values) * 3 / 4 or settings.DEBUG:  # at least 3/4th are of same class.
         return {
             'id': max_id,
             **Product.objects.filter(effective_price__isnull=False, product_class_id=max_id).aggregate(
@@ -129,8 +129,3 @@ def recommended_class(queryset):
                 min_price=Min('effective_price'),
             )
         }
-
-
-
-
-

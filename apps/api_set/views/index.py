@@ -99,17 +99,17 @@ def index(request, *a, **k):
 def offers(request, *a, **k):
     out = {
         'top_wide_banners': {
-            'position_01': offer_banner_serialize_list(random.choices(data_set), request, width_ratio='1:1'),
-            'position_02': offer_banner_serialize_list(random.choices(data_set), request, width_ratio='1:1'),
+            'position_01': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 4)), request, width_ratio='1:1'),
+            'position_02': offer_banner_serialize_list(random.choices(data_set, k=1), request, width_ratio='1:1'),
         },
         'middle_half_banners': {
-            'position_01': offer_banner_serialize_list(random.choices(data_set), request, width_ratio='1:2'),
-            'position_02': offer_banner_serialize_list(random.choices(data_set), request, width_ratio='1:2'),
+            'position_01': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 3)), request, width_ratio='1:2'),
+            'position_02': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 2)), request, width_ratio='1:2'),
         },
         'bottom_wide_banners': {
-            'position_01': offer_banner_serialize_list(random.choices(data_set), request, width_ratio='1:1'),
-            'position_02': offer_banner_serialize_list(random.choices(data_set), request, width_ratio='1:1'),
-        },
+            'position_01': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 3)), request, width_ratio='1:1'),
+            'position_02': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 2)), request, width_ratio='1:1'),
+        }
     }
     return Response(out)
     # cxt = {'context': {'request': request}}
