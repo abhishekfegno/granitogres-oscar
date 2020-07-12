@@ -20,7 +20,7 @@ class MobileNumberSerializer(serializers.Serializer):
     def create(self, validated_data):
         pass
 
-    def validate(self, mobile):
+    def validate_mobile(self, mobile):
         is_valid_number = re.match(mobile_number_format, mobile)
         if not is_valid_number:
             raise serializers.ValidationError('Mobile number is not valid')
