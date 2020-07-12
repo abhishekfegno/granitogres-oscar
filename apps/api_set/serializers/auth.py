@@ -25,7 +25,7 @@ class MobileNumberSerializer(serializers.Serializer):
         if not is_valid_number:
             raise serializers.ValidationError('Mobile number is not valid')
         attrs['mobile_number'] = attrs['mobile']
-        return attrs
+        return attrs['mobile']
 
 
 class OtpSerializer(MobileNumberSerializer):
