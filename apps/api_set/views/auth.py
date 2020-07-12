@@ -89,7 +89,7 @@ class LoginWithOTP(APIView):
         # Generating User or Respond with error
         otp_object = otp_serializer.validated_data['object']
         try:
-            otp_object.generate_user()
+            otp_object.generate_user(fail_silently=True)
         except Exception as e:
             out['error'] = {
                 'non_field_errors': [str(e)]
