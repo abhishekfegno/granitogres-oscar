@@ -18,7 +18,7 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.logging.LoggingPanel',
     'debug_toolbar.panels.redirects.RedirectsPanel',
     # Additional
-    'elastic_panel.panel.ElasticDebugPanel',
+    # 'elastic_panel.panel.ElasticDebugPanel',
 )
 
 

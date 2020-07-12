@@ -1,7 +1,10 @@
+# /home/jk/code/grocery/apps/users/models.py
+
 from datetime import timedelta, datetime
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.gis.db.models import PointField
 from django.db import models
 from random import randint
 
@@ -16,11 +19,7 @@ from apps.users.validators import UnicodeMobileNumberValidator
 from lib.utils.sms import send_otp
 
 
-# User = get_user_model()
-
-
 class User(AbstractUser):
-    # mobile = models.CharField(max_length=12, unique=True, null=True)
     username_validator = UnicodeMobileNumberValidator()
     REQUIRED_FIELDS = ['email']
 
@@ -49,6 +48,17 @@ class User(AbstractUser):
 
     def get_short_name(self):
         return self.first_name or self.last_name or self.username
+
+
+class Location(models.Model):
+    location = PointField()
+    location_name = models.CharField(max_length=90)
+    pin_code = models.CharField(max_length=6)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # self.updated_at = timezone.now()
+        super(Location, self).save(*args, **kwargs)
 
 
 class OTP(models.Model):
@@ -142,5 +152,7 @@ class OTP(models.Model):
 
 @receiver(pre_save, sender=User)
 def update_email(sender, instance, **kwargs):
-    instance.email = f"{instance.username}@grocery.app"
+    if not instance.email:
+        instance.email = f"{instance.username}@grocery.app"
+
 

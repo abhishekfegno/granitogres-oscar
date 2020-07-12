@@ -198,7 +198,6 @@ class SearchResponses(models.Model):
         self.__class__.objects.filter(pk=self.pk).update(rank=F('rank')+1)  # to prevent manipulation of data
         self.refresh_from_db(fields=('rank', ))
 
-
     @classmethod
     def populate(cls):
         return cls.objects.all()

@@ -1,23 +1,51 @@
+# /home/jk/code/grocery/apps/dashboard/custom/models.py
+
+from django.core import validators
 from django.db import models
-
-# Create your models here.
 from django.urls import reverse
-from oscar.models.fields import AutoSlugField
+from sorl.thumbnail import get_thumbnail
 
+from apps.utils import image_not_found
+
+
+class empty:
+    def build_absolute_uri(self, path):
+        return path
 
 class OfferBanner(models.Model):
 
-    name = models.CharField(max_length=120)
-    code = AutoSlugField("Code", max_length=128, unique=True, populate_from='name')
+    MODEL_CHOICES = [
+        ('home_page', 'Display on Home Page'),
+        ('offer_page_top', 'Offer Page Top Lengthy Banner'),
+        ('offer_page_middle', 'Offer Page Middle Short Banner'),
+        ('offer_page_bottom', 'Offer Page Bottom Lengthy Banner'),
+    ]
+
+    display_area = models.CharField(max_length=30, choices=MODEL_CHOICES)
+    position = models.PositiveSmallIntegerField(
+        default=1,
+        help_text="In which slider this image should be placed in design.",
+        validators=[validators.MinValueValidator(1), validators.MaxValueValidator(2), ]
+    )
     banner = models.ImageField(upload_to='offer-banners/')
-    offer = models.ForeignKey('offer.ConditionalOffer', on_delete=models.SET_NULL, blank=True, null=True)
-    order = models.PositiveSmallIntegerField(default=0)
+    product_range = models.ForeignKey('offer.Range', on_delete=models.SET_NULL, blank=True, null=True)
+
+    @property
+    def redirect_to_order(self):
+        return not (self.product_range and self.product_range.all_products().exists())
 
     def products(self):
-        return self.offer.products()
+        return self.product_range.all_products()
 
     def get_absolute_url(self):
         return reverse('dashboard-offer-banner-detail', kwargs={'pk': self.pk})
+
+    def mobile_wide_image(self, width_part, height_px='120', request=empty()):
+        assert width_part in ['1:3', '1:2', '1:1'], f"select An appropreate width_part in mobile_wide_image({width_part},height_px={height_px}, request={request})"
+        width_px = str(int(height_px) / int(width_part.split(':')[1]))
+        resolution = f'{width_px}X{height_px}'
+        return request.build_absolute_uri(get_thumbnail(self.banner, resolution, crop='center', quality=98).url)
+
 
 
 

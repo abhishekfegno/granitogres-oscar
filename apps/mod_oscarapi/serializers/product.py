@@ -1,11 +1,6 @@
-import logging
-from django.utils.translation import ugettext as _
-from oscarapi.serializers.utils import OscarHyperlinkedModelSerializer
-from rest_framework import serializers
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_classes
 
-logger = logging.getLogger(__name__)
 Product = get_model("catalogue", "Product")
 Range = get_model("offer", "Range")
 ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
