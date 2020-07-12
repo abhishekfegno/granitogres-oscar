@@ -51,5 +51,5 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'mobile', 'email',
             'first_name', 'last_name',
-            'pin', 'is_active',
+            'is_active',
         ]
