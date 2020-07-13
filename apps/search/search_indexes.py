@@ -30,15 +30,13 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
     title = indexes.EdgeNgramField(model_attr='title', null=True)
     title_exact = indexes.CharField(model_attr='title', null=True, indexed=False)
 
-
     # Fields for faceting
     product_class = indexes.CharField(null=True, faceted=True)
     category = indexes.MultiValueField(null=True, faceted=True)
     price = indexes.FloatField(null=True, faceted=True)
-    price_data = indexes.CharField(null=True, faceted=True)
+    primary_image = indexes.CharField(null=True, faceted=True)
+    stock_data = indexes.MultiValueField(null=True, faceted=True)
     children = ChildProductIndex
-    # num_in_stock = indexes.IntegerField(null=True, faceted=True)
-    # rating = indexes.IntegerField(null=True, faceted=True)
 
     # Spelling suggestions
     suggestions = indexes.FacetCharField()
@@ -64,15 +62,7 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_category(self, obj):
         categories = obj.categories.all()
         if len(categories) > 0:
-            return [category.full_name for category in categories]
-
-    def prepare_rating(self, obj):
-        if obj.rating is not None:
-            return int(obj.rating)
-
-    # Pricing and stock is tricky as it can vary per customer.  However, the
-    # most common case is for customers to see the same prices and stock levels
-    # and so we implement that case here.
+            return [category.name for category in categories]
 
     def get_strategy(self, partner=None):
         if partner is not None:
@@ -81,7 +71,7 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
             self._strategy = Selector().strategy()
         return self._strategy
 
-    def prepare_price(self, obj):
+    def prepare_stock_data(self, obj):
         strategy = self.get_strategy()
         result = None
         if obj.is_parent:
@@ -93,28 +83,6 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
             if result.price.is_tax_known:
                 return result.price.incl_tax
             return result.price.excl_tax
-
-    def prepare_price_data(self, obj):
-        strategy = self.get_strategy()
-        result = None
-        if obj.is_parent:
-            result = strategy.fetch_for_parent(obj)
-        elif obj.has_stockrecords:
-            result = strategy.fetch_for_product(obj)
-
-        if result:
-            if result.price.is_tax_known:
-                return result.price.incl_tax
-            return result.price.excl_tax
-
-    def prepare_num_in_stock(self, obj):
-        strategy = self.get_strategy()
-        if obj.is_parent:
-            # Don't return a stock level for parent products
-            return None
-        elif obj.has_stockrecords:
-            result = strategy.fetch_for_product(obj)
-            return result.stockrecord.net_stock_level
 
     def prepare(self, obj):
         prepared_data = super().prepare(obj)
