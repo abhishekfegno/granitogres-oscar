@@ -7,22 +7,38 @@ is_solr_supported = get_class('search.features', 'is_solr_supported')
 Selector = get_class('partner.strategy', 'Selector')
 
 
+class ChildProductIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.CharField(
+        document=True, use_template=True,
+        template_name='oscar/search/indexes/product/item_text.txt')
+    # upc = indexes.CharField(model_attr="upc", null=True)
+    pk = indexes.IntegerField(model_attr='pk', null=True)
+    title = indexes.EdgeNgramField(model_attr='title', null=True)
+    title_exact = indexes.CharField(model_attr='title', null=True, indexed=False)
+    price = indexes.FloatField(null=True, faceted=True)
+    price_data = indexes.CharField(null=True)
+
+
 class ProductIndex(indexes.SearchIndex, indexes.Indexable):
     # Search text
     text = indexes.CharField(
         document=True, use_template=True,
         template_name='oscar/search/indexes/product/item_text.txt')
 
-    upc = indexes.CharField(model_attr="upc", null=True)
+    # upc = indexes.CharField(model_attr="upc", null=True)
+    pk = indexes.IntegerField(model_attr='pk', null=True)
     title = indexes.EdgeNgramField(model_attr='title', null=True)
     title_exact = indexes.CharField(model_attr='title', null=True, indexed=False)
+
 
     # Fields for faceting
     product_class = indexes.CharField(null=True, faceted=True)
     category = indexes.MultiValueField(null=True, faceted=True)
     price = indexes.FloatField(null=True, faceted=True)
-    num_in_stock = indexes.IntegerField(null=True, faceted=True)
-    rating = indexes.IntegerField(null=True, faceted=True)
+    price_data = indexes.CharField(null=True, faceted=True)
+    children = ChildProductIndex
+    # num_in_stock = indexes.IntegerField(null=True, faceted=True)
+    # rating = indexes.IntegerField(null=True, faceted=True)
 
     # Spelling suggestions
     suggestions = indexes.FacetCharField()
@@ -58,12 +74,27 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
     # most common case is for customers to see the same prices and stock levels
     # and so we implement that case here.
 
-    def get_strategy(self):
+    def get_strategy(self, partner=None):
+        if partner is not None:
+            self._strategy = Selector().partner_based_strategy(partner)
         if not self._strategy:
             self._strategy = Selector().strategy()
         return self._strategy
 
     def prepare_price(self, obj):
+        strategy = self.get_strategy()
+        result = None
+        if obj.is_parent:
+            result = strategy.fetch_for_parent(obj)
+        elif obj.has_stockrecords:
+            result = strategy.fetch_for_product(obj)
+
+        if result:
+            if result.price.is_tax_known:
+                return result.price.incl_tax
+            return result.price.excl_tax
+
+    def prepare_price_data(self, obj):
         strategy = self.get_strategy()
         result = None
         if obj.is_parent:
