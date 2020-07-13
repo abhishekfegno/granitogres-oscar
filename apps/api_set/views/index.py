@@ -13,6 +13,7 @@ from oscarapi.utils.loading import get_api_class, get_api_classes
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from sorl.thumbnail import get_thumbnail
 
 from apps.api_set.serializers.catalogue import (
     CategorySerializer, Category, Product,
@@ -28,30 +29,12 @@ BasketSerializer = get_api_class("serializers.basket", "BasketSerializer")
 Order = get_model('order', 'Order')
 BasketLine = get_model('basket', 'Line')
 
-pim = ProductImage.objects.all()[:4]
+pim = ProductImage.objects.all()[:6]
 product_range = Range.objects.filter().first()
-data_set = [
-    OfferBanner(
-        banner=pim[0],
-        product_range=product_range
-    ),
-    OfferBanner(
-        banner=pim[1],
-        product_range=product_range
-    ),
-    OfferBanner(
-        banner=pim[2],
-        product_range=product_range
-    ),
-    OfferBanner(
-        banner=pim[3],
-        product_range=product_range
-    ),
-]
+data_set = [OfferBanner(banner=p.original, product_range=product_range) for p in pim]
 
 
-def offer_banner_serialize_list(data_list, request, width_ratio='1:1'):
-
+def offer_banner_serialize_list(data_list, request, width_ratio='1:1', img=None):
     return [{
         'banner': data.mobile_wide_image(width_ratio, request=request),
         'product_range': 1

@@ -12,6 +12,7 @@ class empty:
     def build_absolute_uri(self, path):
         return path
 
+
 class OfferBanner(models.Model):
 
     MODEL_CHOICES = [
@@ -40,11 +41,24 @@ class OfferBanner(models.Model):
     def get_absolute_url(self):
         return reverse('dashboard-offer-banner-detail', kwargs={'pk': self.pk})
 
-    def mobile_wide_image(self, width_part, height_px='120', request=empty()):
-        assert width_part in ['1:3', '1:2', '1:1'], f"select An appropreate width_part in mobile_wide_image({width_part},height_px={height_px}, request={request})"
-        width_px = str(int(height_px) / int(width_part.split(':')[1]))
-        resolution = f'{width_px}X{height_px}'
-        return request.build_absolute_uri(get_thumbnail(self.banner, resolution, crop='center', quality=98).url)
+    def mobile_wide_image(self, width_part,  request=empty()):
+        """
+        120x100, 120x150, 120x300
+        """
+        assert width_part in ['1:3', '1:2', '1:1'], \
+            f"select An appropreate width_part in mobile_wide_image({width_part}, request={request}); select from " \
+            f"['1:3', '1:2', '1:1']"
+
+        resolution = {
+            '1:3': '100x120',
+            '1:2': '150x120',
+            '1:1': '300x120',
+        }[width_part]
+        return request.build_absolute_uri(
+            get_thumbnail(
+                self.banner, resolution, crop='center', quality=98
+            ).url)
+
 
 
 
