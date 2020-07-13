@@ -109,7 +109,6 @@ def custom_ProductListSerializer(queryset, context,
         "primary_image": primary_image_serializer_mixin.get_primary_image(product),
         "url": context['request'].build_absolute_uri(reverse('product-detail', kwargs={'pk': product.id})),
         "price": price_serializer_mixin.get_price(product),
-        "price_data": {},
         "weight": getattr(product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'),
         'search_products': context['request'].build_absolute_uri(
             reverse('wnc-categories-list') + '?product_range=' + str(product.id)),
