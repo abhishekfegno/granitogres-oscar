@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.db.models import Max, F, ExpressionWrapper, IntegerField, Q
 from oscar.apps.offer.models import ConditionalOffer
+from oscar.apps.shipping.scales import Scale
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 from rest_framework import serializers
@@ -108,6 +109,8 @@ def custom_ProductListSerializer(queryset, context,
         "primary_image": primary_image_serializer_mixin.get_primary_image(product),
         "url": context['request'].build_absolute_uri(reverse('product-detail', kwargs={'pk': product.id})),
         "price": price_serializer_mixin.get_price(product),
+        "price_data": {},
+        "weight": getattr(product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'),
         'search_products': context['request'].build_absolute_uri(
             reverse('wnc-categories-list') + '?product_range=' + str(product.id)),
         'variants': custom_ProductListSerializer(product.children.all(), context,
