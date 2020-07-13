@@ -113,7 +113,7 @@ def custom_ProductListSerializer(queryset, context,
         ) if not product.is_parent else None,
         'variants': custom_ProductListSerializer(product.children.all(), context,
                                                  price_serializer_mixin=price_serializer_mixin,
-                                                 primary_image_serializer_mixin=ProductPrimaryImageFieldMixin(),).data,
+                                                 primary_image_serializer_mixin=primary_image_serializer_mixin).data,
     } for product in queryset] or None
 
     # keeping original serializer compatibility so that they can take data as serializer(queryset, context).data
