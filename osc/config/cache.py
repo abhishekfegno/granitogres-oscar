@@ -10,7 +10,7 @@ CACHES = {
         },
         'TIMEOUT': 60 * 60 * 24 * 3,  # for 3 days
         'MAX_ENTRIES': 3000,  # 128 MB
-        "KEY_PREFIX": "woodncart_oscar__"
+        "KEY_PREFIX": "grocery_mod01_oscar__",
     },
     # 'memcached': {
     #     'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
