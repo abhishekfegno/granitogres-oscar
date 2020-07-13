@@ -29,7 +29,7 @@ BasketSerializer = get_api_class("serializers.basket", "BasketSerializer")
 Order = get_model('order', 'Order')
 BasketLine = get_model('basket', 'Line')
 
-pim = ProductImage.objects.all()[:6]
+pim = ProductImage.objects.all()[:10]
 product_range = Range.objects.filter().first()
 data_set = [OfferBanner(banner=p.original, product_range=product_range) for p in pim]
 
@@ -70,7 +70,7 @@ def index(request, *a, **k):
     for _ in range(2):
         out['home'].append({
             'top': categories[index:index + 3],
-            'middle': offer_banner_serialize_list(random.choices(data_set), request),
+            'middle': offer_banner_serialize_list(random.choices(data_set, k=random.randint(0, 3)), request),
             'bottom': categories[index + 3:index + 5],
         })
         index += 5
@@ -83,7 +83,7 @@ def offers(request, *a, **k):
     out = {
         'top_wide_banners': {
             'position_01': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 4)), request, width_ratio='1:1'),
-            'position_02': offer_banner_serialize_list(random.choices(data_set, k=1), request, width_ratio='1:1'),
+            'position_02': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 4)), request, width_ratio='1:1'),
         },
         'middle_half_banners': {
             'position_01': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 3)), request, width_ratio='1:2'),
