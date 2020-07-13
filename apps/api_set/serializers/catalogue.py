@@ -94,22 +94,6 @@ class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixi
                   'primary_image', 'url', 'price')
 
 
-def custom_ProductListSerializerChild(queryset, context, price_serializer_mixin=ProductPriceFieldMixinLite(), **kwargs):
-
-    if not queryset:
-        return FakeSerializerForCompatibility(None)
-
-    out = [{
-        "id": product.id,
-        "url": context['request'].build_absolute_uri(reverse('product-detail', kwargs={'pk': product.id})),
-        "price": price_serializer_mixin.get_price(product),
-        "weight": getattr(product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'),
-    } for product in queryset]
-
-    # keeping original serializer compatibility so that they can take data as serializer(queryset, context).data
-    return FakeSerializerForCompatibility(out)
-
-
 def custom_ProductListSerializer(queryset, context,
                                  price_serializer_mixin=ProductPriceFieldMixinLite(),
                                  primary_image_serializer_mixin=ProductPrimaryImageFieldMixin(), **kwargs):
@@ -122,13 +106,14 @@ def custom_ProductListSerializer(queryset, context,
         "primary_image": primary_image_serializer_mixin.get_primary_image(product),
         "url": context['request'].build_absolute_uri(
             reverse('product-detail', kwargs={'pk': product.id})
-        ) if not product.is_parent else None,
-        "price": price_serializer_mixin.get_price(product) if not product.is_parent else None,
+        ),
+        "price": price_serializer_mixin.get_price(product),
         "weight": getattr(
             product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'
         ) if not product.is_parent else None,
-        'variants': custom_ProductListSerializerChild(product.children.all(), context,
-                                                      price_serializer_mixin=price_serializer_mixin,).data,
+        'variants': custom_ProductListSerializer(product.children.all(), context,
+                                                 price_serializer_mixin=price_serializer_mixin,
+                                                 primary_image_serializer_mixin=ProductPrimaryImageFieldMixin(),).data,
     } for product in queryset] or None
 
     # keeping original serializer compatibility so that they can take data as serializer(queryset, context).data

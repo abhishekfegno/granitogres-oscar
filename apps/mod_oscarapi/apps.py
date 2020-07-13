@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class ModOscarapiConfig(AppConfig):
-    name = 'mod_oscarapi'
+    name = 'apps.mod_oscarapi'
