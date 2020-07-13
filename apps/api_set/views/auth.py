@@ -88,19 +88,21 @@ class LoginWithOTP(APIView):
 
         # Generating User or Respond with error
         otp_object = otp_serializer.validated_data['object']
-        try:
-            otp_object.generate_user()
-        except Exception as e:
-            out['error'] = {
-                'non_field_errors': [str(e)]
-            }
-            return Response(out, status=400)
+        if not otp_object.user:  # signup 
+            try:
+                otp_object.generate_user()
+            except Exception as e:
+                out['error'] = {
+                    'non_field_errors': [str(e)]
+                }
+                return Response(out, status=400)
 
         # Create User and Merge Baskets
         user = otp_object.user
         out['user'] = UserSerializer(instance=otp_object.user, context={'request': request}).data
         anonymous_basket = operations.get_anonymous_basket(request)
         request.user = user
+        request.user.backend =  'django.contrib.auth.backends.ModelBackend'
         login_and_upgrade_session(request._request, user)
         # merge anonymous basket with authenticated basket.
         basket = operations.get_user_basket(user)
@@ -108,6 +110,6 @@ class LoginWithOTP(APIView):
             basket.merge(anonymous_basket)
 
         operations.store_basket_in_session(basket, request.session)
-        out['basket'] = WncBasketSerializer(instance=basket, context={'request': request})
+        out['basket'] = WncBasketSerializer(instance=basket, context={'request': request}).data
         out["cart_item_count"] = basket.lines.all().count()
         return Response(out, status=200)
