@@ -31,12 +31,26 @@ BasketLine = get_model('basket', 'Line')
 
 pim = ProductImage.objects.all()[:10]
 product_range = Range.objects.filter().first()
-data_set = [OfferBanner(banner=p.original, product_range=product_range) for p in pim]
+data_set_l = [
+    '/assets/static/l1.jpg',
+    '/assets/static/l5.jpg',
+    '/assets/static/l3.jpg',
+    '/assets/static/l4.jpg',
+    '/assets/static/l6.jpg',
+    '/assets/static/l7.jpg',
+]
+
+data_set_m = [
+    '/assets/static/m1.jpg',
+    '/assets/static/m5.jpg',
+    '/assets/static/m3.jpg',
+    '/assets/static/m4.jpg',
+]
 
 
 def offer_banner_serialize_list(data_list, request, width_ratio='1:1', img=None):
     return [{
-        'banner': data.mobile_wide_image(width_ratio, request=request),
+        'banner': request.build_absolute_uri(data),
         'product_range': 1
     } for data in data_list]
 
@@ -70,7 +84,7 @@ def index(request, *a, **k):
     for _ in range(2):
         out['home'].append({
             'top': categories[index:index + 3],
-            'middle': offer_banner_serialize_list(random.choices(data_set, k=random.randint(0, 3)), request),
+            'middle': offer_banner_serialize_list(random.choices(data_set_l, k=random.randint(0, 6)), request),
             'bottom': categories[index + 3:index + 5],
         })
         index += 5
@@ -82,16 +96,16 @@ def index(request, *a, **k):
 def offers(request, *a, **k):
     out = {
         'top_wide_banners': {
-            'position_01': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 4)), request, width_ratio='1:1'),
-            'position_02': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 4)), request, width_ratio='1:1'),
+            'position_01': offer_banner_serialize_list(random.choices(data_set_l, k=random.randint(1, 6)), request, width_ratio='1:1'),
+            'position_02': offer_banner_serialize_list(random.choices(data_set_l, k=random.randint(1, 6)), request, width_ratio='1:1'),
         },
         'middle_half_banners': {
-            'position_01': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 3)), request, width_ratio='1:2'),
-            'position_02': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 2)), request, width_ratio='1:2'),
+            'position_01': offer_banner_serialize_list(random.choices(data_set_m, k=random.randint(1, 4)), request, width_ratio='1:2'),
+            'position_02': offer_banner_serialize_list(random.choices(data_set_m, k=1), request, width_ratio='1:2'),
         },
         'bottom_wide_banners': {
-            'position_01': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 3)), request, width_ratio='1:1'),
-            'position_02': offer_banner_serialize_list(random.choices(data_set, k=random.randint(1, 2)), request, width_ratio='1:1'),
+            'position_01': offer_banner_serialize_list(random.choices(data_set_l, k=random.randint(1, 6)), request, width_ratio='1:1'),
+            'position_02': offer_banner_serialize_list(random.choices(data_set_l, k=random.randint(1, 6)), request, width_ratio='1:1'),
         }
     }
     return Response(out)
