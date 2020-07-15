@@ -51,23 +51,19 @@ class OfferBanner(models.Model):
     def get_absolute_url(self):
         return reverse('dashboard-custom:dashboard-offer-banner-detail', kwargs={'pk': self.pk})
 
-    def mobile_wide_image(self, width_part,  request=empty()):
+    def mobile_wide_image(self, request=empty()):
         """
         120x100, 120x150, 120x300
         """
-        assert width_part in ['1:2', '1:1'], \
-            f"select An appropreate width_part in mobile_wide_image({width_part}, request={request}); select from " \
-            f"['1:3', '1:2', '1:1']"
-
         resolution = {
-            '1:3': '100x120',
-            '1:2': '150x120',
-            '1:1': '300x120',
-        }[width_part]
+            self.OFFER_MIDDLE: '300x240',
+            self.OFFER_TOP: '600x240',
+            self.OFFER_BOTTOM: '600x240',
+            self.HOME_PAGE: '600x240',
+        }[self.display_area]
+
         return request.build_absolute_uri(
-            get_thumbnail(
-                self.banner, resolution, crop='center', quality=98
-            ).url)
+            get_thumbnail(self.banner, resolution, crop='center', quality=98).url)
 
 
 

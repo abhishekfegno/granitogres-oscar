@@ -1,11 +1,13 @@
 # /home/jk/code/grocery/apps/api_set/views/index.py
 import random
+from collections import defaultdict, OrderedDict
 
 from allauth.account.models import EmailAddress
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.db import models
 from django.db.models import Count
+from django.template.defaulttags import regroup
 from django.utils.timezone import now
 from oscar.apps.offer.models import ConditionalOffer, Range
 from oscar.core.loading import get_model
@@ -28,31 +30,6 @@ from lib.cache import get_featured_path
 BasketSerializer = get_api_class("serializers.basket", "BasketSerializer")
 Order = get_model('order', 'Order')
 BasketLine = get_model('basket', 'Line')
-
-pim = ProductImage.objects.all()[:10]
-product_range = Range.objects.filter().first()
-data_set_l = [
-    '/assets/static/l1.jpg',
-    '/assets/static/l5.jpg',
-    '/assets/static/l3.jpg',
-    '/assets/static/l4.jpg',
-    '/assets/static/l6.jpg',
-    '/assets/static/l7.jpg',
-]
-
-data_set_m = [
-    '/assets/static/m1.jpg',
-    '/assets/static/m5.jpg',
-    '/assets/static/m3.jpg',
-    '/assets/static/m4.jpg',
-]
-
-
-def offer_banner_serialize_list(data_list, request, width_ratio='1:1', img=None):
-    return [{
-        'banner': request.build_absolute_uri(data),
-        'product_range': 1
-    } for data in data_list]
 
 
 @api_view(("GET",))
@@ -81,10 +58,14 @@ def index(request, *a, **k):
     ).annotate(c=Count('product__basket_lines')).order_by('depth', 'c')[:10]
     categories = CategorySerializer(category_set, **cxt, many=True).data
 
-    for _ in range(2):
+    for slot in range(2):
         out['home'].append({
             'top': categories[index:index + 3],
-            'middle': offer_banner_serialize_list(random.choices(data_set_l, k=random.randint(0, 6)), request),
+            'middle': [{
+                'banner': request.build_absolute_uri(ob['banner']),
+                'product_range': ob['product_range']
+            } for ob in OfferBanner.objects.filter(**{'display_area': OfferBanner.HOME_PAGE,
+                                                      'position': slot}).order_by('-id')],
             'bottom': categories[index + 3:index + 5],
         })
         index += 5
@@ -94,29 +75,28 @@ def index(request, *a, **k):
 
 @api_view(("GET",))
 def offers(request, *a, **k):
-    out = {
-        'top_wide_banners': {
-            'position_01': offer_banner_serialize_list(random.choices(data_set_l, k=random.randint(1, 6)), request, width_ratio='1:1'),
-            'position_02': offer_banner_serialize_list(random.choices(data_set_l, k=random.randint(1, 6)), request, width_ratio='1:1'),
-        },
-        'middle_half_banners': {
-            'position_01': offer_banner_serialize_list(random.choices(data_set_m, k=random.randint(1, 4)), request, width_ratio='1:2'),
-            'position_02': offer_banner_serialize_list(random.choices(data_set_m, k=1), request, width_ratio='1:2'),
-        },
-        'bottom_wide_banners': {
-            'position_01': offer_banner_serialize_list(random.choices(data_set_l, k=random.randint(1, 6)), request, width_ratio='1:1'),
-            'position_02': offer_banner_serialize_list(random.choices(data_set_l, k=random.randint(1, 6)), request, width_ratio='1:1'),
-        }
-    }
+    offer_banner = OfferBanner.objects.all().exclude(
+        display_area=OfferBanner.HOME_PAGE
+    ).order_by('position') #.values('display_area', 'position', 'banner', 'product_range')
+    out = defaultdict(list)
+    for item in offer_banner:
+        out[{
+            OfferBanner.OFFER_TOP: 'top_wide_banners',
+            OfferBanner.OFFER_MIDDLE: 'middle_half_banners',
+            OfferBanner.OFFER_BOTTOM: 'bottom_wide_banners',
+        }[item.display_area]].append(item)
+
+    for key, value_list in out.items():
+        out[key] = defaultdict(OrderedDict)
+        for banners in value_list:
+            pos = ['position_01', 'position_02'][banners.position-1]
+            if pos not in out[key].keys():
+                out[key][pos] = []
+            out[key][pos].append({
+                'banner': banners.mobile_wide_image(request),
+                'product_range': banners.product_range_id
+            })
     return Response(out)
-    # cxt = {'context': {'request': request}}
-    # offers = OfferBanner.objects.all().filter().order_by('-id')
-    # return Response({
-    #     "offer_list": SimpleOfferBannerSerializer(
-    #         offers,
-    #         **cxt,
-    #         many=True).data,
-    # })
 
 
 @api_view(("GET",))
