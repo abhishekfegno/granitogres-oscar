@@ -26,7 +26,7 @@
 
 {% block header %}
     <div class="page-header">
-        <a href="{% url 'dashboard-offer-banner-create' %}" class="btn btn-primary btn-lg pull-right"><i class="icon-plus"></i> {% trans "Create new Banner" %}</a>
+        <a href="{% url 'dashboard-custom:dashboard-offer-banner-create' %}" class="btn btn-primary btn-lg pull-right"><i class="icon-plus"></i> {% trans "Create new Banner" %}</a>
         <h1>{% trans "Offer Banners" %}</h1>
     </div>
 {% endblock header %}
@@ -49,13 +49,13 @@
                 {% for banner in banner_list %}
                     <tr>
                         <td>{{ banner.pk }}</td>
-                        <td><a href="{% url 'dashboard-offer-banner-detail' banner.id %}">{{ banner.name }}</a></td>
+                        <td><a href="{% url 'dashboard-custom:dashboard-offer-banner-detail' banner.id %}">{{ banner.name }}</a></td>
                         <td><span class="badge badge-success">{{ banner.code }}</span></td>
                         <td><img src="{{ banner.banner.url }}" alt="" height="60px" /></td>
                         <td>
                             <div class="btn-toolbar">
                                 <div class="btn-group">
-                                    <a href="{% url 'dashboard-offer-banner-detail' banner.id %}">
+                                    <a href="{% url 'dashboard-custom:dashboard-offer-banner-detail' banner.id %}">
                                     <button class="btn btn-default " >
                                         {% trans "Edit" %}
                                         <span class="caret"></span>

@@ -1,3 +1,12 @@
 from django.contrib import admin
+from apps.dashboard.custom.models import OfferBanner
 
-# Register your models here.
+
+admin.site.register(OfferBanner)
+
+
+
+
+
+
+
