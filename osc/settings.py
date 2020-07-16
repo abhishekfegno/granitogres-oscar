@@ -35,6 +35,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.flatpages',
+    'django.contrib.gis',
+
+    # 'stores',
+    # 'stores.dashboard',
 
     'apps.users',
     'apps.api_set.apps.ApiSetConfig',
@@ -85,6 +89,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_gis',
 
     'oscarapi',
     'oscarapicheckout',

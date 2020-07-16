@@ -1,6 +1,6 @@
 from django.conf import settings
 
-OTP_LENGTH = getattr(settings, 'OTP_LENGTH', 6) - 1
+OTP_LENGTH = getattr(settings, 'OTP_LENGTH', 4) - 1
 OTP_MIN_VALUE = 10 ** OTP_LENGTH
 OTP_MAX_VALUE = (10 ** (OTP_LENGTH + 1)) - 1
 OTP_EXPIRY = getattr(settings, 'OTP_EXPIRY', 1500)

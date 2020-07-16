@@ -26,8 +26,12 @@ from django.views.decorators.cache import never_cache
 from rest_framework.documentation import include_docs_urls
 # from cashondelivery.dashboard.app import application as cod_app
 from apps.mod_oscarapi.views.checkout import CheckoutView
+from django.views.i18n import JavaScriptCatalog
+
 
 view_checkout = never_cache(CheckoutView.as_view())
+
+
 
 urlpatterns = [
     path('api/v1/checkout/', view_checkout, name='api-checkout'),               # Must be before oscar_api.urls
@@ -39,7 +43,6 @@ urlpatterns = [
 
     path('api/v1/avalilability/', include('apps.availability.api')),
     path('dashboard/avalilability/', include('apps.availability.urls')),
-
     path('dashboard/accounts/', apps.get_app_config('accounts_dashboard').urls),
 
     # https://github.com/django-oscar/django-oscar-accounts
@@ -53,7 +56,15 @@ urlpatterns = [
     path('', include('apps.users.urls')),
     path('', include('apps.dashboard.custom.urls')),
     path('', include(apps.get_app_config('oscar').urls[0])),  # > Django-2.0
+
 ]
+
+if 'stores' in settings.INSTALLED_APPS:
+    urlpatterns += [
+        path('stores/', apps.get_app_config('stores').urls),
+        path('dashboard/stores/', apps.get_app_config('stores_dashboard').urls),
+        path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalogue'),
+    ]
 
 
 if settings.DEBUG:

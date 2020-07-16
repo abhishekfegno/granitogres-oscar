@@ -62,8 +62,8 @@ def index(request, *a, **k):
         out['home'].append({
             'top': categories[index:index + 3],
             'middle': [{
-                'banner': request.build_absolute_uri(ob['banner']),
-                'product_range': ob['product_range']
+                'banner': request.build_absolute_uri(ob.banner.url),
+                'product_range': ob.product_range_id
             } for ob in OfferBanner.objects.filter(**{'display_area': OfferBanner.HOME_PAGE,
                                                       'position': slot}).order_by('-id')],
             'bottom': categories[index + 3:index + 5],
