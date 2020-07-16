@@ -27,6 +27,8 @@ django-oscar==2.0.4
 django-oscar-accounts==2.0.0
 django-oscar-api==2.0.2
 django-oscar-api-checkout==1.0.0
+-e git+https://github.com/michaelkuty/django-oscar-cash-on-delivery@d5a3c141bfdea143995bbcc89ba90c607c069be7#egg=django_oscar_cash_on_delivery
+django-oscar-stores==2.1
 django-phonenumber-field==2.0.1
 django-push-notifications==2.0.0
 django-redis==4.11.0
@@ -36,6 +38,7 @@ django-tables2==1.21.2
 django-treebeard==4.3.1
 django-widget-tweaks==1.4.8
 djangorestframework==3.11.0
+djangorestframework-gis==0.15
 elasticsearch==7.6.0
 elasticsearch-dsl==7.1.0
 factory-boy==2.12.0
@@ -86,3 +89,4 @@ text-unidecode==1.3
 uritemplate==3.0.1
 urllib3==1.25.9
 wcwidth==0.1.9
+Whoosh==2.7.4
