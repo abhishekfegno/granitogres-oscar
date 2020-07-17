@@ -40,7 +40,7 @@ class SendOTP(APIView):
             out['mobile_number'] = otp.mobile_number
             out['otp_send'] = status
             out['user'] = bool(otp.user)
-            out['user_name'] = bool(otp.user) and otp.user.get_short_name() or None
+            out['user_name'] = (bool(otp.user) and otp.user.get_short_name()) or None
         return Response(out)
 
 
