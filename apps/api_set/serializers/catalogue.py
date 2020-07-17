@@ -143,7 +143,8 @@ class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMi
     attributes = serializers.SerializerMethodField()
     product_class = serializers.SlugRelatedField(slug_field="slug", queryset=ProductClass.objects, allow_null=True)
     options = OptionSerializer(many=True, required=False)
-    siblings = serializers.SerializerMethodField()
+    # siblings = serializers.SerializerMethodField()
+    variants = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
 
     class Meta:
@@ -165,14 +166,18 @@ class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMi
             "images",
             "price",
             "options",
-            "siblings",
-            # "additional_product_information",
-            # "care_instructions",
-            # "customer_redressal",
-            # "merchant_details",
-            # "returns_and_cancellations",
-            # "warranty_and_installation",
+            # "siblings",
+            "variants",
+            'about',
+            'storage_and_uses',
+            'benifits',
+            'other_product_info',
+            'variable_weight_policy',
         )
+
+    def get_variants(self, instance):
+        if instance.is_parent:
+            return custom_ProductListSerializer(instance.children.all(), self.context).data
 
 
 class ProductDetailMobileSerializer(ProductListSerializer, serializers.ModelSerializer):

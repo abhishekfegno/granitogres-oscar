@@ -143,13 +143,12 @@ def product_detail_web(request, product):
     queryset = Product.objects.base_queryset()
     serializer_class = ProductDetailWebSerializer
     product = get_object_or_404(queryset, pk=product)
-    if product.is_parent:
-        focused_product = product.get_apt_child(order='-price_excl_tax')
-    elif product.is_child:
-        focused_product = product
-        product = product.parent
-    else:
-        focused_product = product
+    # if product.is_parent:
+    #     focused_product = product.get_apt_child(order='-price_excl_tax')
+    focused_product = product
+    if product.is_child:
+        focused_product = product.parent
+        product = product
     return Response({
         'results': serializer_class(instance=focused_product, context={'request': request, 'product': product}).data
     })

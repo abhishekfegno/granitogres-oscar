@@ -27,6 +27,12 @@ class Product(AbstractProduct):
     effective_price = models.FloatField(_('Effective Retail Price.'), null=True, blank=True)
     retail_price = models.FloatField(_('Retail Price.'), null=True, blank=True)
 
+    about = models.TextField(null=True, blank=True)
+    storage_and_uses = models.TextField(null=True, blank=True)
+    benifits = models.TextField(null=True, blank=True)
+    other_product_info = models.TextField(null=True, blank=True)
+    variable_weight_policy = models.TextField(null=True, blank=True)
+
     class Meta(AbstractProduct.Meta):
         indexes = [
             GinIndex(fields=['search']),
