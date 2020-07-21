@@ -49,9 +49,25 @@ Api Docs is available on `/api/v1/`
 
 
 
-Additionally add in  requirements.txt
+You need to setup GDAL before adding requirements.txt
 
 ```
+#!/usr/bin/env bash
+
+sudo add-apt-repository ppa:ubuntugis/ppa && sudo apt-get update
+sudo apt-get update
+sudo apt-get install gdal-bin
+sudo apt-get install libgdal-dev
+export CPLUS_INCLUDE_PATH=/usr/include/gdal
+export C_INCLUDE_PATH=/usr/include/gdal
+pip install GDAL
+```
+
+install `requirements.txt`
+
+
+```
+pip install -r requirements.txt
 pip install -e git+https://github.com/michaelkuty/django-oscar-cash-on-delivery#egg=cashondelivery
 ```
 
