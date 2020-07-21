@@ -61,8 +61,6 @@ basket_urlpatterns = [
         path("", get_basket, name="wnc-get-basket"),
         path("wish-list/", wish_list, name="wnc-wish-list"),
         # path("add/", product_list, name="wnc-all-product-list"),
-        path("mob/", include([
-        ]))
     ]))
 ]
 

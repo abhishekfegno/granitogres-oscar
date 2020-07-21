@@ -246,6 +246,8 @@ OSCAR_DASHBOARD_NAVIGATION = [{
         'children': [
             {'label': _('Availability: Pincode'), 'url_name': 'availability:pincode-selector',
              'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
+            {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
+             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
             {'label': _('Offer Banners'),
              'url_name': 'dashboard-custom:dashboard-offer-banner-list',
              'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser,

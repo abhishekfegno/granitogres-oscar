@@ -1,7 +1,5 @@
 from oscar.core.loading import get_model
 
-from apps.availability.models import PinCode
-
 StockRecord = get_model('partner', 'StockRecord')
 
 
@@ -10,7 +8,6 @@ class PincodeStockRecord(object):
 
     def select_stockrecord(self, product):
         try:
-
             pincode = self.request.session.get('pincode')
             if not pincode:
                 pincode = self.request.user._profile.pincode.code
@@ -19,7 +16,7 @@ class PincodeStockRecord(object):
             for stock_record in stock_records:
                 return stock_record
         except Exception as e:
-            print("GOT Exception @ '/home/jk/code/wnc_oscar/apps/availability/oscar_strategy_mixins.py Line 10 -> "
+            print("GOT Exception @ 'apps/availability/oscar_strategy_mixins.py Line 10 -> "
                   "select_stockrecord'")
             print(e)
             return None

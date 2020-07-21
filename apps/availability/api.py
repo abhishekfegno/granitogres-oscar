@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import PincodeSelector, ajax_for_children, load_page, update_pincode, check_availability, set_pincode
+from apps.availability.pincode.views import PincodeSelector, ajax_for_children, load_page, update_pincode, check_availability, set_pincode
 
 pincode_selector = PincodeSelector.as_view()
 app_name = 'availability-api'

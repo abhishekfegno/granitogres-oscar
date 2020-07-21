@@ -2,8 +2,6 @@
 
 from django.db import migrations, models
 
-from lib import custom_migrate
-
 
 class Migration(migrations.Migration):
 
@@ -29,9 +27,5 @@ class Migration(migrations.Migration):
             model_name='product',
             name='retail_price',
             field=models.FloatField(blank=True, null=True, verbose_name='Effective Retail Price.'),
-        ),
-        custom_migrate.PopulatePriceAfterMigration(
-            model_name='product',
         )
-
     ]

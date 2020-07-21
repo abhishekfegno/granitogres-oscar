@@ -25,7 +25,6 @@ DEBUG = True
 
 # Application definition
 
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -84,9 +83,7 @@ INSTALLED_APPS = [
 
     'rest_auth',
     'rest_auth.registration',
-
     'django_filters',
-
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_gis',
@@ -96,6 +93,9 @@ INSTALLED_APPS = [
 
     'oscar_accounts.apps.AccountsConfig',
     'oscar_accounts.dashboard.apps.AccountsDashboardConfig',
+
+    # third PArty
+    'floppyforms',
 
     # 3rd-party apps that oscar depends on
     'widget_tweaks',
@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     'push_notifications',
 
 ]
+
 
 MIDDLEWARE = [
     # BUILTINS

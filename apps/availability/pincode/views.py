@@ -1,18 +1,13 @@
-from django.conf import settings
-from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
-from django.shortcuts import render
 
 # Create your views here.
-from django.utils.decorators import method_decorator
 from oscar.apps.dashboard.communications.views import ListView
 from rest_framework.response import Response
 
 from apps.api_set.serializers.mixins import ProductPriceFieldMixin
-from apps.availability.facade import PincodeFacade
+from apps.availability.pincode.facade import PincodeFacade
 from apps.availability.signals import pincode_changed
 
-from apps.partner.strategy import Selector
 from oscar.core.loading import get_model
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
@@ -34,7 +29,7 @@ AVAILABLE = 'available'
 
 
 class PincodeSelector(ListView):
-    template_name = 'availability/pincode/selector.html'
+    template_name = 'availability/pincode/list.html'
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_superuser:

@@ -57,7 +57,7 @@ class CategorySerializer(serializers.ModelSerializer):
         return req.build_absolute_uri(img)
 
     def get_offers_upto(self, instance):
-        if instance.depth == 0:
+        if instance.depth == 1:
             field_1 = 'price_excl_tax'
             field_2 = 'price_retail'
             all_nested_categories_from_mp_node = instance.get_descendants_and_self()

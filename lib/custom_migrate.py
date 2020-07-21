@@ -1,4 +1,5 @@
 from django.db.migrations.operations.base import Operation
+from django.db.utils import ProgrammingError
 
 
 class IndexAfterSearchMigration(Operation):
@@ -43,12 +44,15 @@ class PopulatePriceAfterMigration(Operation):
 
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
         from oscar.core.loading import get_model
-        from django.contrib.postgres.search import SearchVector
-        product = get_model('catalogue', 'Product')
-        for pdt in product.objects.all():
-            pdt._save_price()
-            pdt.save()
-            pdt.clear_price_caches()
+        try:
+            from django.contrib.postgres.search import SearchVector
+            product = get_model('catalogue', 'Product')
+            for pdt in product.objects.all():
+                pdt._save_price()
+                pdt.save()
+                pdt.clear_price_caches()
+        except Exception as e:
+            print("WARNING : ", e)
 
     def database_backwards(self, app_label, schema_editor, from_state, to_state):
         pass

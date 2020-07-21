@@ -7,21 +7,6 @@ import pgeocode
 DEFAULT_PINCODE_KEY = 'pincode'
 
 
-# class PinCode(object):
-#     key = getattr(settings, 'COOKIE_STORAGE_PINCODE_KEY', DEFAULT_PINCODE_KEY)
-#
-#     @staticmethod
-#     def add_pincode_to_user(pincode, request=None, user=None):
-#
-#         if user:
-#             pass
-#
-#         if request.is_authenticated:
-#             pin = request.session.get(PinCode.key, [])
-#             pin.push(pincode)
-#             request.session[PinCode.key] = pin
-
-
 def load_all_postal_code_in_district(district):
     geo_india = pgeocode.Nominatim('IN')
     numpy_data = geo_india._data[(geo_india._data.county_name == district.name)].to_numpy()

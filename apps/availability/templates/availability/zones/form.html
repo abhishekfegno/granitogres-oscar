@@ -1,0 +1,48 @@
+{% extends 'availability/pincode/base.html' %}
+{% load i18n static %}
+{% load render_table from django_tables2 %}
+{% load category_tags %}
+
+
+{% block title %} Zones {{ block.super }}{% endblock %}
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li ><a href="{% url 'availability:zones-list' %}">{% trans "Zones" %}</a></li>
+    {% if object.pk %}
+    <li class="active">{{ object.name }}</li>
+    {% else %}
+    <li class="active">Create New</li>
+    {% endif %}
+
+</ul>
+{% endblock %}
+
+{% block header %}
+{{ form.media  }}
+
+
+{% endblock header %}
+
+
+{% block dashboard_content %}
+<div class="container-fluid" >
+    <form method="post" class="form-stacked wysiwyg fixed-actions"   enctype="multipart/form-data" style="border:2px solid grey;  padding: 15px;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit">
+    </form>
+</div>
+<style>
+
+</style>
+{% endblock dashboard_content %}
+{% block extrascripts %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+{% endblock %}
+
+{% block onbodyload %}
+{{ block.super }}
+{% endblock %}
+

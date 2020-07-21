@@ -1,0 +1,28 @@
+{% extends 'availability/pincode/base.html' %}
+{% load i18n static %}
+{% load render_table from django_tables2 %}
+{% load category_tags %}
+
+
+{% block title %} Zones {{ block.super }}{% endblock %}
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li ><a href="{% url 'availability:zones-list' %}">{% trans "Zones" %}</a></li>
+    <li class="active">{{ object.name }} - DELETE?</li>
+</ul>
+{% endblock %}
+
+{% block header %}
+<h3>Are you sure you want to delete This Region "{{ object.name }}"?</h3>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" value="{{ object.pk }}" name="object">
+    <input type="submit" class="btn btn-danger">
+</form>
+
+{% endblock header %}
+
+{% block dashboard_content %}
+{% endblock dashboard_content %}

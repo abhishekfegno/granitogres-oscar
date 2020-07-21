@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.gis.db.models import PolygonField
 from treebeard.mp_tree import MP_Node, MP_NodeManager
 from django.contrib.gis.db import models
 
@@ -27,6 +28,11 @@ class PincodePartnerThroughModel(models.Model):
     pincode = models.ForeignKey(PinCode, on_delete=models.CASCADE, related_name='partner_mappings')
 
 
+class Zones(models.Model):
+    name = models.CharField(max_length=128)
+    zone = PolygonField()
+    partner = models.ForeignKey('partner.Partner',
+                                related_name='zone', on_delete=models.CASCADE)
 
 
 

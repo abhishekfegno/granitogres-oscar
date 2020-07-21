@@ -80,8 +80,25 @@ migrate the project. Run the server.
     python manage.py migrate
     python manage.py runserver
     
+    
+##### How to fill up with dummy data:
+We have script to generate dummy data from package
+https://github.com/marcusklasson/GroceryStoreDataset .
+
+Download the package to home directory.
+
+then run the management command `generate_products` as :
+
+    python manage.py generate_products --copy ~/GroceryStoreDataset/dataset/iconic-images-and-descriptions ~/GroceryStoreDataset/dataset/classes.csv
+
+(Code is editabel at `apps.catalogue.management.commands.generate_products`)
+takes optional  --copy to names with folder of images. instead you can manually copy the contents of 
+`iconic-images-and-descriptions` to your media folder 
+`public/media/products/scripted/` pass required parameter `classes.csv` file to script to start execution.
 
 
+The script is optimized so as not to read all the file, reprocess them to django media file and  then save tp db. 
+Instead, it stores the path directly to db as string.
 
 
 

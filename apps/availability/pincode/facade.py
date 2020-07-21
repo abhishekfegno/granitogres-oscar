@@ -19,13 +19,3 @@ class PincodeFacade(object):
     def set_session(request, pincode):
         request.session['pincode'] = pincode
 
-    # @staticmethod
-    # def set_cookie(response, pincode):
-    #     existing_cookie = response.COOKIES.get('pincode', [])
-    #     if type(existing_cookie) is list:
-    #         existing_cookie.append(pincode)
-    #         response.set_cookie('pincode', existing_cookie)
-    #     else:
-    #         response.set_cookie('pincode', [pincode, ])
-    #
-    #

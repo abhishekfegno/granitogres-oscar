@@ -1,0 +1,64 @@
+{% extends 'availability/pincode/base.html' %}
+{% load i18n static %}
+{% load render_table from django_tables2 %}
+{% load category_tags %}
+
+
+{% block title %} Zones {{ block.super }}{% endblock %}
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="active">{% trans "Zones" %}</li>
+</ul>
+{% endblock %}
+
+{% block header %}
+<div class="page-header">
+    <a href="{% url 'availability:zones-create' %}" class="btn btn-primary btn-lg pull-right"><i class="icon-plus"></i> {% trans "Create New Zone" %}</a>
+    <h1>{% trans "Zones" %}</h1>
+</div>
+{% endblock header %}
+
+
+{% block dashboard_content %}
+{% regroup object_list by partner as partner_zone  %}
+{% for partner in partner_zone %}
+<table class="table table-striped table-bordered table-responsive table-hover">
+    <caption><i class="icon-sitemap icon-large"></i>{{ partner.grouper }} - Zones</caption>
+    <thead>
+    <tr>
+        <th>
+            Name
+        </th>
+        <th>
+            Region
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for zone in partner.list %}
+    <tr>
+        <td>
+            <a href="{% url 'availability:zones-update' pk=zone.pk %}">{{ zone.name }}</a>
+        </td>
+        <td>
+            {{ zone.zone }}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% empty %}
+<p> There is nothing in this list. <a href="{% url 'availability:zones-create' %}">Create a Zone</a> to get listed here. </p>
+{% endfor %}
+
+{% endblock dashboard_content %}
+{% block extrascripts %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+{% endblock %}
+
+{% block onbodyload %}
+{{ block.super }}
+{% endblock %}
+

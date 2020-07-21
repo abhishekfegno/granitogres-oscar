@@ -3,7 +3,6 @@ import random
 
 from django.conf import settings
 from django.core.management import BaseCommand
-from oscar.apps.partner.models import Partner
 from oscar.core.loading import get_model
 
 from apps.catalogue.models import Product, Category, ProductClass, ProductAttribute, ProductImage, StockRecord
@@ -16,6 +15,8 @@ fake = Faker()
 import shutil
 import os
 from shutil import *
+
+Partner = get_model('partner', 'Partner')
 
 
 def copy_and_overwrite(from_path, to_path):
