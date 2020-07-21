@@ -9,15 +9,13 @@ from apps.availability.models import Zones
 #     google_maps_api_key = settings.GOOGLE_MAPS_API_KEY
 
 class PolyWidget(floppyforms.gis.PolygonWidget, floppyforms.gis.BaseOsmWidget):
-    pass
+    map_width = 600
+    map_height = 400
 
 
 class ZoneForm(forms.ModelForm):
 
-    zone = floppyforms.gis.PolygonField(widget=PolyWidget(attrs={
-        'map_width': 1000,
-        'map_height': 700,
-    }))
+    zone = floppyforms.gis.PolygonField(widget=PolyWidget)
     name = forms.CharField(widget=forms.TextInput(attrs={'class': "form-control"}))
 
     class Meta:

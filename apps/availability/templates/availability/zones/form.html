@@ -2,7 +2,7 @@
 {% load i18n static %}
 {% load render_table from django_tables2 %}
 {% load category_tags %}
-
+{% load floppyforms %}
 
 {% block title %} Zones {{ block.super }}{% endblock %}
 {% block breadcrumbs %}
@@ -20,8 +20,6 @@
 
 {% block header %}
 {{ form.media  }}
-
-
 {% endblock header %}
 
 
@@ -29,20 +27,11 @@
 <div class="container-fluid" >
     <form method="post" class="form-stacked wysiwyg fixed-actions"   enctype="multipart/form-data" style="border:2px solid grey;  padding: 15px;">
         {% csrf_token %}
-        {{ form.as_p }}
+
+        {% form form using "floppyforms/layouts/p.html" %}
+
         <input type="submit">
     </form>
 </div>
-<style>
-
-</style>
 {% endblock dashboard_content %}
-{% block extrascripts %}
-{{ block.super }}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
-{% endblock %}
-
-{% block onbodyload %}
-{{ block.super }}
-{% endblock %}
 
