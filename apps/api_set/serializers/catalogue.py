@@ -133,7 +133,7 @@ class SiblingProductsSerializer(SibblingProductAttributeFieldMixin, ProductListS
         fields = ('title', 'slug', 'attributes', 'url')
 
 
-class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMixin,
+class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMixinLite,
                                  ProductDetailSerializerMixin, serializers.ModelSerializer):
     price = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
