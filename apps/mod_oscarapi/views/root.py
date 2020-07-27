@@ -25,7 +25,6 @@ def PUBLIC_APIS(r, f):
         ("Catalogue", collections.OrderedDict([
             ("Category API", reverse("wnc-categories-list", request=r, format=f)),
             ("Products API", reverse("wnc-all-product-list", request=r, format=f)),
-            ("Products API Haystack based", reverse("wnc-all-product-list-new", request=r, format=f)),
             ("Product Suggestion API", reverse("wnc-product-suggestions", request=r, format=f) + '?q=8GB'),
             ("Product Filter Options", reverse("wnc-filter-options", request=r, format=f,
                                                kwargs={'pk': 2})),

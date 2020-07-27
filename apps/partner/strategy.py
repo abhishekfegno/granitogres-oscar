@@ -9,11 +9,13 @@ class Selector(object):
     """
 
     def strategy(self, request=None, user=None, **kwargs):
-
-        kwargs['zone'] = Zones.objects.filter().first().id
+        zone = kwargs.get('zone', )
+        zone = Zones.objects.filter().last()
+        if zone:
+            zone = zone.id
 
         if kwargs.get('zone'):
-            return ZoneBasedIndianPricingStrategy(kwargs.get('zone'), request=request, user=user, **kwargs)
+            return ZoneBasedIndianPricingStrategy(zone, request=request, user=user, **kwargs)
 
         if request and request.session.get('zone'):
             zone = request.session['zone']
