@@ -1,4 +1,7 @@
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.encoding import force_text
+from django.utils.functional import Promise
 
 from apps.partner.strategy import Selector
 from lib.currencies import get_symbol
@@ -16,8 +19,8 @@ def image_not_found(request=None):
 
 
 def get_purchase_info(product, request=None, user=None):
-    strategy = Selector().strategy(request, user)
 
+    strategy = Selector().strategy(request, user)
     if product.is_parent:
         return strategy.fetch_for_parent(product=product)
     else:
@@ -53,7 +56,7 @@ def purchase_info_as_dict(purchase_info, **kwargs):
 
 def purchase_info_lite_as_dict(purchase_info, **kwargs):
     if not purchase_info:
-        return {**kwargs}
+        return kwargs
     retail_rate = hasattr(purchase_info.stockrecord, 'price_retail') and purchase_info.stockrecord.price_retail or None
     if retail_rate:
         retail_rate = get_approximate_tax_for_retail(
@@ -62,16 +65,31 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
             retail_rate
         )
     return {
-        'effective_price': purchase_info.price.effective_price,
-        'retail': retail_rate,
+        'effective_price': float(purchase_info.price.effective_price),
+        'retail': float(retail_rate),
         'currency': purchase_info.price.currency,
         'symbol': get_symbol(purchase_info.price.currency),
         **kwargs
     }
 
 
+def dummy_purchase_info_lite_as_dict(**kwargs):
+    return {
+        'effective_price': 0,
+        'retail': 0,
+        'currency': 'INR',
+        'symbol': get_symbol('INR'),
+        **kwargs
+    }
 
 
+class LazyEncoder(DjangoJSONEncoder):
+
+    def default(self, obj):
+        if isinstance(obj, Promise):
+            return force_text(obj)
+        else:
+            return super(LazyEncoder, self).default(obj)
 
 
 

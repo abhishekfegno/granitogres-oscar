@@ -1,3 +1,5 @@
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from oscar.core.loading import get_model
 from oscarapi.basket import operations
 from oscarapi.utils.loading import get_api_classes, get_api_class

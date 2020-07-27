@@ -14,7 +14,7 @@ from django.utils import timezone
 from oscar.core.compat import get_user_model
 
 from apps.api_set import app_settings
-from apps.users.manger import ActiveOTPManager
+from apps.users.manager import ActiveOTPManager
 from apps.users.validators import UnicodeMobileNumberValidator
 from lib.utils.sms import send_otp
 
@@ -53,11 +53,16 @@ class User(AbstractUser):
 class Location(models.Model):
     location = PointField()
     location_name = models.CharField(max_length=90)
-    pin_code = models.CharField(max_length=6)
+    is_active = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    zone = models.ForeignKey('availability.Zones', on_delete=models.SET_NULL, null=True, blank=True)
+
+    @property
+    def partner(self):
+        if self.zone:
+            return self.zone.partner
 
     def save(self, *args, **kwargs):
-        # self.updated_at = timezone.now()
         super(Location, self).save(*args, **kwargs)
 
 

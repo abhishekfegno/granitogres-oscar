@@ -5,7 +5,8 @@ from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 
 from apps.catalogue.models import ProductImage
-from apps.utils import get_purchase_info, purchase_info_as_dict, purchase_info_lite_as_dict, image_not_found
+from apps.utils import get_purchase_info, purchase_info_as_dict, purchase_info_lite_as_dict, image_not_found, \
+    dummy_purchase_info_lite_as_dict
 from lib import cache_key
 from lib.algorithms.product import siblings_pointer
 from lib.cache import cache_library, get_featured_path
@@ -23,15 +24,9 @@ AvailabilitySerializer = get_api_class('serializers.product', 'AvailabilitySeria
 class ProductPrimaryImageFieldMixin(object):
 
     def get_primary_image(self, instance):
+        req = self.context['request'] # noqa: mixin assured
         img = instance.primary_image()
-        # product_ids = [instance.parent_id, instance.id]
-        # img = ProductImage.objects.filter(
-        #     product__id__in=product_ids,
-        # ).order_by('product__structure', 'display_order').first()    # child first, then in its display order
-        # img = img or MissingProductImage()
-        # img_web = img['original'] if type(img) is dict else img.thumbnail_web_listing
         img_mob = img['original'] if type(img) is dict else img.thumbnail_mobile_listing
-        req = self.context['request']
         return {
             # 'web': req.build_absolute_uri(img_web),
             'mobile': req.build_absolute_uri(img_mob or image_not_found()),
@@ -96,12 +91,14 @@ class ProductPriceFieldMixinLite(object):
         key = 'ProductPriceFieldMixinLite__{0}__{1}'
 
         def _inner():
+            if product.is_parent:
+                return dummy_purchase_info_lite_as_dict(availability=False, availability_message='')
             purchase_info = get_purchase_info(product, request=self.context['request'])  # noqa
-            from oscarapi.serializers.product import AvailabilitySerializer
-            availability = AvailabilitySerializer(purchase_info.availability).data[
-                'is_available_to_buy'
-            ] if purchase_info else False
-            return purchase_info_lite_as_dict(purchase_info, availability=availability)
+            addittional_informations = {
+                "availability": bool(purchase_info.availability.is_available_to_buy),
+                "availability_message": purchase_info.availability.short_message,
+            }
+            return purchase_info_lite_as_dict(purchase_info, **addittional_informations)
 
         return _inner()
 

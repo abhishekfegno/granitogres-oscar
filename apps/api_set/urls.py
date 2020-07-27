@@ -4,13 +4,17 @@ from django.urls import path, include
 from allauth.account.views import confirm_email
 
 from apps.api_set.views.basket import get_basket
-from apps.api_set.views.catalogue_depricated import (
-    categories_list_cached, product_list, product_detail_web, product_suggestions, filter_options,
+from apps.api_set.views.catalogue import (
+    categories_list_cached, product_detail_web, product_suggestions, filter_options,
 )
 from apps.api_set.views.index import (
     index, home, offers, offer_products
 )
 from apps.api_set.views.orders import orders, orders_detail
+from apps.api_set.views.product_listing_query_based import product_list
+from apps.api_set.views.product_listing_haystack_based import product_list
+# from apps.api_set.views.product_listing_haystack_based import product_list as product_list_new, \
+#     query_product_suggestions
 from apps.api_set.views.public import availability
 from apps.api_set.views.wishlist import wish_list
 
@@ -47,6 +51,7 @@ catalogue_urlpatterns = [
     path("v1/catalogue/", include([
         path("c/", categories_list_cached, name="wnc-categories-list"),                             # category
         path("c/all/", product_list, name="wnc-all-product-list"),                                  # category
+        # path("c/all/new/", product_list_new, name="wnc-all-product-list-new"),                                  # category
         path("c/<slug:category>/", product_list, name="wnc-category-product-list"),                 # category
         path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web"),      # detail
         path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),                            # filter

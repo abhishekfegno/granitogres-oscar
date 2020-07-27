@@ -8,6 +8,10 @@ from apps.availability.models import Zones
 # class PolyWidget(floppyforms.gis.PolygonWidget, floppyforms.gis.BaseGMapWidget):
 #     google_maps_api_key = settings.GOOGLE_MAPS_API_KEY
 
+# class PolyWidget(floppyforms.gis.PolygonWidget, floppyforms.gis.BaseMetacartaWidget):
+#     map_width = 600
+#     map_height = 400
+#
 class PolyWidget(floppyforms.gis.PolygonWidget, floppyforms.gis.BaseOsmWidget):
     map_width = 600
     map_height = 400

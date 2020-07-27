@@ -1,12 +1,17 @@
+from collections import OrderedDict
+
 from django.conf import settings
 from django.core.cache import cache
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 
 from factory.django import get_model
 from oscar.apps.offer.models import ConditionalOffer
 from oscar.core.loading import get_class
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from apps.api_set.serializers.catalogue import (
@@ -73,72 +78,11 @@ def categories_list_cached(request):
     return Response(__get_category_cached(request))
 
 
-@api_view()
-def product_list(request, category='all', **kwargs):
-    """
-    PRODUCT LISTING API, (powering,  list /c/all/, /c/<category_slug>/,  )
-
-    q = " A search term "
-    product_range = '<product-range-id>'
-    sort = any one from ['relevancy', 'rating', 'newest', 'price-desc', 'price-asc', 'title-asc', 'title-desc']
-    filter = minprice:25::maxprice:45::available_only:1::color=Red,Black,Blue::weight:25,30,35::ram:4 GB,8 GB
-        Where minprice, maxprice and  available_only are common for all.
-        other dynamic parameters are available at  reverse('wnc-filter-options', kwarg={'pk': '<ProductClass: id>'})
-
-    """
-
-    queryset = Product.browsable.browsable()
-    serializer_class = custom_ProductListSerializer
-    _search = request.GET.get('q')
-    _sort = request.GET.get('sort')
-    _filter = request.GET.get('filter')
-    _offer_category = request.GET.get('offer_category')
-    page_number = int(str(request.GET.get('page', 1)))
-    page_size = int(str(request.GET.get('page_size', settings.DEFAULT_PAGE_SIZE)))
-    out = {}
-    # search_handler = get_product_search_handler_class()(request.GET, request.get_full_path(), [])
-
-    if _offer_category:
-        offer_banner_object = get_object_or_404(OfferBanner, code=_offer_category, offer__status=ConditionalOffer.OPEN)
-        queryset = offer_banner_object.products().filter(structure__in=['standalone', 'child'], is_public=True, stockrecords__isnull=False)
-
-    if category != 'all':
-        queryset = category_filter(queryset=queryset, category_slug=category)
-
-    if _filter:
-        """
-        input = weight__in:25,30,35|price__gte:25|price__lte:45
-        """
-        queryset = apply_filter(queryset=queryset, _filter=_filter)
-
-    if _search:
-        queryset = apply_search(queryset=queryset, search=_search)
-
-    if _sort:
-        _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
-        queryset = apply_sort(queryset=queryset, sort=_sort)
-
-    def _inner():
-        nonlocal queryset
-        paginator = Paginator(queryset, page_size)  # Show 18 contacts per page.
-        page_obj = paginator.get_page(page_number)
-        product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
-        rc = None
-        # if category != 'all':
-        #     rc = recommended_class(queryset)
-        return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc)
-
-    # if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not _search and not _filter and not _sort:
-    #     c_key = cache_key.product_list__key.format(page_number, page_size, category)
-    #     if settings.DEBUG:
-    #         cache.delete(c_key)
-    #     out = cache_library(c_key, cb=_inner)
-    # else:
-    #     out = _inner()
-    return Response(_inner())
 
 
 @api_view()
+@cache_page(60 * 60 * 2)
+@vary_on_cookie
 def product_detail_web(request, product):
     queryset = Product.objects.base_queryset()
     serializer_class = ProductDetailWebSerializer
@@ -151,19 +95,6 @@ def product_detail_web(request, product):
         product = product
     return Response({
         'results': serializer_class(instance=focused_product, context={'request': request, 'product': product}).data
-    })
-
-
-@api_view()
-def product_detail_mobile(request, product):
-    queryset = Product.browsable.filter().prefetch_related('children', 'product_options', 'stockrecords', 'images')
-    serializer_class = ProductDetailMobileSerializer
-    product = get_object_or_404(queryset, slug=product)
-    # if product.is_parent:
-    #     product = product.get_apt_child(order='-price_excl_tax')
-
-    return Response({
-        'results': serializer_class(instance=product).data
     })
 
 

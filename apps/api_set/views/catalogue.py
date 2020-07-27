@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.core.cache import cache
 from django.core.paginator import Paginator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from elasticsearch_dsl.query import Exists
 
 from factory.django import get_model
@@ -48,55 +50,6 @@ def categories_list_cached(request):
     return Response(__get_category_cached(request))
 
 
-@api_view()
-def product_list(request, category='all', **kwargs):
-    """
-    PRODUCT LISTING API, (powering,  list /c/all/, /c/<category_slug>/,  )
-    q = "A search term "
-    product_range = '<product-range-id>'
-    sort = <depricated>
-    filter = <depricated>
-    """
-
-    queryset = Product.browsable.browsable().base_queryset()
-    serializer_class = custom_ProductListSerializer
-    _search = request.GET.get('q')
-    _sort = request.GET.get('sort')
-    _product_range = request.GET.get('product_range')
-    page_number = int(str(request.GET.get('page', 1)))
-    page_size = int(str(request.GET.get('page_size', settings.DEFAULT_PAGE_SIZE)))
-    search_form_class = BrowseCategoryForm
-    out = {
-        'query': None,
-        'suggestion': None,
-        'count': 0,
-    }
-    #
-    # if _product_range:
-    #     _product_range_object = get_object_or_404(Range, id=_product_range)
-    #     queryset = _product_range_object.all_products().base_queryset()
-    #
-    # if category != 'all':
-    #     queryset, cat = category_filter(queryset=queryset, category_slug=category)
-
-    # if _search:
-    handler = GrocerySearchHandler(request.GET, request.get_full_path(), form_class=search_form_class,
-                                   paginate_by=page_size)
-    out['query'] = handler.search_form.cleaned_data['q']
-    out['suggestion'] = handler.search_form.get_suggestion()
-    out['count'] = handler.results.facet_counts()
-
-    def _inner():
-        nonlocal handler, queryset, out
-        page_obj = handler.paginator.get_page(page_number)
-        product_data = serializer_class(page_obj.object_list, context={'request': request}).data
-        return list_api_formatter(
-            request, page_obj=page_obj,
-            results=product_data,
-            # product_class=rc,
-            **out)
-
-    return Response(_inner())
 
 
 @api_view()
@@ -115,18 +68,6 @@ def product_detail_web(request, product):
         'results': serializer_class(instance=focused_product, context={'request': request, 'product': product}).data
     })
 
-
-@api_view()
-def product_detail_mobile(request, product):
-    queryset = Product.browsable.filter().prefetch_related('children', 'product_options', 'stockrecords', 'images')
-    serializer_class = ProductDetailMobileSerializer
-    product = get_object_or_404(queryset, slug=product)
-    # if product.is_parent:
-    #     product = product.get_apt_child(order='-price_excl_tax')
-
-    return Response({
-        'results': serializer_class(instance=product).data
-    })
 
 
 def __(val):

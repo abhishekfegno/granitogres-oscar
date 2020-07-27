@@ -14,6 +14,7 @@ def PUBLIC_APIS(r, f):
             ("Send OTP", reverse("api-v1--send-otp", request=r, format=f)),
             ("Resend OTP", reverse("api-v1--resend-otp", request=r, format=f)),
             ("Login With OTP", reverse("api-v1--login-otp", request=r, format=f)),
+            ("Set / Change Location", reverse("availability-api:set-zone", request=r, format=f)),
             ("API Logout", reverse("rest_logout", request=r, format=f)),
         ])),
         ("Index Page", collections.OrderedDict([
@@ -24,6 +25,7 @@ def PUBLIC_APIS(r, f):
         ("Catalogue", collections.OrderedDict([
             ("Category API", reverse("wnc-categories-list", request=r, format=f)),
             ("Products API", reverse("wnc-all-product-list", request=r, format=f)),
+            ("Products API Haystack based", reverse("wnc-all-product-list-new", request=r, format=f)),
             ("Product Suggestion API", reverse("wnc-product-suggestions", request=r, format=f) + '?q=8GB'),
             ("Product Filter Options", reverse("wnc-filter-options", request=r, format=f,
                                                kwargs={'pk': 2})),

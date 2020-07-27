@@ -8,9 +8,7 @@ class StockRecord(AbstractStockRecord):
 
 
 class Partner(AbstractPartner):
-    location = PointField('coordinates', null=True, blank=True, )
-    # area = MultiPolygonField(null=True, blank=True, )
-
+    pass
 
 
 

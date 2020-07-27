@@ -8,7 +8,10 @@ from django.core.paginator import Paginator
 from django.db import models
 from django.db.models import Count
 from django.template.defaulttags import regroup
+from django.templatetags.static import static
 from django.utils.timezone import now
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from oscar.apps.offer.models import ConditionalOffer, Range
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class, get_api_classes
@@ -49,6 +52,7 @@ def home(request, *a, **k):
 
 
 @api_view(("GET",))
+@cache_page(60 * 60 * 2)
 def index(request, *a, **k):
     index = 0
     out = {'home': []}
@@ -73,29 +77,56 @@ def index(request, *a, **k):
     return Response(out)
 
 
+OFFER_TOP_LABEL: str = 'top_wide_banners'
+OFFER_MIDDLE_LABEL: str = 'middle_half_banners'
+OFFER_BOTTOM_LABEL: str = 'bottom_wide_banners'
+POS_01: str = 'position_01'
+POS_02: str = 'position_02'
+
+
 @api_view(("GET",))
+@cache_page(60 * 60 * 2)
 def offers(request, *a, **k):
     offer_banner = OfferBanner.objects.all().exclude(
         display_area=OfferBanner.HOME_PAGE
-    ).order_by('position') #.values('display_area', 'position', 'banner', 'product_range')
-    out = defaultdict(list)
+    ).order_by('position')                      #.values('display_area', 'position', 'banner', 'product_range')
+    _out = {OFFER_TOP_LABEL: [], OFFER_MIDDLE_LABEL: [], OFFER_BOTTOM_LABEL: []}
     for item in offer_banner:
-        out[{
-            OfferBanner.OFFER_TOP: 'top_wide_banners',
-            OfferBanner.OFFER_MIDDLE: 'middle_half_banners',
-            OfferBanner.OFFER_BOTTOM: 'bottom_wide_banners',
+        _out[{
+            OfferBanner.OFFER_TOP: OFFER_TOP_LABEL,
+            OfferBanner.OFFER_MIDDLE: OFFER_MIDDLE_LABEL,
+            OfferBanner.OFFER_BOTTOM: OFFER_BOTTOM_LABEL,
         }[item.display_area]].append(item)
+    print(_out)
 
-    for key, value_list in out.items():
-        out[key] = defaultdict(OrderedDict)
+    out = defaultdict(dict)
+    for key, value_list in _out.items():
+        out[key][POS_01] = []
+        out[key][POS_02] = []
         for banners in value_list:
-            pos = ['position_01', 'position_02'][banners.position-1]
-            if pos not in out[key].keys():
-                out[key][pos] = []
-            out[key][pos].append({
+            slot = [POS_01, POS_02][banners.position-1]
+            out[key][slot].append({
                 'banner': banners.mobile_wide_image(request),
                 'product_range': banners.product_range_id
             })
+
+    import pdb; pdb.set_trace()
+
+    arrays_config = (
+        # (Array                               'default static image',   allow_many ),
+        (out[OFFER_TOP_LABEL][POS_01],    'static/l6.jpg',         True),
+        (out[OFFER_TOP_LABEL][POS_02],    'static/l6.jpg',         False),
+        (out[OFFER_MIDDLE_LABEL][POS_01], 'static/m4.jpg',         False),
+        (out[OFFER_MIDDLE_LABEL][POS_02], 'static/m4.jpg',         False),
+        (out[OFFER_BOTTOM_LABEL][POS_01], 'static/l6.jpg',         False),
+        (out[OFFER_BOTTOM_LABEL][POS_02], 'static/l6.jpg',         False),
+    )
+
+    for array, img, allow_many in arrays_config:
+        if len(array) == 0:
+            array.append({'banner': request.build_absolute_uri(static(img)), 'product_range': None})
+        if allow_many is False:
+            del array[1:]    # only one is allowed in banner.
     return Response(out)
 
 

@@ -1,4 +1,6 @@
 from decimal import Decimal
+
+from django.core.cache import cache
 from django.db.models import Max, F, ExpressionWrapper, IntegerField, Q
 from oscar.apps.offer.models import ConditionalOffer
 from oscar.apps.shipping.scales import Scale
@@ -14,8 +16,10 @@ from apps.api_set.serializers.mixins import ProductAttributeFieldMixin, ProductD
 from apps.catalogue.models import Product, Category, ProductCategory
 from apps.dashboard.custom.models import OfferBanner
 from apps.partner.models import StockRecord
+from lib.cache import cache_library
 
 ProductClass = get_model("catalogue", "ProductClass")
+ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
 CategoryField = get_api_class("serializers.fields", "CategoryField")
 ProductAttributeValueSerializer = get_api_class('serializers.product', 'ProductAttributeValueSerializer')
 OptionSerializer = get_api_class('serializers.product', 'OptionSerializer')
@@ -96,28 +100,37 @@ class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixi
 
 def custom_ProductListSerializer(queryset, context,
                                  price_serializer_mixin=ProductPriceFieldMixinLite(),
-                                 primary_image_serializer_mixin=ProductPrimaryImageFieldMixin(), **kwargs):
+                                 primary_image_serializer_mixin=ProductPrimaryImageFieldMixin(), is_external_call=True, **kwargs):
+    request = context['request']
     primary_image_serializer_mixin.context = context
     price_serializer_mixin.context = context
 
-    out = [{
-        "id": product.id,
-        "title": product.title,
-        "primary_image": primary_image_serializer_mixin.get_primary_image(product),
-        "url": context['request'].build_absolute_uri(
-            reverse('product-detail', kwargs={'pk': product.id})
-        ),
-        "price": price_serializer_mixin.get_price(product),
-        "weight": getattr(
-            product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'
-        ) if not product.is_parent else None,
-        'variants': custom_ProductListSerializer(product.children.all(), context,
-                                                 price_serializer_mixin=price_serializer_mixin,
-                                                 primary_image_serializer_mixin=primary_image_serializer_mixin).data,
-    } for product in queryset] or None
+    def _solve(product):
+        nonlocal queryset, request, primary_image_serializer_mixin, price_serializer_mixin
 
-    # keeping original serializer compatibility so that they can take data as serializer(queryset, context).data
-    return FakeSerializerForCompatibility(out)
+        return {
+            "id": product.id,
+            "title": product.title,
+            "primary_image": primary_image_serializer_mixin.get_primary_image(product),
+            "url": request.build_absolute_uri(
+                reverse('product-detail', kwargs={'pk': product.id})
+            ),
+            "price": price_serializer_mixin.get_price(product),
+            "weight": getattr(
+                product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'
+            ) if not product.is_parent else None,
+            'variants': custom_ProductListSerializer(product.children.all(), context, is_external_call=False,
+                                                     price_serializer_mixin=price_serializer_mixin,
+                                                     primary_image_serializer_mixin=primary_image_serializer_mixin).data,
+        }
+    result = []
+    for product in queryset:
+        cache_key = f"___custom_ProductListSerializer__cached__product:{product.id}__zone:{request.session.get('zone', '0')}"
+        data = cache_library(cache_key, cb=lambda: _solve(product))
+        result.append(data)
+
+        # keeping original serializer compatibility so that they can take data as serializer(queryset, context).data
+    return FakeSerializerForCompatibility(result)
 
 
 class ProductListSerializerExpanded(ProductPriceFieldMixin, ProductListSerializer):

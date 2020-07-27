@@ -36,7 +36,7 @@ class WncLineSerializer(BasketLineSerializer):
         model = Line
 
         fields = (
-            'id', 'quantity', 'product', 'attributes',
+            'id',  'url', 'quantity', 'product', 'attributes',
             'price_currency', 'price_excl_tax', 'price_incl_tax',
             'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
             'is_tax_known', 'warning', 'stockrecord', 'date_created'

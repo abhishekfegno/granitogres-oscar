@@ -27,31 +27,6 @@ OSCAR_DASHBOARD_ITEMS_PER_PAGE = 20
 
 _ = lambda x: x
 
-OSCAR_SEARCH_FACETS = {
-    'fields': OrderedDict([
-        ('product_class', {'name': _('Type'), 'field': 'product_class'}),
-        ('rating', {'name': _('Rating'), 'field': 'rating'}),
-    ]),
-    'queries': OrderedDict([
-        ('price_range',
-         {
-             'name': _('Price range'),
-             'field': 'price',
-             'queries': [
-                 # This is a list of (name, query) tuples where the name will
-                 # be displayed on the front-end.
-                 (_('0 to 20'), u'[0 TO 20]'),
-                 (_('20 to 40'), u'[20 TO 40]'),
-                 (_('40 to 60'), u'[40 TO 60]'),
-                 (_('60+'), u'[60 TO *]'),
-             ]
-         }),
-    ]),
-}
-
-# OSCAR_PRODUCT_SEARCH_HANDLER = None
-# OSCAR_DASHBOARD_NAVIGATION # too long
-
 OSCAR_DASHBOARD_DEFAULT_ACCESS_FUNCTION = 'oscar.apps.dashboard.nav.default_access_fn'
 
 OSCAR_ALLOW_ANON_REVIEWS = False
@@ -68,7 +43,7 @@ OSCAR_GOOGLE_ANALYTICS_ID = None
 # Other statuses
 ORDER_STATUS_PLACED = 'Placed'
 ORDER_STATUS_CONFIRMED = 'Order Confirmed'
-ORDER_STATUS_SHIPPED = 'Shipped'
+# ORDER_STATUS_SHIPPED = 'Shipped'
 ORDER_STATUS_OUT_FOR_DELIVERY = 'Out For Delivery'
 ORDER_STATUS_DELIVERED = 'Delivered'
 ORDER_STATUS_CANCELED = 'Canceled'
@@ -85,8 +60,9 @@ OSCAR_ORDER_STATUS_PIPELINE = {
     ORDER_STATUS_PLACED: (ORDER_STATUS_PAYMENT_DECLINED, ORDER_STATUS_CONFIRMED, ORDER_STATUS_CANCELED),
     ORDER_STATUS_PAYMENT_DECLINED: (ORDER_STATUS_CONFIRMED, ORDER_STATUS_CANCELED),
     ORDER_STATUS_CONFIRMED: (
-        ORDER_STATUS_SHIPPED, ORDER_STATUS_OUT_FOR_DELIVERY, ORDER_STATUS_DELIVERED, ORDER_STATUS_CANCELED),
-    ORDER_STATUS_SHIPPED: (ORDER_STATUS_OUT_FOR_DELIVERY, ORDER_STATUS_DELIVERED, ORDER_STATUS_CANCELED),
+        # ORDER_STATUS_SHIPPED,
+        ORDER_STATUS_OUT_FOR_DELIVERY, ORDER_STATUS_DELIVERED, ORDER_STATUS_CANCELED),
+    # ORDER_STATUS_SHIPPED: (ORDER_STATUS_OUT_FOR_DELIVERY, ORDER_STATUS_DELIVERED, ORDER_STATUS_CANCELED),
     ORDER_STATUS_OUT_FOR_DELIVERY: (ORDER_STATUS_DELIVERED, ORDER_STATUS_CANCELED),
     ORDER_STATUS_DELIVERED: (),
     ORDER_STATUS_CANCELED: (),

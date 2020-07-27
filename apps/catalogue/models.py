@@ -73,6 +73,10 @@ class Product(AbstractProduct):
     def name(self):
         return self.get_title()
 
+    def __cached_primary_image_logic(self):
+        img = self.primary_image()
+        return img['original'] if type(img) is dict else img.thumbnail_mobile_listing
+
     def _set_request_context(self, request):
         self.request_context = {'request': request}
 

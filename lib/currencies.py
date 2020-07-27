@@ -188,7 +188,7 @@ currency_data = {
 
 
 def get_symbol(code):
-    return currency_data.get(code,code)
+    return currency_data.get(code, code)
 
 
 __all__ = 'get_symbol',

@@ -1,6 +1,5 @@
-from apps.partner.strategy_set.indian import IndianStrategyUsingPincode
-from apps.partner.strategy_set.minimum import MinimumValueStrategy
-from apps.partner.strategy_set.partner_based_strategy import PartnerBasedIndianStrategy
+from apps.partner.strategy_set.strategies import ZoneBasedIndianPricingStrategy
+from apps.partner.strategy_set.strategies import MinimumValueStrategy
 
 
 class Selector(object):
@@ -9,10 +8,18 @@ class Selector(object):
     """
 
     def strategy(self, request=None, user=None, **kwargs):
-        # if request and request.session.get('pincode'):
-        #     return IndianStrategyUsingPincode(request=request, user=user, **kwargs)
-        return MinimumValueStrategy()
 
-    def partner_based_strategy(self, partner):
-        return PartnerBasedIndianStrategy(partner)
+        if kwargs.get('zone'):
+            return ZoneBasedIndianPricingStrategy(kwargs.get('zone'), request=request, user=user, **kwargs)
+
+        if request and request.session.get('zone'):
+            zone = request.session['zone']
+            return ZoneBasedIndianPricingStrategy(zone, request=request, user=user, **kwargs)
+
+        if not request and user:
+            last_location = user.location_set.filter(is_active=True).last()
+            if last_location and last_location.zone_id:
+                return ZoneBasedIndianPricingStrategy(last_location.zone_id, request=request, user=user, **kwargs)
+
+        return MinimumValueStrategy()
 

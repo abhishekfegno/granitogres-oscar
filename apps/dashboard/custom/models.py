@@ -63,7 +63,8 @@ class OfferBanner(models.Model):
         }[self.display_area]
 
         return request.build_absolute_uri(
-            get_thumbnail(self.banner, resolution, crop='center', quality=98).url)
+            get_thumbnail(self.banner, resolution, crop='center', quality=98).url
+        )
 
 
 

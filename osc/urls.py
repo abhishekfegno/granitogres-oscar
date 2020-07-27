@@ -23,6 +23,7 @@ from django.contrib import admin
 from django.shortcuts import render
 from django.urls import path, include
 from django.views.decorators.cache import never_cache
+from django.views.generic import TemplateView
 from rest_framework.documentation import include_docs_urls
 # from cashondelivery.dashboard.app import application as cod_app
 from apps.mod_oscarapi.views.checkout import CheckoutView
@@ -71,6 +72,8 @@ if settings.DEBUG:
     urlpatterns.append(path('__debug__/', include(debug_toolbar.urls))),
     urlpatterns += static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, "assets"))
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += path('qs/', TemplateView.as_view(template_name="dummy_search.html")),  # > Django-2.0
+
 
 
 def error_404(request, exception=None):

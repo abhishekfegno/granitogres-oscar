@@ -9,5 +9,6 @@ public/static/*
 *.sql
 push
 whoosh-index-file
+whoosh-index
 *.swp
 *.tar.bz2

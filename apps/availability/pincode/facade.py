@@ -19,3 +19,4 @@ class PincodeFacade(object):
     def set_session(request, pincode):
         request.session['pincode'] = pincode
 
+
