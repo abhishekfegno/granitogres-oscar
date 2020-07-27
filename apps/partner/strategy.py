@@ -9,22 +9,21 @@ class Selector(object):
     """
 
     def strategy(self, request=None, user=None, **kwargs):
-        zone = kwargs.get('zone', )
+
+        zone = kwargs.get('zone') or (request and request.session.get('zone'))
+
+        # TODO: FOR DEBUGGING PURPOSES
         zone = Zones.objects.filter().last()
         if zone:
             zone = zone.id
 
-        if kwargs.get('zone'):
-            return ZoneBasedIndianPricingStrategy(zone, request=request, user=user, **kwargs)
-
-        if request and request.session.get('zone'):
-            zone = request.session['zone']
-            return ZoneBasedIndianPricingStrategy(zone, request=request, user=user, **kwargs)
-
-        if not request and user:
+        if not zone and (not request and user):
             last_location = user.location_set.filter(is_active=True).last()
             if last_location and last_location.zone_id:
-                return ZoneBasedIndianPricingStrategy(last_location.zone_id, request=request, user=user, **kwargs)
+                zone = last_location.zone_id
+
+        if zone:
+            return ZoneBasedIndianPricingStrategy(zone, request=request, user=user, **kwargs)
 
         return MinimumValueStrategy()
 
