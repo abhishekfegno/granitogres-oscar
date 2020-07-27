@@ -1,3 +1,4 @@
+from apps.availability.models import Zones
 from apps.partner.strategy_set.strategies import ZoneBasedIndianPricingStrategy
 from apps.partner.strategy_set.strategies import MinimumValueStrategy
 
@@ -8,6 +9,8 @@ class Selector(object):
     """
 
     def strategy(self, request=None, user=None, **kwargs):
+
+        kwargs['zone'] = Zones.objects.filter().first().id
 
         if kwargs.get('zone'):
             return ZoneBasedIndianPricingStrategy(kwargs.get('zone'), request=request, user=user, **kwargs)
