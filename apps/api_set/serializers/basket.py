@@ -43,7 +43,7 @@ class WncLineSerializer(BasketLineSerializer):
             item['is_selected'] = item['id'] == instance.product_id
             variants.append(item)
         data['variants'] = variants
-        return data[0]
+        return data
 
     class Meta:
         model = Line
