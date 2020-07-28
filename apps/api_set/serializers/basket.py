@@ -2,6 +2,7 @@ from oscar.core.loading import get_model, get_class
 from oscarapi.utils.loading import get_api_classes
 from rest_framework import serializers
 
+from apps.api_set.serializers.catalogue import custom_ProductListSerializer
 from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin
 
 Basket = get_model("basket", "Basket")
@@ -29,8 +30,18 @@ class WncProductThumbnailSerializer(ProductPrimaryImageFieldMixin, serializers.M
 
 
 class WncLineSerializer(BasketLineSerializer):
-    product = WncProductThumbnailSerializer()
+    product = serializers.SerializerMethodField()
     stockrecord = serializers.SlugRelatedField(slug_field='pk', read_only=True)
+    product_variants = serializers.SerializerMethodField()
+
+    def get_product(self, instance):
+        product_as_qs = Product.objects.filter(id=instance.product_id)
+        return custom_ProductListSerializer(product_as_qs, context=self.context).data
+
+    def get_product_variants(self, instance):
+        product_id = instance.product.parent_id if instance.product.parent_id else instance.product_id
+        product_as_qs = Product.objects.filter(id=product_id)
+        return custom_ProductListSerializer(product_as_qs, context=self.context).data
 
     class Meta:
         model = Line
@@ -39,7 +50,7 @@ class WncLineSerializer(BasketLineSerializer):
             'id',  'url', 'quantity', 'product', 'attributes',
             'price_currency', 'price_excl_tax', 'price_incl_tax',
             'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
-            'is_tax_known', 'warning', 'stockrecord', 'date_created'
+            'is_tax_known', 'warning', 'stockrecord', 'date_created', 'product_variants',
         )
 
 
