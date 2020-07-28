@@ -85,7 +85,7 @@ POS_02: str = 'position_02'
 
 
 @api_view(("GET",))
-@cache_page(60 * 60 * 2)
+# @cache_page(60 * 60 * 2)
 def offers(request, *a, **k):
     offer_banner = OfferBanner.objects.all().exclude(
         display_area=OfferBanner.HOME_PAGE
@@ -97,7 +97,6 @@ def offers(request, *a, **k):
             OfferBanner.OFFER_MIDDLE: OFFER_MIDDLE_LABEL,
             OfferBanner.OFFER_BOTTOM: OFFER_BOTTOM_LABEL,
         }[item.display_area]].append(item)
-    print(_out)
 
     out = defaultdict(dict)
     for key, value_list in _out.items():
@@ -110,8 +109,6 @@ def offers(request, *a, **k):
                 'product_range': banners.product_range_id
             })
 
-    import pdb; pdb.set_trace()
-
     arrays_config = (
         # (Array                               'default static image',   allow_many ),
         (out[OFFER_TOP_LABEL][POS_01],    'static/l6.jpg',         True),
@@ -121,7 +118,7 @@ def offers(request, *a, **k):
         (out[OFFER_BOTTOM_LABEL][POS_01], 'static/l6.jpg',         False),
         (out[OFFER_BOTTOM_LABEL][POS_02], 'static/l6.jpg',         False),
     )
-
+    
     for array, img, allow_many in arrays_config:
         if len(array) == 0:
             array.append({'banner': request.build_absolute_uri(static(img)), 'product_range': None})
