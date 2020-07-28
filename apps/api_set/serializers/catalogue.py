@@ -100,7 +100,7 @@ class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixi
 
 def custom_ProductListSerializer(queryset, context,
                                  price_serializer_mixin=ProductPriceFieldMixinLite(),
-                                 primary_image_serializer_mixin=ProductPrimaryImageFieldMixin(), is_external_call=True, **kwargs):
+                                 primary_image_serializer_mixin=ProductPrimaryImageFieldMixin(), **kwargs):
     request = context['request']
     primary_image_serializer_mixin.context = context
     price_serializer_mixin.context = context
@@ -119,7 +119,7 @@ def custom_ProductListSerializer(queryset, context,
             "weight": getattr(
                 product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'
             ) if not product.is_parent else None,
-            'variants': custom_ProductListSerializer(product.children.all(), context, is_external_call=False,
+            'variants': custom_ProductListSerializer(product.children.all(), context,
                                                      price_serializer_mixin=price_serializer_mixin,
                                                      primary_image_serializer_mixin=primary_image_serializer_mixin).data,
         }

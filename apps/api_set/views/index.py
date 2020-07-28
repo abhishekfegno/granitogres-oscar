@@ -118,7 +118,7 @@ def offers(request, *a, **k):
         (out[OFFER_BOTTOM_LABEL][POS_01], 'static/l6.jpg',         False),
         (out[OFFER_BOTTOM_LABEL][POS_02], 'static/l6.jpg',         False),
     )
-    
+
     for array, img, allow_many in arrays_config:
         if len(array) == 0:
             array.append({'banner': request.build_absolute_uri(static(img)), 'product_range': None})

@@ -12,7 +12,7 @@ from apps.api_set.views.index import (
 )
 from apps.api_set.views.orders import orders, orders_detail
 from apps.api_set.views.product_listing_query_based import product_list
-from apps.api_set.views.product_listing_haystack_based import product_list
+# from apps.api_set.views.product_listing_haystack_based import product_list
 # from apps.api_set.views.product_listing_haystack_based import product_list as product_list_new, \
 #     query_product_suggestions
 from apps.api_set.views.public import availability
