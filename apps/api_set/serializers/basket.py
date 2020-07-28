@@ -40,14 +40,13 @@ class WncLineSerializer(BasketLineSerializer):
         return data[0]
 
     def get_product_variants(self, instance):
-        product_id = instance.product.parent_id if instance.product.parent_id else instance.product_id
-        product_as_qs = Product.objects.filter(id=product_id)
-        data = custom_ProductListSerializer(product_as_qs, context=self.context).data
-        out = []
-        for item in data:
-            item['is_selected'] = item['id'] == instance.product_id
-            out.append(item)
-        return out
+        if instance.product.parent:
+            data = custom_ProductListSerializer(instance.product.parent.children.all(), context=self.context).data
+            out = []
+            for item in data:
+                item['is_selected'] = item['id'] == instance.product_id
+                out.append(item)
+            return out
 
     class Meta:
         model = Line
