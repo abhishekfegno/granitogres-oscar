@@ -56,12 +56,12 @@ INSTALLED_APPS = [
     'apps.dashboard.catalogue',
     'apps.checkout.apps.CheckoutConfig',
     'apps.search.apps.SearchConfig',
+    'apps.order.apps.OrderConfig',
 
     'oscar.apps.analytics.apps.AnalyticsConfig',
     'oscar.apps.address.apps.AddressConfig',
     'oscar.apps.shipping.apps.ShippingConfig',
     'oscar.apps.offer.apps.OfferConfig',
-    'oscar.apps.order.apps.OrderConfig',
     'oscar.apps.voucher.apps.VoucherConfig',
     'oscar.apps.wishlists.apps.WishlistsConfig',
     'oscar.apps.catalogue.reviews.apps.CatalogueReviewsConfig',

@@ -46,43 +46,48 @@ ORDER_STATUS_CONFIRMED = 'Order Confirmed'
 # ORDER_STATUS_SHIPPED = 'Shipped'
 ORDER_STATUS_OUT_FOR_DELIVERY = 'Out For Delivery'
 ORDER_STATUS_DELIVERED = 'Delivered'
+ORDER_STATUS_RETURNED = 'Returned'
 ORDER_STATUS_CANCELED = 'Canceled'
 
 # Needed by oscarapicheckout
-ORDER_STATUS_PENDING = ORDER_STATUS_PLACED
+ORDER_STATUS_PENDING = 'Placed'
 ORDER_STATUS_PAYMENT_DECLINED = 'Payment Declined'
-ORDER_STATUS_AUTHORIZED = ORDER_STATUS_CONFIRMED
+ORDER_STATUS_AUTHORIZED = 'Order Confirmed'
 
 OSCAR_INITIAL_ORDER_STATUS = ORDER_STATUS_PENDING
 OSCARAPI_INITIAL_ORDER_STATUS = ORDER_STATUS_PENDING
 
 OSCAR_ORDER_STATUS_PIPELINE = {
-    ORDER_STATUS_PLACED: (ORDER_STATUS_PAYMENT_DECLINED, ORDER_STATUS_CONFIRMED, ORDER_STATUS_CANCELED),
-    ORDER_STATUS_PAYMENT_DECLINED: (ORDER_STATUS_CONFIRMED, ORDER_STATUS_CANCELED),
-    ORDER_STATUS_CONFIRMED: (
-        # ORDER_STATUS_SHIPPED,
-        ORDER_STATUS_OUT_FOR_DELIVERY, ORDER_STATUS_DELIVERED, ORDER_STATUS_CANCELED),
-    # ORDER_STATUS_SHIPPED: (ORDER_STATUS_OUT_FOR_DELIVERY, ORDER_STATUS_DELIVERED, ORDER_STATUS_CANCELED),
-    ORDER_STATUS_OUT_FOR_DELIVERY: (ORDER_STATUS_DELIVERED, ORDER_STATUS_CANCELED),
-    ORDER_STATUS_DELIVERED: (),
-    ORDER_STATUS_CANCELED: (),
+    'Placed': ('Order Confirmed', 'Canceled'),
+    'Order Confirmed': (
+        'Out For Delivery', 'Delivered', 'Returned'),
+    'Out For Delivery': ('Delivered', 'Payment Declined', 'Returned'),
+    'Delivered': ('Returned', ),
+    'Payment Declined': (),
+    'Returned': (),
+    'Canceled': (),
 }
 
 OSCAR_INITIAL_LINE_STATUS = ORDER_STATUS_PENDING
+
 OSCAR_LINE_STATUS_PIPELINE = {
-    ORDER_STATUS_PLACED: (ORDER_STATUS_CONFIRMED, ORDER_STATUS_CANCELED),
-    ORDER_STATUS_CONFIRMED: (),
-    ORDER_STATUS_CANCELED: (),
+    'Placed': ('Order Confirmed', 'Canceled'),
+    'Order Confirmed': ('Delivered', 'Returned', ),
+    'Delivered': ('Returned', ),
+    'Returned': (),
+    'Canceled': (),
 }
 
-# OSCAR_ORDER_STATUS_PIPELINE = {
-#     'Placed': ('Order Confirmed', 'Canceled',),
-#     'Order Confirmed': ('Shipped', 'Out For Delivery', 'Delivered', 'Canceled',),
-#     'Shipped': ('Out For Delivery',  'Delivered', 'Cancelled',),
-#     'Out For Delivery': ('Delivered', 'Canceled',),
-#     'Delivered': (),
-#     'Canceled': (),
-# }
+OSCAR_ORDER_STATUS_CASCADE = {
+    'Placed': 'Placed',
+    'Order Confirmed': 'Order Confirmed',
+    'Out For Delivery': 'Order Confirmed',
+    'Delivered': 'Delivered',
+    'Payment Declined': 'Canceled',
+    'Returned': 'Canceled',
+    'Canceled': 'Canceled',
+}
+
 # Menu structure of the dashboard navigation
 
 OSCAR_DASHBOARD_NAVIGATION = [{
@@ -185,22 +190,22 @@ OSCAR_DASHBOARD_NAVIGATION = [{
     ],
 },
     {
-    'label': _('Content'),
-    'icon': 'icon-folder-close',
-    'children': [
-                {
-                    'label': _('Pages'),
-                    'url_name': 'dashboard:page-list',
-                },
-                {
-                    'label': _('Email templates'),
-                    'url_name': 'dashboard:comms-list',
-                },
-        # {
-        #     'label': _('Reviews'),
-        #     'url_name': 'dashboard:reviews-list',
-        # },
-    ]
+        'label': _('Content'),
+        'icon': 'icon-folder-close',
+        'children': [
+            {
+                'label': _('Pages'),
+                'url_name': 'dashboard:page-list',
+            },
+            {
+                'label': _('Email templates'),
+                'url_name': 'dashboard:comms-list',
+            },
+            # {
+            #     'label': _('Reviews'),
+            #     'url_name': 'dashboard:reviews-list',
+            # },
+        ]
     },
     {
         'label': _('Reports'),
