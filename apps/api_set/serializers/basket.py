@@ -1,3 +1,4 @@
+from oscar.apps.partner.availability import Unavailable
 from oscar.core.loading import get_model, get_class
 from oscarapi.utils.loading import get_api_classes
 from rest_framework import serializers
@@ -26,13 +27,13 @@ class WncProductThumbnailSerializer(ProductPrimaryImageFieldMixin, serializers.M
 
     class Meta:
         model = Product
-        fields = 'id',  'name', 'primary_image'
+        fields = 'id', 'name', 'primary_image'
 
 
 class WncLineSerializer(BasketLineSerializer):
     product = serializers.SerializerMethodField()
     stockrecord = serializers.SlugRelatedField(slug_field='pk', read_only=True)
-    # product_variants = serializers.SerializerMethodField()
+    warning = serializers.SerializerMethodField()
 
     def get_product(self, instance):
         product = instance.product.parent if instance.product.is_child else instance.product
@@ -45,11 +46,15 @@ class WncLineSerializer(BasketLineSerializer):
         data['variants'] = variants
         return data
 
+    def get_warning(self, instance):
+        if isinstance(instance.purchase_info.availability, Unavailable):
+            return "'%(product)s' is no longer available"
+
     class Meta:
         model = Line
 
         fields = (
-            'id',  'url', 'quantity', 'product', 'attributes',
+            'id', 'url', 'quantity', 'warning', 'product', 'attributes',
             'price_currency', 'price_excl_tax', 'price_incl_tax',
             'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
             'is_tax_known', 'warning', 'stockrecord', 'date_created',
@@ -79,4 +84,3 @@ class WncBasketSerializer(BasketSerializer):
             "offer_discounts",
             "is_tax_known",
         )
-

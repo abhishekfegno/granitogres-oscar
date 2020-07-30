@@ -46,45 +46,57 @@ ORDER_STATUS_CONFIRMED = 'Order Confirmed'
 # ORDER_STATUS_SHIPPED = 'Shipped'
 ORDER_STATUS_OUT_FOR_DELIVERY = 'Out For Delivery'
 ORDER_STATUS_DELIVERED = 'Delivered'
+ORDER_STATUS_RETURN_REQUESTED = 'Return Requested'
 ORDER_STATUS_RETURNED = 'Returned'
 ORDER_STATUS_CANCELED = 'Canceled'
 
 # Needed by oscarapicheckout
-ORDER_STATUS_PENDING = 'Placed'
+ORDER_STATUS_PENDING = ORDER_STATUS_PLACED
 ORDER_STATUS_PAYMENT_DECLINED = 'Payment Declined'
-ORDER_STATUS_AUTHORIZED = 'Order Confirmed'
-
+ORDER_STATUS_AUTHORIZED = ORDER_STATUS_PLACED
 OSCAR_INITIAL_ORDER_STATUS = ORDER_STATUS_PENDING
 OSCARAPI_INITIAL_ORDER_STATUS = ORDER_STATUS_PENDING
-
-OSCAR_ORDER_STATUS_PIPELINE = {
-    'Placed': ('Order Confirmed', 'Canceled'),
-    'Order Confirmed': (
-        'Out For Delivery', 'Delivered', 'Returned'),
-    'Out For Delivery': ('Delivered', 'Payment Declined', 'Returned'),
-    'Delivered': ('Returned', ),
-    'Payment Declined': (),
-    'Returned': (),
-    'Canceled': (),
-}
-
 OSCAR_INITIAL_LINE_STATUS = ORDER_STATUS_PENDING
 
-OSCAR_LINE_STATUS_PIPELINE = {
-    'Placed': ('Order Confirmed', 'Canceled'),
-    'Order Confirmed': ('Delivered', 'Returned', ),
-    'Delivered': ('Returned', ),
-    'Returned': (),
+
+OSCAR_ORDER_STATUS_PIPELINE = {
+    'Placed': ('Order Confirmed', 'Canceled'),      # admin / user can cancel an order / an item
+    'Order Confirmed': (
+        'Out For Delivery', 'Delivered', 'Canceled'),   # only admin can set these statuses
+    'Out For Delivery': ('Delivered', 'Canceled'),      # only admin can set these statuses
+    'Delivered': (),
+    'Payment Declined': (),
     'Canceled': (),
 }
+
+
+OSCAR_LINE_STATUS_PIPELINE = {
+    'Placed': ('Canceled', ),                           # user can cancel an item until order confirm
+    'Order Confirmed': (),                              # admin can deliver or confirm item
+    'Out For Delivery': (),                             # our for delivery
+    'Delivered': ('Return Initiated', ),                # delivered item can be triggered for return
+    'Return Initiated': ('Returned', 'Delivered', ),    # user can cancel return to go to 'Delivered'
+                                                        # or return accepted by by admin
+    'Returned': (),                                     # nothing to do much
+    'Canceled': (),                                     # nothing to do much
+}
+
+OSCAR_ORDER_REFUNDABLE_STATUS = [
+    'Returned',
+    'Canceled',
+]
+
+OSCAR_LINE_REFUNDABLE_STATUS = [
+    'Returned',
+    'Canceled',
+]
 
 OSCAR_ORDER_STATUS_CASCADE = {
     'Placed': 'Placed',
     'Order Confirmed': 'Order Confirmed',
-    'Out For Delivery': 'Order Confirmed',
+    'Out For Delivery': 'Out For Delivery',
     'Delivered': 'Delivered',
     'Payment Declined': 'Canceled',
-    'Returned': 'Canceled',
     'Canceled': 'Canceled',
 }
 

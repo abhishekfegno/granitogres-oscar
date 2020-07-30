@@ -2,8 +2,10 @@
 from oscarapicheckout import states
 from oscarapicheckout.methods import PaymentMethod
 
+from apps.payment.utils import PaymentRefundMixin
 
-class RazorPay(PaymentMethod):
+
+class RazorPay(PaymentRefundMixin, PaymentMethod):
     """
     Cash payments are an example of how to implement a payment method plug-in. It
     doesn't do anything more than record a transaction and payment source.
