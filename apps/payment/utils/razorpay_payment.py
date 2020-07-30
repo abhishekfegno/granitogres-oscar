@@ -15,7 +15,6 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
     code = 'razor_pay'
 
     def _record_payment(self, request, order, method_key, amount, reference, **kwargs):
-        # import pdb;  pdb.set_trace()
         source = self.get_source(order, reference)
 
         amount_to_allocate = amount - source.amount_allocated
