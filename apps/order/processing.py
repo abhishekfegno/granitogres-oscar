@@ -1,23 +1,30 @@
 from oscar.apps.order import processing
-from .models import Order
+from .models import Order, PaymentEventType
+from ..payment.refunds import RefundFacade
 
 
 class EventHandler(processing.EventHandler):
 
-    def handle_order_status_change(self, order: Order, new_status: str, note_msg=None):
+    def handle_payment_event(self, order, event_type: PaymentEventType, amount, lines=None,
+                             line_quantities=None, **kwargs):
         """
-        Handle a requested order status change
+        Handle a payment event for a given order.
 
-        This method is not normally called directly by client code.  The main
-        use-case is when an order is cancelled, which in some ways could be
-        viewed as a shipping event affecting all lines.
+        These should normally be called as part of handling a shipping event.
+        It is rare to call to this method directly.  It does make sense for
+        refunds though where the payment event may be unrelated to a particular
+        shipping event and doesn't directly correspond to a set of lines.
         """
+        self.validate_payment_event(
+            order, event_type, amount, lines, line_quantities, **kwargs)
+        if event_type.name == 'Refund':
+            RefundFacade().refund_admin_defined_payment(
+                order, event_type, amount, lines=None, line_quantities=None, **kwargs
+            )
+        return self.create_payment_event(
+            order, event_type, amount, lines, line_quantities, **kwargs)
 
-        old_status = order.status
 
-        if new_status in order.available_statuses():
-            print("order status is changing: ", old_status, " => ", new_status)
-            # running 'apps.order.signal_receivers.order_status_changed__receiver'
-        order.set_status(new_status)
-        if note_msg:
-            self.create_note(order, note_msg)
+
+
+

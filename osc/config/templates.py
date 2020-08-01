@@ -15,7 +15,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': TEMPLATE_DIRS,
-        # 'APP_DIRS': True,
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.static',
@@ -30,15 +30,15 @@ TEMPLATES = [
                 'oscar.apps.customer.notifications.context_processors.notifications',
                 'oscar.core.context_processors.metadata',
             ],
-            'loaders': [
-                ('django.template.loaders.cached.Loader', [
-                    'django.template.loaders.filesystem.Loader',
-                    'django.template.loaders.app_directories.Loader',
-                    # 'path.to.custom.Loader',
-                ]),
-            ],
-            'libraries': {
-            }
+            # 'loaders': [
+                # ('django.template.loaders.cached.Loader', [
+                #     'django.template.loaders.filesystem.Loader',
+                #     'django.template.loaders.app_directories.Loader',
+                #     # # 'path.to.custom.Loader',
+                # ]),
+            # ],
+            # 'libraries': {
+            # }
         },
     },
 ]

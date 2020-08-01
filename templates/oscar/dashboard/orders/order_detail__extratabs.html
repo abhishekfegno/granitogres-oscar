@@ -1,0 +1,167 @@
+<div class="tab-pane {% if active_tab == 'howto' %}active{% endif %}" id="howto">
+    <div class="well">
+        <h3> How to manage orders ? Guidelines</h3>
+
+        <div class="form-group">
+            <div class="">
+                <table class="table table-bordered">
+                    <caption> Lets look into order flow.</caption>
+                    <thead>
+                    <tr style="display:none;">
+                        <th></th>
+                        <!--  to avoid js generated checkbox -->
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <th>Possible Statuses.</th>
+                        <th>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Placed</td>
+                        <td>
+                            <ol>
+                                <li>Order Confirmed</li>
+                                <li>Canceled</li>
+                            </ol>
+                        </td>
+                        <td>
+                            This Status shows that user has generated an order.
+                            <code>You have to Confirm the order </code> after prepare your order parcel,
+                            or in emergancy cases you user or admin can cancel out the order here. The whole payment
+                            (other than refunding charges by gateway) against the order will be refunded within a period
+                            decided by gateway.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Order Confirmed</td>
+                        <td>
+                            <ol>
+                                <li>Out For Delivery</li>
+                                <li>Delivered</li>
+                                <li>Canceled</li>
+                            </ol>
+                        </td>
+                        <td>This state defines that, you have confirmed the order and the order will be dispatched
+                            soon from your inventory / store. Admin / Delivery boy (if present) can change this
+                            Status from ordered to mentioned Statuses.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Out For Delivery</td>
+                        <td>
+                            <ol>
+                                <li>Delivered</li>
+                                <li>Canceled</li>
+                            </ol>
+                        </td>
+                        <td>As understandable, this status, means, order is out for delivery.</td>
+                    </tr>
+                    <tr>
+                        <td>Delivered</td>
+                        <td>-</td>
+                        <td>Delivered. Nothing can be done more against the order.
+                            Refunding and Returns are against each item of order.</td>
+                    </tr>
+                    <tr>
+                        <td>Payment Declined</td>
+                        <td>-</td>
+                        <td>Description</td>
+                    </tr>
+                    <tr>
+                        <td>Canceled</td>
+                        <td>-</td>
+                        <td>The order hs been cancelled and Refunded. Nothing can be done more.</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+    <div class="well">
+        <h3> How to manage Order Item Cancellation and Refunding? </h3>
+        <div class="form-group">
+            <div class="">
+                <table class="table table-bordered">
+                    <caption> Lets look into <b>OrderItem</b> flow.</caption>
+                    <thead>
+                    <tr style="display:none;"><th></th><!--  to avoid js generated checkbox --></tr>
+                    <tr>
+                        <th>Status</th>
+                        <th>Possible Statuses.</th>
+                        <th>Description</th>
+                        <th>Procedure</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Placed</td>
+                        <td>
+                            <ol>
+                                <li>Canceled</li>
+                            </ol>
+                        </td>
+                        <td>
+                            Admin / User can manually Cancel the selected Order Items when they are on 'Placed' Status.
+                        </td>
+                        <td>
+                            Select the "Order Contents" tab in "Order Details" Section . Select all the lines you want
+                            to cancel. Select "Change Line Status to" and choose status "Cancel" in
+                            "With selected lines" section. Cancellation of partial quantity is not possible, you can
+                            cancel only the whole Order Items. If you try to change status to an impossible status mode,
+                            system will show an error. This Placed status will continue as long as order getting
+                            "delivered" or "cancelled".
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> Delivered </td>
+                        <td> <ol><li> Return Initiated </li></ol> </td>
+                        <td>
+                            Mark item has delivered. After delivery.
+                        </td>
+                        <td>
+                            Select the items you want to Initiate return form "Order Contents" tab,
+                            Select "change line status: to "Deliverd" in "With selected lines" section.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> Return Initiated </td>
+                        <td> <ol>
+                            <li> Returned </li>
+                            <li> Delivered </li>
+                        </ol> </td>
+                        <td>
+                            Either Admin or User can initiate a Return if user wants a return of an item.<br /><br />
+                            Return can be initialted by Setting the status to "Return Initiated". From here Return
+                            Can be cancelled by setting status to "Delivered". <br /><br />
+                            Or Accept the Return By setting Status to "Returned". Setting to "Return" will
+                            automatically Refunded.
+
+                        </td>
+                        <td>
+                            Select the items you want to Initiate return form "Order Contents" tab,
+                            Select "change line status: to "Return Initiated" in "With selected lines" section.
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Returned</td>
+                        <td>-</td>
+                        <td> The item has been returned and refunded. </td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Canceled</td>
+                        <td>-</td>
+                        <td> The item has been Cancelled. </td>
+                        <td>-</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>

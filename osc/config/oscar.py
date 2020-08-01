@@ -93,9 +93,6 @@ OSCAR_LINE_REFUNDABLE_STATUS = [
 
 OSCAR_ORDER_STATUS_CASCADE = {
     'Placed': 'Placed',
-    'Order Confirmed': 'Order Confirmed',
-    'Out For Delivery': 'Out For Delivery',
-    'Delivered': 'Delivered',
     'Payment Declined': 'Canceled',
     'Canceled': 'Canceled',
 }
