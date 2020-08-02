@@ -40,17 +40,23 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
     def _get_external_payment(self, source, amount, reference, description=None):
         client = self.client
         # EXTERNAL PAYMENT
-        pgr = PaymentGateWayResponse(
-            transaction_id=reference, transaction_type=PaymentGateWayResponse.PURCHASE, amount=amount, source=source, description=description
-        )
+        pgr = PaymentGateWayResponse()
+        pgr.transaction_id = reference
+        pgr.transaction_type = PaymentGateWayResponse.PURCHASE
+        pgr.amount = amount
+        pgr.source = source
+        pgr.description = description
+        pgr.payment_status = False
+        pgr._response = {}
+        # pgr.save()
 
         try:
             # success case
-            response = client.payment.capture(reference, amount)    # noqa
+            response = client.payment.capture(reference, float(amount))    # noqa
             pgr._response = response
-                # LOGGING RESPONSE
+            # LOGGING RESPONSE
             pgr.payment_status = True
-            pgr.parent_transaction = True
+            pgr.parent_transaction = None
             pgr.save()
         except (
                 razorpay.errors.BadRequestError, # noqa
@@ -60,7 +66,7 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
         ) as e:
             # payment Rejected Error
             pgr.payment_status = False
-            pgr._response = {'id': reference, 'entity': 'payment', 'amount': amount, 'currency': source.currrency,
+            pgr._response = {'id': reference, 'entity': 'payment', 'amount': amount, 'currency': source.currency,
                              'status': 'already_captured', 'error': str(e)}
             pgr.save()
             return states.Declined(source.amount_debited, source_id=source.pk)

@@ -13,93 +13,365 @@
 
 
 {% block customer_information %}
-    <table class="table table-bordered table-hover">
-        <caption><i class="icon-group icon-large"></i>{% trans "Customer Information" %}</caption>
-        {% if order.guest_email %}
-        <tr>
-            <th>{% trans "Name" %}</th>
-            <th>{% trans "Email address" %}</th>
-        </tr>
-        <tr>
-            <td>
-                {% trans "Customer checked out as a guest." %}
-            </td>
-            <td>{{ order.email }}</td>
-        </tr>
-        {% elif order.user %}
-        <tr>
-            <th>{% trans "Email address" %}</th>
-        </tr>
-        <tr>
-            <td>{{ order.user.get_full_name|default:"-" }}</td>
-            {% if gst_number %}
-            <th style="color: rgba(3, 1, 143, 0.93)">
-                <span class="badge " style="background-color:rgb(2, 0, 139)"> GST ENABLED </span>
-                <span style="padding-top:2px">{{ gst_number }}</span>
-            </th>
-            {% endif  %}
-            <td>{{ order.user.email|default:"-" }}</td>
-        </tr>
-        {% else %}
-        <tr><td>{% trans "Customer has deleted their account." %}</td></tr>
-        {% endif %}
-    </table>
+<!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+<!--<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>-->
+<!--<script src="https://cdn.jsdelivr.net/npm/promise-polyfill"></script>-->
+
+<table class="table table-bordered table-hover">
+    <caption><i class="icon-group icon-large"></i>{% trans "Customer Information" %}</caption>
+    {% if order.guest_email %}
+    <tr>
+        <th>{% trans "Name" %}</th>
+        <th>{% trans "Email address" %}</th>
+    </tr>
+    <tr>
+        <td>
+            {% trans "Customer checked out as a guest." %}
+        </td>
+        <td>{{ order.email }}</td>
+    </tr>
+    {% elif order.user %}
+    <tr>
+        <th>{% trans "Email address" %}</th>
+    </tr>
+    <tr>
+        <td>{{ order.user.get_full_name|default:"-" }}</td>
+        {% if gst_number %}
+        <th style="color: rgba(3, 1, 143, 0.93)">
+            <span class="badge " style="background-color:rgb(2, 0, 139)"> GST ENABLED </span>
+            <span style="padding-top:2px">{{ gst_number }}</span>
+        </th>
+        {% endif  %}
+        <td>{{ order.user.email|default:"-" }}</td>
+    </tr>
+    {% else %}
+    <tr><td>{% trans "Customer has deleted their account." %}</td></tr>
+    {% endif %}
+</table>
 {% endblock customer_information %}
 
 {% block tab_payment %}
-    <style> #order_lines_form div.well > div {display: block;min-height:40px;} </style>
-    {% if order.billing_address %}
-        <div class="sub-header">
-            <h3 >{% trans "Billing address" %}</h3>
-        </div>
-        <p>
-            {% for field in order.billing_address.active_address_fields %}
-                {{ field }}<br/>
-            {% endfor %}
-        </p>
-    {% endif %}
-    {% if gst_number %}
-        <div class="sub-header">
-            <h3> {{ gst_number }} </h3>
-        </div>
-    {% endif %}
+<style> #order_lines_form div.well > div {display: block;min-height:40px;} </style>
+{% if order.billing_address %}
+<div class="sub-header">
+    <h3 >{% trans "Billing address" %}</h3>
+</div>
+<p>
+    {% for field in order.billing_address.active_address_fields %}
+    {{ field }}<br/>
+    {% endfor %}
+</p>
+{% endif %}
+{% if gst_number %}
+<div class="sub-header">
+    <h3> {{ gst_number }} </h3>
+</div>
+{% endif %}
 
-    {% with sources=order.sources.all %}
-        <div class="table-header">
-            <h3 >{% trans "Payment sources" %}</h3>
-        </div>
-        {% if sources %}
-            <table class="table table-striped table-bordered table-hover">
-            <thead>
-            <tr>
-                <th>{% trans "Source" %}</th>
-                <th>{% trans "Allocation" %}</th>
-                <th>{% trans "Amount debited" %}</th>
-                <th>{% trans "Amount refunded" %}</th>
-                <th>{% trans "Reference" %}</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for source in sources %}
-            <tr>
-                <td>{{ source.source_type }}</td>
-                <td>{{ source.amount_allocated|currency:order.currency }}</td>
-                <td>{{ source.amount_debited|currency:order.currency }}</td>
-                <td>{{ source.amount_refunded|currency:order.currency }}</td>
-                <td>{{ source.reference|default:"-" }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-            <table class="table table-striped table-bordered table-hover">
-                <tr><td>{% trans "No payment sources found for this order." %}</td></tr>
-            </table>
-        {% endif %}
-    {% endwith %}
+{% with sources=order.sources.all %}
+<div class="table-header">
+    <h3 >{% trans "Payment sources" %}</h3>
+</div>
+{% if sources %}
+<table class="table table-striped table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>{% trans "Source" %}</th>
+        <th>{% trans "Allocation" %}</th>
+        <th>{% trans "Amount debited" %}</th>
+        <th>{% trans "Amount refunded" %}</th>
+        <th>{% trans "Reference" %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for source in sources %}
+    <tr>
+        <td>{{ source.source_type }}</td>
+        <td>{{ source.amount_allocated|currency:order.currency }}</td>
+        <td>{{ source.amount_debited|currency:order.currency }}</td>
+        <td>{{ source.amount_refunded|currency:order.currency }}</td>
+        <td>{{ source.reference|default:"-" }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<table class="table table-striped table-bordered table-hover">
+    <tr><td>{% trans "No payment sources found for this order." %}</td></tr>
+</table>
+{% endif %}
+{% endwith %}
 
 {% endblock %}
 
+{% block order_lines %}
+<table class="table table-striped table-bordered table-hover">
+    <thead>
+    <tr>
+        <th></th>
+        <th title="Enter the quantity you want to affect the change with below action" style="cursor:crosshair">
+            <span>Selected QTY?</span> </th>
+        <th>{% trans "Line ID" %}</th>
+        <th>{% trans "Quantity" %}</th>
+        <th>{% trans "Product" %}</th>
+        <th>{% trans "UPC" %}</th>
+        <th>{% trans "Status" %}</th>
+        <th>{% trans "Supplier" %}</th>
+        <th>{% trans "Supplier SKU" %}</th>
+        <th>{% trans "Est. dispatch date" %}</th>
+        <th>{% trans "Price excl tax (before discounts)" %}</th>
+        <th>{% trans "Price inc tax (before discounts)" %}</th>
+        <th>{% trans "Actions" %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for line in lines %}
+    <tr class="line_tr">
+        <td>
+            <input type="checkbox" onchange="reset_amount()" name="selected_line" value="{{ line.id }}" data-unitprice="{{ line.unit_price_incl_tax }}" />
+        </td>
+        <td style="cursor:crosshair"
+            title="Enter the quantity you want to affect the change with below action for '{{ line.product.name|default:'this item.' }}'">
+            <input type="number" onchange="window.reset_amount()" name="selected_line_qty_{{ line.id }}"
+                   class="selected_line_qty_input"
+                   value="{{ line.active_quantity }}"
+                   max="{{ line.active_quantity }}"
+                   size="2"
+                   style="width:60px; text-align:center" />
+        </td>
+        <td><a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line.id %}">#{{ line.id }}</a></td>
+        <td class="text-center"
+            style="cursor:crosshair"
+            title="{{ line.active_quantity }} items out of {{ line.quantity }} remains in the order. {{ line.refunded_quantity }} Returned or Refunded.">
+            <b>{{ line.active_quantity }}</b> <span class="text-muted"> / {{ line.quantity }}</span>
+        </td>
+        <td>
+            {% if line.product %}
+            <a href="{% url 'dashboard:catalogue-product' pk=line.product.id %}">{{ line.title }}</a>
+            {% else %}
+            {{ line.title }}
+            {% endif %}
+        </td>
+        <td>{{ line.upc|default:"-" }}</td>
+        <td>
+            {{ line.status|default:"-" }}
+            {% if line.refunded_quantity >= 0 %}
+            <br />[ {{ line.refunded_quantity }} Items Returned ]
+            {% endif %}
+        </td>
+        <td>
+            {% if line.partner %}
+            <a href="{% url 'dashboard:partner-manage' pk=line.partner.id %}">{{ line.partner_name }}</a>
+            {% else %}
+            {{ line.partner_name }}
+            {% endif %}
+        </td>
+        <td>{{ line.partner_sku }}</td>
+        <td>{{ line.est_dispatch_date|default:"-" }}</td>
+        <td class="text-right">{{ line.line_price_before_discounts_excl_tax|currency:order.currency }}</td>
+        <td class="text-right">{{ line.line_price_before_discounts_incl_tax|currency:order.currency }}</td>
+        <td>
+            <a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line.id %}" class="btn btn-info">{% trans "View" %}</a>
+        </td>
+    </tr>
+    {% endfor %}
+
+    <tr>
+        <td colspan="9"></td>
+        <th>{% trans "Discount" %}</th>
+        <td class="text-right">{{ order.total_discount_excl_tax|currency:order.currency }}</td>
+        <td class="text-right">{{ order.total_discount_incl_tax|currency:order.currency }}</td>
+        <td></td>
+    </tr>
+    {% with discounts=order.basket_discounts %}
+    {% if discounts %}
+    <tr>
+        <td colspan="9"></td>
+        <th>{% trans "Basket total (excl. discounts)" %}</th>
+        <td class="text-right">{{ order.basket_total_before_discounts_excl_tax|currency:order.currency }}</td>
+        <td class="text-right">{{ order.basket_total_before_discounts_incl_tax|currency:order.currency }}</td>
+        <td></td>
+    </tr>
+    {% for discount in discounts %}
+    <tr>
+        <td colspan="9"></td>
+        <td>
+            <span class="label label-success">{% trans "Discount" %}</span>
+            {{ discount.offer_name }}
+        </td>
+        <td class="text-right"></td>
+        <td class="text-right">- {{ discount.amount|currency:order.currency }}</td>
+        <td></td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td colspan="9"></td>
+        <th>{% trans "Basket total (inc. discounts)" %}</th>
+        <th class="text-right">{{ order.basket_total_excl_tax|currency:order.currency }}</th>
+        <th class="text-right">{{ order.basket_total_incl_tax|currency:order.currency }}</th>
+        <td></td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="9"></td>
+        <th>{% trans "Basket total" %}</th>
+        <th class="text-right">{{ order.basket_total_excl_tax|currency:order.currency }}</th>
+        <th class="text-right">{{ order.basket_total_incl_tax|currency:order.currency }}</th>
+        <td></td>
+    </tr>
+    {% endif %}
+    {% endwith %}
+
+    {% if order.has_shipping_discounts %}
+    <tr>
+        <td colspan="9"></td>
+        <td>{% trans "Shipping total (excl. discounts)" %}</td>
+        <td class="text-right">{{ order.shipping_before_discounts_excl_tax|currency:order.currency }}</td>
+        <td class="text-right">{{ order.shipping_before_discounts_incl_tax|currency:order.currency }}</td>
+        <td></td>
+    </tr>
+    {% for discount in order.shipping_discounts %}
+    <tr>
+        <td colspan="9"></td>
+        <td>
+            <span class="label label-success">{% trans "Discount" %}</span>
+            {{ discount.offer_name }}
+        </td>
+        <td></td>
+        <td class="text-right">- {{ discount.amount|currency:order.currency }}</td>
+        <td></td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td colspan="9"></td>
+        <th>{% trans "Shipping total (inc. discounts)" %}</th>
+        <th class="text-right">{{ order.shipping_excl_tax|currency:order.currency }}</th>
+        <th class="text-right">{{ order.shipping_incl_tax|currency:order.currency }}</th>
+        <td></td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="9"></td>
+        <th>{% trans "Shipping total" %}</th>
+        <th class="text-right">{{ order.shipping_excl_tax|currency:order.currency }}</th>
+        <th class="text-right">{{ order.shipping_incl_tax|currency:order.currency }}</th>
+        <td></td>
+    </tr>
+    {% endif %}
+
+    <tr>
+        <td colspan="9"></td>
+        <th>{% trans "Order total" %}</th>
+        <th class="text-right">{{ order.total_excl_tax|currency:order.currency }}</th>
+        <th class="text-right">{{ order.total_incl_tax|currency:order.currency }}</th>
+        <td></td>
+    </tr>
+    </tbody>
+</table>
+{% endblock order_lines %}
+
+{% block line_actions %}
+<div class="well">
+    <h3>{% trans "With selected lines" %}:</h3>
+
+    <div class="form-group">
+        <div class="">
+            <label class="radio-inline">
+                <input type="radio" name="line_action" value="change_line_statuses"
+                onclick="window.display_select_qty_box(false)"
+                /> {% trans "Change line status to" %}
+            </label>
+            <label class="radio-inline">
+                <select name="new_status">
+                    <option value=""> -- {% trans "choose new status" %} -- </option>
+                    {% for status in line_statuses %}
+                    <option>{{ status }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+    </div>
+    <hr />
+    <div class="form-group">
+        <div class="">
+            <label class="radio-inline">
+                <input type="radio" name="line_action" value="create_shipping_event"
+                       onclick="window.display_select_qty_box(true)" /> {% trans "Create shipping event" %}
+            </label>
+            <label class="radio-inline">
+                <select name="shipping_event_type">
+                    <option value=""> -- {% trans "choose event type" %} -- </option>
+                    {% for event_type in shipping_event_types %}
+                    <option value="{{ event_type.code }}">{{ event_type.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="radio-inline">
+                {% trans "with reference" %} <input type="text" name="reference" value="" />
+            </label>
+        </div>
+    </div>
+    <hr />
+    <div class="form-group">
+        <div class="">
+            <label class="radio-inline">
+                <input type="radio" name="line_action" value="create_payment_event"
+                onclick="display_select_qty_box(true)" /> {% trans "Create payment event" %}
+            </label>
+            <label class="radio-inline">
+                <select name="payment_event_type">
+                    <option value=""> -- {% trans "choose event type" %} -- </option>
+                    {% for event_type in payment_event_types %}
+                    <option value="{{ event_type.code }}">{{ event_type.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="radio-inline">
+                {% trans "with amount" %} <input type="text" name="amount" value="" disabled />
+                <br />
+            </label>
+            <label class="radio-inline">
+            <span class="text-muted">
+                    You can create a custom amount or calculate price using button.
+                    You can Pay back amount against any order lines. These order lines will not get cancelled.
+                    Just the amount will be refunded. You could not revert it back.
+            </span>
+            <br />
+            <input type="button" onclick="reset_amount()" value="Auto Calculate price from Selected Quantity">
+            </label>
+        </div>
+    </div>
+    <hr />
+    <input type="submit" value="{% trans 'Go!' %}" class="btn btn-primary" />
+    <script>
+        (function(){
+            window.reset_amount = function(){
+                var nodes = document.querySelectorAll('.line_tr');
+                var amount = 0;
+                for( var i = 0; i < nodes.length; i++ ){
+                    if(nodes[i] && nodes[i].querySelector('input[name="selected_line"]').checked)
+                        amount = amount + (
+                            Number(nodes[i].querySelector('input[name="selected_line"]').getAttribute('data-unitprice')) * Number(nodes[i].querySelector('input.selected_line_qty_input').value)
+                        )
+                }
+                document.querySelector('input[name="amount"]').value = amount;
+            }
+            window.display_select_qty_box = function (show) {
+                var nodes = document.querySelectorAll('.selected_line_qty_input')
+                for( var i = 0; i < nodes.length; i++ ){
+                    nodes[i].style.visibility =  ( show ) ? 'visible' : 'hidden';
+                }
+            }
+        })()
+    </script>
+</div>
+{% endblock line_actions %}
+
+
 {% block extra_tabs %}
-    {% include 'oscar/dashboard/orders/order_detail__extratabs.html' %}
+{% include 'oscar/dashboard/orders/order_detail__extratabs.html' %}
 {% endblock extra_tabs %}
+
+
+
+

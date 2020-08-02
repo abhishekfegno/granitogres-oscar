@@ -1,6 +1,8 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.db import models, transaction
-from oscar.apps.order.models import Order, PaymentEvent, PaymentEventQuantity, LinePrice, Line
+from apps.order.models import Order, PaymentEvent, PaymentEventQuantity, LinePrice, Line
 from oscar.apps.payment.models import Transaction, SourceType, Source
 
 
@@ -14,7 +16,7 @@ class PaymentRefundMixin(object):
         order = source.order
         if not kwargs.get('amount_verified', False):        # handled internally
             amount = self.get_max_refundable_amount(source, amount_to_refund=amount)    # confirm for any external call
-
+        amount = Decimal(str(amount))
         # create actual payment
         response = self.create_actual_payment_with_gateway(
             source=source, amount=amount
@@ -29,6 +31,7 @@ class PaymentRefundMixin(object):
         event = self.make_refund_event(  # noqa
             order=order, amount=amount, reference=response['id']
         )
+        return  event
 
     def refund_order(self, order: Order, source: Source, **kwargs):
         """
@@ -37,13 +40,13 @@ class PaymentRefundMixin(object):
         """
         order = source.order
         refundable_amount = self.get_max_refundable_amount(source, amount_to_refund=None)
-        self.__refund_amount_method(
+        event = self.__refund_amount_method(
             source=source,
             amount=float(refundable_amount),
             amount_verified=True,
         )
         for line in order.lines.all().exclude(status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS):
-            self.make_event_quantity(event, line, line.quantity)  # noqa
+            self.make_event_quantity(event, line, line.quantity)
         return True
 
     def refund_order_line(self, line, source, quantity_to_refund: int, **kwargs):
@@ -54,13 +57,13 @@ class PaymentRefundMixin(object):
         refundable_amount = self._qty_to_price(line, quantity_to_refund)
 
         refundable_amount = self.get_max_refundable_amount(source, refundable_amount)  # Net Amount
-        self.__refund_amount_method(
+        event = self.__refund_amount_method(
             source=source,
             amount=float(refundable_amount),
             amount_verified=True,
         )
         # Creating Transaction For Payment
-        self.make_event_quantity(event, line, line.quantity)  # noqa  # Creating PaymentEventQuantity For Order
+        self.make_event_quantity(event, line, line.quantity)    # Creating PaymentEventQuantity For Order
         return True
 
     def refund_admin_defined_payment(self, order, event_type, amount,
@@ -71,17 +74,19 @@ class PaymentRefundMixin(object):
         """
         refundable_amount = 0
         for line, qty in zip(lines, line_quantities):
-            refundable_amount += line.line_price_incl_tax * qty / line.unit_price_incl_tax
+            if line.active_quantity:
+                refundable_amount += line.unit_price_incl_tax * min(qty, line.active_quantity)
 
         refundable_amount = self.get_max_refundable_amount(source, refundable_amount)  # Net Amount
-        self.__refund_amount_method(
+        event = self.__refund_amount_method(
             source=source,
             amount=float(refundable_amount),
             amount_verified=True,
         )
+
         # # Creating Transaction For Payment
         # self.make_event_quantity(event, line, line.quantity)  #noqa  # Creating PaymentEventQuantity For Order
-        # return event
+        return event
 
     def get_max_refundable_amount(self, source: Source, amount_to_refund=None):
         """ Over ride this method, which is more proper from payment gateway. """
@@ -93,10 +98,12 @@ class PaymentRefundMixin(object):
         return amount_to_refund
 
     def create_actual_payment_with_gateway(self, source: Source, amount: float):
-        """ Override this module to trigger actual payment """
+        """
+            Override this module to trigger actual payment
+            This method completely dedicated for refund procedure.
+        """
         reference = source.reference
-        raise Exception("You have to override  'create_actual_payment_with_gateway' to act real world payment.")
-
+        raise Exception("You have to override  'create_actual_payment_with_gateway' to act real world payment for refund.")
 
     def _qty_to_price(self, line: Line, quantity_to_refund: int, **kwargs):
         """

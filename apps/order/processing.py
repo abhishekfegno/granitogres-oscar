@@ -1,6 +1,11 @@
 from oscar.apps.order import processing
+from oscar.core.loading import get_model
+
 from .models import Order, PaymentEventType
 from ..payment.refunds import RefundFacade
+from ..payment.utils.cash_payment import Cash
+
+Transaction = get_model('payment', 'Transaction')
 
 
 class EventHandler(processing.EventHandler):
@@ -17,10 +22,16 @@ class EventHandler(processing.EventHandler):
         """
         self.validate_payment_event(
             order, event_type, amount, lines, line_quantities, **kwargs)
-        if event_type.name == 'Refund':
+
+        if event_type.name == Transaction.DEBIT:
+            Cash().record_payment(request=None, order=order, method_key='cash', amount=amount, reference='',
+                                  lines=lines, line_quantities=line_quantities, **kwargs)
+
+        if event_type.name == Transaction.REFUND:
             RefundFacade().refund_admin_defined_payment(
-                order, event_type, amount, lines=None, line_quantities=None, **kwargs
+                order, event_type, amount, lines=lines, line_quantities=line_quantities, **kwargs
             )
+
         return self.create_payment_event(
             order, event_type, amount, lines, line_quantities, **kwargs)
 

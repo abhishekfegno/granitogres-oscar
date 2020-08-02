@@ -9,6 +9,11 @@ from apps.utils import image_not_found
 
 
 class empty:
+
+    def __init__(self, **kwargs):
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
+
     def build_absolute_uri(self, path):
         return path
 

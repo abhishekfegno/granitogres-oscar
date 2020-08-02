@@ -19,7 +19,7 @@ class PaymentGateWayResponse(models.Model):
     amount = models.FloatField()
     _response = HStoreField()
     payment_status = models.BooleanField()
-    payee = models.ForeignKey(settings.AUTH_USER_MODEL,  on_delete=models.PROTECT)
+    # payee = models.ForeignKey(settings.AUTH_USER_MODEL,  on_delete=models.PROTECT)
     description = models.TextField(null=True, blank=True)
     parent_transaction = models.ForeignKey('self', on_delete=models.PROTECT, null=True, blank=True)
 
@@ -27,14 +27,43 @@ class PaymentGateWayResponse(models.Model):
         return self.transaction_id
 
 
+    # Concept of payee is depricated and will be removed soon.
+    _payee = None
+
+    def get_payee(self):
+        return self._payee
+
+    def set_payee(self, value):
+        self._payee = value
+
+    payee = property(get_payee, set_payee)
+
+class COD(models.Model):
+
+    order = models.OneToOneField('order.Order', on_delete=models.PROTECT, related_name='cod')
+    amount = models.FloatField()
+    created_on = models.DateTimeField()
+    cod_accepted = models.BooleanField(default=False)
+    cod_transferred = models.BooleanField(default=False)
+    amount_received_on = models.DateTimeField(null=True, blank=True)
+
+    def amount_to_receive(self):
+        if not self.amount_received_on:
+            return float(self.amount) - float(self.cod_refunds.aggregate(net_amt=models.Sum('amount'))['net_amt'] or 0)
 
 
-# class CODRecords(models.Model):
-#     order = models.ForeignKey('payment.Order', on_delete=models.PROTECT)
-#     order_assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-#     created_on = models.DateTimeField()
-#
-#
-#
-#
-#
+class CODRepayments(models.Model):
+    cod = models.ForeignKey(COD, on_delete=models.PROTECT, related_name='cod_refunds')
+    amount = models.DecimalField(max_digits=16, decimal_places=2 )
+    amount_received_on = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def cod_response(self):
+        return {
+            'id': 'COD-0000-' + str(self.id),
+            'amount': self.amount,
+            'type': 'cod',
+            'collection_state': self.cod.cod_accepted,
+            'collection_transfer_state': self.cod.cod_transferred,
+            'transaction_date': self.amount_received_on,
+        }
