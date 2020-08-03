@@ -21,51 +21,89 @@ class RefundFacade(object):
             self.payment_methods.append(PaymentMethod())
 
     def get_sources_model_from_order(self, order):
-        return Source.objects.filter(order=order).prefetch_related('source_type', 'order', 'order__lines')
+        return Source.objects.filter(order=order).prefetch_related('source_type', 'order', 'order__lines').reverse()
+
+    def get_source_n_method(self, order):
+        for source in self.get_sources_model_from_order(order):
+            # there should be only one per order. and we have
+            # single transactions only.
+            for payment_method in self.payment_methods:
+                if payment_method.name == source.source_type.name:
+                    return source, payment_method
+        return None, None
 
     def refund_order(self, order, **kwargs):
-        if order.status in settings.OSCAR_ORDER_REFUNDABLE_STATUS:
-            return
+        """
+        Caller Functions:
+            1. EventHandler.handle_order_status_change()
 
-        for source in self.get_sources_model_from_order(order):
-            for payment_method in self.payment_methods:
-                if payment_method.name == source.source_type.name:
-                    payment_method.refund_order(order=order, source=source)
+        Procedure.
+            ✔ 1. Order Status has already been updated. So leave it.
+            ✔ 2. Get the succeeded Order State.
+            ✔ 3. Create a Transaction Record
+            ✔ 4. Create a PaymentEvent
+
+        """
+
+        if order.status in settings.OSCAR_ORDER_REFUNDABLE_STATUS:
+            """
+            Handle this error before calling 'refund_order'
+            """
+            raise Exception(
+                f"Could not Refund Order #{order.number} With Status '{order.status}'!"
+            )
+        source, payment_method = self.get_source_n_method(order)        # case 2 handled
+        # Generate Payment_event
+
+        return payment_method.refund_order(order=order, source=source)         # Case 3 & 4 handled
+        # we are breaking the loop so as to get the first source
 
     def refund_order_line(self, line, **kwargs):
-        if line.status in settings.OSCAR_LINE_REFUNDABLE_STATUS or line.active_quantity == 0:
+        if line.status in settings.OSCAR_LINE_REFUNDABLE_STATUS:        # or line.active_quantity == 0:
             return
         order = line.order
-        for source in self.get_sources_model_from_order(order):
-            for payment_method in self.payment_methods:
-                if payment_method.name == source.source_type.name:
-                    payment_method.refund_order_line(line=line, source=source,
-                                                     quantity_to_refund=kwargs.get('quantity', line.active_quantity))
+        source, payment_method = self.get_source_n_method(order)
+        return payment_method.refund_order_line(line=line, source=source,
+                                                quantity_to_refund=line.quantity)
 
-    def refund_admin_defined_payment(self, order, event_type, amount, lines=None,
-                                     line_quantities=None, **kwargs):
-        _line, _qty = [], []
+    def refund_order_partially(self, order, lines=None, line_quantities=None, **kwargs):
+        """
+        refund_admin_defined_payment
+        """
+        if lines is None:
+            lines = [l for l in order.lines.all()]  # make it python object.
+
+        if line_quantities is None:
+            line_quantities = [line.quantity for line in lines]
+        amount = sum([line.line_price_incl_tax for line in lines])
+
+        _lines, _qty = [], []
         for line, qty in zip(lines, line_quantities):
-            if line.status not in settings.OSCAR_LINE_REFUNDABLE_STATUS or line.refunded_quantity < line.quantity:
-                _line.append(line)
+            if line.status not in settings.OSCAR_LINE_REFUNDABLE_STATUS:
+                _lines.append(line)
                 _qty.append(qty)
-            else:
-                line.refunded_quantity = line.quantity
-                line.save()
-        lines = _line
+
+            # if line.status not in settings.OSCAR_LINE_REFUNDABLE_STATUS or line.refunded_quantity < line.quantity:
+            #     _line.append(line)
+            #     _qty.append(qty)
+            # else:
+            #     line.refunded_quantity = line.quantity
+            #     line.save()
+
+        if not _lines:
+            return None
+
+        lines = _lines
         line_quantities = _qty
+        source, payment_method = self.get_source_n_method(order)
 
-        if not lines:
-            return
+        return payment_method.refund_order_partially(source=source, order=order, lines=lines, amount=amount,
+                                                     line_quantities=line_quantities, **kwargs)
 
-        for source in self.get_sources_model_from_order(order):
-            for payment_method in self.payment_methods:
-                if payment_method.name == source.source_type.name:
-                    payment_method.refund_admin_defined_payment(order, event_type, amount, lines=lines,
-                                                                line_quantities=line_quantities, source=source,
-                                                                **kwargs)
-                    break
-        for line, qty in zip(lines, line_quantities):
-            line.refunded_quantity += qty
-            line.save()
+
+
+
+
+
+
 

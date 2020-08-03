@@ -1,5 +1,6 @@
 from oscar.apps.partner.availability import Unavailable
 from oscar.core.loading import get_model, get_class
+from oscar.core.utils import get_default_currency
 from oscarapi.utils.loading import get_api_classes
 from rest_framework import serializers
 
@@ -63,9 +64,13 @@ class WncLineSerializer(BasketLineSerializer):
 
 class WncBasketSerializer(BasketSerializer):
     lines = serializers.SerializerMethodField()
+    currency = serializers.SerializerMethodField()
 
     def get_lines(self, instance):
         return WncLineSerializer(instance.lines.all(), context=self.context, many=True).data
+
+    def get_currency(self, instance):
+        return instance.currency or get_default_currency()
 
     class Meta:
         model = Basket

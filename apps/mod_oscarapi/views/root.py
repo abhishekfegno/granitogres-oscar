@@ -48,8 +48,8 @@ def PUBLIC_APIS(r, f):
             ("API Checkout", reverse("api-checkout", request=r, format=f)),
         ])),
         # ("Buy Now", collections.OrderedDict([
-        #     ("Get Basket ", reverse("django_oscar_buy_now_api:get-basket", request=r, format=f)),
-        #     ("Checkout ", reverse("django_oscar_buy_now_api:checkout", request=r, format=f, kwargs={'basket': 165})),
+        #     ("Get Basket ", reverse("buynow:get-basket", request=r, format=f)),
+        #     ("Checkout ", reverse("buynow:checkout", request=r, format=f, kwargs={'basket': 165})),
         # ])),
         ("Wish List", collections.OrderedDict([
             ("My Wish List", reverse("wnc-wish-list", request=r, format=f)),

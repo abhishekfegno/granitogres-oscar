@@ -1,7 +1,12 @@
+from typing import Any
+
+from django.conf import settings
+from django.db import models, transaction
 from oscar.apps.order import processing
 from oscar.core.loading import get_model
 
 from .models import Order, PaymentEventType
+from ..payment import refunds
 from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
 
@@ -9,6 +14,40 @@ Transaction = get_model('payment', 'Transaction')
 
 
 class EventHandler(processing.EventHandler):
+
+    @transaction.atomic
+    def handle_order_status_change(self, order: Order, new_status: str, note_msg=None):
+        """
+        Handle Order Status Change in Oscar.
+        """
+
+        """
+        Change Order Status
+        """
+        order.set_status(new_status)
+
+        """ 
+        Handle Refund and Update of Refund Quantity on `new_status` == 'Return'. 
+        Refund Can be proceeded only after changing Order Status.
+        """
+
+        if new_status in settings.OSCAR_ORDER_REFUNDABLE_STATUS:
+            refunds.RefundFacade().refund_order(order=order)
+            order.lines.update(refunded_quantity=models.F('quantity'))
+
+        if new_status in (settings.ORDER_STATUS_DELIVERED, ):
+            """
+            Update Order Lines Status  as Delivered along with Order Getting Delivered.
+            """
+            order.lines.exclude(
+                status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS
+            ).update(status=new_status)
+
+        if note_msg:
+            """
+            Add note if there is a note msg.
+            """
+            self.create_note(order, note_msg)
 
     def handle_payment_event(self, order, event_type: PaymentEventType, amount, lines=None,
                              line_quantities=None, **kwargs):
@@ -27,10 +66,10 @@ class EventHandler(processing.EventHandler):
             Cash().record_payment(request=None, order=order, method_key='cash', amount=amount, reference='',
                                   lines=lines, line_quantities=line_quantities, **kwargs)
 
-        if event_type.name == Transaction.REFUND:
-            RefundFacade().refund_admin_defined_payment(
-                order, event_type, amount, lines=lines, line_quantities=line_quantities, **kwargs
-            )
+        # if event_type.name == Transaction.REFUND:
+        #     RefundFacade().refund_admin_defined_payment(
+        #         order, event_type, amount, lines=lines, line_quantities=line_quantities, **kwargs
+        #     )
 
         return self.create_payment_event(
             order, event_type, amount, lines, line_quantities, **kwargs)

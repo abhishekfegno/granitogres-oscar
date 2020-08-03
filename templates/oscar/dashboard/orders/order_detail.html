@@ -109,12 +109,11 @@
     <thead>
     <tr>
         <th></th>
-        <th title="Enter the quantity you want to affect the change with below action" style="cursor:crosshair">
-            <span>Selected QTY?</span> </th>
+<!--        <th title="Enter the quantity you want to affect the change with below action" style="cursor:crosshair">
+        <span>Selected QTY?</span> </th>-->
         <th>{% trans "Line ID" %}</th>
         <th>{% trans "Quantity" %}</th>
         <th>{% trans "Product" %}</th>
-        <th>{% trans "UPC" %}</th>
         <th>{% trans "Status" %}</th>
         <th>{% trans "Supplier" %}</th>
         <th>{% trans "Supplier SKU" %}</th>
@@ -129,21 +128,23 @@
     <tr class="line_tr">
         <td>
             <input type="checkbox" onchange="reset_amount()" name="selected_line" value="{{ line.id }}" data-unitprice="{{ line.unit_price_incl_tax }}" />
-        </td>
-        <td style="cursor:crosshair"
-            title="Enter the quantity you want to affect the change with below action for '{{ line.product.name|default:'this item.' }}'">
-            <input type="number" onchange="window.reset_amount()" name="selected_line_qty_{{ line.id }}"
+            <input type="number" style="display:none" onchange="window.reset_amount()" name="selected_line_qty_{{ line.id }}"
                    class="selected_line_qty_input"
                    value="{{ line.active_quantity }}"
-                   max="{{ line.active_quantity }}"
-                   size="2"
-                   style="width:60px; text-align:center" />
+                   max="{{ line.active_quantity }}"/>
         </td>
+<!--        <td style="cursor:crosshair"
+            title="Enter the quantity you want to affect the change with below action for '{{ line.product.name|default:'this item.' }}'">
+            <input type="number" style="display:none" onchange="window.reset_amount()" name="selected_line_qty_{{ line.id }}"
+                   class="selected_line_qty_input"
+                   value="{{ line.active_quantity }}"
+                   max="{{ line.active_quantity }}"/>
+        </td>-->
         <td><a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line.id %}">#{{ line.id }}</a></td>
         <td class="text-center"
             style="cursor:crosshair"
             title="{{ line.active_quantity }} items out of {{ line.quantity }} remains in the order. {{ line.refunded_quantity }} Returned or Refunded.">
-            <b>{{ line.active_quantity }}</b> <span class="text-muted"> / {{ line.quantity }}</span>
+            <b>{{ line.quantity }}</b>
         </td>
         <td>
             {% if line.product %}
@@ -152,18 +153,14 @@
             {{ line.title }}
             {% endif %}
         </td>
-        <td>{{ line.upc|default:"-" }}</td>
         <td>
             {{ line.status|default:"-" }}
-            {% if line.refunded_quantity >= 0 %}
-            <br />[ {{ line.refunded_quantity }} Items Returned ]
-            {% endif %}
         </td>
         <td>
             {% if line.partner %}
-            <a href="{% url 'dashboard:partner-manage' pk=line.partner.id %}">{{ line.partner_name }}</a>
+                <a href="{% url 'dashboard:partner-manage' pk=line.partner.id %}">{{ line.partner_name }}</a>
             {% else %}
-            {{ line.partner_name }}
+                {{ line.partner_name }}
             {% endif %}
         </td>
         <td>{{ line.partner_sku }}</td>
@@ -177,7 +174,7 @@
     {% endfor %}
 
     <tr>
-        <td colspan="9"></td>
+        <td colspan="7"></td>
         <th>{% trans "Discount" %}</th>
         <td class="text-right">{{ order.total_discount_excl_tax|currency:order.currency }}</td>
         <td class="text-right">{{ order.total_discount_incl_tax|currency:order.currency }}</td>
@@ -186,7 +183,7 @@
     {% with discounts=order.basket_discounts %}
     {% if discounts %}
     <tr>
-        <td colspan="9"></td>
+        <td colspan="7"></td>
         <th>{% trans "Basket total (excl. discounts)" %}</th>
         <td class="text-right">{{ order.basket_total_before_discounts_excl_tax|currency:order.currency }}</td>
         <td class="text-right">{{ order.basket_total_before_discounts_incl_tax|currency:order.currency }}</td>
@@ -194,7 +191,7 @@
     </tr>
     {% for discount in discounts %}
     <tr>
-        <td colspan="9"></td>
+        <td colspan="7"></td>
         <td>
             <span class="label label-success">{% trans "Discount" %}</span>
             {{ discount.offer_name }}
@@ -205,7 +202,7 @@
     </tr>
     {% endfor %}
     <tr>
-        <td colspan="9"></td>
+        <td colspan="7"></td>
         <th>{% trans "Basket total (inc. discounts)" %}</th>
         <th class="text-right">{{ order.basket_total_excl_tax|currency:order.currency }}</th>
         <th class="text-right">{{ order.basket_total_incl_tax|currency:order.currency }}</th>
@@ -213,7 +210,7 @@
     </tr>
     {% else %}
     <tr>
-        <td colspan="9"></td>
+        <td colspan="7"></td>
         <th>{% trans "Basket total" %}</th>
         <th class="text-right">{{ order.basket_total_excl_tax|currency:order.currency }}</th>
         <th class="text-right">{{ order.basket_total_incl_tax|currency:order.currency }}</th>
@@ -224,7 +221,7 @@
 
     {% if order.has_shipping_discounts %}
     <tr>
-        <td colspan="9"></td>
+        <td colspan="7"></td>
         <td>{% trans "Shipping total (excl. discounts)" %}</td>
         <td class="text-right">{{ order.shipping_before_discounts_excl_tax|currency:order.currency }}</td>
         <td class="text-right">{{ order.shipping_before_discounts_incl_tax|currency:order.currency }}</td>
@@ -232,7 +229,7 @@
     </tr>
     {% for discount in order.shipping_discounts %}
     <tr>
-        <td colspan="9"></td>
+        <td colspan="7"></td>
         <td>
             <span class="label label-success">{% trans "Discount" %}</span>
             {{ discount.offer_name }}
@@ -243,7 +240,7 @@
     </tr>
     {% endfor %}
     <tr>
-        <td colspan="9"></td>
+        <td colspan="7"></td>
         <th>{% trans "Shipping total (inc. discounts)" %}</th>
         <th class="text-right">{{ order.shipping_excl_tax|currency:order.currency }}</th>
         <th class="text-right">{{ order.shipping_incl_tax|currency:order.currency }}</th>
@@ -251,7 +248,7 @@
     </tr>
     {% else %}
     <tr>
-        <td colspan="9"></td>
+        <td colspan="7"></td>
         <th>{% trans "Shipping total" %}</th>
         <th class="text-right">{{ order.shipping_excl_tax|currency:order.currency }}</th>
         <th class="text-right">{{ order.shipping_incl_tax|currency:order.currency }}</th>
@@ -260,7 +257,7 @@
     {% endif %}
 
     <tr>
-        <td colspan="9"></td>
+        <td colspan="7"></td>
         <th>{% trans "Order total" %}</th>
         <th class="text-right">{{ order.total_excl_tax|currency:order.currency }}</th>
         <th class="text-right">{{ order.total_incl_tax|currency:order.currency }}</th>
@@ -272,26 +269,52 @@
 
 {% block line_actions %}
 <div class="well">
-    <h3>{% trans "With selected lines" %}:</h3>
 
+    <h3>{% trans "With selected lines" %}:</h3>
+    {% if order.status in settings.OSCAR_ADMIN_LINE_CANCELLABLE_ORDER_STATUSES %}
     <div class="form-group">
         <div class="">
             <label class="radio-inline">
-                <input type="radio" name="line_action" value="change_line_statuses"
+                <input type="radio" name="line_action" value="change_line_statuses" checked="checked"
                 onclick="window.display_select_qty_box(false)"
                 /> {% trans "Change line status to" %}
             </label>
             <label class="radio-inline">
                 <select name="new_status">
-                    <option value=""> -- {% trans "choose new status" %} -- </option>
-                    {% for status in line_statuses %}
-                    <option>{{ status }}</option>
+                        <option value=""> -- {% trans "choose new status" %} -- </option>
+                    {% for status, text in settings.OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_AFTER_DELIVERY %}
+                        <option value="{{ status }}">{{ text }}</option>
                     {% endfor %}
                 </select>
             </label>
         </div>
     </div>
     <hr />
+    <input type="submit" value="{% trans 'Go!' %}" class="btn btn-primary" />
+    {% elif order.status in settings.OSCAR_ADMIN_LINE_REFUNDABLE_ORDER_STATUSES %}
+    <div class="form-group">
+        <div class="">
+            <label class="radio-inline">
+                <input type="radio" name="line_action" value="change_line_statuses" checked="checked"
+                onclick="window.display_select_qty_box(false)"
+                /> {% trans "Change line status to" %}
+            </label>
+            <label class="radio-inline">
+                <select name="new_status">
+                    <option value=""> -- {% trans "choose new status" %} -- </option>
+                    {% for status, text in settings.OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_AFTER_DELIVERY %}
+                        <option value="{{ status }}">{{ text }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+    </div>
+    <hr />
+    <input type="submit" value="{% trans 'Go!' %}" class="btn btn-primary" />
+    {% else  %}
+        <p>Currently no actions are available now at this order status: '{{ order.status }}'. </p>
+    {% endif %}
+    {% comment %}
     <div class="form-group">
         <div class="">
             <label class="radio-inline">
@@ -342,7 +365,8 @@
         </div>
     </div>
     <hr />
-    <input type="submit" value="{% trans 'Go!' %}" class="btn btn-primary" />
+    {% endcomment %}
+
     <script>
         (function(){
             window.reset_amount = function(){

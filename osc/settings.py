@@ -24,7 +24,6 @@ ALLOWED_HOSTS = ['*']
 DEBUG = True
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,7 +41,8 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.api_set.apps.ApiSetConfig',
     'apps.mod_oscarapi.apps.ModOscarapiConfig',
-    'django_oscar_buy_now_api.apps.BuyNowConfig',
+    'apps.logistics.apps.LogisticsConfig',
+    'apps.buynow.apps.BuyNowConfig',
 
     'oscar',
     'apps.basket.apps.BasketConfig',
@@ -58,6 +58,9 @@ INSTALLED_APPS = [
     'apps.search.apps.SearchConfig',
     'apps.order.apps.OrderConfig',
 
+    # 'apps.dashboard.orders',
+    'apps.dashboard.orders.apps.OrdersDashboardConfig',
+
     'oscar.apps.analytics.apps.AnalyticsConfig',
     'oscar.apps.address.apps.AddressConfig',
     'oscar.apps.shipping.apps.ShippingConfig',
@@ -66,9 +69,10 @@ INSTALLED_APPS = [
     'oscar.apps.wishlists.apps.WishlistsConfig',
     'oscar.apps.catalogue.reviews.apps.CatalogueReviewsConfig',
 
+
     'oscar.apps.dashboard.apps.DashboardConfig',
     'oscar.apps.dashboard.reports.apps.ReportsDashboardConfig',
-    'oscar.apps.dashboard.orders.apps.OrdersDashboardConfig',
+    # 'oscar.apps.dashboard.orders.apps.OrdersDashboardConfig',
     'oscar.apps.dashboard.offers.apps.OffersDashboardConfig',
     'oscar.apps.dashboard.partners.apps.PartnersDashboardConfig',
     'oscar.apps.dashboard.pages.apps.PagesDashboardConfig',
@@ -96,6 +100,7 @@ INSTALLED_APPS = [
 
     # third PArty
     'floppyforms',
+    # 'cashondelivery',
 
     # 3rd-party apps that oscar depends on
     'widget_tweaks',
@@ -110,6 +115,7 @@ INSTALLED_APPS = [
     'push_notifications',
 
 ]
+
 
 
 MIDDLEWARE = [

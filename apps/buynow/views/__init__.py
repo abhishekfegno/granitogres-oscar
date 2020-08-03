@@ -7,10 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from apps.api_set.serializers.basket import WncBasketSerializer as BasketSerializer
 from apps.api_set.serializers.orders import OrderDetailSerializer
-from django_oscar_buy_now_api.basket_manager import generate_buy_now_basket
+from apps.buynow.basket_manager import generate_buy_now_basket
 from ..serializers import CheckoutSerializer
 from oscarapicheckout.signals import order_placed
-from oscarapicheckout.states import DECLINED, CONSUMED
 from oscarapicheckout import utils
 
 

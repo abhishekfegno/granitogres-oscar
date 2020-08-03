@@ -25,13 +25,13 @@ class PaymentRefundMixin(object):
             "You have to return the response from gateway as dict with transaction_id as 'id'"
 
         # mark payment sources that we have refunded the money.
-        source.refund(amount, source.reference)
+        source.refund(amount, response['id'])
 
         # create order transaction event object that we have refunded the money.
         event = self.make_refund_event(  # noqa
             order=order, amount=amount, reference=response['id']
         )
-        return  event
+        return event
 
     def refund_order(self, order: Order, source: Source, **kwargs):
         """
@@ -45,8 +45,10 @@ class PaymentRefundMixin(object):
             amount=float(refundable_amount),
             amount_verified=True,
         )
+
         for line in order.lines.all().exclude(status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS):
             self.make_event_quantity(event, line, line.quantity)
+
         return True
 
     def refund_order_line(self, line, source, quantity_to_refund: int, **kwargs):
@@ -66,26 +68,29 @@ class PaymentRefundMixin(object):
         self.make_event_quantity(event, line, line.quantity)    # Creating PaymentEventQuantity For Order
         return True
 
-    def refund_admin_defined_payment(self, order, event_type, amount,
-                                     lines, line_quantities, source, **kwargs):
+    def refund_admin_defined_payment(self, **kwargs):
+        return self.refund_order_partially(**kwargs)
+
+    def refund_order_partially(self, source, lines, line_quantities, **kwargs):
         """
             Refund the whole amount for a product line.
             call from RefundFacade.refund_order_line
         """
         refundable_amount = 0
         for line, qty in zip(lines, line_quantities):
-            if line.active_quantity:
-                refundable_amount += line.unit_price_incl_tax * min(qty, line.active_quantity)
+            refundable_amount += line.unit_price_incl_tax * min(qty, line.quantity)
 
         refundable_amount = self.get_max_refundable_amount(source, refundable_amount)  # Net Amount
+
         event = self.__refund_amount_method(
             source=source,
             amount=float(refundable_amount),
             amount_verified=True,
         )
 
-        # # Creating Transaction For Payment
-        # self.make_event_quantity(event, line, line.quantity)  #noqa  # Creating PaymentEventQuantity For Order
+        # Creating Transaction For Payment
+        for line, qty in zip(lines, line_quantities):
+            self.make_event_quantity(event, line, min(qty, line.quantity))  #noqa  # Creating PaymentEventQuantity For Order
         return event
 
     def get_max_refundable_amount(self, source: Source, amount_to_refund=None):

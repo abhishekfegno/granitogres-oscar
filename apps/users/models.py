@@ -23,6 +23,7 @@ class User(AbstractUser):
     username_validator = UnicodeMobileNumberValidator()
     REQUIRED_FIELDS = ['email']
 
+    is_delivery_boy = models.BooleanField(default=False)
     username = models.CharField(
         'mobile',
         max_length=10,

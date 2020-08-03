@@ -34,7 +34,7 @@ OSCAR_MODERATE_REVIEWS = False
 
 OSCAR_EAGER_ALERTS = True
 OSCAR_SEND_REGISTRATION_EMAIL = True
-OSCAR_FROM_EMAIL = 'no-reply@woodncart.com'
+OSCAR_FROM_EMAIL = 'no-reply@grocery.com'
 OSCAR_OFFERS_INCL_TAX = False
 
 OSCAR_MISSING_IMAGE_URL = 'image_not_found.jpg'
@@ -58,38 +58,36 @@ OSCAR_INITIAL_ORDER_STATUS = ORDER_STATUS_PENDING
 OSCARAPI_INITIAL_ORDER_STATUS = ORDER_STATUS_PENDING
 OSCAR_INITIAL_LINE_STATUS = ORDER_STATUS_PENDING
 
-
 OSCAR_ORDER_STATUS_PIPELINE = {
-    'Placed': ('Order Confirmed', 'Canceled'),      # admin / user can cancel an order / an item
+    'Placed': ('Order Confirmed', 'Canceled'),  # admin / user can cancel an order / an item
     'Order Confirmed': (
-        'Out For Delivery', 'Delivered', 'Canceled'),   # only admin can set these statuses
-    'Out For Delivery': ('Delivered', 'Canceled'),      # only admin can set these statuses
+        'Out For Delivery', 'Delivered', 'Canceled'),  # only admin can set these statuses
+    'Out For Delivery': ('Delivered', 'Canceled'),  # only admin can set these statuses
     'Delivered': (),
-    'Payment Declined': (),
+    'Payment Declined': ('Order Confirmed', 'Canceled'),
     'Canceled': (),
 }
 
-
 OSCAR_LINE_STATUS_PIPELINE = {
-    'Placed': ('Canceled', ),                           # user can cancel an item until order confirm
-    'Order Confirmed': (),                              # admin can deliver or confirm item
-    'Out For Delivery': (),                             # our for delivery
-    'Delivered': ('Return Initiated', ),                # delivered item can be triggered for return
-    'Return Initiated': ('Returned', 'Delivered', ),    # user can cancel return to go to 'Delivered'
-                                                        # or return accepted by by admin
-    'Returned': (),                                     # nothing to do much
-    'Canceled': (),                                     # nothing to do much
+    'Placed': ('Canceled',),  # user can cancel an item until order confirm
+    'Order Confirmed': (),  # admin can deliver or confirm item
+    'Out For Delivery': (),  # our for delivery
+    'Delivered': ('Return Requested',),  # delivered item can be triggered for return
+    'Return Requested': ('Returned', 'Delivered',),  # user can cancel return to go to 'Delivered'
+    # or return accepted by by admin
+    'Returned': (),  # nothing to do much
+    'Canceled': (),  # nothing to do much
 }
 
-OSCAR_ORDER_REFUNDABLE_STATUS = [
+OSCAR_ORDER_REFUNDABLE_STATUS = (
     'Returned',
     'Canceled',
-]
+)
 
-OSCAR_LINE_REFUNDABLE_STATUS = [
+OSCAR_LINE_REFUNDABLE_STATUS = (
     'Returned',
     'Canceled',
-]
+)
 
 OSCAR_ORDER_STATUS_CASCADE = {
     'Placed': 'Placed',
@@ -97,107 +95,129 @@ OSCAR_ORDER_STATUS_CASCADE = {
     'Canceled': 'Canceled',
 }
 
+OSCAR_ADMIN_LINE_CANCELLABLE_ORDER_STATUSES = (
+    'Placed',
+    'Order Confirmed',
+    'Out For Delivery',
+)
+
+OSCAR_ADMIN_LINE_REFUNDABLE_ORDER_STATUSES = (
+    'Delivered',
+    'Return Requested',
+    'Returned',
+)
+
+OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_BEFORE_DELIVERY = (
+    ('Canceled', 'Cancel Order Item'),
+)
+OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_AFTER_DELIVERY = (
+    ('Return Requested', 'Initiate the return request'),
+    ('Delivered', 'Cancel return request'),
+    ('Returned', 'Returned'),
+)
+
 # Menu structure of the dashboard navigation
 
-OSCAR_DASHBOARD_NAVIGATION = [{
-    'label': _('Dashboard'),
-    'icon': 'icon-th-list',
-    'url_name': 'dashboard:index',
-}, {
-    'label': _('Catalogue'),
-    'icon': 'icon-sitemap',
-    'children': [
-        {
-            'label': _('Products'),
-            'url_name': 'dashboard:catalogue-product-list',
-        },
-        {
-            'label': _('Product Types'),
-            'url_name': 'dashboard:catalogue-class-list',
-        },
-        {
-            'label': _('Categories'),
-            'url_name': 'dashboard:catalogue-category-list',
-        },
-        {
-            'label': _('Ranges'),
-            'url_name': 'dashboard:range-list',
-        },
-        {
-            'label': _('Low stock alerts'),
-            'url_name': 'dashboard:stock-alert-list',
-        },
-        {
-            'label': _('Options'),
-            'url_name': 'dashboard:catalogue-option-list',
-        },
-    ]
-}, {
-    'label': _('Fulfilment'),
-    'icon': 'icon-shopping-cart',
-    'children': [
-        {
-            'label': _('Orders'),
-            'url_name': 'dashboard:order-list',
-        },
-        {
-            'label': _('Statistics'),
-            'url_name': 'dashboard:order-stats',
-        },
-        {
-            'label': _('Partners'),
-            'url_name': 'dashboard:partner-list',
-        },
-        # The shipping method dashboard is disabled by default as it might
-        # be confusing. Weight-based shipping methods aren't hooked into
-        # the shipping repository by default (as it would make
-        # customising the repository slightly more difficult).
-        # {
-        #     'label': _('Shipping charges'),
-        #     'url_name': 'dashboard:shipping-method-list',
-        # },
-    ]
-}, {
-    'label': _('Customers'),
-    'icon': 'icon-group',
-    'children': [
-        {
-            'label': _('Customers'),
-            'url_name': 'dashboard:users-index',
-        },
-        {
-            'label': _('Reviews'),
-            'url_name': 'dashboard:reviews-list',
-        },
-        # {
-        #     'label': _('Dealer Registration'),
-        #     'url_name': 'dealer_registration_list',
-        #     'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_superuser,
-        # },
-        {
-            'label': _('Stock alert requests'),
-            'url_name': 'dashboard:user-alert-list',
-        },
-    ]
-}, {
-    'label': _('Offers'),
-    'icon': 'icon-bullhorn',
-    'children': [
-        {
-            'label': _('Offers'),
-            'url_name': 'dashboard:offer-list',
-        },
-        {
-            'label': _('Vouchers'),
-            'url_name': 'dashboard:voucher-list',
-        },
-        {
-            'label': _('Voucher Sets'),
-            'url_name': 'dashboard:voucher-set-list',
-        },
+OSCAR_DASHBOARD_NAVIGATION = [
+    {
+        'label': _('Dashboard'),
+        'icon': 'icon-th-list',
+        'url_name': 'dashboard:index',
+    }, {
+        'label': _('Catalogue'),
+        'icon': 'icon-sitemap',
+        'children': [
+            {
+                'label': _('Products'),
+                'url_name': 'dashboard:catalogue-product-list',
+            },
+            {
+                'label': _('Product Types'),
+                'url_name': 'dashboard:catalogue-class-list',
+            },
+            {
+                'label': _('Categories'),
+                'url_name': 'dashboard:catalogue-category-list',
+            },
+            {
+                'label': _('Ranges'),
+                'url_name': 'dashboard:range-list',
+            },
+            {
+                'label': _('Low stock alerts'),
+                'url_name': 'dashboard:stock-alert-list',
+            },
+            {
+                'label': _('Options'),
+                'url_name': 'dashboard:catalogue-option-list',
+            },
+        ]
+    }, {
+        'label': _('Fulfilment'),
+        'icon': 'icon-shopping-cart',
+        'children': [
+            {
+                'label': _('Orders'),
+                'url_name': 'dashboard:order-list',
+            },
+            {
+                'label': _('Statistics'),
+                'url_name': 'dashboard:order-stats',
+            },
+            {
+                'label': _('Partners'),
+                'url_name': 'dashboard:partner-list',
+            },
+            # The shipping method dashboard is disabled by default as it might
+            # be confusing. Weight-based shipping methods aren't hooked into
+            # the shipping repository by default (as it would make
+            # customising the repository slightly more difficult).
+            # {
+            #     'label': _('Shipping charges'),
+            #     'url_name': 'dashboard:shipping-method-list',
+            # },
+        ]
+    }, {
+        'label': _('Customers'),
+        'icon': 'icon-group',
+        'children': [
+            {
+                'label': _('Customers'),
+                'url_name': 'dashboard:users-index',
+            },
+            {
+                'label': _('Reviews'),
+                'url_name': 'dashboard:reviews-list',
+            },
+            # {
+            #     'label': _('Dealer Registration'),
+            #     'url_name': 'dealer_registration_list',
+            #     'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_superuser,
+            # },
+            {
+                'label': _('Stock alert requests'),
+                'url_name': 'dashboard:user-alert-list',
+            },
+        ]
+    }, {
+        'label': _('Offers'),
+        'icon': 'icon-bullhorn',
+        'children': [
+            {
+                'label': _('Offers'),
+                'url_name': 'dashboard:offer-list',
+            },
+            {
+                'label': _('Vouchers'),
+                'url_name': 'dashboard:voucher-list',
+            },
+            {
+                'label': _('Voucher Sets'),
+                'url_name': 'dashboard:voucher-set-list',
+            },
 
-    ],
-},
+        ],
+    },
     {
         'label': _('Content'),
         'icon': 'icon-folder-close',
@@ -256,4 +276,3 @@ API_ENABLED_PAYMENT_METHODS = [
         'permission': 'apps.utils.oscar_api_checkout.AuthorizedUsers',
     },
 ]
-

@@ -25,7 +25,6 @@ from django.urls import path, include
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
 from rest_framework.documentation import include_docs_urls
-# from cashondelivery.dashboard.app import application as cod_app
 from apps.mod_oscarapi.views.checkout import CheckoutView
 from django.views.i18n import JavaScriptCatalog
 
@@ -39,14 +38,15 @@ urlpatterns = [
     # path('api/v1/', include(apps.get_app_config("oscarapicheckout").urls[0])),  # Must be before oscar_api.urls
 
     path('api/v1/', include('oscarapi.urls')),
-    path('api/v1/buy-now/', include('django_oscar_buy_now_api.urls')),
+    path('api/v1/buy-now/', include('apps.buynow.urls')),
     path('api/', include('apps.api_set.urls')),                                 # prone to versioning
 
     path('api/v1/avalilability/', include('apps.availability.api')),
     path('dashboard/avalilability/', include('apps.availability.urls')),
-    path('dashboard/accounts/', apps.get_app_config('accounts_dashboard').urls),
 
     # https://github.com/django-oscar/django-oscar-accounts
+    path('dashboard/accounts/', apps.get_app_config('accounts_dashboard').urls),
+
     # path(r'dashboard/payments/cod/', include(cod_app.urls)),
 
     path('api/docs/', include_docs_urls(title='Fegno Store API', public=True)),
@@ -73,7 +73,6 @@ if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, "assets"))
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += path('qs/', TemplateView.as_view(template_name="dummy_search.html")),  # > Django-2.0
-
 
 
 def error_404(request, exception=None):
