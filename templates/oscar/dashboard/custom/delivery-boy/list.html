@@ -1,0 +1,93 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load currency_filters %}
+{% load sorting_tags %}
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block body_class %}{{ block.super }} dealer-registration{% endblock %}
+
+{% block title %}
+    {% trans "Dealer Registration" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+        <li class="active">{% trans "Delivery Boys" %}</li>
+    </ul>
+
+{% endblock %}
+
+{% block header %}
+    <div class="page-header">
+        <h1>{% trans "Delivery Boys" %}</h1>
+    </div>
+{% endblock header %}
+
+{% block dashboard_content %}
+
+    {% if object_list %}
+            {% csrf_token %}
+            <table class="table table-striped table-bordered table-hover">
+            <caption><i class="icon-shopping-cart icon-large"></i>
+                {% trans "All Delivery Boys List" %}
+            </caption>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Mobile</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                {% for boy in object_list %}
+                    <tr>
+                        <td>{{ boy.get_short_name }}</td>
+                        <td>{{ boy.mobile|default:"-" }}</td>
+                        <td>{{ boy.email|default:"-" }}</td>
+                        <td>{{ boy.status|default:"-" }}</td>
+                        <td>
+                            <div>
+                                <form action="{% url 'dashboard-custom:dashboard-delivery-boy-update' pk=boy.id  %}"
+                                      method="post">
+                                    {% csrf_token %}
+                                    <input type="submit"
+                                           class="btn btn-{% if boy.is_delivery_boy %}danger{% else %}success{% endif %}"
+                                           name="submit"
+                                           value="{% if boy.is_delivery_boy %}Ban{% else %}Activate{% endif %}">
+                                </form>
+                            </div>
+                        </td>
+                        <td>
+
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            {% include "oscar/dashboard/partials/pagination.html" %}
+    {% else %}
+        <table class="table table-striped table-bordered">
+            <caption><i class="icon-shopping-cart icon-large"></i>
+                {% trans "All Delivery Boys List" %}
+            </caption>
+            <tr><td>{% trans "No Dealer Registrations found." %}</td></tr>
+        </table>
+    {% endif %}
+
+    {% endblock dashboard_content %}
+
+    {% block onbodyload %}
+        {{ block.super }}
+        oscar.dashboard.dealer_registration.initTable();
+{#        oscar.dashboard.search.init();#}
+        {% if form.errors %}
+        $('#SearchModal').modal('show');
+        {% endif %}
+    {% endblock onbodyload %}

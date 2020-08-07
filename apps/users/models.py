@@ -23,7 +23,11 @@ class User(AbstractUser):
     username_validator = UnicodeMobileNumberValidator()
     REQUIRED_FIELDS = ['email']
 
-    is_delivery_boy = models.BooleanField(default=False)
+    # None => request under approval
+    # False => common user
+    # True => is delivery boy!
+    is_delivery_boy = models.NullBooleanField(default=False)
+
     username = models.CharField(
         'mobile',
         max_length=10,
@@ -34,6 +38,19 @@ class User(AbstractUser):
             'unique': "This mobile number already exists.",
         },
     )
+
+    @property
+    def status(self):
+        if self.is_delivery_boy:
+            return 'delivery_boy'
+        if self.is_delivery_boy is None:
+            return 'request_pending'
+        return 'customer'
+
+    @property
+    def is_delivery_request_pending(self):
+        return not self.is_delivery_boy and type(self.is_delivery_boy) == bool
+
 
     @property
     def mobile(self):
@@ -75,6 +92,7 @@ class OTP(models.Model):
         max_length=10,
     )
     code = models.CharField(max_length=6)
+    is_delivery_boy_request = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     no_of_times_send = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(blank=True)
@@ -98,18 +116,19 @@ class OTP(models.Model):
         self.is_active = not bool(value)
 
     @classmethod
-    def generate(cls, mobile):
+    def generate(cls, mobile, is_delivery_boy_request=False):
         User = get_user_model()
         otp = cls(mobile_number=mobile)
         otp.code = f'{randint(app_settings.OTP_MIN_VALUE, app_settings.OTP_MAX_VALUE)}'
         otp.user = User.objects.filter(username=mobile).first()
+        otp.is_delivery_boy_request = is_delivery_boy_request
         otp.save()
         return otp
 
     def send_message(self):
         if app_settings.MOBILE_NUMBER_VALIDATOR['MAX_RETRIES'] > self.no_of_times_send:
             self.no_of_times_send += 1
-            status = send_otp(phone_no=self.mobile_number, otp=self.code)   # returns a bool
+            status = send_otp(phone_no=self.mobile_number, otp=self.code)  # returns a bool
             if status:
                 self.save()
             return status
@@ -126,7 +145,7 @@ class OTP(models.Model):
     def validate(cls, **kwargs):
         from django.utils import timezone
         otp = cls.objects.filter(**kwargs,
-                                 created_at__gt=(timezone.now()-timedelta(seconds=app_settings.OTP_EXPIRY))).last()
+                                 created_at__gt=(timezone.now() - timedelta(seconds=app_settings.OTP_EXPIRY))).last()
         if otp:
             otp.is_verified = True
             otp.save()
@@ -148,7 +167,9 @@ class OTP(models.Model):
             raise Exception('User with this Mobile number already exists!')
 
         self.user = User.objects.create_user(
-            username=self.mobile_number
+            username=self.mobile_number,
+            email=f"{self.mobile_number}@grocery.app",
+            is_delivery_boy=True if self.is_delivery_boy_request else None
         )
         self.user.set_unusable_password()
         self.user.save()
@@ -160,5 +181,3 @@ class OTP(models.Model):
 def update_email(sender, instance, **kwargs):
     if not instance.email:
         instance.email = f"{instance.username}@grocery.app"
-
-

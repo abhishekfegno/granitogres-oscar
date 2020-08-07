@@ -1,0 +1,52 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load i18n %}
+{% load render_table from django_tables2 %}
+
+{% block title %}
+    {{ title }} | {% trans "Create Attribute Option Group" %} | {{ block.super }}
+{% endblock %}
+{% block body_class %}{{ block.super }} Offer Banners{% endblock %}
+{% block navbar %}
+{% if not is_popup %}
+    {{ block.super }}
+{% endif %}
+{% endblock %}
+{% block dashboard_nav %}
+{% if not is_popup %}
+    {{ block.super }}
+{% endif %}
+{% endblock %}
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+                <li>
+            <a href="{% url 'dashboard-custom:dashboard-offer-banner-list' %}">{% trans "Offer Banners" %}</a>
+        </li>
+
+        <li class="active">{% trans "Banner : " %} {{ object.display_area }}  {{ object.position }} </li>
+    </ul>
+{% endblock %}
+
+{% block header %}
+    <div class="page-header">
+        <h1>{% trans "Banners" %}</h1>
+    </div>
+{% endblock header %}
+
+{% block dashboard_content %}
+    <form method="post">
+        {% csrf_token %}
+        <p>{% trans "Are you sure you want to delete this offer?" %}</p>
+        <h4>{{ object.get_display_area_display }} > {{ object.get_position_display }}</h4>
+
+        <div class="form-actions">
+            <button class="btn btn-lg btn-danger" type="submit"
+                    data-loading-text="{% trans 'Deleting...' %}">{% trans "Delete" %}</button>
+            {% trans "or" %}
+            <a class="btn btn-secondary" href="{% url 'dashboard-custom:dashboard-offer-banner-detail' pk=object.pk %}">{% trans "cancel" %}</a>
+        </div>
+    </form>
+{% endblock dashboard_content %}
+

@@ -226,14 +226,14 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 'label': _('Pages'),
                 'url_name': 'dashboard:page-list',
             },
-            {
-                'label': _('Email templates'),
-                'url_name': 'dashboard:comms-list',
-            },
             # {
-            #     'label': _('Reviews'),
-            #     'url_name': 'dashboard:reviews-list',
+            #     'label': _('Email templates'),
+            #     'url_name': 'dashboard:comms-list',
             # },
+            {
+                'label': _('Reviews'),
+                'url_name': 'dashboard:reviews-list',
+            },
         ]
     },
     {
@@ -254,15 +254,20 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'label': _('Configurations'),
         'icon': 'icon-double-angle-down',
         'children': [
-            {'label': _('Availability: Pincode'), 'url_name': 'availability:pincode-selector',
+
+            {'label': _('Delivery Boys'), 'url_name': 'dashboard-custom:dashboard-delivery-boy-list',
              'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
+
             {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
              'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
+
             {'label': _('Offer Banners'),
              'url_name': 'dashboard-custom:dashboard-offer-banner-list',
              'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser,
              },
+
             {'label': _('Shipping charges'), 'url_name': 'dashboard:shipping-method-list', },
+
         ]
     }]
 

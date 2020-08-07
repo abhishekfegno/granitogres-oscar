@@ -69,7 +69,6 @@ def product_detail_web(request, product):
     })
 
 
-
 def __(val):
     if type(val.value) == AttributeOption:
         return str(val.value)

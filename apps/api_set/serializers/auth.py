@@ -7,12 +7,16 @@ from apps.api_set.app_settings import OTP_MAX_VALUE, OTP_MIN_VALUE
 from apps.users.models import OTP
 
 User = get_user_model()
-mobile_number_format = app_settings.MOBILE_NUMBER_VALIDATOR['REGEX']
+# mobile_number_format = app_settings.MOBILE_NUMBER_VALIDATOR['REGEX']
 
 
 class MobileNumberSerializer(serializers.Serializer):
 
-    mobile = serializers.CharField(max_length=15, required=True)
+    mobile = serializers.CharField(
+        max_length=app_settings.MOBILE_NUMBER_VALIDATOR['LENGTH'],
+        min_length=app_settings.MOBILE_NUMBER_VALIDATOR['LENGTH'],
+        required=True
+    )
 
     def update(self, instance, validated_data):
         pass
@@ -20,11 +24,11 @@ class MobileNumberSerializer(serializers.Serializer):
     def create(self, validated_data):
         pass
 
-    def validate_mobile(self, mobile):
-        is_valid_number = re.match(mobile_number_format, mobile)
-        if not is_valid_number:
-            raise serializers.ValidationError('Mobile number is not valid')
-        return mobile
+    # def validate_mobile(self, mobile):
+    #     is_valid_number = re.match(mobile_number_format, mobile)
+    #     if not is_valid_number:
+    #         raise serializers.ValidationError('Mobile number is not valid')
+    #     return mobile
 
 
 class OtpSerializer(MobileNumberSerializer):

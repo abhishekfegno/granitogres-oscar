@@ -34,7 +34,7 @@ class SendOTP(APIView):
             out['error'] = mns.errors
             return Response(out, status=400)
         else:
-            otp = OTP.generate(mns.validated_data['mobile'])
+            otp = OTP.generate(mns.validated_data['mobile'], request.data.get('is_delivery_boy_request', False))
             status = otp.send_message()
             out['id'] = otp.id
             out['mobile_number'] = otp.mobile_number
@@ -102,7 +102,7 @@ class LoginWithOTP(APIView):
         out['user'] = UserSerializer(instance=otp_object.user, context={'request': request}).data
         anonymous_basket = operations.get_anonymous_basket(request)
         request.user = user
-        request.user.backend =  'django.contrib.auth.backends.ModelBackend'
+        request.user.backend = 'django.contrib.auth.backends.ModelBackend'
         login_and_upgrade_session(request._request, user)
         # merge anonymous basket with authenticated basket.
         basket = operations.get_user_basket(user)
