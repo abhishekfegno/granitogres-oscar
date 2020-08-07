@@ -27,6 +27,9 @@ class SendOTP(APIView):
         Else Return response as mobile number not registered.
 
         Mobile number must be starting with "+91" Without spaces in it.
+
+        When Request is forwarded from Delivery App, 'is_delivery_boy_request': true  must be added with it.
+        
         """
         out = {'id': None, 'otp_send': False, 'error': None}
         mns = self.serializer_class(data=request.data, context={'request': request})

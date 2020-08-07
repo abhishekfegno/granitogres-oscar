@@ -21,8 +21,6 @@ class DeliveryBoyList(ListView):
     ordering = ['-is_active', '-id', ]
 
     def post(self, request, *args, **kwargs):
-        import pdb;
-        pdb.set_trace()
         return HttpResponseRedirect(reverse('dashboard-custom:dashboard-delivery-boy-list'))
 
 @api_view(['POST'])
