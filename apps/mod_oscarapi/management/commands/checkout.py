@@ -157,6 +157,4 @@ class Command(BaseCommand):
         print(response)
         if 200 <= response.status_code < 410:
             print(response.text)
-        else:
-            import pdb; pdb.set_trace()
 

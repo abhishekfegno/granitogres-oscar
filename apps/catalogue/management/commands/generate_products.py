@@ -182,7 +182,6 @@ class Command(BaseCommand):
                 )
                 # Getting Category Object from cat name.
                 k = 1
-                # import pdb;pdb.set_trace()
                 for cat in cat_list:
                     new_cat_obj = cat_obj_list.filter(name=cat).first()
                     if new_cat_obj is None:

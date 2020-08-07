@@ -41,7 +41,6 @@ class ProductAttributeFieldMixin(object):
             """
              Executing 5 Queries!
             """
-            # import pdb; pdb.set_trace()
             attrs_value = instance.attribute_values.filter(
                 **self.attribute_values_filter
             ).annotate(

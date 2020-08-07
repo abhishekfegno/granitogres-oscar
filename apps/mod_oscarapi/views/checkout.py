@@ -134,7 +134,6 @@ class CheckoutView(OscarAPICheckoutView):
     def _record_payments(self, previous_states, request, order, methods, data):
         order_balance = [order.total_incl_tax]
         new_states = {}
-        import pdb; pdb.set_trace()
 
         def record(method_key, method_data):
             # If a previous payment method at least partially succeeded, hasn't been consumed by an

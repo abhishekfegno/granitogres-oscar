@@ -74,11 +74,11 @@ class SetZone(GenericAPIView):
         _out = ZoneFacade().set_zone(request, zone=zone, point=point)
         out = {
             "zone": {
-                "name": _out['zone'].name,
+                "name": _out['zone'],
             },
             "location": {
-                "id": _out['location'].id,
-                "name": _out['location'].location_name,
+                "id": _out['location'],
+                "name": _out['location_name'],
             }
         }
         return Response(out)
