@@ -32,7 +32,7 @@ class ZoneFacade(object):
         return {
             'zone': zone.name,
             'location': location.id if location else None,
-            'location_name': location.name if location else DEFAULT_LOCATION_NAME
+            'location_name': location.location_name if location else DEFAULT_LOCATION_NAME
         }
 
 

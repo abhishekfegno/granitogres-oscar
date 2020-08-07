@@ -45,18 +45,14 @@ class SetZone(GenericAPIView):
     Method : POST
     Login Required : optional;
 
-    BODY : {
-        "point": {
-            "type": "Point",
-            "coordinates": [ 21.31050227940629 49.95653060286432 ],
-        }
-    }
 
-    Another BODY : {
-        "point": {
-            "type": "Point",
-            "coordinates": [ 45.31050227940629, 78.95653060286432 ],
-        }
+    ## A Working location.
+    'SRID=4326;POINT (77.94478155806023 12.785238498732)'
+
+    {
+        "latitude": "12.785238498732",
+        "longitude": "77.94478155806023",
+
     }
 
     """
