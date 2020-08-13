@@ -57,6 +57,8 @@ def PUBLIC_APIS(r, f):
         ])),
         ("Order History & Tracking", collections.OrderedDict([
             ("My Orders", reverse("api-orders", request=r, format=f)),
+            ("My Orders Detail", reverse("api-orders-detail", kwargs={'pk': 10}, request=r, format=f)),
+            ("My Orders More Details", reverse("api-orders-more", kwargs={'pk': 10}, request=r, format=f)),
         ])),
 
         ("Addresses", collections.OrderedDict([

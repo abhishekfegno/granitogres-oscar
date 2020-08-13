@@ -82,7 +82,7 @@
                             <div class="col-md-12">
                                 <div>
                                     <label for="my-select"> Add Delivery Consignments (Orders)</label>
-                                    <select multiple="multiple" id="my-select" name="my-selected-consignments">
+                                    <select multiple="multiple" id="my-select" name="selected_orders">
                                         {% for con_ord in object.possible_delivery_orders %}
                                         <option value='{{ con_ord.pk }}' {% if con_ord.delivery_trip %}selected="selected"{% endif %}>
                                             # ORD{{ con_ord.order.number }} - {{ con_ord.order.shipping_address }}
@@ -103,7 +103,7 @@
                         <div>
                             {% regroup object.possible_delivery_returns by order_line.order.number as orderline_by_order %}
 
-                            <select multiple="multiple" id="my-select-return" name="my-selected-returns">
+                            <select multiple="multiple" id="my-select-return" name="selected_returns">
                                 {% for orders in orderline_by_order %}
                                 <optgroup label="#{{ orders.grouper }} - {{ orders.list.0.order_line.order.shipping_address }}">
                                     {% for con_ord in orders.list %}
@@ -120,11 +120,20 @@
                             <a href='#' id='deselect-all-return'>deselect all</a>
                         </div>
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-12 ">
                         <hr />
-                        <input type="submit" name="save-action" value="{% if object.pk %}Update{% else %}Save{% endif %}?" class="btn btn-primary" />
-                        <input type="submit" name="save-action" value="{% if object.pk %}Update{% else %}Save{% endif %} And Create Another" class="btn btn-primary" />
-                        <input type="submit" name="save-action" value="{% if object.pk %}Update{% else %}save{% endif %} And Continue Editing" class="btn btn-primary" />
+                        <style>
+                            input[name="save-action"] + input[name="save-action"]{margin-right: 10px}
+                        </style>
+                        <input type="submit" name="save-action"
+                               value="{% if object.pk %}Update{% else %}Save{% endif %} And Continue Editing"
+                               class="btn btn-primary pull-right" />
+                        <input type="submit" name="save-action"
+                               value="{% if object.pk %}Update{% else %}Save{% endif %} And Create Another"
+                               class="btn btn-primary pull-right" />
+                        <input type="submit" name="save-action"
+                               value="{% if object.pk %}Update{% else %}Save{% endif %}"
+                               class="btn btn-primary pull-right" />
                     </div>
                     {% else %}
                     <div class="col-md-12">

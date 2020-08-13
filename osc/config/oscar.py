@@ -58,6 +58,8 @@ OSCAR_INITIAL_ORDER_STATUS = ORDER_STATUS_PENDING
 OSCARAPI_INITIAL_ORDER_STATUS = ORDER_STATUS_PENDING
 OSCAR_INITIAL_LINE_STATUS = ORDER_STATUS_PENDING
 
+admin_or_staff = lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser
+
 OSCAR_ORDER_STATUS_PIPELINE = {
     'Placed': ('Order Confirmed', 'Canceled'),  # admin / user can cancel an order / an item
     'Order Confirmed': (
@@ -255,11 +257,11 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'icon': 'icon-double-angle-down',
         'children': [
             {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
-             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
+             'access_fn': admin_or_staff},
 
             {'label': _('Offer Banners'),
              'url_name': 'dashboard-custom:dashboard-offer-banner-list',
-             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser,
+             'access_fn': admin_or_staff
              },
 
             {'label': _('Shipping charges'), 'url_name': 'dashboard:shipping-method-list', },
@@ -270,17 +272,21 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'icon': 'icon-double-angle-down',
         'children': [
             {'label': _('Create Trip'), 'url_name': 'logistics:new-trip',
-             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
+             'access_fn': admin_or_staff },
 
             {'label': _('Delivery Agents'), 'url_name': 'logistics:dashboard-delivery-boy-list',
-             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
+             'access_fn': admin_or_staff },
+
+            {'label': _('Planned Trips'), 'url_name': 'logistics:planned-trips',
+             'access_fn': admin_or_staff },
+
 
             {'label': _('Active Trips'), 'url_name': 'logistics:active-trips',
-             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
+             'access_fn': admin_or_staff },
 
             {'label': _('Delivered Trips'),
              'url_name': 'logistics:delivered-trips',
-             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser,
+             'access_fn': admin_or_staff,
              },
         ]
     }]

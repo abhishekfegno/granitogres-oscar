@@ -38,6 +38,7 @@ class PaymentGateWayResponse(models.Model):
 
     payee = property(get_payee, set_payee)
 
+
 class COD(models.Model):
 
     order = models.OneToOneField('order.Order', on_delete=models.PROTECT, related_name='cod')

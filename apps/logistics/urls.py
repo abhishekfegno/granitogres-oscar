@@ -1,6 +1,7 @@
 from django.urls import path, include
 
-from apps.logistics.views.generic import ActiveTripsListView, DeliveredTripsListView, TripCreateView, TripUpdateView
+from apps.logistics.views.generic import ActiveTripsListView, DeliveredTripsListView, TripCreateView, TripUpdateView, \
+    PlannedTripsListView
 from apps.logistics.views import delivery_boy
 
 app_name = 'logistics'
@@ -13,6 +14,7 @@ urlpatterns = [
     ])),
 
     path('trips/', include([
+        path('planned/', PlannedTripsListView.as_view(), name="planned-trips"),
         path('active/', ActiveTripsListView.as_view(), name="active-trips"),
         path('delivered/', DeliveredTripsListView.as_view(), name="delivered-trips"),
         path('new/', TripCreateView.as_view(), name="new-trip"),

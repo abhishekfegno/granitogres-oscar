@@ -11,11 +11,23 @@ from rest_framework.response import Response
 # from rest_framework.generics import ListAPIView
 
 from apps.logistics.models import DeliveryTrip, ConsignmentDelivery
+from apps.users.models import User
 
 
 class TripCreationForm(forms.ModelForm):
     info = forms.CharField(max_length=256, required=False)
     route = forms.CharField(max_length=128, required=False, )
+    agent = forms.ModelChoiceField(User.objects.filter(is_delivery_boy=True), required=True)
+    selected_orders = forms.ModelMultipleChoiceField(ConsignmentDelivery.objects.all(), widget=forms.MultipleHiddenInput())
+    selected_returns = forms.ModelMultipleChoiceField(ConsignmentDelivery.objects.all(), widget=forms.MultipleHiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance is None:
+            self.instance = DeliveryTrip()
+        self.fields['selected_orders'].queryset = self.instance.possible_delivery_orders
+        self.fields['selected_returns'].queryset = self.instance.possible_delivery_returns
+        self.fields['agent'].initial = self.instance.agent_id
 
     class Meta:
         model = DeliveryTrip
@@ -31,8 +43,8 @@ class TripUpdateView(UpdateView):
 
     def form_valid(self, form):
         self.instance = form.save()
-        con_orders = self.request.POST.getlist('my-selected-consignments')
-        con_returns = self.request.POST.getlist('my-selected-returns')
+        con_orders = self.request.POST.getlist('selected_orders')
+        con_returns = self.request.POST.getlist('selected_returns')
 
         if self.instance.is_editable:
             possible_delivery_orders = self.object.possible_delivery_orders
@@ -58,7 +70,7 @@ class TripUpdateView(UpdateView):
             return reverse('logistics:update-trip', kwargs={'pk': self.object.pk})
         if 'another' in save_action:
             return reverse('logistics:new-trip')
-        return reverse('logistics:active-trips')
+        return reverse('logistics:planned-trips')
 
 
 @method_decorator(login_required, name="dispatch")
@@ -73,13 +85,27 @@ class TripCreateView(TripUpdateView):
 @method_decorator(user_passes_test(lambda user: user.is_superuser), name="dispatch")
 class ActiveTripsListView(ListView):
 
-    queryset = DeliveryTrip.objects.filter(completed=False).annotate(
+    template_name = 'logistics/deliverytrip_list.html'
+    queryset = DeliveryTrip.objects.filter(completed=False, is_active=True).annotate(
+        order_count=Count('delivery_consignments'), refund_count=Count('return_consignments')).order_by('-id')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        return super().get_context_data(object_list=object_list,
+                                        TITLE="Active Trips",
+                                        **kwargs)
+
+
+@method_decorator(login_required, name="dispatch")
+@method_decorator(user_passes_test(lambda user: user.is_superuser), name="dispatch")
+class PlannedTripsListView(ListView):
+
+    queryset = DeliveryTrip.objects.filter(completed=False, is_active=False).annotate(
         order_count=Count('delivery_consignments'), refund_count=Count('return_consignments')).order_by('-id')
     template_name = 'logistics/deliverytrip_list.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
         return super().get_context_data(object_list=object_list,
-                                        TITLE="Active Trips",
+                                        TITLE="Planned Trips",
                                         **kwargs)
 
 

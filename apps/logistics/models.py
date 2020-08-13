@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from oscar.core.loading import get_model
@@ -48,9 +49,26 @@ class DeliveryTrip(models.Model):
                                  'order_line__order__shipping_address')
 
     def complete_forcefully(self):
+        """
+        In the assumption that, 'request_cancelled' can be set by user.
+        """
+
+        """ Handling Delivery. """
         self.delivery_consignments.update(completed=True)
-        self.return_consignments.update(completed=True)
+
+        """ Updating Status of order for Pickup and Pickup Cancellation. """
+        for consignment in self.return_consignments.all():
+            if consignment.order_item.request_cancelled is False:
+                """ Signal will handle refunding procedure and all."""
+                consignment.order_item.set_state(settings.ORDER_STATUS_RETURNED)
+            else:
+                """ Status back to delivered."""
+                consignment.order_item.set_state(settings.ORDER_STATUS_DELIVERED)
+
+        """ Handling Pickup. """
+        self.return_consignments.exclude(request_cancelled=True).update(completed=True)
         self.completed = True
+        self.save()
 
     def activate_trip(self):
         """
@@ -68,7 +86,7 @@ class DeliveryTrip(models.Model):
             return True
         self.completed = not any([
             self.delivery_consignments.filter(completed=False).exists(),
-            self.return_consignments.filter(models.Q(completed=False)|Q(request_cancelled=True)).exists(),
+            self.return_consignments.filter(Q(completed=False)|Q(request_cancelled=True)).exists(),
         ])
         if self.completed:
             self.save()

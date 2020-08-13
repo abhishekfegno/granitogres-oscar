@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from apps.api_set.serializers.orders import OrderListSerializer, OrderDetailSerializer
+from apps.api_set.serializers.orders import OrderListSerializer, OrderDetailSerializer, OrderMoreDetailSerializer
 from apps.utils.urls import list_api_formatter
 
 Order = get_model('order', 'Order')
@@ -41,6 +41,14 @@ def orders(request, *a, **k):
 def orders_detail(request, *a, **k):
     _object = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
     serializer_class = OrderDetailSerializer
+    return Response(serializer_class(_object, context={'request': request}).data)
+
+
+@api_view(("GET",))
+@_login_required
+def orders_more_detail(request, *a, **k):
+    _object = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
+    serializer_class = OrderMoreDetailSerializer
     return Response(serializer_class(_object, context={'request': request}).data)
 
 
