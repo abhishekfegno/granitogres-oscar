@@ -40,7 +40,8 @@ def home(request, *a, **k):
     user = None
     b_count = 0
     if request.user.is_authenticated:
-        user_fields = ['id', 'mobile', 'email', 'first_name', 'last_name', 'is_active', ]
+        user_fields = ['id', 'mobile', 'email', 'first_name', 'last_name', 'is_active',
+                       'status', 'is_delivery_request_pending']
         user = {field: getattr(request.user, field) for field in user_fields}
         b_count = Basket.open.filter(owner=request.user).last().num_lines
     else:

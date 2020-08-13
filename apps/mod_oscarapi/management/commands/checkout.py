@@ -1,3 +1,4 @@
+import json
 from random import randint
 
 import requests
@@ -25,34 +26,97 @@ for method in settings.API_ENABLED_PAYMENT_METHODS:
 
 
 class Command(BaseCommand):
+    user = None
+    s = None            # store request with session
+    _passwd = None
+    serializer_class = CheckoutSerializer
+    BASE_URL = 'http://localhost:8000/api/v1/'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--method', help=f'Get Payment Mode, Must be one of {[met.code for met in get_methods]}', default='cash'
         )
         parser.add_argument(
+            '--password',  default='asdf1234', help="Enter password, if password is not 'asdf1234' (Dev Settings)"
+        )
+        parser.add_argument(
+            '--num-orders',  default='1', help="Number of orders you want to generate."
+        )
+        parser.add_argument(
             'user_id', help='Get User',
         )
 
-    def handle(self, *args, **kwargs):
+    def post(self, _method):
+        basket = self.populate_basket(no_of_products_needed=randint(2, 6))
+        data = self.generate_data(
+                basket, basket.owner, _method
+        )
+        self.checkout(data)
+
+    def handle(self, *args, **options):
+        _method = None
+        self._passwd = options['password']
         try:
-            user = User.objects.get(pk=kwargs['user_id'])
+            self.user = User.objects.get(pk=options['user_id'])
         except Exception as e:
             return print(e)
+        else:
+            if options['method'] not in [met.code for met in get_methods]:
+                print(f"Invalid Input Types. Must be one of {[met.code for met in get_methods]}")
+                return
+            for met in get_methods:
+                if met.code == options['method']:
+                    _method = met
+                    break
+            self.login(self.user)
+            for i in range(int(options['num_orders'])):
+                print(f"Generating Cart #{i+1}......!")
+                self.post(_method)
 
-        if kwargs['method'] not in [met.code for met in get_methods]:
-            print(f"Invalid Input Types. Must be one of {[met.code for met in get_methods]}")
-            return
-        method = None
-        for met in get_methods:
-            if met.code == kwargs['method']:
-                method = met
-                break
-        self.post(kwargs['user_id'], method)
+    def login(self, user):
+        s = requests.Session()
+        login_data = {"username": user.username, "email": user.email,  "password": self._passwd}
+        response = s.post(
+            self.BASE_URL + 'rest-auth/login/',
+            login_data
+        )
+        print("Logged in Status ", response)
+        self.s = s
 
-        print("Cart Ordered Successfully!")
+    def checkout(self, data):
+        response = self.s.post(
+            self.BASE_URL + 'checkout/',
+            json=data,
+            headers={'Content-Type': 'application/json'}
+        )
+        # print("DATA : ")
+        # print(json.dumps(data))
+        print(response)
+        # if 200 <= response.status_code < 410:
+        #     print(response.text)
 
-    def generate_data(self, basket, user, method):
+    def populate_basket(self, no_of_products_needed=3):
+
+        qs = Product.objects.filter(
+                structure__in=[Product.STANDALONE, Product.CHILD]
+        ).values_list('id', flat=True).order_by('?')[:no_of_products_needed]
+
+        for product in qs:
+            post_url = self.BASE_URL + 'basket/add-product/'
+            product_url = self.BASE_URL + 'products/' + str(product) + '/'
+            self.s.post(
+                post_url,
+                {
+                    'url': product_url,
+                    'quantity': randint(2, 10)
+                }
+            )
+        basket = Basket.open.get(owner_id=self.user.id)
+        basket.strategy = Selector().strategy(user=basket.owner)
+        basket.save()
+        return basket
+
+    def generate_data(self, basket, user=None, method=None):
         # if method == 'cash':
         #     payment =
         # elif method == 'razor_pay':
@@ -91,7 +155,7 @@ class Command(BaseCommand):
                 "notes": "",
                 "country": "https://store.demo.fegno.com/api/v1/countries/IN/"
             },
-            "billing_address":{
+            "billing_address": {
                 "title": "Mr",
                 "first_name": "JERIN",
                 "last_name": "JOHN",
@@ -108,7 +172,6 @@ class Command(BaseCommand):
             "payment": {
                 "cash": {
                     "enabled": True,
-                    # "pay_balance": True
                     "amount": float(basket.total_incl_tax)
                 },
                 "razor_pay": {
@@ -116,45 +179,4 @@ class Command(BaseCommand):
                 }
             }
         }
-
-
-    serializer_class = CheckoutSerializer
-
-    def post(self, user_id, method):
-        import json
-        s = requests.Session()
-        login_data = {"username": "9497270863", "email": "admin@fegno.com",  "password": "asdf1234"}
-        BASE_URL = 'http://localhost:8000/api/v1/'
-        response = s.post(
-            BASE_URL + 'rest-auth/login/',
-            login_data
-        )
-        for product in Product.objects.filter(
-                structure__in=[Product.STANDALONE, Product.CHILD]
-        ).values_list('id', flat=True)[:randint(2, 6)]:
-            post_url = BASE_URL + 'basket/add-product/'
-            product_url = BASE_URL + 'products/' + str(product) + '/'
-            s.post(
-                post_url,
-                {
-                    'url': product_url,
-                    'quantity': randint(2, 10)
-                }
-            )
-        basket = Basket.open.get(owner_id=user_id)
-        basket.strategy = Selector().strategy(user=basket.owner)
-        basket.save()
-        data = self.generate_data(
-                basket, basket.owner, method
-            )
-        response = s.post(
-            BASE_URL + 'checkout/',
-            json=data,
-            headers={'Content-Type': 'application/json'}
-        )
-        print("DATA : ")
-        print(json.dumps(data))
-        print(response)
-        if 200 <= response.status_code < 410:
-            print(response.text)
 

@@ -7,6 +7,9 @@ from apps.logistics.models import ConsignmentDelivery, ConsignmentReturn
 
 @receiver(order_status_changed)
 def order_status_changed__receiver_for_consignment_return(order, old_status, new_status, **kwargs):
+    """
+    Order Should Create a Consignment When Shifting from order Placed to Order Confirmed.
+    """
     if new_status == settings.LOGISTICS_CONSIGNMENT_CREATE_STATUS_FOR_ORDER:
         cd, created = ConsignmentDelivery.objects.get_or_create(order=order)
 

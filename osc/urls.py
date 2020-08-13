@@ -40,9 +40,11 @@ urlpatterns = [
     path('api/v1/', include('oscarapi.urls')),
     path('api/v1/buy-now/', include('apps.buynow.urls')),
     path('api/', include('apps.api_set.urls')),                                 # prone to versioning
+    path('api/', include('apps.logistics.apis')),                                 # prone to versioning
 
     path('api/v1/avalilability/', include('apps.availability.api')),
     path('dashboard/avalilability/', include('apps.availability.urls')),
+    path('dashboard/logistics/', include('apps.logistics.urls')),
 
     # https://github.com/django-oscar/django-oscar-accounts
     path('dashboard/accounts/', apps.get_app_config('accounts_dashboard').urls),

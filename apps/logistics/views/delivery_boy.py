@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
+from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from oscar.core.compat import get_user_model
 from django.shortcuts import render
@@ -15,17 +16,15 @@ from rest_framework.reverse import reverse
 User = get_user_model()
 
 
+@method_decorator(user_passes_test(lambda user: user.is_authenticated and user.is_superuser), name='dispatch')
 class DeliveryBoyList(ListView):
     queryset = User.objects.exclude(is_delivery_boy=False)
-    template_name = 'oscar/dashboard/custom/delivery-boy/list.html'
+    template_name = 'logistics/delivery-boy/list.html'
     ordering = ['-is_active', '-id', ]
 
-    def post(self, request, *args, **kwargs):
-        return HttpResponseRedirect(reverse('dashboard-custom:dashboard-delivery-boy-list'))
 
 @api_view(['POST'])
-@login_required
-@user_passes_test(lambda user: user and user.is_superuser)
+@user_passes_test(lambda user: user.is_authenticated and user.is_superuser)
 def actions(request, pk):
     queryset = User.objects.exclude(is_delivery_boy=False)
     delb = queryset.filter(pk=pk).first()
@@ -39,8 +38,4 @@ def actions(request, pk):
         delb.is_delivery_boy = True
         delb.save()
         messages.success(request, f"{delb.get_short_name()} is Activated as Delivery boy!")
-    return HttpResponseRedirect(reverse('dashboard-custom:dashboard-delivery-boy-list'))
-
-
-
-
+    return HttpResponseRedirect(reverse('logistics:dashboard-delivery-boy-list'))

@@ -53,7 +53,7 @@
                         <td>{{ boy.status|default:"-" }}</td>
                         <td>
                             <div>
-                                <form action="{% url 'dashboard-custom:dashboard-delivery-boy-update' pk=boy.id  %}"
+                                <form action="{% url 'logistics:dashboard-delivery-boy-update' pk=boy.id  %}"
                                       method="post">
                                     {% csrf_token %}
                                     <input type="submit"

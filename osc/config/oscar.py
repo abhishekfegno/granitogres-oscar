@@ -254,10 +254,6 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'label': _('Configurations'),
         'icon': 'icon-double-angle-down',
         'children': [
-
-            {'label': _('Delivery Boys'), 'url_name': 'dashboard-custom:dashboard-delivery-boy-list',
-             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
-
             {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
              'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
 
@@ -268,6 +264,24 @@ OSCAR_DASHBOARD_NAVIGATION = [
 
             {'label': _('Shipping charges'), 'url_name': 'dashboard:shipping-method-list', },
 
+        ]
+    }, {
+        'label': _('Logistics'),
+        'icon': 'icon-double-angle-down',
+        'children': [
+            {'label': _('Create Trip'), 'url_name': 'logistics:new-trip',
+             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
+
+            {'label': _('Delivery Agents'), 'url_name': 'logistics:dashboard-delivery-boy-list',
+             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
+
+            {'label': _('Active Trips'), 'url_name': 'logistics:active-trips',
+             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser, },
+
+            {'label': _('Delivered Trips'),
+             'url_name': 'logistics:delivered-trips',
+             'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser,
+             },
         ]
     }]
 

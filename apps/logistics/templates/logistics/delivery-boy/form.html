@@ -46,8 +46,9 @@
                     </span>
                 {% endif %}
             {% endfor %}
-            <input type="submit" value="{% if object %}Update{% else %}Create{% endif %}" class="btn btn-primary" /></form>
-
+            <input type="submit" value="{% if object %}Update{% else %}Create{% endif %}" class="btn btn-primary" />
+        </form>
+    </div>
     {% endblock dashboard_content %}
 
     {% block onbodyload %}

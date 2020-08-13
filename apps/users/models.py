@@ -49,8 +49,7 @@ class User(AbstractUser):
 
     @property
     def is_delivery_request_pending(self):
-        return not self.is_delivery_boy and type(self.is_delivery_boy) == bool
-
+        return self.is_delivery_boy is None
 
     @property
     def mobile(self):
@@ -66,6 +65,9 @@ class User(AbstractUser):
 
     def get_short_name(self):
         return self.first_name or self.last_name or self.username
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.username}) "
 
 
 class Location(models.Model):

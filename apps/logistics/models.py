@@ -13,7 +13,10 @@ class DeliveryTrip(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     agent = models.ForeignKey(app_settings.AGENT_MODEL, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=False)   # active mode or in draft mode.
     completed = models.BooleanField(default=False)
+    route = models.CharField(max_length=128, null=True, blank=True)
+    info = models.CharField(max_length=256, null=True, blank=True)
 
     @property
     def delivery_orders(self):
@@ -21,12 +24,43 @@ class DeliveryTrip(models.Model):
 
     @property
     def delivery_returns(self):
-        return Order.objects.filter(consignmentdelivery__delivery_trip=self)
+        return Order.objects.filter(consignmentreturn__delivery_trip=self)
+
+    @property
+    def possible_delivery_orders(self):
+        qs = ConsignmentDelivery.objects.filter(delivery_trip__isnull=True)
+        if self.pk:
+            qs |= ConsignmentDelivery.objects.filter(delivery_trip=self)
+        return qs.select_related('delivery_trip', 'order', 'order__shipping_address', 'order__user', )
+
+    @property
+    def is_editable(self):
+        return not self.is_active or not self.completed
+
+    @property
+    def possible_delivery_returns(self):
+        qs = ConsignmentReturn.objects.filter(delivery_trip__isnull=True)
+        if self.pk:
+            qs |= ConsignmentReturn.objects.filter(delivery_trip=self)
+        return qs.select_related('delivery_trip', 'order_line',
+                                 'order_line__order',
+                                 'order_line__order__user',
+                                 'order_line__order__shipping_address')
 
     def complete_forcefully(self):
         self.delivery_consignments.update(completed=True)
         self.return_consignments.update(completed=True)
         self.completed = True
+
+    def activate_trip(self):
+        """
+        Changes status of all Orders to "Out for Delivery" Mode.
+        """
+        self.is_active = True
+        status = app_settings.LOGISTICS_ORDER_STATUS_ON_TRIP_ACTIVATE
+        for order in self.delivery_orders():
+            if status in order.available_statuses():
+                order.set_status(status)
         self.save()
 
     def get_completed(self):

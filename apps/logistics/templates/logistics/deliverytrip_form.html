@@ -1,0 +1,308 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load currency_filters %}
+{% load sorting_tags %}
+{% load i18n static %}
+{% load widget_tweaks form_tags %}
+
+{% block body_class %}{{ block.super }} dealer-registration{% endblock %}
+
+{% block title %}
+{% trans "Dealer Registration" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li>
+        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+    </li>
+    <li> <a href="{% url 'logistics:active-trips' %}">Trips</a> </li>
+    {% if object.pk %}
+    <li  class="active"> Update # {{ object.id }} [ AGENT : {{ object.agent }} ]</li>
+    {% else  %}
+    <li class="active">Create Delivery Trip</li>
+    {% endif %}
+</ul>
+{% endblock %}
+
+{% block header %}
+<link rel="stylesheet" href="{{ STATIC_URL }}/css/multi-select.css" />
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/multi-select/0.9.12/css/multi-select.min.css" />-->
+<!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@9.15.2/dist/sweetalert2.min.css" />-->
+
+<style>
+.ms-container {width: 100%!important}
+.ms-container .search-input{margin-bottom:30px; }
+.ms-container .ms-selectable,.ms-container .ms-selection {display: inline-block; background-color: #efefef !importnat;}
+.ms-container .ms-list{height: 400px;}
+.ms-container .ms-list.ms-focus{box-shadow: 0 14px 26px -12px rgba(244, 67, 54, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(244, 67, 54, 0.2);border-color: #e11b0c;animation: ease-in-out 1s; -webkit-animation: ease-in-out 1s;}
+.ms-container .ms-selectable li.ms-elem-selectable, .ms-container .ms-selection li.ms-elem-selection{padding: 6px 10px}
+.ms-container .ms-selectable li.ms-hover, .ms-container .ms-selection li.ms-hover{background: linear-gradient(60deg, #ef5350, #e53935)}
+
+</style>
+
+<div class="page-header">
+    {% if object.pk %}
+    <h1> Update # {{ object.id }} [ AGENT : {{ object.agent }} ]</h1>
+    {% else  %}
+    <h1>Create Delivery Trip</h1>
+    {% endif %}
+</div>
+{% endblock header %}
+
+{% block dashboard_content %}
+<script src="{{ STATIC_URL }}js//polyfill.min.js" ></script>
+<div class="table-header">
+    <h3><i class="icon-add icon-large"></i>Create Delivery Trip</h3>
+</div>
+<div class="well">
+    <form method="post"  id="search_form">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="row">
+                    {% if object.is_active is False or object.is_completed is False  %}
+                    <div class="col-md-12">
+                        {% for field in form %}
+                        {% if field.is_hidden %}
+                        {% render_field field class+='form-control' %}
+                        {% else %}
+                        <div class="form-group{% if field.errors %} has-error{% endif %}">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {% render_field field class+='form-control' %}
+                            {% for error in field.errors %}
+                            <ul class="error-block">
+                                <li>{{ error }}</li>
+                            </ul>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div>
+                                    <label for="my-select"> Add Delivery Consignments (Orders)</label>
+                                    <select multiple="multiple" id="my-select" name="my-selected-consignments">
+                                        {% for con_ord in object.possible_delivery_orders %}
+                                        <option value='{{ con_ord.pk }}' {% if con_ord.delivery_trip %}selected="selected"{% endif %}>
+                                            # ORD{{ con_ord.order.number }} - {{ con_ord.order.shipping_address }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <a href='#' id='select-all'>select all</a>
+                                    <a href='#' id='deselect-all'>deselect all</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <hr />
+                        <label for="my-select-return"> Add Return Consignments (Order Items)</label>
+                        <div>
+                            {% regroup object.possible_delivery_returns by order_line.order.number as orderline_by_order %}
+
+                            <select multiple="multiple" id="my-select-return" name="my-selected-returns">
+                                {% for orders in orderline_by_order %}
+                                <optgroup label="#{{ orders.grouper }} - {{ orders.list.0.order_line.order.shipping_address }}">
+                                    {% for con_ord in orders.list %}
+                                    <option value='{{ con_ord.pk }}' {% if con_ord.delivery_trip %}selected="selected"{% endif %}>
+                                        #{{ con_ord.order_line.pk }} - {{ con_ord.order_line }} ({{ orders.grouper }})
+                                    </option>
+                                    {% endfor %}
+                                </optgroup>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <a href='#' id='select-all-return'>select all</a>
+                            <a href='#' id='deselect-all-return'>deselect all</a>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <hr />
+                        <input type="submit" name="save-action" value="{% if object.pk %}Update{% else %}Save{% endif %}?" class="btn btn-primary" />
+                        <input type="submit" name="save-action" value="{% if object.pk %}Update{% else %}Save{% endif %} And Create Another" class="btn btn-primary" />
+                        <input type="submit" name="save-action" value="{% if object.pk %}Update{% else %}save{% endif %} And Continue Editing" class="btn btn-primary" />
+                    </div>
+                    {% else %}
+                    <div class="col-md-12">
+                        <div class="alert alert-info"> You could not Change the Orders in this trip Because the trip
+                            has been  {% if object.is_active %} started{% else %} completed{% endif %}!</div>
+                        <div>
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <td>Agent </td>
+                                    <td>{{ object.agent }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Route </td>
+                                    <td>{{ object.route|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Info </td>
+                                    <td>{{ object.info|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <td> Deliverables  </td>
+                                    <td> {{ object.delivery_consignments.all|length }} </td>
+                                </tr>
+                                <tr>
+                                    <td> Returns  </td>
+                                    <td> {{ object.return_consignments.all|length }} </td>
+                                </tr>
+                                <tr>
+                                    <td> Trip Status  </td>
+                                    <td>
+                                        {% if con_ord.completed %}
+                                        <span class="badge badge-success"> Completed </span>
+                                        {% else %}
+                                        <span class="badge badge-info"> On the Way! </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <b> Consignments To Deliver </b>
+                        <ol>
+                            {% for consignment in object.delivery_consignments.all %}
+                            <li> # ORD{{ con_ord.order.number }} - {{ con_ord.order.shipping_address }}
+                                {% if con_ord.completed %}
+                                <span class="badge badge-success"> Completed </span>
+                                {% else %}
+                                <span class="badge badge-info"> On the Way! </span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                    <div class="col-md-12">
+                        <b> Consignments To Return </b>
+                        <ol>
+                            {% for consignment in object.return_consignments.all %}
+                            <li> # ORD{{ con_ord.order.number }} - {{ con_ord.order.shipping_address }}
+                                {% if con_ord.completed %}
+                                <span class="badge badge-success"> Completed </span>
+                                {% elif con_ord.request_cancelled %}
+                                <span class="badge badge-danger"> Cancelled </span>
+                                {% else %}
+                                <span class="badge badge-warning"> On the Way </span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+        </div>
+    </form>
+</div>
+{% endblock  %}
+
+{% block extrascripts %}
+{{ block.super }}
+<script src="{{ STATIC_URL }}/js/jquery.multi-select.js"></script>
+<script src="{% static 'js/jquery.quicksearch.js' %}"></script>
+<!--    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>-->
+<script>
+</script>
+{% endblock %}
+
+
+{% block onbodyload %}
+{{ block.super }}
+oscar.dashboard.orders.initTable();
+oscar.dashboard.search.init();
+{% if form.errors %}
+$('#SearchModal').modal('show');
+{% endif %}
+
+(function(){
+let $select = $('#my-select');
+let $select_return = $('#my-select-return');
+let $msselect = $('#ms-my-select-return');
+let $msselect_return = $('#ms-my-select-return');
+let options = {
+animation:true, container:'body',
+'data-content':'Select the consignments to get shipped in this trip!',
+placement:'right', 'data-title':'Required!', trigger:'manual',
+}
+let main_options = {
+selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='try \"12\"'>",
+selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='try \"4\"'>",
+afterInit: function(ms){
+var that = this,
+$selectableSearch = that.$selectableUl.prev(),
+$selectionSearch = that.$selectionUl.prev(),
+selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+
+that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+.on('keydown', function(e){
+if (e.which === 40){
+that.$selectableUl.focus();
+return false;
+}
+});
+
+that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+.on('keydown', function(e){
+if (e.which == 40){
+that.$selectionUl.focus();
+return false;
+}
+});
+},
+afterSelect: function(){
+this.qs1.cache();
+this.qs2.cache();
+},
+afterDeselect: function(){
+this.qs1.cache();
+this.qs2.cache();
+}
+};
+$select.select2('destroy');
+$select.multiSelect(main_options);  /*  http://loudev.com/  */
+$msselect.popover(options);
+
+$select_return.select2('destroy');
+$select_return.multiSelect(main_options);  /*  http://loudev.com/  */
+$msselect_return.popover(options);
+
+$('#select-all').click(function(){
+$('#my-select').multiSelect('select_all');
+return false;
+});
+$('#deselect-all').click(function(){
+$('#my-select').multiSelect('deselect_all');
+return false;
+});
+$('#refresh').on('click', function(){
+$('#my-select').multiSelect('refresh');
+return  false;
+});
+$('#select-all-return').click(function(){
+$('#my-select-return').multiSelect('select_all');
+return false;
+});
+$('#deselect-all-return').click(function(){
+$('#my-select-return').multiSelect('deselect_all');
+return false;
+});
+$('#refresh-return').on('click', function(){
+$('#my-select-return').multiSelect('refresh');
+return  false;
+});
+})()
+
+{% endblock onbodyload %}
+1

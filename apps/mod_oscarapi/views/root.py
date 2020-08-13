@@ -15,6 +15,7 @@ def PUBLIC_APIS(r, f):
             ("Resend OTP", reverse("api-v1--resend-otp", request=r, format=f)),
             ("Login With OTP", reverse("api-v1--login-otp", request=r, format=f)),
             ("Set / Change Location", reverse("availability-api:set-zone", request=r, format=f)),
+            ("User Profile", reverse("rest_user_details", request=r, format=f)),
             ("API Logout", reverse("rest_logout", request=r, format=f)),
         ])),
         ("Index Page", collections.OrderedDict([
@@ -63,6 +64,13 @@ def PUBLIC_APIS(r, f):
             ("basket", reverse("api-basket", request=r, format=f)),
             ("basket-add-product", reverse("api-basket-add-product", request=r, format=f)),
             ("basket-add-voucher", reverse("api-basket-add-voucher", request=r, format=f)),
+        ])),
+
+        ("Logistics", collections.OrderedDict([
+            ("Orders List", reverse("logistics-api:order-list", request=r, format=f)),
+            # ("Order Detail", reverse("logistics-api:order-list", request=r, format=f)),
+            # ("Order Item Detail", reverse("logistics-api:order-list", request=r, format=f)),
+            # ("Trip Status", reverse("logistics-api:order-list", request=r, format=f)),
         ])),
 
         # ("Pincode", collections.OrderedDict([

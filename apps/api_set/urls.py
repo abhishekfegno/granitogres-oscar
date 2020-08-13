@@ -26,6 +26,7 @@ v1__registration_apis = [
     path('v1/send-otp/', SendOTP.as_view(), name="api-v1--send-otp"),
     path('v1/resend-otp/', resend_otp, name="api-v1--resend-otp"),
     path('v1/login-with-otp/', LoginWithOTP.as_view(), name="api-v1--login-otp"),
+    # path('v1/update-profile/', UpdateProfile.as_view(), name="api-v1--update-profile"),
 ]
 
 home_urlpatterns = [
