@@ -1,4 +1,5 @@
 import json
+import sys
 from random import randint
 
 import requests
@@ -30,7 +31,7 @@ class Command(BaseCommand):
     s = None            # store request with session
     _passwd = None
     serializer_class = CheckoutSerializer
-    BASE_URL = 'http://localhost:8000/api/v1/'
+    BASE_URL = 'http://{}/api/v1/'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -40,10 +41,19 @@ class Command(BaseCommand):
             '--password',  default='asdf1234', help="Enter password, if password is not 'asdf1234' (Dev Settings)"
         )
         parser.add_argument(
+            '--host',  default='localhost:8000', help="Enter Host Name."
+        )
+        parser.add_argument(
             '--num-orders',  default='1', help="Number of orders you want to generate."
         )
         parser.add_argument(
-            'user_id', help='Get User',
+            '--print-users',  action='store_true', help="Print Users List"
+        )
+        # parser.add_argument(
+        #     '--random-user',  action='store_true', help="Print Users List"
+        # )
+        parser.add_argument(
+            '--user',  default='1', help='Get User',
         )
 
     def post(self, _method):
@@ -53,25 +63,37 @@ class Command(BaseCommand):
         )
         self.checkout(data)
 
+    def get_user(self, **options):
+        self.user = User.objects.filter(pk=options['user']).first()
+
     def handle(self, *args, **options):
         _method = None
+        self.BASE_URL = self.BASE_URL.format(options['host'])
+        if options['print_users']:
+            self.user = User.objects.order_by('?').first()
+            print("Username\t| ID\t| First Name\t| is_active")
+            for user in User.objects.all():
+                print(f" {user.username}\t| {user.id}\t| {user.get_short_name()}\t| {user.is_active}")
+            return
+
+        self.get_user(**options)
+        if not self.user:
+            return
+
         self._passwd = options['password']
-        try:
-            self.user = User.objects.get(pk=options['user_id'])
-        except Exception as e:
-            return print(e)
-        else:
-            if options['method'] not in [met.code for met in get_methods]:
-                print(f"Invalid Input Types. Must be one of {[met.code for met in get_methods]}")
-                return
-            for met in get_methods:
-                if met.code == options['method']:
-                    _method = met
-                    break
-            self.login(self.user)
-            for i in range(int(options['num_orders'])):
-                print(f"Generating Cart #{i+1}......!")
-                self.post(_method)
+
+        if options['method'] not in [met.code for met in get_methods]:
+            print(f"Invalid Input Types. Must be one of {[met.code for met in get_methods]}")
+            return
+        for met in get_methods:
+            if met.code == options['method']:
+                _method = met
+                break
+        self.login(self.user)
+
+        for i in range(int(options['num_orders'])):
+            print(f"Generating Cart #{i+1}......!")
+            self.post(_method)
 
     def login(self, user):
         s = requests.Session()
@@ -81,7 +103,13 @@ class Command(BaseCommand):
             login_data
         )
         print("Logged in Status ", response)
-        self.s = s
+        if response.status_code == 200:
+            print("Logged in as : ", user.get_short_name(), "[ ", user.pk, " ]")
+            self.s = s
+            return
+        print("Could Not Login")
+        print(response.text)
+        sys.exit(0)
 
     def checkout(self, data):
         response = self.s.post(
@@ -104,13 +132,15 @@ class Command(BaseCommand):
         for product in qs:
             post_url = self.BASE_URL + 'basket/add-product/'
             product_url = self.BASE_URL + 'products/' + str(product) + '/'
+            qty = randint(2, 10)
             self.s.post(
                 post_url,
                 {
                     'url': product_url,
-                    'quantity': randint(2, 10)
+                    'quantity': qty
                 }
             )
+            print(f"Added {qty} items of  {product}")
         basket = Basket.open.get(owner_id=self.user.id)
         basket.strategy = Selector().strategy(user=basket.owner)
         basket.save()
