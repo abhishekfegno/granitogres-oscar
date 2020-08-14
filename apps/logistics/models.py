@@ -1,10 +1,16 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Sum
+from django.utils.functional import cached_property
+from oscar.apps.payment.models import Source
 from oscar.core.loading import get_model
+from oscar.core.utils import get_default_currency
+from oscar.templatetags.currency_filters import currency
 
 from . import settings as app_settings
-
+from ..payment.utils.cash_payment import Cash
 
 Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
@@ -25,7 +31,7 @@ class DeliveryTrip(models.Model):
 
     @property
     def delivery_returns(self):
-        return Order.objects.filter(consignmentreturn__delivery_trip=self)
+        return OrderLine.objects.filter(consignmentreturn__delivery_trip=self)
 
     @property
     def possible_delivery_orders(self):
@@ -53,27 +59,39 @@ class DeliveryTrip(models.Model):
         In the assumption that, 'request_cancelled' can be set by user.
         """
 
-        """ Handling Delivery. """
-        self.delivery_consignments.update(completed=True)
-
-        """ Updating Status of order for Pickup and Pickup Cancellation. """
-        for consignment in self.return_consignments.all():
-            if consignment.order_item.request_cancelled is False:
-                """ Signal will handle refunding procedure and all."""
-                consignment.order_item.set_state(settings.ORDER_STATUS_RETURNED)
-            else:
-                """ Status back to delivered."""
-                consignment.order_item.set_state(settings.ORDER_STATUS_DELIVERED)
-
+        # """ Handling Delivery. """
+        # self.delivery_consignments.update(completed=True)
+        #
+        # """ Updating Status of order for Pickup and Pickup Cancellation. """
+        # for consignment in self.return_consignments.all():
+        #     if consignment.order_item.request_cancelled is False:
+        #         """ Signal will handle refunding procedure and all."""
+        #         consignment.order_item.set_state(settings.ORDER_STATUS_RETURNED)
+        #     else:
+        #         """ Status back to delivered."""
+        #         consignment.order_item.set_state(settings.ORDER_STATUS_DELIVERED)
+        assert not self.delivery_consignments.filter(completed=False).exists()
+        assert not self.return_consignments.filter(completed=False).exists()
         """ Handling Pickup. """
-        self.return_consignments.exclude(request_cancelled=True).update(completed=True)
         self.completed = True
         self.save()
+
+    @classmethod
+    def active_trip(cls, agent, raise_error=True):
+        try:
+            return cls.objects.get(agent=agent, is_active=True, completed=False)
+        except Exception as e:
+            if raise_error:
+                raise e
+            if type(e) is cls.MultipleObjectsReturned:
+                return cls.objects.filter(agent=agent, is_active=True, completed=False).last()
 
     def activate_trip(self):
         """
         Changes status of all Orders to "Out for Delivery" Mode.
         """
+        # there should not be any other active trips for this user.
+        assert not self.__class__.active_trip(self.agent, raise_error=False)
         self.is_active = True
         status = app_settings.LOGISTICS_ORDER_STATUS_ON_TRIP_ACTIVATE
         for order in self.delivery_orders():
@@ -92,11 +110,21 @@ class DeliveryTrip(models.Model):
             self.save()
         return self.completed
 
+    @cached_property
     def cods_to_collect(self):
-        return
+        sources = Source.objects.filter(
+            order__in=self.delivery_orders.all()
+        ).select_related('order', 'source_type')
+        net = Decimal('0.0')
+        for source in sources:
+            if source.source_type.name == Cash.name:
+                net += source.order.total_incl_tax
+        return currency(net, get_default_currency())
 
+    @cached_property
     def cods_to_return(self):
-        return
+        #  TODO : implement
+        return Decimal('0.0')
 
 
 class ConsignmentDelivery(models.Model):

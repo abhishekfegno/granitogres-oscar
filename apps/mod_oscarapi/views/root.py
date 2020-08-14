@@ -69,10 +69,9 @@ def PUBLIC_APIS(r, f):
         ])),
 
         ("Logistics", collections.OrderedDict([
-            ("Orders List", reverse("logistics-api:order-list", request=r, format=f)),
-            # ("Order Detail", reverse("logistics-api:order-list", request=r, format=f)),
-            # ("Order Item Detail", reverse("logistics-api:order-list", request=r, format=f)),
-            # ("Trip Status", reverse("logistics-api:order-list", request=r, format=f)),
+            ("Trip List", reverse("logistics-api:active-trip", request=r, format=f)),
+            ("Orders List", reverse("logistics-api:delivered-list", request=r, format=f)),
+            ("Orders Detail", reverse("logistics-api:detail-trip", kwargs={'pk': '8'}, request=r, format=f)),
         ])),
 
         # ("Pincode", collections.OrderedDict([

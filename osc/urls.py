@@ -31,8 +31,6 @@ from django.views.i18n import JavaScriptCatalog
 
 view_checkout = never_cache(CheckoutView.as_view())
 
-
-
 urlpatterns = [
     path('api/v1/checkout/', view_checkout, name='api-checkout'),               # Must be before oscar_api.urls
     # path('api/v1/', include(apps.get_app_config("oscarapicheckout").urls[0])),  # Must be before oscar_api.urls
@@ -40,7 +38,7 @@ urlpatterns = [
     path('api/v1/', include('oscarapi.urls')),
     path('api/v1/buy-now/', include('apps.buynow.urls')),
     path('api/', include('apps.api_set.urls')),                                 # prone to versioning
-    path('api/', include('apps.logistics.apis')),                                 # prone to versioning
+    path('api/v1/', include('apps.logistics.apis')),                                 # prone to versioning
 
     path('api/v1/avalilability/', include('apps.availability.api')),
     path('dashboard/avalilability/', include('apps.availability.urls')),

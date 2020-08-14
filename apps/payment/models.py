@@ -26,7 +26,6 @@ class PaymentGateWayResponse(models.Model):
     def __str__(self):
         return self.transaction_id
 
-
     # Concept of payee is depricated and will be removed soon.
     _payee = None
 
