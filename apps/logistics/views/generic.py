@@ -18,8 +18,15 @@ class TripCreationForm(forms.ModelForm):
     info = forms.CharField(max_length=256, required=False)
     route = forms.CharField(max_length=128, required=False, )
     agent = forms.ModelChoiceField(User.objects.filter(is_delivery_boy=True), required=True)
-    selected_orders = forms.ModelMultipleChoiceField(ConsignmentDelivery.objects.all(), widget=forms.MultipleHiddenInput())
-    selected_returns = forms.ModelMultipleChoiceField(ConsignmentDelivery.objects.all(), widget=forms.MultipleHiddenInput())
+    selected_orders = forms.ModelMultipleChoiceField(
+        ConsignmentDelivery.objects.all(),
+        required=False,
+        widget=forms.MultipleHiddenInput())
+
+    selected_returns = forms.ModelMultipleChoiceField(
+        ConsignmentDelivery.objects.all(),
+        required=False,
+        widget=forms.MultipleHiddenInput())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -27,11 +34,12 @@ class TripCreationForm(forms.ModelForm):
             self.instance = DeliveryTrip()
         self.fields['selected_orders'].queryset = self.instance.possible_delivery_orders
         self.fields['selected_returns'].queryset = self.instance.possible_delivery_returns
-        self.fields['agent'].initial = self.instance.agent_id
+        if self.instance:
+            self.fields['agent'].initial = self.instance.agent_id
 
     class Meta:
         model = DeliveryTrip
-        fields = ('agent', 'route', 'info', )
+        fields = ('agent', 'route', 'info', 'selected_orders', 'selected_returns')
 
 
 @method_decorator(login_required, name="dispatch")

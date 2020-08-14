@@ -14,11 +14,14 @@ urlpatterns = [
     ])),
 
     path('trips/', include([
+
+        path('new/', TripCreateView.as_view(), name="new-trip"),
+        path('<int:pk>/', TripUpdateView.as_view(), name="update-trip"),
+
         path('planned/', PlannedTripsListView.as_view(), name="planned-trips"),
         path('active/', ActiveTripsListView.as_view(), name="active-trips"),
         path('delivered/', DeliveredTripsListView.as_view(), name="delivered-trips"),
-        path('new/', TripCreateView.as_view(), name="new-trip"),
-        path('<int:pk>/', TripUpdateView.as_view(), name="update-trip"),
+
     ]))
 
 ]
