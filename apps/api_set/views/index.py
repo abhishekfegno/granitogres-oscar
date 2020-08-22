@@ -38,14 +38,17 @@ BasketLine = get_model('basket', 'Line')
 @api_view(("GET",))
 def home(request, *a, **k):
     user = None
+    basket = None
     b_count = 0
     if request.user.is_authenticated:
         user_fields = ['id', 'mobile', 'email', 'first_name', 'last_name', 'is_active',
                        'status', 'is_delivery_request_pending']
         user = {field: getattr(request.user, field) for field in user_fields}
-        b_count = Basket.open.filter(owner=request.user).last().num_lines
-    else:
-        b_count = request.basket.num_lines
+        basket = Basket.open.filter(owner=request.user).last()
+    if basket is None:
+        basket = request.basket or None
+    b_count = basket.num_lines if basket else 0
+    
     return Response({
         "user": user,
         "cart_item_count": b_count,

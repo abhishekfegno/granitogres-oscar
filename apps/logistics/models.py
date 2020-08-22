@@ -54,30 +54,44 @@ class DeliveryTrip(models.Model):
                                  'order_line__order__user',
                                  'order_line__order__shipping_address')
 
+    def mark_as_completed(self):
+        """
+        In the assumption that, 'request_cancelled' can be set by user.
+        """
+        assert not self.delivery_consignments.filter(completed=False).exists(), \
+            "Could mark as complete because there are incomplete delivery consignments."
+        assert not self.return_consignments.exclude().filter(completed=False).exists(), \
+            "Could mark as complete because there are incomplete delivery consignments."
+        """ Handling Pickup. """
+        self.is_active = False
+        self.completed = True
+        self.save()
+
     def complete_forcefully(self):
         """
         In the assumption that, 'request_cancelled' can be set by user.
         """
+        # import pdb; pdb.set_trace()
+        """ Handling Delivery. """
+        self.delivery_consignments.update(completed=True)
 
-        # """ Handling Delivery. """
-        # self.delivery_consignments.update(completed=True)
-        #
-        # """ Updating Status of order for Pickup and Pickup Cancellation. """
-        # for consignment in self.return_consignments.all():
-        #     if consignment.order_item.request_cancelled is False:
-        #         """ Signal will handle refunding procedure and all."""
-        #         consignment.order_item.set_state(settings.ORDER_STATUS_RETURNED)
-        #     else:
-        #         """ Status back to delivered."""
-        #         consignment.order_item.set_state(settings.ORDER_STATUS_DELIVERED)
-        assert not self.delivery_consignments.filter(completed=False).exists()
-        assert not self.return_consignments.filter(completed=False).exists()
+        """ Updating Status of order for Pickup and Pickup Cancellation. """
+        for consignment in self.return_consignments.filter(completed=True):
+            if consignment.order_item.request_cancelled is False:
+                """ Signal will handle refunding procedure and all."""
+                consignment.order_item.set_state(settings.ORDER_STATUS_RETURNED)
+
+        self.delivery_consignments.filter(completed=False).update(completed=True)
+        self.return_consignments.filter(
+            completed=False, request_cancelled=False
+        ).update(request_cancelled=True, completed=False)
         """ Handling Pickup. """
+        self.is_active = False
         self.completed = True
         self.save()
 
     @classmethod
-    def active_trip(cls, agent, raise_error=True):
+    def get_active_trip(cls, agent, raise_error=True):
         try:
             return cls.objects.get(agent=agent, is_active=True, completed=False)
         except Exception as e:
@@ -86,12 +100,16 @@ class DeliveryTrip(models.Model):
             if type(e) is cls.MultipleObjectsReturned:
                 return cls.objects.filter(agent=agent, is_active=True, completed=False).last()
 
+    def agent_do_not_have_other_active_trips(self):
+        return self.__class__.objects.filter(agent=self.agent, is_active=True, completed=False).count() == 0
+
     def activate_trip(self):
         """
         Changes status of all Orders to "Out for Delivery" Mode.
         """
         # there should not be any other active trips for this user.
-        assert not self.__class__.active_trip(self.agent, raise_error=False)
+        assert self.have_consignments
+        assert self.agent_do_not_have_other_active_trips()
         self.is_active = True
         status = app_settings.LOGISTICS_ORDER_STATUS_ON_TRIP_ACTIVATE
         for order in self.delivery_orders():
@@ -125,6 +143,10 @@ class DeliveryTrip(models.Model):
     def cods_to_return(self):
         #  TODO : implement
         return Decimal('0.0')
+
+    @property
+    def have_consignments(self):
+        return self.delivery_consignments.exists() or self.return_consignments.exists()
 
 
 class ConsignmentDelivery(models.Model):

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Count
 from django.http import HttpResponseRedirect
@@ -43,9 +44,9 @@ class TripCreationForm(forms.ModelForm):
 
 
 @method_decorator(login_required, name="dispatch")
-@method_decorator(user_passes_test(lambda user:user.is_superuser), name="dispatch")
+@method_decorator(user_passes_test(lambda user: user.is_superuser), name="dispatch")
 class TripUpdateView(UpdateView):
-    queryset = DeliveryTrip.objects.filter(completed=False)
+    queryset = DeliveryTrip.objects.order_by('-id')
     template_name = 'logistics/deliverytrip_form.html'
     form_class = TripCreationForm
 
@@ -87,6 +88,48 @@ class TripCreateView(TripUpdateView):
 
     def get_object(self, queryset=None):
         return DeliveryTrip()
+
+
+@login_required
+@user_passes_test(lambda user: user.is_superuser)
+def trip_update_status_view(request, **kwargs):
+    if request.method == 'POST':
+        dt: DeliveryTrip = DeliveryTrip.objects.filter(pk=kwargs['pk']).last()
+        action_complete_forcefully = request.POST.get('action') == 'completed_forcefully'
+        action_complete = request.POST.get('action') == 'completed'
+        action_start = request.POST.get('action') == 'start_trip'
+        if dt is None:
+            messages.error(request, "Invalid Submission")
+        elif action_complete_forcefully:
+            dt.complete_forcefully()
+            messages.success(request, "Trip marked as  Completed Forcefully.")
+
+        elif action_complete:
+            try:
+                dt.mark_as_completed()
+            except AssertionError as e:
+                messages.error(request, str(e))
+                return HttpResponseRedirect(
+                    reverse('logistics:update-trip', kwargs={'pk': kwargs['pk']}) + '?complete_forcefully=1')
+            else:
+                messages.success(request, "Trip marked as  Completed.")
+        elif action_start:
+            # Validations
+            if not dt.have_consignments:
+                messages.error(request, "Could not start Trip, as trip neither have "
+                                        "Delivery Consignments nor have Return Consignments.")
+
+            elif dt.agent_do_not_have_other_active_trips():
+                messages.error(request, "Could not start Trip, this Agent already in  another trip.")
+
+            elif action_start:
+                dt.activate_trip()
+                messages.success(request, "Trip marked as Started..")
+        else:
+            messages.error(request, "Invalid Action. Please select one from 'completed|start_trp'")
+    else:
+        messages.error(request, "Method not Allowed!")
+    return HttpResponseRedirect(reverse('logistics:update-trip', kwargs={'pk': kwargs['pk']}))
 
 
 @method_decorator(login_required, name="dispatch")
