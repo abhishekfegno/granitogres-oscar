@@ -48,7 +48,7 @@ def home(request, *a, **k):
     if basket is None:
         basket = request.basket or None
     b_count = basket.num_lines if basket else 0
-    
+
     return Response({
         "user": user,
         "cart_item_count": b_count,

@@ -51,9 +51,9 @@ ORDER_STATUS_RETURNED = 'Returned'
 ORDER_STATUS_CANCELED = 'Canceled'
 
 # Needed by oscarapicheckout
-ORDER_STATUS_PENDING = ORDER_STATUS_PLACED
+ORDER_STATUS_PENDING = 'Placed'
 ORDER_STATUS_PAYMENT_DECLINED = 'Payment Declined'
-ORDER_STATUS_AUTHORIZED = ORDER_STATUS_PLACED
+ORDER_STATUS_AUTHORIZED = ORDER_STATUS_PENDING
 OSCAR_INITIAL_ORDER_STATUS = ORDER_STATUS_PENDING
 OSCARAPI_INITIAL_ORDER_STATUS = ORDER_STATUS_PENDING
 OSCAR_INITIAL_LINE_STATUS = ORDER_STATUS_PENDING
@@ -61,7 +61,8 @@ OSCAR_INITIAL_LINE_STATUS = ORDER_STATUS_PENDING
 admin_or_staff = lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser
 
 OSCAR_ORDER_STATUS_PIPELINE = {
-    'Placed': ('Order Confirmed', 'Canceled'),  # admin / user can cancel an order / an item
+    # 'Pending': ('Order Confirmed', 'Canceled', 'Pending', 'Payment Declined'),  # admin / user can cancel an order / an item
+    'Placed': ('Order Confirmed', 'Payment Declined', 'Canceled'),  # admin / user can cancel an order / an item
     'Order Confirmed': (
         'Out For Delivery', 'Delivered', 'Canceled'),  # only admin can set these statuses
     'Out For Delivery': ('Delivered', 'Canceled'),  # only admin can set these statuses

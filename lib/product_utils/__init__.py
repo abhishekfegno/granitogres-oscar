@@ -19,6 +19,10 @@ def category_filter(queryset, category_slug, return_as_tuple=False):
     return out if return_as_tuple else out[0]
 
 
+def brand_filter(queryset, brand_ids):
+    return queryset.filter(brand__in=brand_ids)
+
+
 def apply_filter(queryset, _filter, null_value_compatability='__'):
     """
     _filter:
