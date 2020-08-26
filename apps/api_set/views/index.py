@@ -66,7 +66,7 @@ def index(request, *a, **k):
     ).annotate(c=Count('product__basket_lines')).order_by('depth', 'c')[:10]
     categories = CategorySerializer(category_set, **cxt, many=True).data
 
-    for slot in range(2):
+    for slot in range(1, 3):
         out['home'].append({
             'top': categories[index:index + 3],
             'middle': [{
