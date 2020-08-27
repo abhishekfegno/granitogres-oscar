@@ -1,7 +1,9 @@
+import math
 from decimal import Decimal
 
 from django.core.cache import cache
 from django.db.models import Max, F, ExpressionWrapper, IntegerField, Q
+from django.utils.html import strip_tags
 from oscar.apps.offer.models import ConditionalOffer
 from oscar.apps.shipping.scales import Scale
 from oscar.core.loading import get_model
@@ -47,6 +49,10 @@ class CategorySerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
     img_thumb_mob = serializers.SerializerMethodField()
     offers_upto = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+
+    def get_description(self, instance):
+        return strip_tags(instance.description)
 
     def get_children(self, instance):
         return self.__class__(
@@ -61,6 +67,7 @@ class CategorySerializer(serializers.ModelSerializer):
         return req.build_absolute_uri(img)
 
     def get_offers_upto(self, instance):
+        round_off_base = 5
         if instance.depth == 1:
             field_1 = 'price_excl_tax'
             field_2 = 'price_retail'
@@ -75,7 +82,8 @@ class CategorySerializer(serializers.ModelSerializer):
                 diff_percentage=ExpressionWrapper(  # wrap expression : (field_1 - field_2) * 100 / field_1
                     (F(field_1) - F(field_2)) * Decimal('100.0') / (F(field_1)),
                     output_field=IntegerField()))
-            return sr2.aggregate(Max('diff_percentage'))['diff_percentage__max']
+            percent = sr2.aggregate(Max('diff_percentage'))['diff_percentage__max']
+            return round_off_base * math.ceil(percent/round_off_base)     # to round 43 to 45 and 46 to 50
         return 0
 
 
@@ -159,6 +167,11 @@ class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMi
     # siblings = serializers.SerializerMethodField()
     variants = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
+    about = serializers.SerializerMethodField()
+    storage_and_uses = serializers.SerializerMethodField()
+    benifits = serializers.SerializerMethodField()
+    other_product_info = serializers.SerializerMethodField()
+    variable_weight_policy = serializers.SerializerMethodField()
 
     class Meta:
         model = Product

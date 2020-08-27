@@ -10,6 +10,7 @@ from apps.utils import get_purchase_info, purchase_info_as_dict, purchase_info_l
 from lib import cache_key
 from lib.algorithms.product import siblings_pointer
 from lib.cache import cache_library, get_featured_path
+from django.utils.html import strip_tags
 
 
 Product = get_model("catalogue", "Product")
@@ -108,8 +109,22 @@ class ProductDetailSerializerMixin(object):
         return self.context['product'].get_title()
 
     def get_description(self, instance):
-        # return striptags(self.context['product'].description)
-        return self.context['product'].description
+        return strip_tags(self.context['product'].description)
+
+    def get_about(self, instance):
+        return strip_tags(self.context['product'].about)
+
+    def get_storage_and_uses(self, instance):
+        return strip_tags(self.context['product'].storage_and_uses)
+
+    def get_benifits(self, instance):
+        return strip_tags(self.context['product'].benifits)
+
+    def get_other_product_info(self, instance):
+        return strip_tags(self.context['product'].other_product_info)
+
+    def get_variable_weight_policy(self, instance):
+        return strip_tags(self.context['product'].variable_weight_policy)
 
     def get_categories(self, instance):
         featured = get_featured_path()
