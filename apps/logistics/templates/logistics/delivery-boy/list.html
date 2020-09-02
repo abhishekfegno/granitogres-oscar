@@ -50,7 +50,7 @@
                         <td>{{ boy.get_short_name }}</td>
                         <td>{{ boy.mobile|default:"-" }}</td>
                         <td>{{ boy.email|default:"-" }}</td>
-                        <td>{{ boy.status|default:"-" }}</td>
+                        <td>{{ boy.status_text|default:"-" }}</td>
                         <td>
                             <div>
                                 <form action="{% url 'logistics:dashboard-delivery-boy-update' pk=boy.id  %}"

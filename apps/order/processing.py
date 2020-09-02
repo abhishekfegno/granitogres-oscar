@@ -74,7 +74,31 @@ class EventHandler(processing.EventHandler):
         return self.create_payment_event(
             order, event_type, amount, lines, line_quantities, **kwargs)
 
+    @transaction.atomic
+    def handle_order_line_status_change(self, order_line, new_status: str, note_msg=None):
+        """
+        Handle Order Status Change in Oscar.
+        """
 
+        """
+        Change Order Status
+        """
+        order_line.set_status(new_status)
+
+        """ 
+        Handle Refund and Update of Refund Quantity on `new_status` == 'Return'. 
+        Refund Can be proceeded only after changing Order Status.
+        """
+
+        if new_status in settings.OSCAR_LINE_REFUNDABLE_STATUS:
+            refunds.RefundFacade().refund_order_line(line=order_line)
+            order_line.refunded_quantity = order_line.quantity
+            order_line.save()
+        if note_msg:
+            """
+            Add note if there is a note msg.
+            """
+            self.create_note(order_line.order, note_msg)
 
 
 

@@ -40,7 +40,7 @@ class TripCreationForm(forms.ModelForm):
 
     class Meta:
         model = DeliveryTrip
-        fields = ('agent', 'route', 'info', 'selected_orders', 'selected_returns')
+        fields = ('agent', 'route', 'info', 'selected_orders', 'selected_returns', 'status')
 
 
 @method_decorator(login_required, name="dispatch")
@@ -63,7 +63,6 @@ class TripUpdateView(UpdateView):
             deliverable_consignments_to_remove.update(delivery_trip=None)       # no need to change the status.
 
             new_deliverable_consignments.update(delivery_trip=self.object)
-
 
             possible_return_consignments = self.object.possible_delivery_returns
             new_return_consignments = possible_return_consignments.filter(id__in=con_returns)
@@ -101,7 +100,7 @@ def trip_update_status_view(request, **kwargs):
         if dt is None:
             messages.error(request, "Invalid Submission")
         elif action_complete_forcefully:
-            dt.complete_forcefully()
+            dt.complete_forcefully(reason="Order Delivery has been cancelled!  ")
             messages.success(request, "Trip marked as  Completed Forcefully.")
 
         elif action_complete:
@@ -109,8 +108,11 @@ def trip_update_status_view(request, **kwargs):
                 dt.mark_as_completed()
             except AssertionError as e:
                 messages.error(request, str(e))
+                params = ''
+                if settings.DEBUG:
+                    params = '?complete_forcefully=1'
                 return HttpResponseRedirect(
-                    reverse('logistics:update-trip', kwargs={'pk': kwargs['pk']}) + '?complete_forcefully=1')
+                    reverse('logistics:update-trip', kwargs={'pk': kwargs['pk']}) + params)
             else:
                 messages.success(request, "Trip marked as  Completed.")
         elif action_start:
@@ -119,7 +121,7 @@ def trip_update_status_view(request, **kwargs):
                 messages.error(request, "Could not start Trip, as trip neither have "
                                         "Delivery Consignments nor have Return Consignments.")
 
-            elif dt.agent_do_not_have_other_active_trips():
+            elif not dt.agent_do_not_have_other_active_trips():
                 messages.error(request, "Could not start Trip, this Agent already in  another trip.")
 
             elif action_start:
@@ -137,7 +139,7 @@ def trip_update_status_view(request, **kwargs):
 class ActiveTripsListView(ListView):
 
     template_name = 'logistics/deliverytrip_list.html'
-    queryset = DeliveryTrip.objects.filter(completed=False, is_active=True).annotate(
+    queryset = DeliveryTrip.objects.filter(status=DeliveryTrip.ON_TRIP).annotate(
         order_count=Count('delivery_consignments'), refund_count=Count('return_consignments')).order_by('-id')
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -150,7 +152,7 @@ class ActiveTripsListView(ListView):
 @method_decorator(user_passes_test(lambda user: user.is_superuser), name="dispatch")
 class PlannedTripsListView(ListView):
 
-    queryset = DeliveryTrip.objects.filter(completed=False, is_active=False).annotate(
+    queryset = DeliveryTrip.objects.filter(status=DeliveryTrip.YET_TO_START).annotate(
         order_count=Count('delivery_consignments'), refund_count=Count('return_consignments')).order_by('-id')
     template_name = 'logistics/deliverytrip_list.html'
 
@@ -161,9 +163,9 @@ class PlannedTripsListView(ListView):
 
 
 @method_decorator(login_required, name="dispatch")
-@method_decorator(user_passes_test(lambda user:user.is_superuser), name="dispatch")
+@method_decorator(user_passes_test(lambda user: user.is_superuser), name="dispatch")
 class DeliveredTripsListView(ListView):
-    queryset = DeliveryTrip.objects.filter(completed=True).annotate(
+    queryset = DeliveryTrip.objects.filter(status=DeliveryTrip.COMPLETED).annotate(
         order_count=Count('delivery_consignments'), refund_count=Count('return_consignments')).order_by('-id')
     template_name = 'logistics/deliverytrip_list.html'
 

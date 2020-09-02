@@ -11,8 +11,10 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
 
     def get_orders(self, instance):
         return [{
-            'id': consignment.id,
-            'order_id': consignment.order.number,
+            'consignment_id': consignment.id,
+            'id': consignment.order.id,
+            'type': 'order',
+            'order_number': consignment.order.number,
             'date_placed': consignment.order.date_placed,
             'num_items': consignment.order.num_items,
             'total_incl_tax': consignment.order.total_incl_tax,
@@ -24,8 +26,11 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
 
     def get_returns(self, instance):
         return [{
-            'id': cons.id,
-            'order_id': cons.order_line.order.number,
+            'consignment_return_id': cons.id,
+            'id': cons.order_line.id,
+            'type': 'order_item',
+            'order_number': cons.order_line.order.number,
+            'order_id': cons.order_line.order.id,
             'date_placed': cons.order_line.order.date_placed,
             'num_items': cons.order_line.order.num_items,
             'total_incl_tax': cons.order_line.order.total_incl_tax,

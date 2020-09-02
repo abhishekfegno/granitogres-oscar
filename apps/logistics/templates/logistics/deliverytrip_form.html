@@ -17,7 +17,7 @@
     </li>
     <li> <a href="{% url 'logistics:active-trips' %}">Trips</a> </li>
     {% if object.pk %}
-    <li  class="active"> Update # {{ object.id }} [ AGENT : {{ object.agent }} ]</li>
+    <li  class="active"> Update #{{ object.id }}. {{ object.agent }} ({{ object.status }}) </li>
     {% else  %}
     <li class="active">Create Delivery Trip</li>
     {% endif %}
@@ -42,7 +42,7 @@
 
 <div class="page-header">
     {% if object.pk %}
-    <h1> Update # {{ object.id }} [ AGENT : {{ object.agent }} ]</h1>
+    <h1> Update #{{ object.id }}. {{ object.agent }} ({{ object.status }})</h1>
     {% else  %}
     <h1>Create Delivery Trip</h1>
     {% endif %}
@@ -59,30 +59,33 @@
     {% if object.pk  %}
     <div class="row">
         <div class="col-md-12">
-            {% if object.is_active is False or object.is_completed is False %}
+            {% if object.is_under_planning %}
+            {% comment %} PLANNED TRIP {% endcomment %}
             <form method="post" action="{% url 'logistics:update-trip-status' pk=object.pk %}">
                 <input type="hidden" hidden name="action" value="start_trip">
                 <button class="btn btn-danger pull-right btn-lg"> Start Trip! </button>
             </form>
-            {% elif object.is_active is True or object.is_completed is False %}
-            <form method="post" action="{% url 'logistics:update-trip-status' pk=object.pk %}">
-                <input type="hidden" hidden name="action" value="completed">
-                <button class="btn btn-success pull-right btn-lg"> <b>Mark as Completed!</b> </button>
-            </form>
-            {% if request.GET.complete_forcefully %}
+            {% elif object.on_trip %}
+            {% comment %} Active TRIP {% endcomment %}
                 <form method="post" action="{% url 'logistics:update-trip-status' pk=object.pk %}">
-                    <input type="hidden" hidden name="action" value="completed_forcefully">
-                    <button style="margin-right: 10px;" class="btn btn-danger pull-right btn-lg">
-                        <b>Complete Forcefully!</b> </button>
+                    <input type="hidden" hidden name="action" value="completed">
+                    <button class="btn btn-success pull-right btn-lg"> <b>Mark as Completed!</b> </button>
                 </form>
-            {% endif %}
+                {% if request.GET.complete_forcefully %}
+                    <form method="post" action="{% url 'logistics:update-trip-status' pk=object.pk %}">
+                        <input type="hidden" hidden name="action" value="completed_forcefully">
+                        <button style="margin-right: 10px;" class="btn btn-danger pull-right btn-lg">
+                            <b>Complete Forcefully!</b> </button>
+                    </form>
+                {% endif %}
             {% else %}
-                <button class="btn btn-success pull-right"> Trip Completed! </button>
+                {% comment %} Delivered TRIP {% endcomment %}
+                <button class="badge badge-success pull-right"> Trip Completed! </button>
             {% endif %}
         </div>
     </div>
     {% endif %}
-    {% if object.is_active is False or object.is_completed is False  %}
+    {% if object.is_under_planning %}
     <form method="post"  id="search_form">
         <div class="row">
             <div class="col-md-8">
@@ -219,11 +222,11 @@
                     <b> Consignments To Deliver </b>
                     <ol>
                         {% for consignment in object.delivery_consignments.all %}
-                        <li> # ORD{{ con_ord.order.number }} - {{ con_ord.order.shipping_address }}
+                        <li style="margin-top:3px"> # ORD{{ con_ord.order.number }} - {{ con_ord.order.shipping_address }}
                             {% if con_ord.completed %}
                             <span class="badge badge-success"> Completed </span>
                             {% else %}
-                            <span class="badge badge-info"> On the Way! </span>
+                            <span class="badge badge-light"> On the Way! </span>
                             {% endif %}
                         </li>
                         {% endfor %}
@@ -233,7 +236,7 @@
                     <b> Consignments To Return </b>
                     <ol>
                         {% for consignment in object.return_consignments.all %}
-                        <li> # ORD{{ con_ord.order.number }} - {{ con_ord.order.shipping_address }}
+                        <li style="margin-top:3px"> # ORD{{ con_ord.order.number }} - {{ con_ord.order.shipping_address }}
                             {% if con_ord.completed %}
                             <span class="badge badge-success"> Completed </span>
                             {% elif con_ord.request_cancelled %}

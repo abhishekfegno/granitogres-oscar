@@ -48,6 +48,14 @@ class User(AbstractUser):
         return 'customer'
 
     @property
+    def status_text(self):
+        if self.is_delivery_boy:
+            return 'Approved'
+        if self.is_delivery_boy is None:
+            return 'Pending'
+        return 'Customer'
+
+    @property
     def is_delivery_request_pending(self):
         return self.is_delivery_boy is None
 
