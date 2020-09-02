@@ -43,6 +43,10 @@ class OrderListSerializer(serializers.ModelSerializer):
 
 class OrderDetailSerializer(serializers.ModelSerializer):
     lines = LineDetailSerializer(many=True)
+    total_discount_incl_tax = serializers.SerializerMethodField()
+
+    def get_total_discount_incl_tax(self, instance):
+        return str(instance.total_discount_incl_tax)
 
     class Meta:
         model = Order
