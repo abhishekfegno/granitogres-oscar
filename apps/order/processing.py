@@ -24,6 +24,7 @@ class EventHandler(processing.EventHandler):
         """
         Change Order Status
         """
+        old_status = order.status
         order.set_status(new_status)
 
         """ 
@@ -42,6 +43,7 @@ class EventHandler(processing.EventHandler):
             order.lines.exclude(
                 status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS
             ).update(status=new_status)
+
 
         if note_msg:
             """
@@ -83,13 +85,13 @@ class EventHandler(processing.EventHandler):
         """
         Change Order Status
         """
+        old_status = order_line.status
         order_line.set_status(new_status)
 
         """ 
         Handle Refund and Update of Refund Quantity on `new_status` == 'Return'. 
         Refund Can be proceeded only after changing Order Status.
         """
-
         if new_status in settings.OSCAR_LINE_REFUNDABLE_STATUS:
             refunds.RefundFacade().refund_order_line(line=order_line)
             order_line.refunded_quantity = order_line.quantity

@@ -47,6 +47,7 @@ ORDER_STATUS_CONFIRMED = 'Order Confirmed'
 ORDER_STATUS_OUT_FOR_DELIVERY = 'Out For Delivery'
 ORDER_STATUS_DELIVERED = 'Delivered'
 ORDER_STATUS_RETURN_REQUESTED = 'Return Requested'
+ORDER_STATUS_RETURN_APPROVED = 'Return Approved'
 ORDER_STATUS_RETURNED = 'Returned'
 ORDER_STATUS_CANCELED = 'Canceled'
 
@@ -63,8 +64,7 @@ admin_or_staff = lambda user, url_name, url_args, url_kwargs: user.is_staff or u
 OSCAR_ORDER_STATUS_PIPELINE = {
     # 'Pending': ('Order Confirmed', 'Canceled', 'Pending', 'Payment Declined'),  # admin / user can cancel an order / an item
     'Placed': ('Order Confirmed', 'Payment Declined', 'Canceled'),  # admin / user can cancel an order / an item
-    'Order Confirmed': (
-        'Out For Delivery', 'Delivered', 'Canceled'),  # only admin can set these statuses
+    'Order Confirmed': ('Out For Delivery', 'Delivered', 'Canceled'),  # only admin can set these statuses
     'Out For Delivery': ('Delivered', 'Canceled'),  # only admin can set these statuses
     'Delivered': (),
     'Payment Declined': ('Order Confirmed', 'Canceled'),
@@ -72,14 +72,14 @@ OSCAR_ORDER_STATUS_PIPELINE = {
 }
 
 OSCAR_LINE_STATUS_PIPELINE = {
-    'Placed': ('Canceled',),  # user can cancel an item until order confirm
-    'Order Confirmed': (),  # admin can deliver or confirm item
-    'Out For Delivery': (),  # our for delivery
-    'Delivered': ('Return Requested',),  # delivered item can be triggered for return
-    'Return Requested': ('Returned', 'Delivered',),  # user can cancel return to go to 'Delivered'
-    # or return accepted by by admin
-    'Returned': (),  # nothing to do much
-    'Canceled': (),  # nothing to do much
+    'Placed': ('Canceled',),                                 # user can cancel an item until order confirm
+    'Order Confirmed': (),                                   # admin can deliver or confirm item
+    'Out For Delivery': (),                                  # our for delivery
+    'Delivered': ('Return Requested', ),                     # delivered item can be triggered for return
+    'Return Requested': ('Return Approved', 'Delivered', ),  # user can cancel return to go to 'Delivered'
+    'Return Approved': ('Returned',  'Delivered', ),         # or return accepted by by admin
+    'Returned': (),                                          # nothing to do much
+    'Canceled': (),                                          # nothing to do much
 }
 
 OSCAR_ORDER_REFUNDABLE_STATUS = (
@@ -98,15 +98,16 @@ OSCAR_ORDER_STATUS_CASCADE = {
     'Canceled': 'Canceled',
 }
 
-OSCAR_ADMIN_LINE_CANCELLABLE_ORDER_STATUSES = (
+OSCAR_ADMIN_PRE_DELIVERY_STATUSES = (
     'Placed',
     'Order Confirmed',
     'Out For Delivery',
 )
 
-OSCAR_ADMIN_LINE_REFUNDABLE_ORDER_STATUSES = (
+OSCAR_ADMIN_LINE_POST_DELIVERY_ORDER_STATUSES = (
     'Delivered',
     'Return Requested',
+    'Return Approved',
     'Returned',
 )
 
@@ -115,7 +116,8 @@ OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_BEFORE_DELIVERY = (
 )
 OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_AFTER_DELIVERY = (
     ('Return Requested', 'Initiate the return request'),
-    ('Delivered', 'Cancel return request'),
+    ('Return Approved', 'Approve Return!'),
+    ('Delivered', 'Cancel return request!'),
     ('Returned', 'Returned'),
 )
 
@@ -272,21 +274,23 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'label': _('Logistics'),
         'icon': 'icon-double-angle-down',
         'children': [
-            {'label': _('Create Trip'), 'url_name': 'logistics:new-trip',
-             'access_fn': admin_or_staff },
-
             {'label': _('Delivery Agents'), 'url_name': 'logistics:dashboard-delivery-boy-list',
              'access_fn': admin_or_staff },
+
+            {'label': _('Create Trip'), 'url_name': 'logistics:new-trip',
+             'access_fn': admin_or_staff},
 
             {'label': _('Planned Trips'), 'url_name': 'logistics:planned-trips',
              'access_fn': admin_or_staff },
 
-
             {'label': _('Active Trips'), 'url_name': 'logistics:active-trips',
              'access_fn': admin_or_staff },
 
-            {'label': _('Delivered Trips'),
-             'url_name': 'logistics:delivered-trips',
+            {'label': _('Delivered Trips'), 'url_name': 'logistics:delivered-trips',
+             'access_fn': admin_or_staff,
+             },
+
+            {'label': _('Cancelled Trips'), 'url_name': 'logistics:cancelled-trips',
              'access_fn': admin_or_staff,
              },
         ]

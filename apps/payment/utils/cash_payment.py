@@ -1,7 +1,9 @@
 from django.utils import timezone
+from django.utils.module_loading import import_string
 from oscar.apps.payment.models import Source
 from oscarapicheckout import states
-from oscarapicheckout.methods import Transaction, PaymentMethod
+from apps.mod_oscarapi import states as custom_states
+from oscarapicheckout.methods import Transaction, PaymentMethod, SourceType
 
 from apps.payment.models import COD, PaymentGateWayResponse, CODRepayments
 from apps.payment.utils import PaymentRefundMixin
@@ -18,18 +20,11 @@ class Cash(PaymentRefundMixin, PaymentMethod):
     def _record_payment(self, request, order, method_key, amount, reference, **kwargs):
         source = self.get_source(order, reference)
 
-        amount_to_allocate = amount - source.amount_allocated
-        source.allocate(amount_to_allocate, reference)
-
-        amount_to_debit = amount - source.amount_debited
-        source.debit(amount_to_debit, reference)
-
-        event = self.make_debit_event(order, amount_to_debit, reference)
+        self.allocate_payment(amount, source, reference)
+        self.debit_payment(source)
 
         lines = kwargs.get('lines', order.lines.all())
         line_quantities = kwargs.get('line_quantities', [line.active_quantity for line in lines])
-        for line, qty in zip(lines, line_quantities):
-            self.make_event_quantity(event, line, qty)
         cod = COD.objects.create(
             order=source.order,
             amount=amount,
@@ -38,9 +33,26 @@ class Cash(PaymentRefundMixin, PaymentMethod):
             cod_transferred=False,
             amount_received_on=None,
         )
-        return states.Complete(source.amount_debited, source_id=source.pk)
+        # update system, that transaction is complete and we will somehow  internally manage remaining transactions.
+        # these states are used for keeping in session by 'oscarapicheckout' package only.
+        return states.Complete(source.amount_allocated, source_id=source.pk)
 
-    def create_actual_payment_with_gateway(self, source: Source, amount):
+    def allocate_payment(self, amount, source, reference=''):
+        amount_to_allocate = amount - source.amount_allocated
+        source.allocate(amount_to_allocate, reference)
+
+    def debit_payment(self, source, reference=''):
+        amount_to_debit = source.amount_allocated - source.amount_debited
+        source.debit(amount_to_debit, reference)
+        event = self.make_debit_event(source.order, amount_to_debit, reference)
+        order = source.order
+        lines = order.lines.all()
+        for line in lines:
+            self.make_event_quantity(event, line, line.active_quantity)
+        COD.objects.filter(order=source.order).update(cod_accepted=True)
+        return states.Complete(source.amount_debited, source_id=source.pk)  # event
+
+    def create_actual_refund_with_gateway(self, source: Source, amount):
         """
         This method completely dedicated for refund procedure
         """
@@ -55,11 +67,13 @@ class Cash(PaymentRefundMixin, PaymentMethod):
                 amount_received_on=None,
             )
 
-        codr = CODRepayments()
+        # !important
+        codr = CODRepayments()      # Creating COD Response For Order Items.
         codr.cod = cod
         codr.amount = amount
         codr.save()
 
+        # logging transaction
         pgr = PaymentGateWayResponse()
         pgr.order = source.order
         pgr.transaction_id = 'COD-0000-' + str(codr.id or 0)

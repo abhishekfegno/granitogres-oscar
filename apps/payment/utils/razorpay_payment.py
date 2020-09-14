@@ -21,9 +21,16 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
 
     def __init__(self):
         self.client = razorpay.Client(autn=(settings.RAZOR_PAY_PUBLIC_KEY, settings.RAZOR_PAY_SECRET_KEY))
-        self.client.set_app_details({"title": "WoodN'Cart", "version": "0.9.0"})
+        self.client.set_app_details({"title": "Shopprix - Super Center", "version": "0.9.0"})
 
     def _record_payment(self, request, order, method_key, amount, reference, **kwargs):
+        """
+        Get Payment Source, Calculate amount to allocate, calculate, amount to debit,
+
+        MARKER: Create Payment and Payment State,
+        if Payment State is complete:
+            then:: MARKER:  Debit the amount, create curresponding event and update line quantities.
+        """
         source = self.get_source(order, reference)
         amount_to_allocate = amount - source.amount_allocated
         source.allocate(amount_to_allocate, reference)
@@ -38,8 +45,11 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
         return payment_state
 
     def _get_external_payment(self, source, amount, reference, description=None):
+        """
+        Get Client, GEt Payment Gateway Rrsponse,
+        """
         client = self.client
-        # EXTERNAL PAYMENT
+        # EXTERNAL PAYMENT      # espicially for the purpose of COD.
         pgr = PaymentGateWayResponse()
         pgr.transaction_id = reference
         pgr.transaction_type = PaymentGateWayResponse.PURCHASE
@@ -73,7 +83,7 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
         else:
             return states.Complete(source.amount_debited, source_id=source.pk)
 
-    def create_actual_payment_with_gateway(self, source: Source, amount):
+    def create_actual_refund_with_gateway(self, source: Source, amount):
         client = self.client
         reference = source.reference
         order = source.order

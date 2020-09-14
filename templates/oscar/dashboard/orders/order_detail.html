@@ -127,11 +127,14 @@
     {% for line in lines %}
     <tr class="line_tr">
         <td>
-            <input type="checkbox" onchange="reset_amount()" name="selected_line" value="{{ line.id }}" data-unitprice="{{ line.unit_price_incl_tax }}" />
-            <input type="number" style="display:none" onchange="window.reset_amount()" name="selected_line_qty_{{ line.id }}"
-                   class="selected_line_qty_input"
-                   value="{{ line.active_quantity }}"
-                   max="{{ line.active_quantity }}"/>
+
+            {% if line.status != settings.ORDER_STATUS_CANCELED and line.status != settings.ORDER_STATUS_RETURNED %}
+                <input type="checkbox" onchange="reset_amount()" name="selected_line" value="{{ line.id }}" data-unitprice="{{ line.unit_price_incl_tax }}" />
+                <input type="number" style="display:none" onchange="window.reset_amount()" name="selected_line_qty_{{ line.id }}"
+                       class="selected_line_qty_input"
+                       value="{{ line.active_quantity }}"
+                       max="{{ line.active_quantity }}"/>
+            {% endif %}
         </td>
 <!--        <td style="cursor:crosshair"
             title="Enter the quantity you want to affect the change with below action for '{{ line.product.name|default:'this item.' }}'">
@@ -271,7 +274,7 @@
 <div class="well">
 
     <h3>{% trans "With selected lines" %}:</h3>
-    {% if order.status in settings.OSCAR_ADMIN_LINE_CANCELLABLE_ORDER_STATUSES %}
+    {% if order.status in settings.OSCAR_ADMIN_PRE_DELIVERY_STATUSES %}
     <div class="form-group">
         <div class="">
             <label class="radio-inline">
@@ -282,7 +285,7 @@
             <label class="radio-inline">
                 <select name="new_status">
                         <option value=""> -- {% trans "choose new status" %} -- </option>
-                    {% for status, text in settings.OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_AFTER_DELIVERY %}
+                    {% for status, text in settings.OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_BEFORE_DELIVERY %}
                         <option value="{{ status }}">{{ text }}</option>
                     {% endfor %}
                 </select>
@@ -291,7 +294,7 @@
     </div>
     <hr />
     <input type="submit" value="{% trans 'Go!' %}" class="btn btn-primary" />
-    {% elif order.status in settings.OSCAR_ADMIN_LINE_REFUNDABLE_ORDER_STATUSES %}
+    {% elif order.status in settings.OSCAR_ADMIN_LINE_POST_DELIVERY_ORDER_STATUSES %}
     <div class="form-group">
         <div class="">
             <label class="radio-inline">

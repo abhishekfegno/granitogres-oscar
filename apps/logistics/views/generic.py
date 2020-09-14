@@ -40,7 +40,7 @@ class TripCreationForm(forms.ModelForm):
 
     class Meta:
         model = DeliveryTrip
-        fields = ('agent', 'route', 'info', 'selected_orders', 'selected_returns', 'status')
+        fields = ('agent', 'route', 'info', 'selected_orders', 'selected_returns', )
 
 
 @method_decorator(login_required, name="dispatch")
@@ -100,7 +100,7 @@ def trip_update_status_view(request, **kwargs):
         if dt is None:
             messages.error(request, "Invalid Submission")
         elif action_complete_forcefully:
-            dt.complete_forcefully(reason="Order Delivery has been cancelled!  ")
+            dt.complete_forcefully(reason="Order Delivery has been completed Forcefully!  ")
             messages.success(request, "Trip marked as  Completed Forcefully.")
 
         elif action_complete:
@@ -172,6 +172,19 @@ class DeliveredTripsListView(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         return super().get_context_data(object_list=object_list,
                                         TITLE="Delivered Trips",
+                                        **kwargs)
+
+
+@method_decorator(login_required, name="dispatch")
+@method_decorator(user_passes_test(lambda user: user.is_superuser), name="dispatch")
+class CancalledTripsListView(ListView):
+    queryset = DeliveryTrip.objects.filter(status=DeliveryTrip.CANCELLED).annotate(
+        order_count=Count('delivery_consignments'), refund_count=Count('return_consignments')).order_by('-id')
+    template_name = 'logistics/deliverytrip_list.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        return super().get_context_data(object_list=object_list,
+                                        TITLE="Cancelled Trips",
                                         **kwargs)
 
 

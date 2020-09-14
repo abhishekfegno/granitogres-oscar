@@ -59,16 +59,28 @@ class RefundFacade(object):
         # we are breaking the loop so as to get the first source
 
     def refund_order_line(self, line, **kwargs):
-        if line.status in settings.OSCAR_LINE_REFUNDABLE_STATUS:        # or line.active_quantity == 0:
-            return
+        # if line.status in settings.OSCAR_LINE_REFUNDABLE_STATUS:        # or line.active_quantity == 0:
+        #     return
         order = line.order
+
+        # source will be instance of <Source>
+        # payment_method will be the object of <PaymentMethod: >
         source, payment_method = self.get_source_n_method(order)
+        msg = f"""
+        REFUNDING FOR ORDER LINE {line} ({order}).
+        source : {source}
+        payment_method : {payment_method}
+        """
+        print(msg)
         return payment_method.refund_order_line(line=line, source=source,
                                                 quantity_to_refund=line.quantity)
 
     def refund_order_partially(self, order, lines=None, line_quantities=None, **kwargs):
         """
         refund_admin_defined_payment
+
+        Filter out lines and quantities, get source and apyment method, then call to trigger refund.
+
         """
         if lines is None:
             lines = [l for l in order.lines.all()]  # make it python object.
@@ -96,13 +108,9 @@ class RefundFacade(object):
         lines = _lines
         line_quantities = _qty
         source, payment_method = self.get_source_n_method(order)
-
+        print(":>>>>: ", source, payment_method)       # TODO: Remove
         return payment_method.refund_order_partially(source=source, order=order, lines=lines, amount=amount,
                                                      line_quantities=line_quantities, **kwargs)
-
-
-
-
 
 
 

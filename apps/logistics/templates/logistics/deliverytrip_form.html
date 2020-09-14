@@ -28,16 +28,23 @@
 <link rel="stylesheet" href="{{ STATIC_URL }}/css/multi-select.css" />
 <!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/multi-select/0.9.12/css/multi-select.min.css" />-->
 <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@9.15.2/dist/sweetalert2.min.css" />-->
-
-<style>
-.ms-container {width: 100%!important}
-.ms-container .search-input{margin-bottom:30px; }
-.ms-container .ms-selectable,.ms-container .ms-selection {display: inline-block; background-color: #efefef !importnat;}
-.ms-container .ms-list{height: 400px;}
-.ms-container .ms-list.ms-focus{box-shadow: 0 14px 26px -12px rgba(244, 67, 54, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(244, 67, 54, 0.2);border-color: #e11b0c;animation: ease-in-out 1s; -webkit-animation: ease-in-out 1s;}
-.ms-container .ms-selectable li.ms-elem-selectable, .ms-container .ms-selection li.ms-elem-selection{padding: 6px 10px}
-.ms-container .ms-selectable li.ms-hover, .ms-container .ms-selection li.ms-hover{background: linear-gradient(60deg, #ef5350, #e53935)}
-
+<style type="text/css">
+    .ms-container {width: 100%!important}
+    .ms-container .search-input{margin-bottom:30px; }
+    .ms-container .ms-selectable,.ms-container .ms-selection {display: inline-block; background-color: #efefef !importnat;}
+    .ms-container .ms-list{height: 400px;}
+    .ms-container .ms-list.ms-focus{box-shadow: 0 14px 26px -12px rgba(244, 67, 54, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(244, 67, 54, 0.2);border-color: #e11b0c;animation: ease-in-out 1s; -webkit-animation: ease-in-out 1s;}
+    .ms-container .ms-selectable li.ms-elem-selectable, .ms-container .ms-selection li.ms-elem-selection{padding: 6px 10px}
+    .ms-container .ms-selectable li.ms-hover, .ms-container .ms-selection li.ms-hover{background: linear-gradient(60deg, #ef5350, #e53935)}
+    input[name="save-action"] + input[name="save-action"]{margin-right: 10px}
+    .badge-danger {color: #fff;background-color: #dc3545;}
+    .badge-success {color: #fff;background-color: #28a745;}
+    .badge-primary {color: #fff;background-color: #007bff;}
+    .badge-secondary {color: #fff;background-color: #6c757d;}
+    .badge-warning {color: #212529;background-color: #ffc107;}
+    .badge-info {color: #fff;background-color: #17a2b8;}
+    .badge-light {color: #212529;background-color: #f8f9fa;}
+    .badge-dark {color: #fff;background-color: #343a40;}
 </style>
 
 <div class="page-header">
@@ -47,6 +54,7 @@
     <h1>Create Delivery Trip</h1>
     {% endif %}
 </div>
+
 {% endblock header %}
 
 {% block dashboard_content %}
@@ -67,20 +75,20 @@
             </form>
             {% elif object.on_trip %}
             {% comment %} Active TRIP {% endcomment %}
-                <form method="post" action="{% url 'logistics:update-trip-status' pk=object.pk %}">
-                    <input type="hidden" hidden name="action" value="completed">
-                    <button class="btn btn-success pull-right btn-lg"> <b>Mark as Completed!</b> </button>
-                </form>
-                {% if request.GET.complete_forcefully %}
-                    <form method="post" action="{% url 'logistics:update-trip-status' pk=object.pk %}">
-                        <input type="hidden" hidden name="action" value="completed_forcefully">
-                        <button style="margin-right: 10px;" class="btn btn-danger pull-right btn-lg">
-                            <b>Complete Forcefully!</b> </button>
-                    </form>
-                {% endif %}
+            <form method="post" action="{% url 'logistics:update-trip-status' pk=object.pk %}">
+                <input type="hidden" hidden name="action" value="completed">
+                <button class="btn btn-success pull-right btn-lg"> <b>Mark as Completed!</b> </button>
+            </form>
+            {% if request.GET.complete_forcefully %}
+            <form method="post" action="{% url 'logistics:update-trip-status' pk=object.pk %}">
+                <input type="hidden" hidden name="action" value="completed_forcefully">
+                <button style="margin-right: 10px;" class="btn btn-danger pull-right btn-lg">
+                    <b>Complete Forcefully!</b> </button>
+            </form>
+            {% endif %}
             {% else %}
-                {% comment %} Delivered TRIP {% endcomment %}
-                <button class="badge badge-success pull-right"> Trip Completed! </button>
+            {% comment %} Delivered TRIP {% endcomment %}
+            <button class="badge badge-success pull-right"> Trip Completed! </button>
             {% endif %}
         </div>
     </div>
@@ -157,9 +165,6 @@
                     </div>
                     <div class="col-md-12 ">
                         <hr />
-                        <style>
-                            input[name="save-action"] + input[name="save-action"]{margin-right: 10px}
-                        </style>
                         <input type="submit" name="save-action"
                                value="{% if object.pk %}Update{% else %}Save{% endif %} And Continue Editing"
                                class="btn btn-primary pull-right" />
@@ -176,9 +181,9 @@
     </form>
     {% else %}
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-8">
                     <div class="alert alert-info"> You could not Change the Orders in this trip Because the trip
                         has been  {% if object.is_active %} started{% else %} completed{% endif %}!</div>
                     <div>
@@ -207,11 +212,9 @@
                             <tr>
                                 <td> Trip Status  </td>
                                 <td>
-                                    {% if con_ord.completed %}
-                                    <span class="badge badge-success"> Completed </span>
-                                    {% else %}
-                                    <span class="badge badge-info"> On the Way! </span>
-                                    {% endif %}
+                                    <span class="badge {% if object.status == con_ord.COMPLETED %}badge-success{% else %}badge-info{% endif %}">
+                                        {{ object.status }}
+                                    </span>
                                 </td>
                             </tr>
                             </tbody>
@@ -219,34 +222,66 @@
                     </div>
                 </div>
                 <div class="col-md-12">
-                    <b> Consignments To Deliver </b>
-                    <ol>
-                        {% for consignment in object.delivery_consignments.all %}
-                        <li style="margin-top:3px"> # ORD{{ con_ord.order.number }} - {{ con_ord.order.shipping_address }}
-                            {% if con_ord.completed %}
-                            <span class="badge badge-success"> Completed </span>
-                            {% else %}
-                            <span class="badge badge-light"> On the Way! </span>
-                            {% endif %}
-                        </li>
+                    <table class="table">
+                        <caption>Consignments To Deliver</caption>
+                        <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th> Order </th>
+                            <th> Address </th>
+                            <th> Amount </th>
+                            <th> Payment Type </th>
+                            <th> Payment Status </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for con_ord in object.delivery_consignments.all %}
+                        <tr>
+                            <td>
+                                <span class="{{ con_ord.css_badge_class }}"> {{ con_ord.status }} </span>
+                            </td>
+                            <td>{{ con_ord.order.number }}</td>
+                            <td>{{ con_ord.order.shipping_address }}</td>
+                            <td>{{ con_ord.order.total_incl_tax }}</td>
+                            <td>{{ con_ord.payment_status }}</td>
+                        </tr>
                         {% endfor %}
-                    </ol>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="col-md-12">
-                    <b> Consignments To Return </b>
-                    <ol>
-                        {% for consignment in object.return_consignments.all %}
-                        <li style="margin-top:3px"> # ORD{{ con_ord.order.number }} - {{ con_ord.order.shipping_address }}
-                            {% if con_ord.completed %}
-                            <span class="badge badge-success"> Completed </span>
-                            {% elif con_ord.request_cancelled %}
-                            <span class="badge badge-danger"> Cancelled </span>
-                            {% else %}
-                            <span class="badge badge-warning"> On the Way </span>
-                            {% endif %}
-                        </li>
+                    <table class="table">
+                        <caption>Consignments To Return</caption>
+                        <thead>
+                        <tr>
+                            <th> Status</th>
+                            <th> Pickup Dropped ? </th>
+                            <th> Order </th>
+                            <th> Item ID </th>
+                            <th> Product </th>
+                            <th> Address </th>
+                            <th> Amount </th>
+                            <th> Payment Type </th>
+                            <th> Payment Status </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for con_ord in object.return_consignments.all %}
+                        <tr>
+                            <td>
+                                <span class="{{ con_ord.css_badge_class }}"> {{ con_ord.status }} </span>
+                            </td>
+                            <td> {{ con_ord.request_cancelled|yesno }} </td>
+                            <td>{{ con_ord.order_line.order.number }}</td>
+                            <td>{{ con_ord.order_line.id }}</td>
+                            <td>{{ con_ord.order_line.product }}</td>
+                            <td>{{ con_ord.order_line.order.shipping_address }}</td>
+                            <td>{{ con_ord.order_line.line_price_incl_tax }}</td>
+                            <td>{{ con_ord.payment_status }}</td>
+                        </tr>
                         {% endfor %}
-                    </ol>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

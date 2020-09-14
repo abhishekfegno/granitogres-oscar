@@ -18,7 +18,6 @@ load_dotenv()
 
 SECRET_KEY = '@sjw(#19ix-we_-0ijndhsw4x)53vccyxx%y0xl4u$tsr*&h5b'
 
-
 ALLOWED_HOSTS = ['*']
 
 DEBUG = True
