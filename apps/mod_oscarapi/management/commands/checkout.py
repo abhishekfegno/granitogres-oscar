@@ -1,25 +1,16 @@
-import json
 import sys
 from random import randint
 
 import requests
 from django.conf import settings
 from django.core.management import BaseCommand
-from django.urls import reverse
 from django.utils.module_loading import import_string
-from oscar.core.loading import get_model
-from oscarapicheckout import utils
-from oscarapicheckout.serializers import OrderSerializer
-from oscarapicheckout.signals import order_placed
-from oscarapicheckout.states import DECLINED, CONSUMED
-
-from apps.availability.models import Zones
 from apps.basket.models import Basket
 from apps.catalogue.models import Product
-from apps.dashboard.custom.models import empty
 from apps.mod_oscarapi.serializers.checkout import CheckoutSerializer
 from apps.partner.strategy import Selector
 from apps.users.models import User
+0
 
 get_methods = []
 for method in settings.API_ENABLED_PAYMENT_METHODS:
@@ -44,6 +35,9 @@ class Command(BaseCommand):
             '--host',  default='localhost:8000', help="Enter Host Name."
         )
         parser.add_argument(
+            '--checkout-current',  action='store_true', help="No need to add any products, just checkout as it is."
+        )
+        parser.add_argument(
             '--num-orders',  default='1', help="Number of orders you want to generate."
         )
         parser.add_argument(
@@ -56,8 +50,11 @@ class Command(BaseCommand):
             '--user',  default='1', help='Get User',
         )
 
-    def post(self, _method):
-        basket = self.populate_basket(no_of_products_needed=randint(2, 6))
+    def post(self, _method, checkout_only_current_basket=False):
+        if checkout_only_current_basket:
+            basket = self.populate_basket(no_of_products_needed=0)
+        else:
+            basket = self.populate_basket(no_of_products_needed=randint(1, 2))
         data = self.generate_data(
                 basket, basket.owner, _method
         )
@@ -92,8 +89,8 @@ class Command(BaseCommand):
         self.login(self.user)
 
         for i in range(int(options['num_orders'])):
-            print(f"Generating Cart #{i+1}......!")
-            self.post(_method)
+            print(f"Generating Cart #{ i + 1 }......!")
+            self.post(_method, options['checkout_current'] and options['num_orders'] == '1')
 
     def login(self, user):
         s = requests.Session()
@@ -120,8 +117,8 @@ class Command(BaseCommand):
         # print("DATA : ")
         # print(json.dumps(data))
         print(response)
-        # if 200 <= response.status_code < 410:
-        #     print(response.text)
+        if 200 < response.status_code or response.status_code > 204:
+            print(response.text)
 
     def populate_basket(self, no_of_products_needed=3):
 
@@ -132,7 +129,7 @@ class Command(BaseCommand):
         for product in qs:
             post_url = self.BASE_URL + 'basket/add-product/'
             product_url = self.BASE_URL + 'products/' + str(product) + '/'
-            qty = randint(2, 10)
+            qty = randint(1, 2)
             self.s.post(
                 post_url,
                 {
@@ -147,18 +144,35 @@ class Command(BaseCommand):
         return basket
 
     def generate_data(self, basket, user=None, method=None):
-        # if method == 'cash':
-        #     payment =
-        # elif method == 'razor_pay':
-        #     payment = {
-        #         method: {
-        #             "enabled": True,
-        #             "pay_balance": True
-        #         }
-        #     }
-        #     raise NotImplemented()
-        # else:
-        #     raise ModuleNotFoundError()
+        if method.code == 'cash':
+            payment = {
+                "cash": {
+                    "enabled": True,
+                    "amount": float(basket.total_incl_tax)
+                },
+                "razor_pay": {
+                    "enabled": False
+                }
+            }
+        elif method.code == 'razor_pay':
+            print(f"Open {self.BASE_URL.replace('/api/v1/', '/rzp/')}?amt={int(basket.total_incl_tax * 100)} ")
+            print(f'Amount : INR {basket.total_incl_tax} /-')
+            rzp_key = input("razorpay_payment_id : ")
+            print(rzp_key)
+            # rzp_key = input(f"razorpay payment id for amount '{int(basket.total_incl_tax * 100)}' : ")
+            payment = {
+                "cash": {
+                    "enabled": False,
+                },
+                "razor_pay": {
+                    "enabled": True,
+                    "amount": float(basket.total_incl_tax),
+                    "razorpay_payment_id": rzp_key
+                }
+            }
+        else:
+            print(basket, user, method)
+            raise ModuleNotFoundError("Method is not in ")
 
         return {
             "basket": f"https://store.demo.fegno.com/api/v1/baskets/{basket.id}/",
@@ -171,7 +185,7 @@ class Command(BaseCommand):
                 "incl_tax": 0.0,
                 "tax": 0.0
             },
-            "shipping_address":{
+            "shipping_address": {
                 "title": "Mr",
                 "first_name": "JERIN",
                 "last_name": "JOHN",
@@ -199,14 +213,6 @@ class Command(BaseCommand):
                 "notes": "",
                 "country": "https://store.demo.fegno.com/api/v1/countries/IN/"
             },
-            "payment": {
-                "cash": {
-                    "enabled": True,
-                    "amount": float(basket.total_incl_tax)
-                },
-                "razor_pay": {
-                    "enabled": False
-                }
-            }
+            "payment": payment
         }
 

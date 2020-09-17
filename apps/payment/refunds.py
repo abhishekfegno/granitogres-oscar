@@ -20,11 +20,14 @@ class RefundFacade(object):
             PaymentMethod = import_string(method_config['method'])
             self.payment_methods.append(PaymentMethod())
 
-    def get_sources_model_from_order(self, order):
-        return Source.objects.filter(order=order).prefetch_related('source_type', 'order', 'order__lines').reverse()
+    def get_sources_model_from_order(self, order, reference=''):
+        kwg = {'order': order}
+        if reference:
+            kwg['reference'] = reference
+        return Source.objects.filter(**kwg).prefetch_related('source_type', 'order', 'order__lines').reverse()
 
-    def get_source_n_method(self, order):
-        for source in self.get_sources_model_from_order(order):
+    def get_source_n_method(self, order, reference=None):
+        for source in self.get_sources_model_from_order(order, reference=reference):
             # there should be only one per order. and we have
             # single transactions only.
             for payment_method in self.payment_methods:
@@ -108,7 +111,6 @@ class RefundFacade(object):
         lines = _lines
         line_quantities = _qty
         source, payment_method = self.get_source_n_method(order)
-        print(":>>>>: ", source, payment_method)       # TODO: Remove
         return payment_method.refund_order_partially(source=source, order=order, lines=lines, amount=amount,
                                                      line_quantities=line_quantities, **kwargs)
 

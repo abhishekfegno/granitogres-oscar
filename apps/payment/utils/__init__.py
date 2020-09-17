@@ -43,16 +43,17 @@ class PaymentRefundMixin(object):
         order = source.order
         if not kwargs.get('amount_verified', False):        # handled internally
             amount = self.get_max_refundable_amount(source, amount_to_refund=amount)    # confirm for any external call
-        amount = Decimal(str(amount))
-        # create actual payment
+
+       # create actual payment
         response = self.create_actual_refund_with_gateway(
             source=source, amount=amount
         )
+        print("create_actual_refund_with_gateway Response : ", response)  # TODO : Remove
         assert type(response) is dict and 'id' in response.keys(), \
             "You have to return the response from gateway as dict with transaction_id as 'id'"
 
         # mark payment sources that we have refunded the money.
-        source.refund(amount, response['id'])
+        source.refund(Decimal(amount), reference=response['id'])
 
         # create order transaction event object that we have refunded the money.
         event = self.make_refund_event(  # noqa

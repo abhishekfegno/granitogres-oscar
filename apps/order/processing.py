@@ -2,7 +2,9 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models, transaction
+from django.utils.module_loading import import_string
 from oscar.apps.order import processing
+from oscar.apps.payment.models import SourceType
 from oscar.core.loading import get_model
 
 from .models import Order, PaymentEventType
@@ -43,7 +45,6 @@ class EventHandler(processing.EventHandler):
             order.lines.exclude(
                 status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS
             ).update(status=new_status)
-
 
         if note_msg:
             """

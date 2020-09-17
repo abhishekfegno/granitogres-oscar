@@ -1,3 +1,4 @@
+from django.conf import settings
 from oscarapicheckout import utils
 from oscarapicheckout.serializers import OrderSerializer
 from oscarapicheckout.signals import order_placed
@@ -13,6 +14,8 @@ from ..serializers.checkout import (
     # PaymentMethodsSerializer,
     # PaymentStateSerializer
 )
+from ...api_set.serializers.basket import BasketSerializer, WncBasketSerializer
+from ...basket.utils import order_to_basket
 
 
 class CheckoutView(OscarAPICheckoutView):
@@ -127,8 +130,18 @@ class CheckoutView(OscarAPICheckoutView):
             data=c_ser.validated_data['payment'])
         utils.set_payment_method_states(order, request, new_states)
 
-        # Return order data
         o_ser = OrderSerializer(order, context={'request': request})
+
+        if order.status == settings.ORDER_STATUS_PAYMENT_DECLINED:
+            basket = order_to_basket(order, request=request)
+            b_ser = WncBasketSerializer(basket, context={'request': request})
+            return Response({
+                'new_basket': b_ser.data,
+                'failed_order': o_ser.data,
+                'message': "Payment Declined!",
+            }, status=400)
+
+        # Return order data
         return Response(o_ser.data)
 
     def _record_payments(self, previous_states, request, order, methods, data):
@@ -155,7 +168,8 @@ class CheckoutView(OscarAPICheckoutView):
 
             # Previous payment method doesn't exist or can't be reused. Create it now.
             if not state:
-                state = method.record_payment(request, order, method_key, **method_data)
+                method_data.update()
+                state = method.record_payment(request, order, method_key,  **method_data)
             # Subtract amount from pending order balance.
             order_balance[0] = order_balance[0] - state.amount
             return state
@@ -166,7 +180,7 @@ class CheckoutView(OscarAPICheckoutView):
             new_states[key] = record(key, method_data)
 
         # Change the remainder, not covered by the above methods, to the method marked with `pay_balance`
-        data_pay_balance = { k: v for k, v in data.items() if v['pay_balance'] and v['enabled']}
+        data_pay_balance = {k: v for k, v in data.items() if v['pay_balance'] and v['enabled']}
         for key, method_data in data_pay_balance.items():
             method_data['amount'] = order_balance[0]
             new_states[key] = record(key, method_data)

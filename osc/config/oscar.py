@@ -6,7 +6,7 @@ OSCARAPI_BLOCK_ADMIN_API_ACCESS = True
 
 OSCAR_DEFAULT_CURRENCY = 'INR'
 OSCAR_SHOP_NAME = 'Shopprix'
-OSCAR_SHOP_TAGLINE = "Shopprix Super Center"
+OSCAR_SHOP_TAGLINE = "Super Center"
 OSCAR_HOMEPAGE = reverse_lazy('catalogue:index')
 OSCAR_ACCOUNTS_REDIRECT_URL = 'customer:profile-view'
 OSCAR_RECENTLY_VIEWED_PRODUCTS = 20
@@ -62,13 +62,17 @@ OSCAR_INITIAL_LINE_STATUS = ORDER_STATUS_PENDING
 admin_or_staff = lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser
 
 OSCAR_ORDER_STATUS_PIPELINE = {
-    # 'Pending': ('Order Confirmed', 'Canceled', 'Pending', 'Payment Declined'),  # admin / user can cancel an order / an item
+
+    # 'Pending': ('Order Confirmed', 'Canceled', 'Pending', 'Payment Declined'),
+    # admin / user can cancel an order / an item
+
     'Placed': ('Order Confirmed', 'Payment Declined', 'Canceled'),  # admin / user can cancel an order / an item
     'Order Confirmed': ('Out For Delivery', 'Delivered', 'Canceled'),  # only admin can set these statuses
     'Out For Delivery': ('Delivered', 'Canceled'),  # only admin can set these statuses
     'Delivered': (),
-    'Payment Declined': ('Order Confirmed', 'Canceled'),
+    'Payment Declined': (),
     'Canceled': (),
+
 }
 
 OSCAR_LINE_STATUS_PIPELINE = {
@@ -275,16 +279,16 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'icon': 'icon-double-angle-down',
         'children': [
             {'label': _('Delivery Agents'), 'url_name': 'logistics:dashboard-delivery-boy-list',
-             'access_fn': admin_or_staff },
+             'access_fn': admin_or_staff},
 
             {'label': _('Create Trip'), 'url_name': 'logistics:new-trip',
              'access_fn': admin_or_staff},
 
             {'label': _('Planned Trips'), 'url_name': 'logistics:planned-trips',
-             'access_fn': admin_or_staff },
+             'access_fn': admin_or_staff},
 
             {'label': _('Active Trips'), 'url_name': 'logistics:active-trips',
-             'access_fn': admin_or_staff },
+             'access_fn': admin_or_staff},
 
             {'label': _('Delivered Trips'), 'url_name': 'logistics:delivered-trips',
              'access_fn': admin_or_staff,
