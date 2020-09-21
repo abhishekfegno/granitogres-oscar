@@ -118,7 +118,7 @@ class ActiveTripView(GenericAPIView):
         return Response({"details": "Invalid Action"}, status=status.HTTP_400_BAD_REQUEST)
 
     def get_object(self):
-        return DeliveryTrip.get_active_trip(agent=self.request.user, raise_error=True)
+        return DeliveryTrip.get_active_trip(agent=self.request.user, raise_error=False)
 
     def get(self, request, *args, **kwargs):
         instance: Any(DeliveryTrip, None) = self.get_object()
