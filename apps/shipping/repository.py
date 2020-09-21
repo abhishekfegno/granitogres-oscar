@@ -3,24 +3,31 @@
 
 # from oscar.apps.shipping.repository import *
 from decimal import Decimal as D
+
+from django.conf import settings
 from oscar.apps.shipping.methods import Free, FixedPrice, NoShippingRequired
 from oscar.apps.shipping.repository import Repository as CoreRepository
 from oscar.apps.shipping import methods, models
 from oscar.apps.shipping.models import WeightBased
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import messages
+from oscar.core import prices
 
 
-class WoodNCartDeliveryKerala(methods.FixedPrice):  # hand delivery, eg for customers located near company premises
-    code = "hand-delivery"
-    name = _("Hand Delivery")
-    charge_excl_tax = D('00.00')
+class OwnDeliveryKerala(methods.FixedPrice):
+    code = "free-shipping"
+    name = _("Own Delivery")
 
-
-class WoodNCartDeliveryOutsideIndia(methods.FixedPrice):  # hand delivery, eg for customers located near company premises
-    code = "hand-delivery"
-    name = _("Hand Delivery")
-    charge_excl_tax = D('00.00')
+    def calculate(self, basket):
+        if basket.total_incl_tax < settings.MINIMUM_BASKET_AMOUNT_FOR_FREE_DELIVERY:
+            return prices.Price(
+                currency=basket.currency,
+                excl_tax=settings.DELIVERY_CHARGE,
+                incl_tax=settings.DELIVERY_CHARGE)
+        return prices.Price(
+            currency=basket.currency,
+            excl_tax=self.charge_excl_tax,
+            incl_tax=self.charge_incl_tax)
 
 
 class Repository(CoreRepository):
@@ -29,22 +36,12 @@ class Repository(CoreRepository):
     Oscar's default behaviour is to only have one.
     """
 
-    methods = [WoodNCartDeliveryKerala()]  # init shipping method to default hand delivery
+    methods = [OwnDeliveryKerala()]  # init shipping method to default hand delivery
 
     def get_available_shipping_methods(self, basket, user=None, shipping_addr=None, request=None, **kwargs):
-        # check if shipping method(s) is available for shipping country (for instance 'FR')
         if shipping_addr:
-            # retrieve shipping method(s) for shipping country
-            weightbased_set = WeightBased.objects.all().filter(countries=shipping_addr.country.code)
-            # set shipping method(s) if available for shipping country
-            if weightbased_set:
-                methods = (list(weightbased_set))
-                methods += [WoodNCartDeliveryKerala()]
-            else:
-                # no shipping method is available for shipping country, error message will be displayed by oscar core
-                methods = []
-        # no shipping address, set shipping method to default hand delivery
-        else:
-            methods = [WoodNCartDeliveryKerala()]
-        return methods
+            if shipping_addr.country.code == 'IN':
+                if shipping_addr.postcode[:2] in ['67', '68', '69']:
+                    return [OwnDeliveryKerala()]
+        return []
 

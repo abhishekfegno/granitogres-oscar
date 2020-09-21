@@ -310,3 +310,7 @@ API_ENABLED_PAYMENT_METHODS = [
         'permission': 'apps.utils.oscar_api_checkout.AuthorizedUsers',
     },
 ]
+
+MINIMUM_BASKET_AMOUNT_FOR_FREE_DELIVERY = 250     # in INR
+DELIVERY_CHARGE = 40            # in INR
+

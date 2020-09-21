@@ -1,3 +1,4 @@
+from collections import defaultdict
 from decimal import Decimal
 
 from django.conf import settings
@@ -11,6 +12,7 @@ from oscar.templatetags.currency_filters import currency
 
 from . import settings as app_settings
 from ..order.processing import EventHandler
+from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
 
 Order = get_model('order', 'Order')
@@ -57,9 +59,13 @@ class Constant:
             return 'badge badge-danger'
         return 'badge'
 
+    @cached_property
+    def transaction_source_n_method(self):
+        raise NotImplementedError('transaction_source_n_method')
+
     @property
     def transaction_source(self):
-        raise NotImplementedError()
+        raise self.transaction_source_n_method[0]
 
     @cached_property
     def transaction_type(self):
@@ -70,7 +76,7 @@ class Constant:
         return {
             'allocated': self.transaction_source.amount_allocated,
             'debited': self.transaction_source.amount_debited,
-            'balance': self.transaction_source.amount_allocated - self.transaction_source.amount_debited,
+            'refunded': self.transaction_source.amount_refunded,
         }
 
 
@@ -130,7 +136,7 @@ class DeliveryTrip(Constant, models.Model):
         """
         In the assumption that, 'request_cancelled' can be set by user.
         """
-        assert not self.delivery_consignments.exclude(status__in=[self.COMPLETED, self.CANCELLED]).exists(),\
+        assert not self.delivery_consignments.exclude(status__in=[self.COMPLETED, self.CANCELLED]).exists(), \
             "Could mark as complete because there are incomplete delivery consignments."
 
         assert not self.return_consignments.exclude(status__in=[self.COMPLETED, self.CANCELLED]).exists(), \
@@ -161,12 +167,12 @@ class DeliveryTrip(Constant, models.Model):
     @classmethod
     def get_active_trip(cls, agent, raise_error=True):
         try:
-            return cls.objects.get(agent=agent, is_active=True, completed=False)
+            return cls.objects.get(agent=agent, status=cls.ON_TRIP)
         except Exception as e:
             if raise_error:
                 raise e
             if type(e) is cls.MultipleObjectsReturned:
-                return cls.objects.filter(agent=agent, is_active=True, completed=False).last()
+                return cls.objects.filter(agent=agent, status=cls.ON_TRIP).last()
 
     def agent_do_not_have_other_active_trips(self):
         return not self.__class__.objects.filter(agent=self.agent, status=self.ON_TRIP).exists()
@@ -183,16 +189,25 @@ class DeliveryTrip(Constant, models.Model):
         for order in self.delivery_orders:
             if order_status in order.available_statuses():
                 order.set_status(order_status)
+        self.delivery_consignments.update(status=Constant.ON_TRIP)
+        self.return_consignments.update(status=Constant.ON_TRIP)
         self.save()
 
     def get_completed(self):
-        if self.completed:
+        if self.status == self.COMPLETED:
             return True
-        self.completed = not self.have_active_consignments()
-        if self.completed:
+        if not self.have_active_consignments():
+            self.status = self.COMPLETED
             self.save()
-        return self.completed
+        return self.status == self.COMPLETED
 
+    def cancel_consignment(self, reason=''):
+        for dc in self.delivery_consignments.all():
+            dc.cancel_consignment(reason)
+        for dc in self.return_consignments.all():
+            dc.cancel_consignment(reason)
+        self.status = self.CANCELLED
+        self.save()
 
     @cached_property
     def cods_to_collect(self):
@@ -200,7 +215,6 @@ class DeliveryTrip(Constant, models.Model):
             order__in=self.delivery_orders.all()
         ).select_related('order', 'source_type')
         net = Decimal('0.0')
-
         for source in sources:
             if source.source_type.name == Cash.name:
                 net += source.order.total_incl_tax
@@ -208,8 +222,19 @@ class DeliveryTrip(Constant, models.Model):
 
     @cached_property
     def cods_to_return(self):
-        #  TODO : implement
-        return Decimal('0.0')
+        order_set = defaultdict(list)
+        for item in self.delivery_returns.all():
+            order_set[item.order].append(item)
+
+        sources = Source.objects.filter(
+            order__in=order_set.keys()
+        ).select_related('order', 'source_type')
+        net = Decimal('0.0')
+        for source in sources:
+            if source.source_type.name == Cash.name:
+                for item in order_set[source.order]:
+                    net += item.line_price_incl_tax
+        return currency(net, get_default_currency())
 
 
 class ConsignmentDelivery(Constant, models.Model):
@@ -218,7 +243,7 @@ class ConsignmentDelivery(Constant, models.Model):
                                                     related_name='delivery_consignments')
     status = models.CharField(choices=Constant.CHOICES, default=Constant.YET_TO_START, max_length=20)
 
-    def mark_as_completed(self):
+    def mark_as_completed(self, reason=None):
         if hasattr(self, 'order'):
             EventHandler().handle_order_status_change(self.order, settings.ORDER_STATUS_DELIVERED, )
         self.status = self.COMPLETED
@@ -233,8 +258,8 @@ class ConsignmentDelivery(Constant, models.Model):
         self.save()
 
     @cached_property
-    def transaction_source(self):
-        return self.order.source
+    def transaction_source_n_method(self):
+        return RefundFacade().get_source_n_method(self.order)
 
 
 class ConsignmentReturn(Constant, models.Model):
@@ -246,8 +271,8 @@ class ConsignmentReturn(Constant, models.Model):
     completed = models.BooleanField(default=False)
 
     @cached_property
-    def transaction_source(self):
-        return self.order_line.order.source
+    def transaction_source_n_method(self):
+        return RefundFacade().get_source_n_method(self.order_line.order)
 
     @classmethod
     def get_instance_from_line(cls, line, as_queryset=False):

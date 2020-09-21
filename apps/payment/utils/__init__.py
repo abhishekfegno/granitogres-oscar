@@ -34,7 +34,6 @@ class PaymentRefundMixin(object):
         """
         raise NotImplementedError(' you have to over ride the method "create_actual_debit_with_gateway()"')
 
-
     @transaction.atomic
     def __refund_amount_method(self, source: Source, amount: float, **kwargs):
         """

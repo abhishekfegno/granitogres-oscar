@@ -150,7 +150,7 @@ class CheckoutView(OscarAPICheckoutView):
 
         def record(method_key, method_data):
             # If a previous payment method at least partially succeeded, hasn't been consumed by an
-            # order, and is for the same amount, recycle it. This requires that the amount hasn't changed.
+            # order, andx` is for the same amount, recycle it. This requires that the amount hasn't changed.
 
             # Get the processor class for this method
             code = method_data['method_type']
