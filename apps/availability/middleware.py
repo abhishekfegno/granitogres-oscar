@@ -23,7 +23,12 @@ class AvailabilityZoneMiddleware(MiddlewareMixin):
     def process_request(self, request):
         request.session['location'] = request.session.get('location', None)
         request.session['zone'] = zone = request.session.get('zone', None)
-        if not (zone and request.session.get('location')) and request.user.is_authenticated:
+        if (
+                not zone
+                and not request.session.get('location')
+                and request.user.is_authenticated
+                and str(request.path).startswith('/api/v')
+        ):
             location = Location.objects.filter(user=request.user).order_by('is_active', 'id').last()
             if location:
                 location_id = location.id
@@ -35,5 +40,5 @@ class AvailabilityZoneMiddleware(MiddlewareMixin):
 
     def process_response(self, request, response):
         response['X-Geo-Location-ID'] = request.session.get('location')
-        response['X-X-Geo-Location-Point'] = request.session.get('location_coordinates')
+        response['X-Geo-Location-Point'] = request.session.get('location_coordinates')
         return response

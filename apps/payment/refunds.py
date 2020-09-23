@@ -20,11 +20,14 @@ class RefundFacade(object):
             PaymentMethod = import_string(method_config['method'])
             self.payment_methods.append(PaymentMethod())
 
-    def get_sources_model_from_order(self, order):
-        return Source.objects.filter(order=order).prefetch_related('source_type', 'order', 'order__lines').reverse()
+    def get_sources_model_from_order(self, order, reference=''):
+        kwg = {'order': order}
+        if reference:
+            kwg['reference'] = reference
+        return Source.objects.filter(**kwg).prefetch_related('source_type', 'order', 'order__lines').reverse()
 
-    def get_source_n_method(self, order):
-        for source in self.get_sources_model_from_order(order):
+    def get_source_n_method(self, order, reference=None):
+        for source in self.get_sources_model_from_order(order, reference=reference):
             # there should be only one per order. and we have
             # single transactions only.
             for payment_method in self.payment_methods:
@@ -59,16 +62,28 @@ class RefundFacade(object):
         # we are breaking the loop so as to get the first source
 
     def refund_order_line(self, line, **kwargs):
-        if line.status in settings.OSCAR_LINE_REFUNDABLE_STATUS:        # or line.active_quantity == 0:
-            return
+        # if line.status in settings.OSCAR_LINE_REFUNDABLE_STATUS:        # or line.active_quantity == 0:
+        #     return
         order = line.order
+
+        # source will be instance of <Source>
+        # payment_method will be the object of <PaymentMethod: >
         source, payment_method = self.get_source_n_method(order)
+        msg = f"""
+        REFUNDING FOR ORDER LINE {line} ({order}).
+        source : {source}
+        payment_method : {payment_method}
+        """
+        print(msg)
         return payment_method.refund_order_line(line=line, source=source,
                                                 quantity_to_refund=line.quantity)
 
     def refund_order_partially(self, order, lines=None, line_quantities=None, **kwargs):
         """
         refund_admin_defined_payment
+
+        Filter out lines and quantities, get source and apyment method, then call to trigger refund.
+
         """
         if lines is None:
             lines = [l for l in order.lines.all()]  # make it python object.
@@ -96,13 +111,8 @@ class RefundFacade(object):
         lines = _lines
         line_quantities = _qty
         source, payment_method = self.get_source_n_method(order)
-
         return payment_method.refund_order_partially(source=source, order=order, lines=lines, amount=amount,
                                                      line_quantities=line_quantities, **kwargs)
-
-
-
-
 
 
 

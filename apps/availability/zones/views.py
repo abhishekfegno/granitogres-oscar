@@ -51,8 +51,7 @@ class SetZone(GenericAPIView):
 
     {
         "latitude": "12.785238498732",
-        "longitude": "77.94478155806023",
-
+        "longitude": "77.94478155806023"
     }
 
     """

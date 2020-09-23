@@ -1,6 +1,6 @@
 {% load currency_filters %}
 
-<form action="{% url 'checkout:preview' %}" method="POST" id="payment_token_form" onsubmit="submission_interceptor(event)">
+<form action="" method="POST" id="payment_token_form" onsubmit="submission_interceptor(event)">
     <script
             src="https://checkout.razorpay.com/v1/checkout.js"
             data-key="{{ settings.RAZOR_PAY_PUBLIC_KEY }}"

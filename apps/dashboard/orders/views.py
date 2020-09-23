@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.order.models import OrderNote
 from apps.payment.refunds import RefundFacade
+from lib.exceptions import AlertException
 
 
 class OrderDetailView(OscarOrderDetailView):
@@ -26,18 +27,21 @@ class OrderDetailView(OscarOrderDetailView):
             return self.reload_page()
 
         msgs = []
-        if new_status in settings.OSCAR_LINE_REFUNDABLE_STATUS:
-            event = RefundFacade().refund_order_partially(
-                order=order, lines=lines, line_quantities=quantities
-            )
+        try:
+            if new_status in settings.OSCAR_LINE_REFUNDABLE_STATUS:
+                event = RefundFacade().refund_order_partially(
+                    order=order, lines=lines, line_quantities=quantities
+                )
+            for line in lines:
+                msg = _("Status of line #%(line_id)d changed from '%(old_status)s'"
+                        " to '%(new_status)s'") % {'line_id': line.id,
+                                                   'old_status': line.status,
+                                                   'new_status': new_status}
+                msgs.append(msg)
+                line.set_status(new_status)
+        except AlertException as ae:
+            messages.error(request, str(ae))
 
-        for line in lines:
-            msg = _("Status of line #%(line_id)d changed from '%(old_status)s'"
-                    " to '%(new_status)s'") % {'line_id': line.id,
-                                               'old_status': line.status,
-                                               'new_status': new_status}
-            msgs.append(msg)
-            line.set_status(new_status)
         message = "\n".join(msgs)
         messages.info(request, message)
         order.notes.create(user=request.user, message=message,

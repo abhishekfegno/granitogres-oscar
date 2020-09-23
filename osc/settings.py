@@ -18,7 +18,6 @@ load_dotenv()
 
 SECRET_KEY = '@sjw(#19ix-we_-0ijndhsw4x)53vccyxx%y0xl4u$tsr*&h5b'
 
-
 ALLOWED_HOSTS = ['*']
 
 DEBUG = True
@@ -58,13 +57,13 @@ INSTALLED_APPS = [
     'apps.checkout.apps.CheckoutConfig',
     'apps.search.apps.SearchConfig',
     'apps.order.apps.OrderConfig',
+    'apps.shipping.apps.ShippingConfig',
 
     # 'apps.dashboard.orders',
     'apps.dashboard.orders.apps.OrdersDashboardConfig',
 
     'oscar.apps.analytics.apps.AnalyticsConfig',
     'oscar.apps.address.apps.AddressConfig',
-    'oscar.apps.shipping.apps.ShippingConfig',
     'oscar.apps.offer.apps.OfferConfig',
     'oscar.apps.voucher.apps.VoucherConfig',
     'oscar.apps.wishlists.apps.WishlistsConfig',

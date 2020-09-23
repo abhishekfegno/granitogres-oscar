@@ -1,0 +1,3 @@
+
+class AlertException(Exception):
+    pass

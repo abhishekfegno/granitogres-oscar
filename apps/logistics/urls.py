@@ -21,6 +21,7 @@ urlpatterns = [
         path('planned/', PlannedTripsListView.as_view(), name="planned-trips"),
         path('active/', ActiveTripsListView.as_view(), name="active-trips"),
         path('delivered/', DeliveredTripsListView.as_view(), name="delivered-trips"),
+        path('cancelled/', CancalledTripsListView.as_view(), name="cancelled-trips"),
 
     ]))
 

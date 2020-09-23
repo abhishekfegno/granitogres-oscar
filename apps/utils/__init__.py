@@ -66,7 +66,7 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
         )
     return {
         'effective_price': float(purchase_info.price.effective_price),
-        'retail': float(retail_rate),
+        'retail': int(retail_rate * 100) / 100,
         'currency': purchase_info.price.currency,
         'symbol': get_symbol(purchase_info.price.currency),
         **kwargs

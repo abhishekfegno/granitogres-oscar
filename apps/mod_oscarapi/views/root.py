@@ -89,6 +89,10 @@ def PUBLIC_APIS(r, f):
                     'pk': '19', 'method': 'return', 'action': 'complete'}, request=r, format=f)),
                 ("Return Cancel", reverse("logistics-api:order-action", kwargs={
                     'pk': '19', 'method': 'return', 'action': 'cancel'}, request=r, format=f)),
+                ("Trip Completion", reverse("logistics-api:order-action", kwargs={
+                    'pk': '19', 'method': 'trip', 'action': 'complete'}, request=r, format=f)),
+                ("Trip Cancel", reverse("logistics-api:order-action", kwargs={
+                    'pk': '19', 'method': 'trip', 'action': 'cancel'}, request=r, format=f)),
             ]))
         ])),
 

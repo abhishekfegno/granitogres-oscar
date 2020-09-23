@@ -78,7 +78,6 @@ class PlannedTripView(ListAPIView):
         return DeliveryTrip.objects.filter(agent=self.request.user, status=DeliveryTrip.YET_TO_START)
 
 
-
 class TripsDetailView(RetrieveAPIView):
     serializer_class = DeliveryTripSerializer
     authentication_classes = (SessionAuthentication, )
@@ -166,29 +165,53 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
     method: {order|return}
     pk: <consignment_id>
     action {complete|cancel} """
-    dt = DeliveryTrip.get_active_trip(agent=request.user, raise_error=False) or DeliveryTrip()
+    dt = DeliveryTrip.get_active_trip(agent=request.user, raise_error=False)
+    if dt is None:
+        return Response({'error': ''}, status=400)
     out = {}
+
+    def catch_error(func, args=(), kwargs=None):
+        if kwargs is None:
+            kwargs = {}
+        try:
+            return (func(*args, **kwargs), None)
+        except Exception as e:
+            return None, {'error': str(e)}
+
     status_code = 200
+    reason = request.GET.get('reason')
     if method == 'order':
         consignment_object = get_object_or_404(dt.delivery_consignments, pk=k.get('pk'))
         if action == 'complete':
-            consignment_object.mark_as_completed()
+            _, err = catch_error(consignment_object.mark_as_completed)
+            out = err
         elif action == "cancel":
-            consignment_object.cancel_consignment()
+            consignment_object.cancel_consignment(reason)
         else:
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
             status_code = 400
     elif method == 'return':
         consignment_object = get_object_or_404(dt.return_consignments, pk=k.get('pk'))
         if action == 'complete':
-            consignment_object.mark_as_completed()
+            _, err = catch_error(consignment_object.mark_as_completed)
+            out = err
         elif action == "cancel":
-            consignment_object.cancel_consignment()
+            consignment_object.cancel_consignment(reason)
+        else:
+            out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
+            status_code = 400
+    elif method == 'trip':
+        consignment_object = dt
+        if action == 'complete':
+            _, err = catch_error(consignment_object.mark_as_completed)
+            out = err
+        elif action == "cancel":
+            consignment_object.cancel_consignment(reason)
         else:
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
             status_code = 400
     else:
-        out = {'error': 'Invalid Type'}
+        out = {'error': 'Invalid Type. Type can be "order" or "return"'}
         status_code = 400
 
     return Response(out, status=status_code)

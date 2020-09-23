@@ -8,6 +8,7 @@ from rest_framework.relations import HyperlinkedIdentityField
 from apps.api_set.serializers.catalogue import ProductListSerializer, ProductSimpleListSerializer, \
     custom_ProductListSerializer
 from apps.catalogue.models import Product
+from apps.payment.refunds import RefundFacade
 
 Order = get_model('order', 'Order')
 Line = get_model('order', 'Line')
@@ -44,9 +45,22 @@ class OrderListSerializer(serializers.ModelSerializer):
 class OrderDetailSerializer(serializers.ModelSerializer):
     lines = LineDetailSerializer(many=True)
     total_discount_incl_tax = serializers.SerializerMethodField()
+    source = serializers.SerializerMethodField()
 
     def get_total_discount_incl_tax(self, instance):
         return str(instance.total_discount_incl_tax)
+
+    def get_source(self, order):
+        source = RefundFacade().get_sources_model_from_order(order).first()
+        if source:
+            return {
+                'payment_type': source.source_type.name,
+                'amount_debited': source.amount_debited,
+                'is_paid': source.source_type.code.lower() != 'cash',
+                'amount_refunded': source.amount_refunded,
+                'amount_available_for_refund': source.amount_available_for_refund,
+                'reference': source.reference,
+            }
 
     class Meta:
         model = Order
@@ -56,6 +70,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             'shipping_incl_tax',
             'total_incl_tax',
             'shipping_status',
+            'source',
             'num_lines', 'status', 'date_placed', 'lines'
         )
 
