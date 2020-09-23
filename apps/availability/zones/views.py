@@ -63,6 +63,7 @@ class SetZone(GenericAPIView):
         return Response({
             'zone': request.session.get('zone_id'),
             'location': request.session.get('location_id'),
+            'location_coordinates': request.session.get('location_coordinates'),
         })
 
     def post(self, request, *args, **kwargs):
@@ -79,6 +80,7 @@ class SetZone(GenericAPIView):
             "location": {
                 "id": _out['location'],
                 "name": _out['location_name'],
+                'location_coordinates': request.session.get('location_coordinates'),
             }
         }
         return Response(out)

@@ -1,3 +1,5 @@
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
 from oscarapicheckout import utils
 from oscarapicheckout.serializers import OrderSerializer
 from oscarapicheckout.signals import order_placed
@@ -5,6 +7,8 @@ from oscarapicheckout.states import DECLINED, CONSUMED
 from oscarapicheckout.utils import CHECKOUT_ORDER_ID
 from oscarapicheckout.views import CheckoutView as OscarAPICheckoutView
 from rest_framework import status
+from rest_framework.decorators import renderer_classes
+from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
 from rest_framework.response import Response
 
 from ..serializers.checkout import (
@@ -13,8 +17,20 @@ from ..serializers.checkout import (
     # PaymentMethodsSerializer,
     # PaymentStateSerializer
 )
+from ...users.models import Location
 
 
+def _login_and_location_required(func):
+    def _wrapper(request, *args, **kwargs):
+        if request.user.is_anonymous:
+            return JsonResponse({'detail': 'You have to be logged-in to create Order.'}, status=status.HTTP_400_BAD_REQUEST)
+        if request.session.get('location'):
+            return JsonResponse({'detail': 'Geolocation not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        return func(request, *args, **kwargs)
+    return _wrapper
+
+
+@method_decorator(_login_and_location_required, name="dispatch")
 class CheckoutView(OscarAPICheckoutView):
     __doc__ = """
     Prepare an order for checkout.
@@ -98,6 +114,11 @@ class CheckoutView(OscarAPICheckoutView):
     serializer_class = CheckoutSerializer
 
     def post(self, request, format=None):
+        if request.user.is_anonymous:
+            return Response({'detail': 'You have to be logged-in to create Order.'}, status=status.HTTP_400_BAD_REQUEST)
+        if request.session.get('location'):
+            return Response({'detail': 'Geolocation not provided'}, status=status.HTTP_400_BAD_REQUEST)
+
         # Wipe out any previous state data
         utils.clear_consumed_payment_method_states(request)
 
@@ -105,7 +126,10 @@ class CheckoutView(OscarAPICheckoutView):
         c_ser = self.get_serializer(data=request.data)
         if not c_ser.is_valid():
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
-
+        location_id = request.session.get('location')
+        location = location_id and Location.objects.filter(id=location_id).last()
+        if not location:
+            return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
         # Freeze basket
         basket = c_ser.validated_data.get('basket')
         basket.freeze()
@@ -113,6 +137,10 @@ class CheckoutView(OscarAPICheckoutView):
         # Save Order
         order = c_ser.save()
         request.session[CHECKOUT_ORDER_ID] = order.id
+
+        # adding location from user request to
+        order.shipping_address.location = location
+        order.shipping_address.save()
 
         # Send order_placed signal
         order_placed.send(sender=self, order=order, user=request.user, request=request)
@@ -161,7 +189,7 @@ class CheckoutView(OscarAPICheckoutView):
             return state
 
         # Loop through each method with a specified amount to charge
-        data_amount_specified = { k: v for k, v in data.items() if not v['pay_balance'] and v['enabled']}
+        data_amount_specified = {k: v for k, v in data.items() if not v['pay_balance'] and v['enabled']}
         for key, method_data in data_amount_specified.items():
             new_states[key] = record(key, method_data)
 

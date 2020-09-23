@@ -4,6 +4,8 @@ from oscar.apps.order.abstract_models import *
 
 __all__ = ['PaymentEventQuantity', 'ShippingEventQuantity']
 
+from apps.users.models import Location
+
 
 class Order(AbstractOrder):
     pass
@@ -22,7 +24,7 @@ class CommunicationEvent(AbstractCommunicationEvent):
 
 
 class ShippingAddress(AbstractShippingAddress):
-    pass
+    location = models.ForeignKey('users.Location', on_delete=models.SET_NULL, null=True, blank=True)
 
 
 class BillingAddress(AbstractBillingAddress):

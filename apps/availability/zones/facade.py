@@ -26,13 +26,18 @@ class ZoneFacade(object):
             else:
                 location = Location.objects.create(**params, user=user)
             request.session['location'] = location.id
+            request.session['location_coordinates'] = str(location.location)
+
         else:
             request.session['location'] = None
+            request.session['location_coordinates'] = None
+
         request.session['zone'] = zone.id
         return {
             'zone': zone.name,
             'location': location.id if location else None,
-            'location_name': location.location_name if location else DEFAULT_LOCATION_NAME
+            'location_name': location.location_name if location else DEFAULT_LOCATION_NAME,
+            'location_coordinates': request.session.get('location_coordinates'),
         }
 
 

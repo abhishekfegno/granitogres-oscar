@@ -36,15 +36,11 @@ class Migration(migrations.Migration):
             name='no_of_times_send',
             field=models.PositiveIntegerField(default=1),
         ),
-        migrations.AddField(
-            model_name='user',
-            name='is_delivery_boy',
-            field=models.NullBooleanField(default=False),
-        ),
         migrations.AlterField(
             model_name='otp',
             name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='otp_set', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                    related_name='otp_set', to=settings.AUTH_USER_MODEL),
         ),
         migrations.CreateModel(
             name='Location',
@@ -52,9 +48,11 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('location', django.contrib.gis.db.models.fields.PointField(srid=4326)),
                 ('location_name', models.CharField(max_length=90)),
-                ('is_active', models.BooleanField(default=True)),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('zone', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='availability.Zones')),
+                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                           to=settings.AUTH_USER_MODEL)),
+                # ('is_active', models.BooleanField(default=True)),
+                # ('zone', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                #                            to='availability.Zones')),
             ],
         ),
     ]

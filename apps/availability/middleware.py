@@ -21,16 +21,19 @@ class AvailabilityPincodeMiddleware(MiddlewareMixin):
 class AvailabilityZoneMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
-        zone = request.session.get('zone', None)
-        if not zone and request.user.is_authenticated:
-            location = Location.objects.filter(user=request.user, is_active=True).only('id', 'zone').last()
+        request.session['location'] = request.session.get('location', None)
+        request.session['zone'] = zone = request.session.get('zone', None)
+        if not (zone and request.session.get('location')) and request.user.is_authenticated:
+            location = Location.objects.filter(user=request.user).order_by('is_active', 'id').last()
             if location:
                 location_id = location.id
-                zone_id = location.zone_id
+                zone_id = location.zone.id if location.zone else None
+                location_coordinates = str(location.location)
                 request.session['location'] = location_id
+                request.session['location_coordinates'] = location_coordinates
                 request.session['zone'] = zone_id
-        else:
-            request.session['location'] = request.session.get('location', None)
-            request.session['zone'] = zone
 
-
+    def process_response(self, request, response):
+        response['X-Geo-Location-ID'] = request.session.get('location')
+        response['X-X-Geo-Location-Point'] = request.session.get('location_coordinates')
+        return response
