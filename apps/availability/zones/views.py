@@ -59,11 +59,7 @@ class SetZone(GenericAPIView):
     permission_classes = [AllowAny, ]
 
     def get(self, request, *args, **kwargs):
-        return Response({
-            'zone': request.session.get('zone_id'),
-            'location': request.session.get('location_id'),
-            'location_coordinates': request.session.get('location_coordinates'),
-        })
+        return Response(ZoneFacade().face(request))
 
     def post(self, request, *args, **kwargs):
         sobj = self.get_serializer(data=request.data)
@@ -72,19 +68,5 @@ class SetZone(GenericAPIView):
         point = sobj.validated_data['point']
         zone = sobj.validated_data['zone']
         _out = ZoneFacade().set_zone(request, zone=zone, point=point)
-        out = {
-            "zone": {
-                "name": _out['zone'],
-            },
-            "location": {
-                "id": _out['location'],
-                "name": _out['location_name'],
-                'location_coordinates': request.session.get('location_coordinates'),
-            }
-        }
-        return Response(out)
-
-
-
-
+        return Response(_out)
 

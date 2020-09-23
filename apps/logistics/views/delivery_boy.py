@@ -13,7 +13,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from rest_framework.decorators import api_view
 from rest_framework.reverse import reverse
 
-User = get_user_model()
+from apps.users.models import User
 
 
 @method_decorator(user_passes_test(lambda user: user.is_authenticated and user.is_superuser), name='dispatch')
@@ -21,6 +21,38 @@ class DeliveryBoyList(ListView):
     queryset = User.objects.exclude(is_delivery_boy=False)
     template_name = 'logistics/delivery-boy/list.html'
     ordering = ['-is_active', '-id', ]
+
+
+@method_decorator(user_passes_test(lambda user: user.is_authenticated and user.is_superuser), name='dispatch')
+class DeliveryBoyCreate(CreateView):
+    queryset = User.objects.all()
+    template_name = 'logistics/delivery-boy/form.html'
+    fields = ('username',  'first_name', 'last_name',  'image', 'id_proof', 'email', )
+
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        form.instance.is_delivery_boy = True
+        self.object = form.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('logistics:dashboard-delivery-boy-list')
+
+
+@method_decorator(user_passes_test(lambda user: user.is_authenticated and user.is_superuser), name='dispatch')
+class DeliveryBoyUpdate(UpdateView):
+    queryset = User.objects.filter(is_delivery_boy=True)
+    template_name = 'logistics/delivery-boy/form.html'
+    fields = ('username',  'first_name', 'last_name',  'image', 'id_proof', 'email', )
+
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        form.instance.is_delivery_boy = True
+        self.object = form.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('logistics:dashboard-delivery-boy-update-form', kwargs={'pk': self.object.pk})
 
 
 @api_view(['POST'])

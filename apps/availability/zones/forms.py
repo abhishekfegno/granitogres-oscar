@@ -20,7 +20,7 @@ class PolyWidget(floppyforms.gis.PolygonWidget, floppyforms.gis.BaseOsmWidget):
 class ZoneForm(forms.ModelForm):
 
     zone = floppyforms.gis.PolygonField(widget=PolyWidget)
-    name = forms.CharField(widget=forms.TextInput(attrs={'class': "form-control"}))
+    name = forms.CharField()
 
     class Meta:
         model = Zones

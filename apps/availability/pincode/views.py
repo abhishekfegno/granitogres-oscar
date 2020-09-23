@@ -147,7 +147,6 @@ def check_availability(request):
     request : GET
     params : /../../?pincode=<pincode>&product=<product>
     RETURN : 'pincode' Is a deliverable location if 'status' => true
-
     """
     if not request.user.is_authenticated:
         return Response({'access': 'denied'}, status=403)

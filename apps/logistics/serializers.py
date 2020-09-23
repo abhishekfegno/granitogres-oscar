@@ -4,7 +4,7 @@ from decimal import Decimal
 from oscar.templatetags.currency_filters import currency
 from rest_framework import serializers
 
-from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin
+from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin, ProductAttributeFieldMixin
 from apps.logistics.models import DeliveryTrip, Constant
 from apps.payment.refunds import RefundFacade
 
@@ -33,6 +33,7 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             'consignment_id': consignment.id,
             'id': consignment.order.id,
             'type': 'order',
+            'consignment_status': consignment.status,
             'source': get_source_data(consignment.order),
             'order_number': consignment.order.number,
             'order_status': consignment.order.status,
@@ -47,7 +48,10 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
                 'product_name': line.product.name,
                 'primary_image': cx.get_primary_image(line.product),
                 'quantity': line.quantity,
-                'line_price_incl_tax': line.line_price_incl_tax
+                'line_price_incl_tax': line.line_price_incl_tax,
+                "weight": getattr(
+                    line.product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'
+                    ) if not line.product.is_parent else None,
             } for line in consignment.order.lines.all()],
         } for consignment in instance.delivery_consignments.select_related('order', 'order__shipping_address')]
 

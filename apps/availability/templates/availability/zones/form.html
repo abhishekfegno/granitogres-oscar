@@ -10,16 +10,15 @@
     <li><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
     <li ><a href="{% url 'availability:zones-list' %}">{% trans "Zones" %}</a></li>
     {% if object.pk %}
-    <li class="active">{{ object.name }}</li>
+        <li class="active">{{ object.name }}</li>
     {% else %}
-    <li class="active">Create New</li>
+        <li class="active">Create New</li>
     {% endif %}
-
 </ul>
 {% endblock %}
 
 {% block header %}
-{{ form.media  }}
+    {{ form.media  }}
 {% endblock header %}
 
 

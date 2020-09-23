@@ -50,8 +50,6 @@ def categories_list_cached(request):
     return Response(__get_category_cached(request))
 
 
-
-
 @api_view()
 def product_detail_web(request, product):
     queryset = Product.objects.base_queryset()
@@ -64,8 +62,28 @@ def product_detail_web(request, product):
         product = product.parent
     else:
         focused_product = product
+    if request.session.get('location'):
+        out = {
+            'message': None,
+            'status': True,
+            'data': {
+                'location': {
+                    "zone_id": request.session.get('zone'),
+                    "zone_name": request.session.get('zone_name'),
+                    "location_id": request.session.get('location'),
+                    "location_name": request.session.get('location_name')
+                }
+            }
+        }
+    else:
+        out = {
+            'message': 'Current Location is not provided.',
+            'status': False
+        }
+
     return Response({
-        'results': serializer_class(instance=focused_product, context={'request': request, 'product': product}).data
+        'results': serializer_class(instance=focused_product, context={'request': request, 'product': product}).data,
+        'deliverable': out
     })
 
 

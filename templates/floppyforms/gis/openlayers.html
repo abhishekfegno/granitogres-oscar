@@ -19,7 +19,10 @@
 	<div id="{{ attrs.id }}_map"></div>
 	<a href="javascript:{{ module }}.clearFeatures()">Delete all Features</a>
 	{% if display_wkt %}<p> WKT debugging window:</p>{% endif %}
-	{% include "floppyforms/textarea.html" with required=0 %}
+	{% comment %}{% include "floppyforms/textarea.html" with required=0 %}{% endcomment %}
+	<input name="{{ name }}" id="{{ attrs.id }}" required
+		   {% include "floppyforms/attrs.html" %} value="{% if value %}{{ value }}{% endif %}" />
+
 	<script type="text/javascript">
 	    window.addEventListener('DOMContentLoaded', function() {
 	    	{% block map_options %}var map_options = {};{% endblock %}
@@ -36,6 +39,8 @@
 				name: '{{ name }}'
 			};{% endblock %}
 			var {{ module }} = new MapWidget(options);
+            console.log({{ module }})
+            window.{{ module }} = {{ module }};
 		}, false);
 	</script>
 </div>

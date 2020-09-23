@@ -15,7 +15,13 @@
         <li>
             <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
         </li>
-        <li class="active">Delivery Boy Management</li>
+        <li ><a href="{% url 'logistics:dashboard-delivery-boy-list' %}">Delivery Boy Management</a></li>
+        {% if object.pk %}
+            <li class="active">#{{ object.pk }} {{ object.get_full_name }}</li>
+        {% else %}
+            <li class="active">Create New Agent</li>
+        {% endif %}
+
     </ul>
 {% endblock %}
 
@@ -30,23 +36,29 @@
         <h3><i class="icon-add icon-large"></i>Register New Delivery Boy</h3>
     </div>
     <div class="well">
-        <form method="post"  id="search_form">
+        <form method="post" id="search_form">
+            {% csrf_token %}
             {% for field in form %}
                 {% if field.is_hidden %}
                     {% render_field field class+='form-control' %}
                 {% else %}
-                    <span class="form-group{% if field.errors %} has-error{% endif %}">
-                        {{ field.label_tag }}
-                        {% render_field field class+='form-control' %}
-                        {% for error in field.errors %}
-                            <ul class="error-block">
-                                <li>{{ error }}</li>
-                            </ul>
-                        {% endfor %}
-                    </span>
+                    <div class="col-md-6">
+                        <span class="form-group{% if field.errors %} has-error{% endif %}">
+                            {{ field.label_tag }}
+                            {% render_field field class+='form-control' %}
+                            {% for error in field.errors %}
+                                <ul class="error-block">
+                                    <li>{{ error }}</li>
+                                </ul>
+                            {% endfor %}
+                            <div class="text-muted">{{ field.help_text }}</div>
+                        </span>
+                    </div>
                 {% endif %}
             {% endfor %}
-            <input type="submit" value="{% if object %}Update{% else %}Create{% endif %}" class="btn btn-primary" />
+            <div class="col-md-12">
+                <input type="submit" value="{% if object %}Update{% else %}Create{% endif %}" class="btn btn-primary" />
+            </div>
         </form>
     </div>
     {% endblock dashboard_content %}
