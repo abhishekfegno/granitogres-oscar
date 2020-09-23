@@ -199,6 +199,7 @@ class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMi
             'benifits',
             'other_product_info',
             'variable_weight_policy',
+            'deliverable',
         )
 
     def get_variants(self, instance):

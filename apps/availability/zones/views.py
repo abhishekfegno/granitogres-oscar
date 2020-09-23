@@ -51,8 +51,7 @@ class SetZone(GenericAPIView):
 
     {
         "latitude": "12.785238498732",
-        "longitude": "77.94478155806023",
-
+        "longitude": "77.94478155806023"
     }
 
     """
@@ -61,8 +60,10 @@ class SetZone(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         return Response({
-            'zone': request.session.get('zone_id'),
-            'location': request.session.get('location_id'),
+            "zone_id": request.session.get('zone'),
+            "zone_name": request.session.get('zone_name'),
+            "location_id": request.session.get('location'),
+            "location_name": request.session.get('location_name')
         })
 
     def post(self, request, *args, **kwargs):
@@ -72,16 +73,7 @@ class SetZone(GenericAPIView):
         point = sobj.validated_data['point']
         zone = sobj.validated_data['zone']
         _out = ZoneFacade().set_zone(request, zone=zone, point=point)
-        out = {
-            "zone": {
-                "name": _out['zone'],
-            },
-            "location": {
-                "id": _out['location'],
-                "name": _out['location_name'],
-            }
-        }
-        return Response(out)
+        return self.get(request, *args, **kwargs)
 
 
 

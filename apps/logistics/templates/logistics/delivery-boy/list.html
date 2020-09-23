@@ -16,14 +16,19 @@
             <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
         </li>
         <li class="active">{% trans "Delivery Boys" %}</li>
-    </ul>
 
+    </ul>
 {% endblock %}
 
 {% block header %}
     <div class="page-header">
-        <h1>{% trans "Delivery Boys" %}</h1>
+        <h1>
+            {% trans "Delivery Boys" %}
+            <a href="{% url 'logistics:dashboard-delivery-boy-create' %}" class="btn btn-primary pull-right">
+                Add New Agent </a>
+        </h1>
     </div>
+
 {% endblock header %}
 
 {% block dashboard_content %}
@@ -47,7 +52,12 @@
 
                 {% for boy in object_list %}
                     <tr>
-                        <td>{{ boy.get_short_name }}</td>
+                        <td>
+                                {% if boy.image %}
+                                    <img src="{{ boy.image.url }}" alt="img-url" width="40" height="40" />
+                                {% endif %}
+                            <a href="{% url 'logistics:dashboard-delivery-boy-update-form' pk=boy.pk %}">{{ boy.get_full_name|default:"< Name >" }}</a>
+                        </td>
                         <td>{{ boy.mobile|default:"-" }}</td>
                         <td>{{ boy.email|default:"-" }}</td>
                         <td>{{ boy.status_text|default:"-" }}</td>

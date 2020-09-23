@@ -53,7 +53,7 @@ class ProductAttributeFieldMixin(object):
                 'value': attr.value_as_text,
                 'code': attr.att_code,
             } for attr in attrs_value]
-        cache.delete(cache_key.product_attribute__key(instance.id))
+        # cache.delete(cache_key.product_attribute__key(instance.id))
         return cache_library(cache_key.product_attribute__key(instance.id), cb=_inner)
 
 

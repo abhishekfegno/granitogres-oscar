@@ -28,6 +28,12 @@ class User(AbstractUser):
     # True => is delivery boy!
     is_delivery_boy = models.NullBooleanField(default=False)
 
+    image = models.ImageField(null=True, blank=True, upload_to='user_profile_pictures',)
+    id_proof = models.ImageField(null=True, blank=True, upload_to='user_documents',
+                                 help_text="Driving License, ID Card etc... specially used for Delivery Boys.")
+    emp_id = models.TextField(verbose_name="Employee ID", null=True, blank=True,
+                              help_text="Applicable only to System Employees Accounts")
+
     username = models.CharField(
         'mobile',
         max_length=10,

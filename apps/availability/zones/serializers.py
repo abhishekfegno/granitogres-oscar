@@ -29,10 +29,9 @@ class DeliverabilityCheckSerializer(PointSerializer):
             raise forms.ValidationError("Currently we are not delivering to this location.")
         location_id = self.context['request'].session.get('location_id')
         if location_id:
-            location = Location.objects.filter(id=location_id, is_active=True).first()
+            location = Location.objects.filter(id=location_id, is_active=True).last()
             if location and location.location == attrs['point']:
                 forms.ValidationError("Location Already Updated!")
-
         attrs['zone'] = zone
         return attrs
 

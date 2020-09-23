@@ -21,7 +21,7 @@ class AvailabilityPincodeMiddleware(MiddlewareMixin):
 class AvailabilityZoneMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
-        zone = request.session.get('zone', None)
+        zone = request.session.get('zone', None)        # for scripting purpose.
         if not zone and request.user.is_authenticated:
             location = Location.objects.filter(user=request.user, is_active=True).only('id', 'zone').last()
             if location:
