@@ -26,6 +26,15 @@ class CommunicationEvent(AbstractCommunicationEvent):
 class ShippingAddress(AbstractShippingAddress):
     location = models.ForeignKey('users.Location', on_delete=models.SET_NULL, null=True, blank=True)
 
+    @property
+    def summary_line(self):
+        """
+        Returns a single string summary of the address,
+        separating fields using commas.
+        """
+        fields = ['line1', 'line2', 'line3', 'line4', 'state', 'postcode', 'country']
+        return ", ".join(self.get_field_values(fields)())
+
 
 class BillingAddress(AbstractBillingAddress):
     pass

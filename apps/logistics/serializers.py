@@ -41,7 +41,8 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             'num_items': consignment.order.num_items,
             'total_incl_tax': consignment.order.total_incl_tax,
             'refund': None,
-            'shipping': consignment.order.shipping_address.summary,
+            'user_name': consignment.order.user.get_full_name(),
+            'shipping': consignment.order.shipping_address.summary_line,
             'contact': str(consignment.order.shipping_address.phone_number),
             'notes': consignment.order.shipping_address.notes,
             'lines': [{
@@ -95,11 +96,10 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             'num_items_to_be_returned': len(consignments),
             'order_total': currency(order.total_incl_tax),
             'return_amount': '',
-            'shipping': {
-                'address': order.shipping_address.summary,
-                'contact': str(order.shipping_address.phone_number),
-                'notes': order.shipping_address.notes,
-            },
+            'user_name': order.user.get_full_name(),
+            'shipping': order.shipping_address.summary_line,
+            'contact': str(order.shipping_address.phone_number),
+            'notes': order.shipping_address.notes,
             'refund': get_return_data(order),
             "consignments": [{
                 'id': cons.order_line.id,
