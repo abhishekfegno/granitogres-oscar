@@ -33,7 +33,7 @@ class ShippingAddress(AbstractShippingAddress):
         separating fields using commas.
         """
         fields = ['line1', 'line2', 'line3', 'line4', 'state', 'postcode', 'country']
-        return ", ".join(self.get_field_values(fields)())
+        return ", ".join(self.get_field_values(fields))
 
 
 class BillingAddress(AbstractBillingAddress):
