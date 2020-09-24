@@ -84,7 +84,7 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             'order_number': consignment.order_line.order.number,
             'id': consignment.order_line.id,
             'consignment_status': consignment.status,
-            'source': get_status(consignment.order),
+            'source': get_status(consignment.order_line),
             'order_status': consignment.status,
             'date_placed': consignment.order_line.order.date_placed,
             'total_incl_tax': consignment.order_line.line_price_incl_tax,
