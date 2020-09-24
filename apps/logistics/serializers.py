@@ -78,14 +78,15 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             return (is_cancelled and DeliveryTrip.CANCELLED) or DeliveryTrip.COMPLETED
 
         return [{
-            'type': 'return',
+
             'consignment_id': consignment.id,
             'order_id': consignment.order_line.order.id,
             'order_number': consignment.order_line.order.number,
             'id': consignment.order_line.id,
+            'type': 'return',
             'consignment_status': consignment.status,
-            'source': consignment.order_line.status,
-            'order_status': consignment.status,
+            'source': get_return_data(consignment.order),
+            'order_status': consignment.order_line.status,
             'date_placed': consignment.order_line.order.date_placed,
             'total_incl_tax': consignment.order_line.line_price_incl_tax,
             'user_name': consignment.order_line.order.shipping_address.get_full_name(),
