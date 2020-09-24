@@ -42,8 +42,8 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             'contact': str(consignment.order.shipping_address.phone_number),
             'notes': consignment.order.shipping_address.notes,
             'geolocation': {
-                'latitude': getattr(consignment.order_line.order.shipping_address.location, 'x', None),
-                'longitude': getattr(consignment.order_line.order.shipping_address.location, 'y', None),
+                'latitude': getattr(consignment.order.shipping_address.location, 'x', None),
+                'longitude': getattr(consignment.order.shipping_address.location, 'y', None),
             },
             'lines': [{
                 'line_id': line.id,
@@ -103,7 +103,7 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
                 'quantity': line.quantity,
                 'line_price_incl_tax': line.line_price_incl_tax,
                 "weight": getattr(
-                    line.product.attr0ibute_values.filter(attribute__code='weight').first(), 'value', 'Weight Unavailable'
+                    line.product.attribute_values.filter(attribute__code='weight').first(), 'value', 'Weight Unavailable'
                 ) if not line.product.is_parent else None,
             } for line in [consignment.order_line]],
         } for consignment in return_items]
