@@ -42,8 +42,8 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             'contact': str(consignment.order.shipping_address.phone_number),
             'notes': consignment.order.shipping_address.notes,
             'geolocation': {
-                'latitude': consignment.order.shipping_address.location.x,
-                'longitude': consignment.order.shipping_address.location.y,
+                'latitude': getattr(consignment.order_line.order.shipping_address.location, 'x', None),
+                'longitude': getattr(consignment.order_line.order.shipping_address.location, 'y', None),
             },
             'lines': [{
                 'line_id': line.id,
@@ -93,8 +93,8 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             'contact': str(consignment.order_line.order.shipping_address.phone_number),
             'notes': consignment.order_line.order.shipping_address.notes,
             'geolocation': {
-                'latitude': consignment.order_line.order.shipping_address.location.x,
-                'longitude': consignment.order_line.order.shipping_address.location.y,
+                'latitude': getattr(consignment.order_line.order.shipping_address.location, 'x', None),
+                'longitude': getattr(consignment.order_line.order.shipping_address.location, 'y', None),
             },
             'lines': [{
                 'line_id': line.id,
