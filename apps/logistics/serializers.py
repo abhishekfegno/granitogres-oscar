@@ -30,7 +30,7 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
         return [{
             'consignment_id': consignment.id,
             'id': consignment.order.id,
-            'order_number': consignment.order.numebr,
+            'order_number': consignment.order.number,
             'type': 'order',
             'consignment_status': consignment.status,
             'source': get_source_data(consignment.order),
@@ -81,7 +81,7 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             'type': 'return',
             'consignment_id': consignment.id,
             'order_id': consignment.order_line.order.id,
-            'order_number': consignment.order_line.order.numebr,
+            'order_number': consignment.order_line.order.number,
             'id': consignment.order_line.id,
             'consignment_status': consignment.status,
             'source': get_status(consignment.order),
