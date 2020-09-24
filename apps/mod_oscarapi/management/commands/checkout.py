@@ -65,6 +65,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         _method = None
+        self.options = options
         self.BASE_URL = self.BASE_URL.format(options['host'])
         if options['print_users']:
             self.user = User.objects.order_by('?').first()
@@ -112,6 +113,7 @@ class Command(BaseCommand):
             sys.exit(0)
 
     def checkout(self, data):
+        print(data)
         response = self.s.post(
             self.BASE_URL + 'checkout/',
             json=data,

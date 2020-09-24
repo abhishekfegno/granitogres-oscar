@@ -35,6 +35,11 @@ class ShippingAddress(AbstractShippingAddress):
         fields = ['line1', 'line2', 'line3', 'line4', 'state', 'postcode', 'country']
         return ", ".join(self.get_field_values(fields))
 
+    def get_full_name(self):
+
+        fields = ['salutation', 'first_name', 'last_name']
+        return ", ".join(self.get_field_values(fields))
+
 
 class BillingAddress(AbstractBillingAddress):
     pass

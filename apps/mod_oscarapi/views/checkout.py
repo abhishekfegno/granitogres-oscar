@@ -122,6 +122,9 @@ class CheckoutView(OscarAPICheckoutView):
         utils.clear_consumed_payment_method_states(request)
 
         # Validate the input
+
+        import pdb; pdb.set_trace()
+
         c_ser = self.get_serializer(data=request.data)
         if not c_ser.is_valid():
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)

@@ -20,34 +20,35 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             if source:
                 return {
                     'payment_type': source.source_type.name,
-                    'amount_allocated': source.amount_allocated,
-                    'amount_debited': source.amount_debited,
-                    'is_paid': source.source_type.code.lower() != 'cash',
-                    'amount_refunded': source.amount_refunded,
-                    'amount_available_for_refund': source.amount_available_for_refund,
+                    # 'amount_allocated': source.amount_allocated,
+                    # 'amount_debited': source.amount_debited,
+                    # 'is_paid': source.source_type.code.lower() != 'cash',
+                    # 'amount_refunded': source.amount_refunded,
+                    # 'amount_available_for_refund': source.amount_available_for_refund,
                     'reference': source.reference,
                 }
-        cx = ProductPrimaryImageFieldMixin()
-        cx.context = self.context
         return [{
             'consignment_id': consignment.id,
             'id': consignment.order.id,
+            'order_number': consignment.order.numebr,
             'type': 'order',
             'consignment_status': consignment.status,
             'source': get_source_data(consignment.order),
-            'order_number': consignment.order.number,
             'order_status': consignment.order.status,
             'date_placed': consignment.order.date_placed,
-            'num_items': consignment.order.num_items,
             'total_incl_tax': consignment.order.total_incl_tax,
-            'refund': None,
-            'user_name': consignment.order.user.get_full_name(),
+            'user_name': consignment.order.shipping_address.get_full_name(),
             'shipping': consignment.order.shipping_address.summary_line,
             'contact': str(consignment.order.shipping_address.phone_number),
             'notes': consignment.order.shipping_address.notes,
+            'geolocation': {
+                'latitude': consignment.order.shipping_address.location.x,
+                'longitude': consignment.order.shipping_address.location.y,
+            },
             'lines': [{
+                'line_id': line.id,
+                'line_status': line.status,
                 'product_name': line.product.name,
-                'primary_image': cx.get_primary_image(line.product),
                 'quantity': line.quantity,
                 'line_price_incl_tax': line.line_price_incl_tax,
                 "weight": getattr(
@@ -62,71 +63,78 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             if source:
                 return {
                     'payment_type': source.source_type.name,
-                    'amount_allocated': source.amount_allocated,
-                    'amount_debited': source.amount_debited,
-                    'is_paid': source.source_type.code.lower() != 'cash',
-                    'amount_refunded': source.amount_refunded,
-                    'amount_available_for_refund': source.amount_available_for_refund,
                     'reference': source.reference,
                 }
         sel_reltd = 'order_line', 'order_line__order', 'order_line__order__shipping_address'
-        items = instance.return_consignments.select_related(*sel_reltd)
-        grouped_list = defaultdict(list)
+        return_items = instance.return_consignments.select_related(*sel_reltd)
 
-        for item in items:
-            source = RefundFacade().get_sources_model_from_order(item.order_line.order).first()
-            item.order_line.order.source = None
-            if source:
-                item.order_line.order.source = {
-                    'payment_type': source.source_type.name,
-                    'amount_allocated': source.amount_allocated,
-                    'amount_debited': source.amount_debited,
-                    'is_paid': source.source_type.code.lower() != 'cash',
-                    'amount_refunded': source.amount_refunded,
-                    'amount_available_for_refund': source.amount_available_for_refund,
-                    'reference': source.reference,
-                }
-            grouped_list[item.order_line.order].append(item)
+        def get_status(cons):
+            is_cancelled = True
+            for con in cons:
+                if con.status == DeliveryTrip.ON_TRIP:
+                    return DeliveryTrip.ON_TRIP
+                if con.status != DeliveryTrip.CANCELLED:
+                    is_cancelled = False
+            return (is_cancelled and DeliveryTrip.CANCELLED) or DeliveryTrip.COMPLETED
 
         return [{
-            'order_id': order.id,
-            'order_number': order.number,
-            'date_placed': order.date_placed,
-            'order_status': order.status,
-            'num_items_to_be_returned': len(consignments),
-            'order_total': currency(order.total_incl_tax),
-            'return_amount': '',
-            'user_name': order.user.get_full_name(),
-            'shipping': order.shipping_address.summary_line,
-            'contact': str(order.shipping_address.phone_number),
-            'notes': order.shipping_address.notes,
-            'refund': get_return_data(order),
-            "consignments": [{
-                'id': cons.order_line.id,
-                'order_status': cons.order_line.status,
-                'consignment_return_id': cons.id,
-                'product': {
-                    'product_name': cons.order_line.product.name,
-                    # 'primary_image': getattr(cons.order_line.product.primary_image(), 'original', None),
-                    'quantity': cons.order_line.quantity,
-                    'line_price_incl_tax': cons.order_line.line_price_incl_tax
-                },
-            } for cons in consignments],
-        } for order, consignments in grouped_list.items()]
+            'type': 'return',
+            'consignment_id': consignment.id,
+            'order_id': consignment.order_line.order.id,
+            'order_number': consignment.order_line.order.numebr,
+            'id': consignment.order_line.id,
+            'consignment_status': consignment.status,
+            'source': get_status(consignment.order),
+            'order_status': consignment.status,
+            'date_placed': consignment.order_line.order.date_placed,
+            'total_incl_tax': consignment.order_line.line_price_incl_tax,
+            'user_name': consignment.order_line.order.shipping_address.get_full_name(),
+            'shipping': consignment.order_line.order.shipping_address.summary_line,
+            'contact': str(consignment.order_line.order.shipping_address.phone_number),
+            'notes': consignment.order_line.order.shipping_address.notes,
+            'geolocation': {
+                'latitude': consignment.order_line.order.shipping_address.location.x,
+                'longitude': consignment.order_line.order.shipping_address.location.y,
+            },
+            'lines': [{
+                'line_id': line.id,
+                'line_status': line.status,
+                'product_name': line.product.name,
+                'quantity': line.quantity,
+                'line_price_incl_tax': line.line_price_incl_tax,
+                "weight": getattr(
+                    line.product.attr0ibute_values.filter(attribute__code='weight').first(), 'value', 'Weight Unavailable'
+                ) if not line.product.is_parent else None,
+            } for line in [consignment.order_line]],
+        } for consignment in return_items]
+
+        # return [{
+        #     'consignment_id': None,
+        #     'id': order.id,
+        #     'order_number': order.number,
+        #     'type': 'return',
+        #     'date_placed': order.date_placed,
+        #     'order_status': get_status(consignments),
+        #     'order_total': currency(sum(map(lambda con: con.order_line.line_price_incl_tax, consignments))),
+        #     'user_name': order.shipping_address.get_full_name(),
+        #     'shipping': order.shipping_address.summary_line,
+        #     'contact': str(order.shipping_address.phone_number),
+        #     'notes': order.shipping_address.notes,
+        #     'source': get_return_data(order),
+        #     "consignments": [{
+        #         'id': cons.order_line.id,
+        #         'consignment_return_id': cons.id,
+        #         'order_status': cons.order_line.status,
+        #         'product': {
+        #             'product_name': cons.order_line.product.name,
+        #             'primary_image': getattr(cons.order_line.product.primary_image(), 'original', None),
+        #             # 'quantity': cons.order_line.quantity,
+        #             'line_price_incl_tax': cons.order_line.line_price_incl_tax
+        #     #     },
+        #   # } for cons in consignments],
+        # } for order, consignments in grouped_list.items()]
 
     def get_cod_to_collect(self, instance: DeliveryTrip):
-        delivery_consignments_all = instance.delivery_consignments.all()
-        return_consignments_all = instance.return_consignments.all()
-        approached_statuses = Constant.COMPLETED, Constant.CANCELLED
-
-        delivery_consignments_completed = [cons for cons in delivery_consignments_all if cons.status in approached_statuses]
-        return_consignments_completed = [cons for cons in return_consignments_all if cons.status in approached_statuses]
-        delivery_consignments_on_going = [cons for cons in delivery_consignments_all if cons.status == Constant.ON_TRIP]
-        return_consignments_on_going = [cons for cons in return_consignments_all if cons.status == Constant.ON_TRIP]
-        from functools import reduce
-
-        d_to_collect = d_collected = r_to_collect = r_collected = Decimal('0.0')
-
         return {
             'delivery': instance.cods_to_collect,
             'return': instance.cods_to_return,
