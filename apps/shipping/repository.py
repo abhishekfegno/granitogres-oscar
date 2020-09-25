@@ -2,8 +2,10 @@
 # https://groups.google.com/forum/#!topic/django-oscar/H4tf20ujm8k
 
 # from oscar.apps.shipping.repository import *
+import collections
 from decimal import Decimal as D, Decimal
 
+from django import forms
 from django.conf import settings
 from oscar.apps.shipping.methods import Free, FixedPrice, NoShippingRequired
 from oscar.apps.shipping.repository import Repository as CoreRepository
@@ -18,7 +20,7 @@ class OwnDeliveryKerala(methods.FixedPrice):
     code = "free-shipping"
     name = _("Own Delivery")
 
-    def calculate(self, basket):
+    def calculate(self, basket, *args, **kwargs):
         if basket.total_incl_tax < settings.MINIMUM_BASKET_AMOUNT_FOR_FREE_DELIVERY:
             charge = Decimal(str(settings.DELIVERY_CHARGE))
             return prices.Price(
@@ -40,9 +42,21 @@ class Repository(CoreRepository):
     methods = [OwnDeliveryKerala()]  # init shipping method to default hand delivery
 
     def get_available_shipping_methods(self, basket, user=None, shipping_addr=None, request=None, **kwargs):
-        # if shipping_addr:
-        #     if shipping_addr['country'].code == 'IN':
-        #         if shipping_addr['postcode'][:2] in ['67', '68', '69']:
-        #             return [OwnDeliveryKerala()]
-        return [OwnDeliveryKerala()]
+        # import pdb; pdb.set_trace()
+        country = postcode = None
+        if shipping_addr is None:
+            raise forms.ValidationError("Shipping Address")
+        if type(shipping_addr) in [dict, collections.OrderedDict]:
+            country = shipping_addr['country']
+            postcode = shipping_addr['postcode']
+        elif shipping_addr is not None:
+            country = shipping_addr.country
+            postcode = shipping_addr.postcode
+        if (
+            shipping_addr is None
+            or country.code != 'IN'
+            or postcode[:2] not in ['67', '68', '69']
+        ):
+            raise forms.ValidationError("Could Not Ship to This Location. ")
+        return self.methods
 

@@ -5,9 +5,12 @@ import requests
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.utils.module_loading import import_string
+from oscar.apps.address.models import UserAddress, Country
+
 from apps.basket.models import Basket
 from apps.catalogue.models import Product
 from apps.mod_oscarapi.serializers.checkout import CheckoutSerializer
+from apps.order.models import ShippingAddress
 from apps.partner.strategy import Selector
 from apps.users.models import User
 0
@@ -56,7 +59,7 @@ class Command(BaseCommand):
         else:
             basket = self.populate_basket(no_of_products_needed=randint(1, 2))
         data = self.generate_data(
-                basket, basket.owner, _method
+            basket, basket.owner, _method
         )
         self.checkout(data)
 
@@ -113,7 +116,6 @@ class Command(BaseCommand):
             sys.exit(0)
 
     def checkout(self, data):
-        print(data)
         response = self.s.post(
             self.BASE_URL + 'checkout/',
             json=data,
@@ -128,7 +130,7 @@ class Command(BaseCommand):
     def populate_basket(self, no_of_products_needed=3):
 
         qs = Product.objects.filter(
-                structure__in=[Product.STANDALONE, Product.CHILD]
+            structure__in=[Product.STANDALONE, Product.CHILD]
         ).values_list('id', flat=True).order_by('?')[:no_of_products_needed]
 
         for product in qs:
@@ -149,6 +151,54 @@ class Command(BaseCommand):
         return basket
 
     def generate_data(self, basket, user=None, method=None):
+        if method.code == 'cash':
+            payment = {"payment": "cash"}
+        elif method.code == 'razor_pay':
+            print(f"Open {self.BASE_URL.replace('/api/v1/', '/rzp/')}?amt={int(basket.total_incl_tax * 100)} ")
+            print(f'Amount : INR {basket.total_incl_tax} /-')
+            rzp_key = input("razorpay_payment_id : ")
+            print(rzp_key)
+            # rzp_key = input(f"razorpay payment id for amount '{int(basket.total_incl_tax * 100)}' : ")
+            payment = {
+                "payment": "cash",
+                "razorpay_payment_id": rzp_key
+            }
+        else:
+            print(basket, user, method)
+            raise ModuleNotFoundError("Method is not in ")
+        uad = UserAddress.objects.filter(user=user, ).only('id').last()
+        if uad is None:
+            uad = UserAddress.objects.create(
+                user=user,
+                **{
+                    "title": "Mr",
+                    "first_name": "JERIN",
+                    "last_name": "JOHN",
+                    "line1": "Kachirackal House",
+                    "line2": "Vennikulam P O",
+                    "line3": "Thiruvalla",
+                    "line4": "Thiruvalla",
+                    "state": "Kerala",
+                    "postcode": "689544",
+                    # "phone_number": "+919446600863",
+                    # "notes": "",
+                    "country": Country.objects.get(pk='IN')
+                },
+                is_default_for_shipping=True,
+                is_default_for_billing=True,
+            )
+        return {
+            "basket": f"https://store.demo.fegno.com/api/v1/baskets/{basket.id}/",
+            "basket_id": basket.id,
+            # "total": float(basket.total_incl_tax),
+            "notes": "Some Notes for address as string.",
+            "phone_number": "",
+            "shipping_address": uad.id,
+            "billing_address": uad.id,
+            **payment
+        }
+
+    def generate_data_old(self, basket, user=None, method=None):
         if method.code == 'cash':
             payment = {
                 "cash": {
@@ -220,4 +270,6 @@ class Command(BaseCommand):
             },
             "payment": payment
         }
+
+
 

@@ -1,3 +1,4 @@
+from django.contrib.gis.db.models import PointField
 from oscar.apps.address.abstract_models import (
     AbstractBillingAddress, AbstractShippingAddress)
 from oscar.apps.order.abstract_models import *
@@ -24,7 +25,7 @@ class CommunicationEvent(AbstractCommunicationEvent):
 
 
 class ShippingAddress(AbstractShippingAddress):
-    location = models.ForeignKey('users.Location', on_delete=models.SET_NULL, null=True, blank=True)
+    location = PointField(null=True, blank=True)
 
     @property
     def summary_line(self):

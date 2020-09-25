@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'apps.buynow.apps.BuyNowConfig',
 
     'oscar',
+    'apps.address.apps.AddressConfig',
     'apps.basket.apps.BasketConfig',
     'apps.customer.apps.CustomerConfig',
     'apps.partner.apps.PartnerConfig',
@@ -63,12 +64,11 @@ INSTALLED_APPS = [
     'apps.dashboard.orders.apps.OrdersDashboardConfig',
 
     'oscar.apps.analytics.apps.AnalyticsConfig',
-    'oscar.apps.address.apps.AddressConfig',
+    # 'oscar.apps.address.apps.AddressConfig',
     'oscar.apps.offer.apps.OfferConfig',
     'oscar.apps.voucher.apps.VoucherConfig',
     'oscar.apps.wishlists.apps.WishlistsConfig',
     'oscar.apps.catalogue.reviews.apps.CatalogueReviewsConfig',
-
 
     'oscar.apps.dashboard.apps.DashboardConfig',
     'oscar.apps.dashboard.reports.apps.ReportsDashboardConfig',

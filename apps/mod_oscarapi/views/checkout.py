@@ -1,25 +1,31 @@
+import pprint
+
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.conf import settings
+from oscarapi.permissions import IsOwner
+
+from apps.address.models import UserAddress
+from oscar.core import prices
+from oscarapi.basket.operations import assign_basket_strategy
 from oscarapicheckout import utils
 from oscarapicheckout.serializers import OrderSerializer
 from oscarapicheckout.signals import order_placed
 from oscarapicheckout.states import DECLINED, CONSUMED
 from oscarapicheckout.utils import CHECKOUT_ORDER_ID
 from oscarapicheckout.views import CheckoutView as OscarAPICheckoutView
-from rest_framework import status
-from rest_framework.decorators import renderer_classes
-from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
+from rest_framework import status, serializers, generics
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
+from ..calculators import OrderTotalCalculator
 from ..serializers.checkout import (
-    CheckoutSerializer,
-    # OrderSerializer,
-    # PaymentMethodsSerializer,
-    # PaymentStateSerializer
+    CheckoutSerializer, UserAddressSerializer,
 )
+from ...basket.models import Basket
+from ...shipping.repository import Repository
 from ...users.models import Location
-from ...api_set.serializers.basket import BasketSerializer, WncBasketSerializer
+from ...api_set.serializers.basket import WncBasketSerializer
 from ...basket.utils import order_to_basket
 
 
@@ -117,21 +123,100 @@ class CheckoutView(OscarAPICheckoutView):
     serializer_class = CheckoutSerializer
 
     def post(self, request, format=None):
-
         # Wipe out any previous state data
         utils.clear_consumed_payment_method_states(request)
-
+        user = request.user if request.user and request.user.is_authenticated else None
         # Validate the input
+        data = request.data.copy()
+        basket = Basket.open.filter(pk=data.get('basket_id', 0)).filter(owner=user).first()
+        if basket is None:
+            return Response({'errors': {"basket": [
+                "Basket does not Exists"
+            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        basket = assign_basket_strategy(basket, request)
+        shipping_address = UserAddress.objects.filter(user=user, pk=data.get('shipping_address')).first()
+        if shipping_address is None:
+            return Response({'errors': {"shipping_address": [
+                "User Address for shipping does not exists"
+            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        billing_address = UserAddress.objects.filter(user=user, pk=data.get('billing_address')).first()
+        if billing_address is None:
+            return Response({'errors': {"billing_address": [
+                "User Address for billing does not exists"
+            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        try:
+            ship = Repository().get_default_shipping_method(
+                basket=basket, shipping_addr=shipping_address,
+            )
+        except serializers.ValidationError:
+            return Response({'errors': {"shipping_address": [
+                "User Address for billing does not exists"
+            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        shipping_cost: prices.Price = ship.calculate(basket)
+        # total_amt = float(basket.total_incl_tax + shipping_cost.incl_tax)
+        total_amt = OrderTotalCalculator(request=request).calculate(basket, shipping_cost)
+        sample_data = {
+            "basket": request.build_absolute_uri(reverse("basket-detail", kwargs={'pk': basket.pk})),
+            "guest_email": "",
+            "total": total_amt.incl_tax,
+            "shipping_method_code": ship.code,
+            "shipping_charge": {
+                "excl_tax": shipping_cost.excl_tax,
+                "currency": shipping_cost.currency,
+                "incl_tax": shipping_cost.incl_tax,
+                "tax": 0.0
+            },
+            "shipping_address": {
+                "title": shipping_address.title,
+                "first_name": shipping_address.first_name,
+                "last_name": shipping_address.last_name,
+                "line1": shipping_address.line1,
+                "line2": shipping_address.line2,
+                "line3": shipping_address.line3,
+                "line4": shipping_address.line4,
+                "state": shipping_address.state,
+                "postcode": shipping_address.postcode,
+                "phone_number": data.get('phone_number') or f"+91 {request.user.username}",
+                "notes": data.get('notes'),
+                "country": request.build_absolute_uri(f"/api/v1/countries/{shipping_address.country.pk}/")
+            },
+            "billing_address": {
+                "title": shipping_address.title,
+                "first_name": shipping_address.first_name,
+                "last_name": shipping_address.last_name,
+                "line1": shipping_address.line1,
+                "line2": shipping_address.line2,
+                "line3": shipping_address.line3,
+                "line4": shipping_address.line4,
+                "state": shipping_address.state,
+                "postcode": shipping_address.postcode,
+                "phone_number": data.get('phone_number') or f"+91 {request.user.username}",
+                "notes": data.get('notes'),
+                "country": request.build_absolute_uri(f"/api/v1/countries/{shipping_address.country.pk}/")
+            },
+            "payment": {
+                "cash": {
+                    "enabled": data.get('payment') == 'cash',
+                    "amount": total_amt.incl_tax if data.get('payment') == 'cash' else 0,
+                },
+                "razor_pay": {
+                    "enabled": data.get('payment') == 'razor_pay',
+                    "amount": total_amt.incl_tax if data.get('payment') == 'razor_pay' else 0,
+                    "razorpay_payment_id": data.get('razorpay_payment_id')
+                }
+            }
+        }
+        pprint.pprint(sample_data)
 
-        import pdb; pdb.set_trace()
-
-        c_ser = self.get_serializer(data=request.data)
+        c_ser = self.get_serializer(data=sample_data)
         if not c_ser.is_valid():
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
         location_id = request.session.get('location')
         location = location_id and Location.objects.filter(id=location_id).last()
         if not location:
-            return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': {"non_field_errors": [
+                "You have not provided your location Yet."
+            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
         # Freeze basket
         basket = c_ser.validated_data.get('basket')
         basket.freeze()
@@ -214,5 +299,12 @@ class CheckoutView(OscarAPICheckoutView):
 
         return new_states
 
+
+class UserAddressDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserAddressSerializer
+    permission_classes = (IsOwner,)
+
+    def get_queryset(self):
+        return UserAddress.objects.filter(user=self.request.user)
 
 
