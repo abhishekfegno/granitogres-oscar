@@ -90,7 +90,7 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             'shipping': consignment.order_line.order.shipping_address.summary_line,
             'contact': str(consignment.order_line.order.shipping_address.phone_number),
             'notes': consignment.order_line.order.shipping_address.notes,
-            'geolocation': consignment.order.shipping_address.location_data,
+            'geolocation': consignment.order_line.order.shipping_address.location_data,
             'lines': [{
                 'line_id': line.id,
                 'line_status': line.status,
