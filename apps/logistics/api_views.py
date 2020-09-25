@@ -181,7 +181,7 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
     status_code = 200
     reason = request.GET.get('reason')
     if method == 'order':
-        consignment_object = get_object_or_404(dt.delivery_consignments, pk=k.get('pk'))
+        consignment_object = get_object_or_404(dt.delivery_consignments, pk=pk)
         if action == 'complete':
             _, err = catch_error(consignment_object.mark_as_completed)
             out = err
@@ -191,7 +191,7 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
             status_code = 400
     elif method == 'return':
-        consignment_object = get_object_or_404(dt.return_consignments, pk=k.get('pk'))
+        consignment_object = get_object_or_404(dt.return_consignments, pk=pk)
         if action == 'complete':
             _, err = catch_error(consignment_object.mark_as_completed)
             out = err
