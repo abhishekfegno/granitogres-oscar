@@ -104,8 +104,7 @@ class UserAddressSerializer(CoreUserAddressSerializer):
             if loc_obj:
                 distance = loc_obj.location.distance(instance.location).m
         return {
-            'latitude': instance.location and instance.location.x,
-            'longitude': instance.location and instance.location.y,
+            **instance.location_data,
             'distance': distance,
         }
 
