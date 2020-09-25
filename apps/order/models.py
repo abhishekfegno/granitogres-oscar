@@ -41,6 +41,7 @@ class ShippingAddress(AbstractShippingAddress):
         fields = ['salutation', 'first_name', 'last_name']
         return ", ".join(self.get_field_values(fields))
 
+    @property
     def location_data(self):
         return {
             'latitude': self.location and self.location.x,
