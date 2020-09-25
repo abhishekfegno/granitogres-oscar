@@ -186,7 +186,8 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
             _, err = catch_error(consignment_object.mark_as_completed)
             out = err
         elif action == "cancel":
-            consignment_object.cancel_consignment(reason)
+            _, err = catch_error(consignment_object.cancel_consignment(reason))
+            out = err
         else:
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
             status_code = 400
@@ -196,7 +197,8 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
             _, err = catch_error(consignment_object.mark_as_completed, reason)
             out = err
         elif action == "cancel":
-            consignment_object.cancel_consignment(reason)
+            _, err = catch_error(consignment_object.cancel_consignment(reason))
+            out = err
         else:
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
             status_code = 400
@@ -206,7 +208,8 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
             _, err = catch_error(consignment_object.mark_as_completed)
             out = err
         elif action == "cancel":
-            consignment_object.cancel_consignment(reason)
+            _, err = catch_error(consignment_object.cancel_consignment(reason))
+            out = err
         else:
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
             status_code = 400
