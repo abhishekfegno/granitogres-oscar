@@ -193,7 +193,7 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
     elif method == 'return':
         consignment_object = get_object_or_404(dt.return_consignments, pk=pk)
         if action == 'complete':
-            _, err = catch_error(consignment_object.mark_as_completed)
+            _, err = catch_error(consignment_object.mark_as_completed, reason)
             out = err
         elif action == "cancel":
             consignment_object.cancel_consignment(reason)

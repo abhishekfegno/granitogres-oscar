@@ -33,7 +33,7 @@ def _login_and_location_required(func):
     def _wrapper(request, *args, **kwargs):
         if request.user.is_anonymous:
             return JsonResponse({'detail': 'You have to be logged-in to create Order.'}, status=status.HTTP_400_BAD_REQUEST)
-        if request.session.get('location'):
+        if not request.session.get('location'):
             return JsonResponse({'detail': 'Geolocation not provided'}, status=status.HTTP_400_BAD_REQUEST)
         return func(request, *args, **kwargs)
     return _wrapper
@@ -152,13 +152,13 @@ class CheckoutView(OscarAPICheckoutView):
             return Response({'errors': {"shipping_address": [
                 "User Address for billing does not exists"
             ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         shipping_cost: prices.Price = ship.calculate(basket)
         # total_amt = float(basket.total_incl_tax + shipping_cost.incl_tax)
         total_amt = OrderTotalCalculator(request=request).calculate(basket, shipping_cost)
         sample_data = {
             "basket": request.build_absolute_uri(reverse("basket-detail", kwargs={'pk': basket.pk})),
-            "guest_email": "",
-            "total": total_amt.incl_tax,
+            # "total": total_amt.incl_tax,
             "shipping_method_code": ship.code,
             "shipping_charge": {
                 "excl_tax": shipping_cost.excl_tax,
@@ -178,7 +178,8 @@ class CheckoutView(OscarAPICheckoutView):
                 "postcode": shipping_address.postcode,
                 "phone_number": data.get('phone_number') or f"+91 {request.user.username}",
                 "notes": data.get('notes'),
-                "country": request.build_absolute_uri(f"/api/v1/countries/{shipping_address.country.pk}/")
+                "country": request.build_absolute_uri(f"/api/v1/countries/{shipping_address.country.pk}/"),
+                "location": f'POINT({shipping_address.location.x} {shipping_address.location.y})'
             },
             "billing_address": {
                 "title": shipping_address.title,
@@ -211,11 +212,10 @@ class CheckoutView(OscarAPICheckoutView):
         c_ser = self.get_serializer(data=sample_data)
         if not c_ser.is_valid():
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
-        location_id = request.session.get('location')
-        location = location_id and Location.objects.filter(id=location_id).last()
+        location = shipping_address.location
         if not location:
             return Response({'errors': {"non_field_errors": [
-                "You have not provided your location Yet."
+                "You have not provided your location yet."
             ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
         # Freeze basket
         basket = c_ser.validated_data.get('basket')
@@ -228,7 +228,6 @@ class CheckoutView(OscarAPICheckoutView):
         # adding location from user request to
         order.shipping_address.location = location
         order.shipping_address.save()
-
         # Send order_placed signal
         order_placed.send(sender=self, order=order, user=request.user, request=request)
 

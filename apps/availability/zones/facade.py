@@ -18,7 +18,6 @@ class ZoneFacade(object):
             "location_name": DEFAULT_LOCATION_NAME,
             "zone": zone
         }
-        import pdb; pdb.set_trace()
         location = Location.objects.create(**params, user=user, is_active=True if user else False)
         request.session['location'] = location.id
         request.session['location_name'] = location.location_name or DEFAULT_LOCATION_NAME

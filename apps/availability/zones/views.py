@@ -23,6 +23,8 @@ class ZoneUpdate(UpdateView):
     queryset = Zones.objects.all()
     template_name = 'availability/zones/form.html'
 
+    def get_success_url(self):
+        return reverse('availability:zones-update',  kwargs={'pk': self.object.pk})
 
 class ZoneCreate(CreateView):
     form_class = ZoneForm

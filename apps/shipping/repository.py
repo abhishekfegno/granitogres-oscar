@@ -42,7 +42,6 @@ class Repository(CoreRepository):
     methods = [OwnDeliveryKerala()]  # init shipping method to default hand delivery
 
     def get_available_shipping_methods(self, basket, user=None, shipping_addr=None, request=None, **kwargs):
-        # import pdb; pdb.set_trace()
         country = postcode = None
         if shipping_addr is None:
             raise forms.ValidationError("Shipping Address")

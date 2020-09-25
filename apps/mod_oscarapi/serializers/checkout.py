@@ -32,17 +32,14 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
     """
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(CheckoutSerializer, self).__init__(*args, **kwargs)
         self.fields['payment'] = PaymentMethodsSerializer(context=kwargs['context'])
 
-    def validate(self, attrs):
-        request = self.context["request"]
-
+    def lookup_annonymous(self, attrs, request):
         if request.user.is_anonymous:
             if not settings.OSCAR_ALLOW_ANON_CHECKOUT:
                 message = "Anonymous checkout forbidden"
                 raise serializers.ValidationError(message)
-
             if not attrs.get("guest_email"):
                 # Always require the guest email field if the user is anonymous
                 message = "Guest email is required for anonymous checkouts"
@@ -51,8 +48,13 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
             if "guest_email" in attrs:
                 # Don't store guest_email field if the user is authenticated
                 del attrs["guest_email"]
+        return attrs
 
+    def validate(self, attrs):
+        request = self.context["request"]
+        attrs = self.lookup_annonymous(attrs, request)
         basket = attrs.get("basket")
+        attrs["user"] = basket.owner or (request.user.is_authenticated and request.user) or None
         basket = assign_basket_strategy(basket, request)
         if basket.num_items <= 0:
             message = "Cannot checkout with empty basket"
@@ -83,9 +85,9 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
             if posted_total != total.incl_tax:
                 message = ("Total incorrect %s != %s" % (posted_total, total.incl_tax))
                 raise serializers.ValidationError(message)
-
         # update attrs with validated data.
         attrs["order_total"] = total
+        attrs["total"] = total
         attrs["shipping_method"] = shipping_method
         attrs["shipping_charge"] = shipping_charge
         attrs["basket"] = basket

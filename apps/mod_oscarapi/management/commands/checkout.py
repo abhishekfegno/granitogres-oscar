@@ -3,9 +3,10 @@ from random import randint
 
 import requests
 from django.conf import settings
+from django.contrib.gis.geos import Point
 from django.core.management import BaseCommand
 from django.utils.module_loading import import_string
-from oscar.apps.address.models import UserAddress, Country
+from apps.address.models import UserAddress, Country
 
 from apps.basket.models import Basket
 from apps.catalogue.models import Product
@@ -13,7 +14,7 @@ from apps.mod_oscarapi.serializers.checkout import CheckoutSerializer
 from apps.order.models import ShippingAddress
 from apps.partner.strategy import Selector
 from apps.users.models import User
-0
+
 
 get_methods = []
 for method in settings.API_ENABLED_PAYMENT_METHODS:
@@ -180,12 +181,13 @@ class Command(BaseCommand):
                     "line4": "Thiruvalla",
                     "state": "Kerala",
                     "postcode": "689544",
+                    "location": Point(float(12.785238498732), float(77.94478155806023)),
                     # "phone_number": "+919446600863",
                     # "notes": "",
                     "country": Country.objects.get(pk='IN')
-                },
-                is_default_for_shipping=True,
-                is_default_for_billing=True,
+                }
+                # is_default_for_shipping=True,
+                # is_default_for_billing=True,
             )
         return {
             "basket": f"https://store.demo.fegno.com/api/v1/baskets/{basket.id}/",

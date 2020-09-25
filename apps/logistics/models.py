@@ -282,17 +282,15 @@ class ConsignmentReturn(Constant, models.Model):
             return qs
         return qs.last()
 
-    def mark_as_completed(self):
-        if hasattr(self, 'order'):
-            EventHandler().handle_order_line_status_change(self.order, settings.ORDER_STATUS_RETURNED)
+    def mark_as_completed(self, reason=None):
+        EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_RETURNED, note_msg=reason)
         self.status = self.COMPLETED
         self.save()
 
     def cancel_consignment(self, reason=None):
         if reason is None:
-            reason = "Item Return could not be delivered, We could not reach you."
-        if hasattr(self, 'order'):
-            EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_CANCELED, note_msg=reason)
+            reason = "Item Return could not be delivered."
+        EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_CANCELED, note_msg=reason)
         self.status = self.CANCELLED
         self.save()
 
