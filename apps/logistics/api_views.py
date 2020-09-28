@@ -203,7 +203,6 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
         elif action == "cancel":
             _, err = catch_error(consignment_object.cancel_consignment, args=(reason, ))
             out = err
-            status_code = 400
         else:
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
             status_code = 400
