@@ -176,10 +176,10 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
     if method == 'order':
         consignment_object = get_object_or_404(dt.delivery_consignments, pk=pk)
         if action == 'complete':
-            _, err = catch_error(consignment_object.mark_as_completed)
+            _, err = catch_error(consignment_object.mark_as_completed, args=(reason, ))
             out = err
         elif action == "cancel":
-            _, err = catch_error(consignment_object.cancel_consignment(reason))
+            _, err = catch_error(consignment_object.cancel_consignment, args=(reason, ))
             out = err
         else:
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
@@ -187,10 +187,10 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
     elif method == 'return':
         consignment_object = get_object_or_404(dt.return_consignments, pk=pk)
         if action == 'complete':
-            _, err = catch_error(consignment_object.mark_as_completed, reason)
+            _, err = catch_error(consignment_object.mark_as_completed, args=(reason, ))
             out = err
         elif action == "cancel":
-            _, err = catch_error(consignment_object.cancel_consignment(reason))
+            _, err = catch_error(consignment_object.cancel_consignment, args=(reason, ))
             out = err
         else:
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
@@ -198,10 +198,10 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
     elif method == 'trip':
         consignment_object = dt
         if action == 'complete':
-            _, err = catch_error(consignment_object.mark_as_completed)
+            _, err = catch_error(consignment_object.mark_as_completed, args=(reason, ))
             out = err
         elif action == "cancel":
-            _, err = catch_error(consignment_object.cancel_consignment(reason))
+            _, err = catch_error(consignment_object.cancel_consignment, args=(reason, ))
             out = err
         else:
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
