@@ -34,7 +34,10 @@ class EventHandler(processing.EventHandler):
         Refund Can be proceeded only after changing Order Status.
         """
 
-        if new_status in settings.OSCAR_ORDER_REFUNDABLE_STATUS:
+        if (
+                new_status in settings.OSCAR_ORDER_REFUNDABLE_STATUS
+                and old_status not in settings.OSCAR_ORDER_REFUNDABLE_STATUS
+        ):
             refunds.RefundFacade().refund_order(order=order)
             order.lines.update(refunded_quantity=models.F('quantity'))
 
