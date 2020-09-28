@@ -181,7 +181,6 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
         elif action == "cancel":
             _, err = catch_error(consignment_object.cancel_consignment, args=(reason, ))
             out = err
-            status_code = 400
         else:
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
             status_code = 400
@@ -193,7 +192,6 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
         elif action == "cancel":
             _, err = catch_error(consignment_object.cancel_consignment, args=(reason, ))
             out = err
-            status_code = 400
         else:
             out = {'error': 'Invalid Action. Action can either be "completed" or "cancelled"'}
             status_code = 400
@@ -212,7 +210,11 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
     else:
         out = {'error': 'Invalid Type. Type can be "order" or "return"'}
         status_code = 400
-
+    if out.keys():
+        status_code = 400
+    else:
+        action += ('d' if action == 'completed' else 'led')
+        out = {"message": f"Successful! {method} #{pk} {action}"}
     return Response(out, status=status_code)
 
 
