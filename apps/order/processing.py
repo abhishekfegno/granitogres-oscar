@@ -81,7 +81,7 @@ class EventHandler(processing.EventHandler):
             order, event_type, amount, lines, line_quantities, **kwargs)
 
     @transaction.atomic
-    def handle_order_line_status_change(self, order_line, new_status: str, note_msg=None):
+    def handle_order_line_status_change(self, order_line, new_status: str, note_msg=None, note_type='System'):
         """
         Handle Order Status Change in Oscar.
         """
@@ -104,7 +104,7 @@ class EventHandler(processing.EventHandler):
             """
             Add note if there is a note msg.
             """
-            self.create_note(order_line.order, note_msg)
+            self.create_note(order_line.order, note_msg, note_type)
 
 
 
