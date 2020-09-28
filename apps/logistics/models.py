@@ -259,7 +259,7 @@ class ConsignmentDelivery(Constant, models.Model):
     def mark_as_completed(self, reason=None):
         if hasattr(self, 'order'):
             EventHandler().handle_order_status_change(self.order, settings.ORDER_STATUS_DELIVERED,
-                                                      note_type=NOTE_BY_DELIVERY_BOY)
+                                                      note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
         self.status = self.COMPLETED
         self.save()
 

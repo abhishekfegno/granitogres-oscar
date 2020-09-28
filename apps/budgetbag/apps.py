@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class BudgetbagConfig(AppConfig):
-    name = 'budgetbag'
+class BudgetBagConfig(AppConfig):
+    name = 'apps.budgetbag'

@@ -73,15 +73,6 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
         sel_reltd = 'order_line', 'order_line__order', 'order_line__order__shipping_address'
         return_items = instance.return_consignments.select_related(*sel_reltd)
 
-        def get_status(cons):
-            is_cancelled = True
-            for con in cons:
-                if con.status == DeliveryTrip.ON_TRIP:
-                    return DeliveryTrip.ON_TRIP
-                if con.status != DeliveryTrip.CANCELLED:
-                    is_cancelled = False
-            return (is_cancelled and DeliveryTrip.CANCELLED) or DeliveryTrip.COMPLETED
-
         return [{
             'consignment_id': consignment.id,
             'order_id': consignment.order_line.order.id,

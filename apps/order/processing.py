@@ -18,7 +18,7 @@ Transaction = get_model('payment', 'Transaction')
 class EventHandler(processing.EventHandler):
 
     @transaction.atomic
-    def handle_order_status_change(self, order: Order, new_status: str, note_msg=None):
+    def handle_order_status_change(self, order: Order, new_status: str, note_msg=None, note_type='System'):
         """
         Handle Order Status Change in Oscar.
         """
@@ -53,7 +53,7 @@ class EventHandler(processing.EventHandler):
             """
             Add note if there is a note msg.
             """
-            self.create_note(order, note_msg)
+            self.create_note(order, note_msg, note_type=note_type)
 
     def handle_payment_event(self, order, event_type: PaymentEventType, amount, lines=None,
                              line_quantities=None, **kwargs):
