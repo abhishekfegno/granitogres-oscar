@@ -48,7 +48,7 @@ class RefundFacade(object):
 
         """
 
-        if order.status in settings.OSCAR_ORDER_REFUNDABLE_STATUS:
+        if order.status not in settings.OSCAR_ORDER_REFUNDABLE_STATUS:
             """
             Handle this error before calling 'refund_order'
             """
