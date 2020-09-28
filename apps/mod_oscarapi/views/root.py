@@ -69,7 +69,6 @@ def PUBLIC_APIS(r, f):
         ])),
 
         ("Logistics", collections.OrderedDict([
-            ("Trips under Plan", reverse("logistics-api:planned-trip", request=r, format=f)),
             ("Active Trip", reverse("logistics-api:active-trip", request=r, format=f)),
             ("Archived Trips", reverse("logistics-api:archived-list", kwargs={"trip_date": "28-09-2020"},
                                        request=r, format=f)),
