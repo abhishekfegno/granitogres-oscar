@@ -209,7 +209,8 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
     else:
         out = {'error': 'Invalid Type. Type can be "order" or "return"'}
         status_code = 400
-    if out.keys():
+
+    if out and out.keys():
         status_code = 400
     else:
         action += ('d' if action == 'completed' else 'led')
