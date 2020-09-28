@@ -5,7 +5,7 @@ from oscar.templatetags.currency_filters import currency
 from rest_framework import serializers
 
 from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin, ProductAttributeFieldMixin
-from apps.logistics.models import DeliveryTrip, Constant
+from apps.logistics.models import DeliveryTrip, Constant, NOTE_BY_DELIVERY_BOY
 from apps.payment.refunds import RefundFacade
 
 
@@ -14,7 +14,14 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
     returns = serializers.SerializerMethodField()
     cod_to_collect = serializers.SerializerMethodField()
 
+    @staticmethod
+    def get_note(order):
+        note = order.notes.filter(note_type=NOTE_BY_DELIVERY_BOY).last()
+        if note:
+            return note.message
+
     def get_orders(self, instance):
+
         def get_source_data(order):
             source = RefundFacade().get_sources_model_from_order(order).first()
             if source:
@@ -52,6 +59,7 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
                     line.product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'
                     ) if not line.product.is_parent else None,
             } for line in consignment.order.lines.all()],
+            "cancel_notes": self.get_note(consignment.order),
         } for consignment in instance.delivery_consignments.select_related('order', 'order__shipping_address')]
 
     def get_returns(self, instance):
@@ -75,7 +83,6 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             return (is_cancelled and DeliveryTrip.CANCELLED) or DeliveryTrip.COMPLETED
 
         return [{
-
             'consignment_id': consignment.id,
             'order_id': consignment.order_line.order.id,
             'order_number': consignment.order_line.order.number,
@@ -101,6 +108,7 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
                     line.product.attribute_values.filter(attribute__code='weight').first(), 'value', 'Weight Unavailable'
                 ) if not line.product.is_parent else None,
             } for line in [consignment.order_line]],
+            "cancel_notes": self.get_note(consignment.order_line.order),
         } for consignment in return_items]
 
         # return [{

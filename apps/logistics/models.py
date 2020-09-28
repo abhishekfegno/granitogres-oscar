@@ -20,6 +20,8 @@ from ..payment.utils.cash_payment import Cash
 Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
 
+NOTE_BY_DELIVERY_BOY = "Reason From Delivery App"
+
 
 class Constant:
     ON_TRIP = 'On Trip'
@@ -91,6 +93,7 @@ class DeliveryTrip(Constant, models.Model):
     trip_time = models.TimeField(null=True, blank=True)
     route = models.CharField(max_length=128, null=True, blank=True)
     info = models.CharField(max_length=256, null=True, blank=True)
+    reason = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.agent} on {self.created_at} {self.status}"
@@ -251,10 +254,12 @@ class ConsignmentDelivery(Constant, models.Model):
     delivery_trip: DeliveryTrip = models.ForeignKey('logistics.DeliveryTrip', on_delete=models.CASCADE, null=True, blank=True,
                                                     related_name='delivery_consignments')
     status = models.CharField(choices=Constant.CHOICES, default=Constant.YET_TO_START, max_length=20)
+    reason = models.TextField(null=True, blank=True)
 
     def mark_as_completed(self, reason=None):
         if hasattr(self, 'order'):
-            EventHandler().handle_order_status_change(self.order, settings.ORDER_STATUS_DELIVERED, )
+            EventHandler().handle_order_status_change(self.order, settings.ORDER_STATUS_DELIVERED,
+                                                      note_type=NOTE_BY_DELIVERY_BOY)
         self.status = self.COMPLETED
         self.save()
 
@@ -262,7 +267,8 @@ class ConsignmentDelivery(Constant, models.Model):
         if reason is None:
             reason = "Order Could not be delivered, We could not reach you at that point."
         if hasattr(self, 'order'):
-            EventHandler().handle_order_status_change(self.order, settings.ORDER_STATUS_CANCELED, note_msg=reason)
+            EventHandler().handle_order_status_change(self.order, settings.ORDER_STATUS_CANCELED, note_msg=reason,
+                                                      note_type=NOTE_BY_DELIVERY_BOY)
         self.status = self.CANCELLED
         self.save()
 
@@ -278,6 +284,7 @@ class ConsignmentReturn(Constant, models.Model):
     status = models.CharField(choices=Constant.CHOICES, default=Constant.YET_TO_START, max_length=20)
     request_cancelled = models.BooleanField(default=False)
     completed = models.BooleanField(default=False)
+    reason = models.TextField(null=True, blank=True)
 
     @cached_property
     def transaction_source_n_method(self):
@@ -292,14 +299,16 @@ class ConsignmentReturn(Constant, models.Model):
         return qs.last()
 
     def mark_as_completed(self, reason=None):
-        EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_RETURNED, note_msg=reason)
+        EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_RETURNED,
+                                                       note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
         self.status = self.COMPLETED
         self.save()
 
     def cancel_consignment(self, reason=None):
         if reason is None:
             reason = "Item Return could not be delivered."
-        EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_CANCELED, note_msg=reason)
+        EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_CANCELED,
+                                                       note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
         self.status = self.CANCELLED
         self.save()
 
