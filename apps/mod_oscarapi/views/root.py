@@ -71,15 +71,16 @@ def PUBLIC_APIS(r, f):
         ("Logistics", collections.OrderedDict([
             ("Trips under Plan", reverse("logistics-api:planned-trip", request=r, format=f)),
             ("Active Trip", reverse("logistics-api:active-trip", request=r, format=f)),
-            ("Delivered Trips", reverse("logistics-api:delivered-list", request=r, format=f)),
-            ("Cancelled Trips", reverse("logistics-api:cancelled-list", request=r, format=f)),
+            ("Archived Trips", reverse("logistics-api:archived-list", kwargs={"trip_date": "28-09-2020"},
+                                       request=r, format=f)),
             # trip details
             ("Trip Detail", reverse("logistics-api:detail-trip", kwargs={'pk': '8'}, request=r, format=f)),
             # order
             ("Order Details", reverse("logistics-api:order-detail", kwargs={'pk': '6'}, request=r, format=f)),
             ("Order More Details", reverse("logistics-api:order-more", kwargs={'pk': '6'}, request=r, format=f)),
             #  Order Return
-            ("Return Item Details", reverse("logistics-api:order-item-detail", kwargs={'pk': '19'}, request=r, format=f)),
+            ("Return Item Details", reverse("logistics-api:order-item-detail", kwargs={'pk': '19'},
+                                            request=r, format=f)),
             ("Apply Status Changes via POST Method", collections.OrderedDict([
                 ("Order Completed", reverse("logistics-api:order-action", kwargs={
                     'pk': '19', 'method': 'order', 'action': 'complete'}, request=r, format=f)),

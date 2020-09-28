@@ -1,3 +1,5 @@
+from collections import defaultdict
+from datetime import datetime
 from typing import Any
 
 from django.utils.decorators import method_decorator
@@ -13,7 +15,7 @@ from rest_framework.views import APIView
 from apps.api_set.serializers.orders import OrderListSerializer, OrderDetailSerializer, OrderMoreDetailSerializer, \
     LineDetailSerializer
 from apps.logistics.models import DeliveryTrip, ConsignmentReturn
-from apps.logistics.serializers import DeliveryTripSerializer
+from apps.logistics.serializers import DeliveryTripSerializer, ArchivedTripListSerializer
 from apps.order.models import Order
 
 
@@ -51,31 +53,22 @@ class OrdersListView(APIView):
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
-class DeliveredTripsListView(ListAPIView):
-    serializer_class = DeliveryTripSerializer
+class ArchivedTripsListView(ListAPIView):
+    serializer_class = ArchivedTripListSerializer
     authentication_classes = (SessionAuthentication, )
     permission_classes = [DeliveryBoyPermission, ]
 
     def get_queryset(self):
-        return DeliveryTrip.objects.filter(agent=self.request.user, status=DeliveryTrip.COMPLETED)
-
-
-class CancelledTripsListView(ListAPIView):
-    serializer_class = DeliveryTripSerializer
-    authentication_classes = (SessionAuthentication, )
-    permission_classes = [DeliveryBoyPermission, ]
-
-    def get_queryset(self):
-        return DeliveryTrip.objects.filter(agent=self.request.user, status=DeliveryTrip.CANCELLED)
-
-
-class PlannedTripView(ListAPIView):
-    serializer_class = DeliveryTripSerializer
-    authentication_classes = (SessionAuthentication, )
-    permission_classes = [DeliveryBoyPermission, ]
-
-    def get_queryset(self):
-        return DeliveryTrip.objects.filter(agent=self.request.user, status=DeliveryTrip.YET_TO_START)
+        trip_date = None
+        try:
+            trip_date = datetime.strptime(self.kwargs['trip_date'], "%d-%m-%Y")
+        except ValueError as e:
+            return Response({"detail": "Date is not valid"}, status=status.HTTP_404_NOT_FOUND)
+        return DeliveryTrip.objects.filter(
+            agent=self.request.user,
+            status__in=(DeliveryTrip.COMPLETED, DeliveryTrip.CANCELLED),
+            trip_date=trip_date,
+        )
 
 
 class TripsDetailView(RetrieveAPIView):

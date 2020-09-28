@@ -1,4 +1,6 @@
+import datetime
 from collections import defaultdict
+from django.utils import timezone
 from decimal import Decimal
 
 from django.conf import settings
@@ -85,7 +87,8 @@ class DeliveryTrip(Constant, models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     agent = models.ForeignKey(app_settings.AGENT_MODEL, on_delete=models.CASCADE)
     status = models.CharField(choices=Constant.CHOICES, default=Constant.YET_TO_START, max_length=20)
-
+    trip_date = models.DateField(null=True, blank=True, db_index=True)
+    trip_time = models.TimeField(null=True, blank=True)
     route = models.CharField(max_length=128, null=True, blank=True)
     info = models.CharField(max_length=256, null=True, blank=True)
 
@@ -132,6 +135,12 @@ class DeliveryTrip(Constant, models.Model):
                                  'order_line__order__user',
                                  'order_line__order__shipping_address')
 
+    def update_self(self):
+        self.trip_date = datetime.date.today()
+        self.trip_time = timezone.now().time()
+        self.status = self.COMPLETED
+        self.save()
+
     def mark_as_completed(self):
         """
         In the assumption that, 'request_cancelled' can be set by user.
@@ -143,8 +152,7 @@ class DeliveryTrip(Constant, models.Model):
             "Could mark as complete because there are incomplete delivery consignments."
 
         """ Handling Pickup. """
-        self.status = self.COMPLETED
-        self.save()
+        self.update_self()
 
     def complete_forcefully(self, reason=None):
         # Complete as trip successfully ended!
@@ -161,8 +169,7 @@ class DeliveryTrip(Constant, models.Model):
             consignment.mark_as_completed()
 
         """ Handling Pickup. """
-        self.status = self.COMPLETED
-        self.save()
+        self.update_self()
 
     @classmethod
     def get_active_trip(cls, agent, raise_error=True):
@@ -185,6 +192,8 @@ class DeliveryTrip(Constant, models.Model):
         assert self.have_consignments
         assert self.agent_do_not_have_other_active_trips()
         self.status = self.ON_TRIP
+        self.trip_date = datetime.date.today()
+        self.trip_time = timezone.now().time()
         order_status = app_settings.LOGISTICS_ORDER_STATUS_ON_TRIP_ACTIVATE
         for order in self.delivery_orders:
             if order_status in order.available_statuses():

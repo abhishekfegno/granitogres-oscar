@@ -6,10 +6,8 @@ app_name = 'logistics-api'
 
 urlpatterns = [
     path('trips/', include([
-        path('planned/', api_views.PlannedTripView.as_view(), name="planned-trip"),
         path('active/', api_views.ActiveTripView.as_view(), name="active-trip"),
-        path('delivered/', api_views.DeliveredTripsListView.as_view(), name="delivered-list"),
-        path('cancelled/', api_views.CancelledTripsListView.as_view(), name="cancelled-list"),
+        path('archived/<str:trip_date>/', api_views.ArchivedTripsListView.as_view(), name="archived-list"),
         path('<int:pk>/detail/', api_views.TripsDetailView.as_view(), name="detail-trip"),
     ])),
 
