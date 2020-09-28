@@ -20,7 +20,7 @@ class PaymentGateWayResponse(models.Model):
     ), default=PURCHASE)
     source = models.ForeignKey('payment.Source', on_delete=models.PROTECT)
     amount = models.FloatField()
-    _response = HStoreField()
+    response = HStoreField()
     payment_status = models.BooleanField()
     # payee = models.ForeignKey(settings.AUTH_USER_MODEL,  on_delete=models.PROTECT)
     description = models.TextField(null=True, blank=True)

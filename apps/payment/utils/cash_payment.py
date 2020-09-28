@@ -80,7 +80,7 @@ class Cash(PaymentRefundMixin, PaymentMethod):
         pgr.transaction_type = Transaction.REFUND
         pgr.source = source
         pgr.amount = amount
-        pgr._response = codr.cod_response
+        pgr.response = codr.cod_response
         pgr.payment_status = True
         pgr.payee = source.order.user
         pgr.description = ''

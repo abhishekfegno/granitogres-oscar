@@ -307,7 +307,7 @@ class ConsignmentReturn(Constant, models.Model):
     def cancel_consignment(self, reason=None):
         if reason is None:
             reason = "Item Return could not be delivered."
-        EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_CANCELED,
+        EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_DELIVERED,
                                                        note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
         self.status = self.CANCELLED
         self.save()
