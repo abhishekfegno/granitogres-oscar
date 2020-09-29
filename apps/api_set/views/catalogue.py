@@ -133,8 +133,8 @@ def get_products(_filter=None, _exclude=None, max_count=30):
         recommended_product_ids = recommended_product_ids.exclude(_exclude)
     recommended_product_ids = recommended_product_ids.annotate(usable_product_id=Case(
         When(product__structure='child',
-             then=F('product_id')),
-        default=F('product__parent_id'),
+             then=F('product__parent_id')),
+        default=F('product_id'),
         output_field=PositiveIntegerField()
     )).values('usable_product_id').annotate(
         rank=Sum('quantity'),
