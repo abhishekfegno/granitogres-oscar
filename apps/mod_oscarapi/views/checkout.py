@@ -179,7 +179,7 @@ class CheckoutView(OscarAPICheckoutView):
                 "phone_number": data.get('phone_number') or f"+91 {request.user.username}",
                 "notes": data.get('notes'),
                 "country": request.build_absolute_uri(f"/api/v1/countries/{shipping_address.country.pk}/"),
-                "location": f'POINT({shipping_address.location.x} {shipping_address.location.y})'
+                "location": f'POINT({shipping_address.location.x} {shipping_address.location.y})' if shipping_address.location else None
             },
             "billing_address": {
                 "title": shipping_address.title,
