@@ -124,8 +124,14 @@ def product_suggestions(request, **kwargs):
     return Response(out, status=(400 if len(out['results']) == 0 else 200))
 
 
-def get_products(_filter=Q(), _exclude=Q(), max_count=30):
-    recommended_product_ids = Line.objects.filter(_filter).exclude(_exclude).annotate(usable_product_id=Case(
+def get_products(_filter=None, _exclude=None, max_count=30):
+
+    recommended_product_ids = Line.objects
+    if _filter:
+        recommended_product_ids = recommended_product_ids.filter(_filter)
+    if _exclude:
+        recommended_product_ids = recommended_product_ids.exclude(_exclude)
+    recommended_product_ids = recommended_product_ids.annotate(usable_product_id=Case(
         When(product__structure='child',
              then=F('product_id')),
         default=F('product__parent_id'),
@@ -150,7 +156,8 @@ def budget_bag(request, **kwargs):
     most_selling_products = []
     if len(recommended_products) <= 12:
         most_selling_products = get_products(
-            _exclude=Q(product__in=recommended_products, product__parent__in=recommended_products), max_count=15)
+            _exclude=Q(product__in=recommended_products, product__parent__in=recommended_products),
+            max_count=15)
     out = {
         'recommended': custom_ProductListSerializer(recommended_products, context={'request': request}).data,
         'most_selling': custom_ProductListSerializer(most_selling_products, context={'request': request}).data,
