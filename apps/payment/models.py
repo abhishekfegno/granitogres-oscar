@@ -4,7 +4,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
 from oscar.apps.payment.models import *  # noqa isort:skip
-from rest_framework.fields import HStoreField
+from django.contrib.postgres.fields import HStoreField
 
 
 class PaymentGateWayResponse(models.Model):
@@ -20,7 +20,7 @@ class PaymentGateWayResponse(models.Model):
     ), default=PURCHASE)
     source = models.ForeignKey('payment.Source', on_delete=models.PROTECT)
     amount = models.FloatField()
-    response = HStoreField()
+    response = HStoreField(null=True)
     payment_status = models.BooleanField()
     # payee = models.ForeignKey(settings.AUTH_USER_MODEL,  on_delete=models.PROTECT)
     description = models.TextField(null=True, blank=True)
@@ -74,7 +74,7 @@ class CODRepayments(models.Model):
 
     @property
     def amount_balance(self):
-        return (self.order_amount - self.amount_refunded)
+        return self.order_amount - self.amount_refunded
 
     @property
     def reference(self):

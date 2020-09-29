@@ -219,6 +219,7 @@ class DeliveryTrip(Constant, models.Model):
         for dc in self.return_consignments.all():
             dc.cancel_consignment(reason)
         self.status = self.CANCELLED
+        self.reason = reason
         self.save()
 
     @cached_property
@@ -261,6 +262,7 @@ class ConsignmentDelivery(Constant, models.Model):
             EventHandler().handle_order_status_change(self.order, settings.ORDER_STATUS_DELIVERED,
                                                       note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
         self.status = self.COMPLETED
+        self.reason = reason
         self.save()
 
     def cancel_consignment(self, reason=None):
@@ -270,6 +272,7 @@ class ConsignmentDelivery(Constant, models.Model):
             EventHandler().handle_order_status_change(self.order, settings.ORDER_STATUS_CANCELED, note_msg=reason,
                                                       note_type=NOTE_BY_DELIVERY_BOY)
         self.status = self.CANCELLED
+        self.reason = reason
         self.save()
 
     @cached_property
@@ -302,6 +305,7 @@ class ConsignmentReturn(Constant, models.Model):
         EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_RETURNED,
                                                        note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
         self.status = self.COMPLETED
+        self.reason = reason
         self.save()
 
     def cancel_consignment(self, reason=None):
@@ -310,6 +314,7 @@ class ConsignmentReturn(Constant, models.Model):
         EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_DELIVERED,
                                                        note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
         self.status = self.CANCELLED
+        self.reason = reason
         self.save()
 
     @classmethod

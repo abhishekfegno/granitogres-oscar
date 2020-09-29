@@ -21,6 +21,7 @@ def PUBLIC_APIS(r, f):
         ("Index Page", collections.OrderedDict([
             ("Home", reverse("api-home", request=r, format=f)),
             ("Index", reverse("api-index", request=r, format=f)),
+            ("Budget Bag", reverse("wnc-budget_bag", request=r, format=f)),
             ("Offers", reverse("api-offers", request=r, format=f)),
         ])),
         ("Catalogue", collections.OrderedDict([

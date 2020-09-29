@@ -17,6 +17,8 @@ def _login_required(func):
         if request.user.is_anonymous:
             return Response({'detail': 'Authentication Required@'}, status=status.HTTP_400_BAD_REQUEST)
         return func(request, *args, **kwargs)
+    _wrapper.__name__ = func.__name__
+    _wrapper.__doc__ = func.__doc__
     return _wrapper
 
 
@@ -50,6 +52,7 @@ def orders_more_detail(request, *a, **k):
     _object = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
     serializer_class = OrderMoreDetailSerializer
     return Response(serializer_class(_object, context={'request': request}).data)
+
 
 
 

@@ -1,31 +1,22 @@
 from django.conf import settings
-from django.core.cache import cache
-from django.core.paginator import Paginator
+from django.db.models import Count, Sum, Q, Case, When, Value, F, ForeignKey, SET_NULL, PositiveIntegerField
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
-from elasticsearch_dsl.query import Exists
-
 from factory.django import get_model
-from haystack.query import EmptySearchQuerySet
-from haystack.views import FacetedSearchView
-from oscar.apps.offer.models import ConditionalOffer, Range
-from oscar.apps.search.facets import base_sqs
-from oscar.apps.search.forms import SearchForm, BrowseCategoryForm
-from oscar.apps.search.search_handlers import SearchHandler
 from oscar.core.loading import get_class
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from apps.api_set.search import GrocerySearchHandler
 from apps.api_set.serializers.catalogue import (
-    CategorySerializer, ProductListSerializer,
-    ProductDetailMobileSerializer, ProductDetailWebSerializer, custom_ProductListSerializer
+    CategorySerializer, ProductDetailWebSerializer, custom_ProductListSerializer
 )
-from apps.dashboard.custom.models import OfferBanner
-from lib.product_utils import category_filter, apply_filter, apply_search, apply_sort, recommended_class
+from apps.api_set.views.orders import _login_required
+from apps.order.models import Line
+
+from lib.product_utils import apply_search, recommended_class
 from apps.catalogue.models import Product, ProductAttribute, AttributeOption
-from apps.utils.urls import list_api_formatter
+
 from lib import cache_key
 from lib.cache import cache_library
 
@@ -131,5 +122,57 @@ def product_suggestions(request, **kwargs):
 
     # return JsonResponse(out, status=(400 if len(out['results']) == 0 else 200))
     return Response(out, status=(400 if len(out['results']) == 0 else 200))
+
+
+def get_products(_filter=Q(), _exclude=Q(), max_count=30):
+    recommended_product_ids = Line.objects.filter(_filter).exclude(_exclude).annotate(usable_product_id=Case(
+        When(product__structure='child',
+             then=F('product_id')),
+        default=F('product__parent_id'),
+        output_field=PositiveIntegerField()
+    )).values('usable_product_id').annotate(
+        rank=Sum('quantity'),
+    ).filter(rank__gte=2).order_by('-rank')[:max_count]
+    recommended_product_dict = {f['usable_product_id']: f['rank'] for f in recommended_product_ids}
+    recommended_products = Product.browsable.browsable().filter(id__in=recommended_product_dict.keys())
+    recommended_products__ordered = sorted(recommended_products,
+                                           key=lambda item: recommended_product_dict[item.pk], reverse=True)
+    return recommended_products__ordered
+
+
+@api_view()
+@_login_required
+# @cache_page(60*60*24)
+# @vary_on_cookie
+def budget_bag(request, **kwargs):
+    user = request.user
+    recommended_products = get_products(_filter=Q(order__user=user))
+    most_selling_products = []
+    if len(recommended_products) <= 12:
+        most_selling_products = get_products(
+            _exclude=Q(product__in=recommended_products, product__parent__in=recommended_products), max_count=15)
+    out = {
+        'recommended': custom_ProductListSerializer(recommended_products, context={'request': request}).data,
+        'most_selling': custom_ProductListSerializer(most_selling_products, context={'request': request}).data,
+    }
+    return Response(out)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

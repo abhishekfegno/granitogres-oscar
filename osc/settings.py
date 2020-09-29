@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'oscar',
     'apps.address.apps.AddressConfig',
     'apps.basket.apps.BasketConfig',
-    'apps.budgetbag.apps.BudgetBagConfig',
     'apps.customer.apps.CustomerConfig',
     'apps.partner.apps.PartnerConfig',
     'apps.payment.apps.PaymentConfig',

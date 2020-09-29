@@ -5,7 +5,7 @@ from allauth.account.views import confirm_email
 
 from apps.api_set.views.basket import get_basket
 from apps.api_set.views.catalogue import (
-    categories_list_cached, product_detail_web, product_suggestions, filter_options,
+    categories_list_cached, product_detail_web, product_suggestions, filter_options, budget_bag,
 )
 from apps.api_set.views.index import (
     index, home, offers, offer_products
@@ -65,6 +65,7 @@ basket_urlpatterns = [
     path("v1/_basket/", include([
         path("", get_basket, name="wnc-get-basket"),
         path("wish-list/", wish_list, name="wnc-wish-list"),
+        path("budget-bag/", budget_bag, name="wnc-budget_bag"),
         # path("add/", product_list, name="wnc-all-product-list"),
     ]))
 ]

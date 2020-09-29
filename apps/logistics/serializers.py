@@ -59,7 +59,8 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
                     line.product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'
                     ) if not line.product.is_parent else None,
             } for line in consignment.order.lines.all()],
-            "cancel_notes": self.get_note(consignment.order),
+            "cancel_notes": consignment.reason,
+            "cancel_customer_reason": None,
         } for consignment in instance.delivery_consignments.select_related('order', 'order__shipping_address')]
 
     def get_returns(self, instance):
@@ -99,7 +100,8 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
                     line.product.attribute_values.filter(attribute__code='weight').first(), 'value', 'Weight Unavailable'
                 ) if not line.product.is_parent else None,
             } for line in [consignment.order_line]],
-            "cancel_notes": self.get_note(consignment.order_line.order),
+            "cancel_notes": consignment.reason,
+            "cancel_customer_reason": None,
         } for consignment in return_items]
 
         # return [{

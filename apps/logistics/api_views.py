@@ -102,8 +102,6 @@ class ActiveTripView(GenericAPIView):
         if instance is None:
             return Response({"details": "No active Trips Found"}, status=status.HTTP_204_NO_CONTENT)
         if request.POST.get('action') == 'completed':
-            have_delivery_consignments = instance.delivery_consignments.filter(completed=False).exists()
-            have_delivery_consignments = instance.delivery_consignments.filter(completed=False).exists()
             instance.complete_forcefully()
             return Response({
                 "details": "Trip Completed.",
