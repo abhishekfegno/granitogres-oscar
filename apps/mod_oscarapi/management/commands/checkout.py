@@ -48,29 +48,8 @@ class Command(BaseCommand):
             '--print-users',  action='store_true', help="Print Users List"
         )
         parser.add_argument(
-            '--print-users',  action='store_true', help="Print Users List"
-        )
-        # parser.add_argument(
-        #     '--random-user',  action='store_true', help="Print Users List"
-        # )
-        parser.add_argument(
             '--user',  default='1', help='Get User',
         )
-        # parser.add_argument(
-        #     '--confirm-order',  action='store_true', help='Confirm the Order',
-        # )
-        # parser.add_argument(
-        #     '--out-for-delivery',  action='store_true', help='Confirm the Order',
-        # )
-        # parser.add_argument(
-        #     '--deliver',  action='store_true', help='Deliver the Order',
-        # )
-        # parser.add_argument(
-        #     '--approve-return',  action='store_true', help='approve Return the Order',
-        # )
-        # parser.add_argument(
-        #     '--return',  action='store_true', help='Return the Order',
-        # )
 
     def post(self, _method, checkout_only_current_basket=False):
         if checkout_only_current_basket:
