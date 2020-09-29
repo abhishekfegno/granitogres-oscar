@@ -193,16 +193,18 @@ class Command(BaseCommand):
                 # is_default_for_shipping=True,
                 # is_default_for_billing=True,
             )
-        return {
+        req_body = {
             "basket": f"https://store.demo.fegno.com/api/v1/baskets/{basket.id}/",
             "basket_id": basket.id,
             # "total": float(basket.total_incl_tax),
             "notes": "Some Notes for address as string.",
-            "phone_number": "",
+            "phone_number": "+919497270863",
             "shipping_address": uad.id,
             "billing_address": uad.id,
             **payment
         }
+        print(req_body)
+        return req_body
 
     def generate_data_old(self, basket, user=None, method=None):
         if method.code == 'cash':
