@@ -188,4 +188,3 @@ class CancalledTripsListView(ListView):
                                         **kwargs)
 
 
-

@@ -11,13 +11,15 @@ from oscar.apps.payment.models import Source
 from oscar.core.loading import get_model
 from oscar.core.utils import get_default_currency
 from oscar.templatetags.currency_filters import currency
+from oscar_accounts.models import Account, AccountType
 
 from . import settings as app_settings
+from .utils import TransferCOD
 from ..order.processing import EventHandler
 from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
 
-Order = get_model('order', 'Order')
+from apps.order.models import Order
 OrderLine = get_model('order', 'Line')
 
 NOTE_BY_DELIVERY_BOY = "Reason From Delivery App"
@@ -261,6 +263,15 @@ class ConsignmentDelivery(Constant, models.Model):
         if hasattr(self, 'order'):
             EventHandler().handle_order_status_change(self.order, settings.ORDER_STATUS_DELIVERED,
                                                       note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
+        source = self.order.sources.prefetch_related('source_type').last()
+        if source and source.source_type.code == Cash.code:
+            staff = self.delivery_trip.agent
+            transfer = TransferCOD(
+                authorized_by=staff             # noqa
+            ).from_customer().to_staff(staff).transfer(
+                self.order.total_incl_tax,
+                description=f"Accepted money while Delivering #{self.order.number} to #{self.order.email} on {timezone.now()}"
+            )
         self.status = self.COMPLETED
         self.reason = reason
         self.save()
@@ -304,6 +315,16 @@ class ConsignmentReturn(Constant, models.Model):
     def mark_as_completed(self, reason=None):
         EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_RETURNED,
                                                        note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
+        source = self.order_line.order.sources.prefetch_related('source_type').last()
+        if source and source.source_type.code == Cash.code:
+            staff = self.delivery_trip.agent
+            transfer = TransferCOD(
+                authorized_by=staff
+            ).from_staff(staff).to_customer().transfer(
+                self.order.total_incl_tax * -1,
+                description=f"Returned money while Returning #{self.order_line.id} (of order "
+                            f"#{self.order_line.order.number} ) to #{self.order.email} on {timezone.now()}"
+            )
         self.status = self.COMPLETED
         self.reason = reason
         self.save()

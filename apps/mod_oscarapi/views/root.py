@@ -81,6 +81,8 @@ def PUBLIC_APIS(r, f):
             #  Order Return
             ("Return Item Details", reverse("logistics-api:order-item-detail", kwargs={'pk': '19'},
                                             request=r, format=f)),
+            ("Transaction List", reverse("logistics-api:transaction-list",
+                                         request=r, format=f)),
             ("Apply Status Changes via POST Method", collections.OrderedDict([
                 ("Order Completed", reverse("logistics-api:order-action", kwargs={
                     'pk': '19', 'method': 'order', 'action': 'complete'}, request=r, format=f)),

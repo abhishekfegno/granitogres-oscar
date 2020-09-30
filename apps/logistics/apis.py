@@ -3,6 +3,8 @@ from django.urls import path, include
 from . import api_views
 
 app_name = 'logistics-api'
+from apps.logistics.api_views import TransactionList
+
 
 urlpatterns = [
     path('trips/', include([
@@ -15,9 +17,11 @@ urlpatterns = [
         path('order/<int:pk>/details/', api_views.orders_detail, name="order-detail"),
         path('order/<int:pk>/details/more/', api_views.orders_detail, name="order-more"),
         path('return/<int:pk>/details/', api_views.orders_item_detail, name="order-item-detail"),
-        
+
         path('<str:method>/<int:pk>/action/<str:action>/', api_views.order_delivered_status_change, name="order-action"),
 
     ])),
-
+    path('transactions/', include([
+        path('', TransactionList.as_view(), name="transaction-list"),
+    ])),
 ]

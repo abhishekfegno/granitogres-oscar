@@ -2,6 +2,7 @@ from collections import defaultdict
 from decimal import Decimal
 
 from oscar.templatetags.currency_filters import currency
+from oscar_accounts.models import Transfer, Account
 from rest_framework import serializers
 
 from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin, ProductAttributeFieldMixin
@@ -104,32 +105,6 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
             "cancel_customer_reason": None,
         } for consignment in return_items]
 
-        # return [{
-        #     'consignment_id': None,
-        #     'id': order.id,
-        #     'order_number': order.number,
-        #     'type': 'return',
-        #     'date_placed': order.date_placed,
-        #     'order_status': get_status(consignments),
-        #     'order_total': currency(sum(map(lambda con: con.order_line.line_price_incl_tax, consignments))),
-        #     'user_name': order.shipping_address.get_full_name(),
-        #     'shipping': order.shipping_address.summary_line,
-        #     'contact': str(order.shipping_address.phone_number),
-        #     'notes': order.shipping_address.notes,
-        #     'source': get_re0turn_data(order),
-        #     "consignments": [{
-        #         'id': cons.order_line.id,
-        #         'consignment_return_id': cons.id,
-        #         'order_status': cons.order_line.status,
-        #         'product': {
-        #             'product_name': cons.order_line.product.name,
-        #             'primary_image': getattr(cons.order_line.product.primary_image(), 'original', None),
-        #             # 'quantity': cons.order_line.quantity,
-        #             'line_price_incl_tax': cons.order_line.line_price_incl_tax
-        #     #     },
-        #   # } for cons in consignments],
-        # } for order, consignments in grouped_list.items()]
-
     def get_cod_to_collect(self, instance: DeliveryTrip):
         return {
             'delivery': instance.cods_to_collect,
@@ -149,3 +124,35 @@ class ArchivedTripListSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryTrip
         fields = ('id', 'route', 'info', 'trip_date', 'trip_time', 'cods_to_collect', 'cods_to_return', 'status', )
+
+
+class AccountSerializer(serializers.ModelSerializer):
+    account_type = serializers.SerializerMethodField()
+
+    def get_account_type(self, instance):
+        return instance.account_type and instance.account_type.name
+
+    class Meta:
+        model = Account
+        fields = ('name', 'description', 'account_type', 'balance', 'date_created')
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    source = AccountSerializer()
+    destination = AccountSerializer()
+    direction = serializers.SerializerMethodField()
+
+    def get_direction(self, instance):
+        cash_flow_to_staff = instance.destination.primary_user == instance.user
+        return {
+            'polarity': '+' if cash_flow_to_staff else '-',
+            'amount': ('+ ' if cash_flow_to_staff else '- ') + currency(instance.amount),
+            'as_text': ('From ' if cash_flow_to_staff else 'To ') + instance.destination.name,
+        }
+
+    class Meta:
+        model = Transfer
+        fields = ('reference', 'amount', 'merchant_reference', 'description', 'date_created',
+                  'source', 'destination', 'direction')
+
+

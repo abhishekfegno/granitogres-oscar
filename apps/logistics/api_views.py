@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any
 
 from django.utils.decorators import method_decorator
+from oscar_accounts.models import Transfer
 from oscarapi.serializers.checkout import OrderLineSerializer
 from rest_framework import status, authentication
 from rest_framework.authentication import SessionAuthentication, BaseAuthentication
@@ -15,7 +16,8 @@ from rest_framework.views import APIView
 from apps.api_set.serializers.orders import OrderListSerializer, OrderDetailSerializer, OrderMoreDetailSerializer, \
     LineDetailSerializer
 from apps.logistics.models import DeliveryTrip, ConsignmentReturn
-from apps.logistics.serializers import DeliveryTripSerializer, ArchivedTripListSerializer
+from apps.logistics.serializers import DeliveryTripSerializer, ArchivedTripListSerializer, TransactionSerializer
+from apps.logistics.utils import TransferCOD
 from apps.order.models import Order
 
 
@@ -216,3 +218,11 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
     return Response(out, status=status_code)
 
 
+@method_decorator(_delivery_boy_login_required, name="dispatch")
+class TransactionList(ListAPIView):
+    model = Transfer
+    serializer_class = TransactionSerializer
+
+    def get_queryset(self):
+        return TransferCOD(self.request.user).get_my_transactions().select_related(
+            'source', 'source__account_type', 'destination', 'destination__account_type').order_by('-date_created')

@@ -1,5 +1,6 @@
 from django.urls import path, include
 
+
 from apps.logistics.views.generic import *
 from apps.logistics.views import delivery_boy
 
@@ -25,8 +26,7 @@ urlpatterns = [
         path('delivered/', DeliveredTripsListView.as_view(), name="delivered-trips"),
         path('cancelled/', CancalledTripsListView.as_view(), name="cancelled-trips"),
 
-    ]))
-
+    ])),
 ]
 
 

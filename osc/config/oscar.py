@@ -297,8 +297,30 @@ OSCAR_DASHBOARD_NAVIGATION = [
             {'label': _('Cancelled Trips'), 'url_name': 'logistics:cancelled-trips',
              'access_fn': admin_or_staff,
              },
+        ],
+    }, {
+        'label': 'Accounts',
+        'icon': 'icon-globe',
+        'children': [
+            {
+                'label': 'Accounts',
+                'url_name': 'accounts_dashboard:accounts-list',
+            },
+            {
+                'label': 'Transfers',
+                'url_name': 'accounts_dashboard:transfers-list',
+            },
+            {
+                'label': 'Deferred income report',
+                'url_name': 'accounts_dashboard:report-deferred-income',
+            },
+            {
+                'label': 'Profit/loss report',
+                'url_name': 'accounts_dashboard:report-profit-loss',
+            },
         ]
     }]
+
 
 API_ENABLED_PAYMENT_METHODS = [
     {
