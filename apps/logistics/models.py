@@ -144,7 +144,7 @@ class DeliveryTrip(Constant, models.Model):
         self.status = self.COMPLETED
         self.save()
 
-    def mark_as_completed(self):
+    def mark_as_completed(self, reason=''):
         """
         In the assumption that, 'request_cancelled' can be set by user.
         """
