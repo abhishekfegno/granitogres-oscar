@@ -172,6 +172,7 @@ class Command(BaseCommand):
             print(basket, user, method)
             raise ModuleNotFoundError("Method is not in ")
         uad = UserAddress.objects.filter(user=user, ).only('id').last()
+        point = Point(float(12.785238498732), float(77.94478155806023))
         if uad is None:
             uad = UserAddress.objects.create(
                 user=user,
@@ -185,7 +186,7 @@ class Command(BaseCommand):
                     "line4": "Thiruvalla",
                     "state": "Kerala",
                     "postcode": "689544",
-                    "location": Point(float(12.785238498732), float(77.94478155806023)),
+                    "location": point,
                     # "phone_number": "+919446600863",
                     # "notes": "",
                     "country": Country.objects.get(pk='IN')
@@ -193,6 +194,9 @@ class Command(BaseCommand):
                 # is_default_for_shipping=True,
                 # is_default_for_billing=True,
             )
+        if uad.location is None:
+            uad.location = point
+            uad.save()
         req_body = {
             "basket": f"https://store.demo.fegno.com/api/v1/baskets/{basket.id}/",
             "basket_id": basket.id,
