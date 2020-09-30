@@ -139,7 +139,7 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryTrip
         fields = (
-            'id', 'route', 'info', 'status', 'trip_date', 'trip_time' 'updated_at',
+            'id', 'route', 'info', 'status', 'trip_date', 'trip_time', 'updated_at',
             'orders', 'returns', 'cod_to_collect', 'reason'
         )
 
