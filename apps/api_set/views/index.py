@@ -42,8 +42,10 @@ def home(request, *a, **k):
     b_count = 0
     if request.user.is_authenticated:
         user_fields = ['id', 'mobile', 'email', 'first_name', 'last_name', 'is_active',
-                       'status', 'is_delivery_request_pending']
+                       'status',  'status_text',  'is_delivery_request_pending', 'emp_id']
         user = {field: getattr(request.user, field) for field in user_fields}
+        user['image'] = request.build_absolute_uri(request.user.image.url) if request.user.image else None
+        user['id_proof'] = request.build_absolute_uri(request.user.id_proof.url) if request.user.id_proof else None
         basket = Basket.open.filter(owner=request.user).last()
     if basket is None:
         basket = request.basket or None
