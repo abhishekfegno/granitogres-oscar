@@ -42,7 +42,8 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
         if Payment State is complete:
             then:: MARKER:  Debit the amount, create curresponding event and update line quantities.
         """
-        reference = request.data['payment']['razor_pay']['razorpay_payment_id']
+        # reference = request.data['payment']['razor_pay']['razorpay_payment_id']
+        reference = request.data['razorpay_payment_id']
         source = self.get_source(order, reference)
         amount_to_allocate = amount - source.amount_allocated
         source.allocate(amount_to_allocate, reference)
