@@ -133,8 +133,8 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
         payment_pgr.response = payment_response
         max_refundable_amount = payment_response['amount'] - payment_response['amount_refunded']
         if amount > max_refundable_amount:
-            msg = f"""The Amount {source.currency} {amount}/- is more than the 
-                    {source.currency} {max_refundable_amount} /-.  
+            msg = f"""The Amount {source.currency} {amount / 100}/- is more than the 
+                    {source.currency} {max_refundable_amount / 100} /-.  
                     The total amount of this order #{order.number} is 
                     {source.currency}  {payment_response['amount'] / 100}/-"""
 

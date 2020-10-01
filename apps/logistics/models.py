@@ -135,6 +135,7 @@ class DeliveryTrip(Constant, models.Model):
         qs = ConsignmentReturn.objects.filter(delivery_trip__isnull=True)
         if self.pk:
             qs |= ConsignmentReturn.objects.filter(delivery_trip=self)
+
         return qs.select_related('delivery_trip', 'order_line',
                                  'order_line__order',
                                  'order_line__order__user',
@@ -359,7 +360,7 @@ class ConsignmentReturn(Constant, models.Model):
         else:
             """ Handling Case 1 & 3 """
             consignment_return, is_new = cls.objects.exclude(
-                status=cls.COMPLETED, request_cancelled=True
+                status=cls.CANCELLED
             ).get_or_create(order_line=line)
             return consignment_return
 
