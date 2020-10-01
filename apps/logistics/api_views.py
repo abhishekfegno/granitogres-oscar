@@ -243,7 +243,7 @@ def archived_transaction_list_summery(request, trip_date):
     return Response({
         'credit_transfers': credit_transfers,
         'debit_transfers': debit_transfers,
-        'balance_transfers': credit_transfers - debit_transfers
+        'balance_transfers': credit_transfers + debit_transfers
     })
 
 
