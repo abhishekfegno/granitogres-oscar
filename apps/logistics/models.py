@@ -325,7 +325,7 @@ class ConsignmentReturn(Constant, models.Model):
             transfer = TransferCOD(
                 authorized_by=staff
             ).from_staff(staff).to_customer().transfer(
-                self.order_line.order.total_incl_tax * -1,
+                self.order_line.order.total_incl_tax,
                 description=f"Returned money while Returning #{self.order_line.id} (of order "
                             f"#{self.order_line.order.number} ) to #{self.order_line.order.email} on {timezone.now()}"
             )
