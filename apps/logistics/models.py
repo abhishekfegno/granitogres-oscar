@@ -312,6 +312,10 @@ class ConsignmentReturn(Constant, models.Model):
             return qs
         return qs.last()
 
+    @property
+    def order(self):
+        return self.order_line.order
+
     def mark_as_completed(self, reason=None):
         EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_RETURNED,
                                                        note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
@@ -321,9 +325,9 @@ class ConsignmentReturn(Constant, models.Model):
             transfer = TransferCOD(
                 authorized_by=staff
             ).from_staff(staff).to_customer().transfer(
-                self.order.total_incl_tax * -1,
+                self.order_line.order.total_incl_tax * -1,
                 description=f"Returned money while Returning #{self.order_line.id} (of order "
-                            f"#{self.order_line.order.number} ) to #{self.order.email} on {timezone.now()}"
+                            f"#{self.order_line.order.number} ) to #{self.order_line..email} on {timezone.now()}"
             )
         self.status = self.COMPLETED
         self.reason = reason
