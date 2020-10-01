@@ -24,7 +24,7 @@ class RefundFacade(object):
         kwg = {'order': order}
         if reference:
             kwg['reference'] = reference
-        return Source.objects.filter(**kwg).prefetch_related('source_type', 'order', 'order__lines').reverse()
+        return Source.objects.filter(**kwg).prefetch_related('source_type', 'order', 'order__lines').order_by('id')
 
     def get_source_n_method(self, order, reference=None):
         for source in self.get_sources_model_from_order(order, reference=reference):
