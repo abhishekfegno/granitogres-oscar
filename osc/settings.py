@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.flatpages',
     'django.contrib.gis',
+    'django.contrib.postgres',
     'django.contrib.humanize',
 
     # 'stores',
