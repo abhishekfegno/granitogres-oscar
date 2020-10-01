@@ -75,7 +75,7 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
             # success case
             fetch_resp = client.payment.fetch(reference)
             if fetch_resp['status'] == 'authorized':
-                fetch_resp = client.payment.capture(reference, int(amount))
+                fetch_resp = client.payment.capture(reference, fetch_resp['amount'])
             response = fetch_resp
             pgr.response = response
             pgr.description = description
@@ -106,14 +106,14 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
             # payment Rejected Error
             pgr.payment_status = False
             pgr.response = {'id': reference, 'entity': 'payment', 'amount': amount, 'currency': source.currency,
-                             'status': 'already_captured', 'error': str(e)}
+                            'status': 'already_captured', 'error': str(e)}
             pgr.save()
             return states.Declined(source.amount_debited, source_id=source.pk)
         else:
             return states.Complete(source.amount_debited, source_id=source.pk)
 
     def create_actual_refund_with_gateway(self, source: Source, amount):
-        # amount = int(amount * 100)
+        amount = int(amount * 100)
         client = self.client
         reference = source.reference or self.get_reference_from_source(source)
         payment_pgr = PaymentGateWayResponse.objects.filter(source=source).first()
@@ -173,7 +173,7 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
             # payment Rejected Error
             pgr.payment_status = False
             pgr.response = {'id': reference, 'entity': 'payment', 'amount': amount, 'currency': source.currency,
-                             'status': 'already_captured', 'error': str(e)}
+                            'status': 'already_captured', 'error': str(e)}
             pgr.save()
             return {'id': reference, 'entity': 'payment', 'amount': amount, 'currency': source.currency,
                     'status': 'already_captured', 'error': str(e)}
