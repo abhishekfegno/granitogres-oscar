@@ -86,6 +86,9 @@ def PUBLIC_APIS(r, f):
             ("Archived Transaction List", reverse("logistics-api:archived-transaction-list",
                                                   kwargs={"trip_date": "28-09-2020"},
                                                   request=r, format=f)),
+            ("Transfer Summery", reverse("logistics-api:summery-transfer-list",
+                                         kwargs={"trip_date": "28-09-2020"},
+                                         request=r, format=f)),
             ("Apply Status Changes via POST Method", collections.OrderedDict([
                 ("Order Completed", reverse("logistics-api:order-action", kwargs={
                     'pk': '19', 'method': 'order', 'action': 'complete'}, request=r, format=f)),

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from django.utils.decorators import method_decorator
-from oscar_accounts.models import Transfer
+from oscar_accounts.models import Transfer, Transaction
 from oscarapi.serializers.checkout import OrderLineSerializer
 from rest_framework import status, authentication
 from rest_framework.authentication import SessionAuthentication, BaseAuthentication
@@ -18,7 +18,7 @@ from apps.api_set.serializers.orders import OrderListSerializer, OrderDetailSeri
 from apps.logistics.models import DeliveryTrip, ConsignmentReturn
 from apps.logistics.serializers import DeliveryTripSerializer, ArchivedTripListSerializer, TransactionSerializer
 from apps.logistics.utils import TransferCOD
-from apps.order.models import Order
+from apps.order.models import Order, Sum
 
 
 def _delivery_boy_login_required(func):
@@ -228,6 +228,25 @@ class TransactionList(ListAPIView):
             'source', 'source__account_type', 'destination', 'destination__account_type').order_by('-date_created')
 
 
+@api_view()
+@_delivery_boy_login_required
+def archived_transaction_list_summery(request, trip_date):
+    try:
+        trip_date = datetime.strptime(trip_date, "%d-%m-%Y")
+    except ValueError as e:
+        return Response({"detail": "Date is not valid"}, status=status.HTTP_404_NOT_FOUND)
+    transfers = Transaction.objects.filter(
+        date_created__date=trip_date, account__primary_user=request.user
+    )
+    credit_transfers = transfers.filter(amount__gt=0).aggregate(sum=Sum('amount'))['sum'] or 0
+    debit_transfers = transfers.filter(amount__lt=0).aggregate(sum=Sum('amount'))['sum'] or 0
+    return Response({
+        'credit_transfers': credit_transfers,
+        'debit_transfers': debit_transfers,
+        'balance_transfers': credit_transfers - debit_transfers
+    })
+
+
 class ArchivedTransactionList(TransactionList):
 
     def get_queryset(self):
@@ -238,3 +257,5 @@ class ArchivedTransactionList(TransactionList):
         return TransferCOD(self.request.user).get_my_transactions(
         ).filter(date_created__date=trip_date).select_related(
             'source', 'source__account_type', 'destination', 'destination__account_type').order_by('-date_created')
+
+
