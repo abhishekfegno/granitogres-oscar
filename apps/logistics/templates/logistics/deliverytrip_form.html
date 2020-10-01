@@ -240,7 +240,7 @@
                             <td>
                                 <span class="{{ con_ord.css_badge_class }}"> {{ con_ord.status }} </span>
                             </td>
-                            <td>{{ con_ord.order.number }}</td>
+                            <td><a href="{% url 'dashboard:order-detail' number=con_ord.order.number %}">{{ con_ord.order.number }}</a> ({{ con_ord.order.status }})</td>
                             <td>{{ con_ord.order.shipping_address }}</td>
                             <td>{{ con_ord.order.total_incl_tax }}</td>
                             <td>{{ con_ord.payment_status }}</td>
@@ -272,8 +272,9 @@
                                 <span class="{{ con_ord.css_badge_class }}"> {{ con_ord.status }} </span>
                             </td>
                             <td> {{ con_ord.request_cancelled|yesno }} </td>
-                            <td>{{ con_ord.order_line.order.number }}</td>
-                            <td>{{ con_ord.order_line.id }}</td>
+                            <td><a href="{% url 'dashboard:order-detail' number=con_ord.order.number %}">{{ con_ord.order.number }}</a></td>
+                            <td><a href="{% url 'dashboard:order-line-detail' number=con_ord.order_line.order.number line_id=con_ord.order_line.id %}">
+                                {{ con_ord.order_line.id }} ({{ con_ord.order_line.status }})</a></td>
                             <td>{{ con_ord.order_line.product }}</td>
                             <td>{{ con_ord.order_line.order.shipping_address }}</td>
                             <td>{{ con_ord.order_line.line_price_incl_tax }}</td>
