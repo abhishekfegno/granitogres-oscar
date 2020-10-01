@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from django.utils.decorators import method_decorator
@@ -231,10 +231,10 @@ class TransactionList(ListAPIView):
 class ArchivedTransactionList(TransactionList):
 
     def get_queryset(self):
-        trip_date = None
         try:
             trip_date = datetime.strptime(self.kwargs['trip_date'], "%d-%m-%Y")
         except ValueError as e:
             return Response({"detail": "Date is not valid"}, status=status.HTTP_404_NOT_FOUND)
-        return TransferCOD(self.request.user).get_my_transactions().filter(date_created=trip_date).select_related(
+        return TransferCOD(self.request.user).get_my_transactions(
+        ).filter(date_created__date=trip_date).select_related(
             'source', 'source__account_type', 'destination', 'destination__account_type').order_by('-date_created')
