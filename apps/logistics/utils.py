@@ -18,7 +18,7 @@ def get_staff_account(user):
         acc_type = AccountType.add_root(code=acc_type_code, name=acc_type_name)
     staff_account, _ = Account.objects.get_or_create(
         primary_user=user, account_type=acc_type,
-        defaults={'name': f"{user.get_full_name()} Wallet", 'credit_limit': None})
+        defaults={'name': f"{user.get_full_name()} Wallet {user.id}", 'credit_limit': None})
     return staff_account
 
 
