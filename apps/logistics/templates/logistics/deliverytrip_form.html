@@ -238,7 +238,7 @@
                         {% for con_ord in object.delivery_consignments.all %}
                         <tr>
                             <td>
-                                <span class="{{ con_ord.css_badge_class }}"> {{ con_ord.status }} </span>
+                                <span class="{{ con_ord.css_badge_class }}"> #D{{ con_ord.id }} {{ con_ord.status }} </span>
                             </td>
                             <td><a href="{% url 'dashboard:order-detail' number=con_ord.order.number %}">{{ con_ord.order.number }}</a> ({{ con_ord.order.status }})</td>
                             <td>{{ con_ord.order.shipping_address }}</td>
@@ -269,7 +269,7 @@
                         {% for con_ord in object.return_consignments.all %}
                         <tr>
                             <td>
-                                <span class="{{ con_ord.css_badge_class }}"> {{ con_ord.status }} </span>
+                                <span class="{{ con_ord.css_badge_class }}"> #R{{ con_ord.id }} {{ con_ord.status }} </span>
                             </td>
                             <td> {{ con_ord.request_cancelled|yesno }} </td>
                             <td><a href="{% url 'dashboard:order-detail' number=con_ord.order.number %}">{{ con_ord.order.number }}</a></td>

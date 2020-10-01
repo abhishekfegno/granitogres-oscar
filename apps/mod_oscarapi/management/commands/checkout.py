@@ -165,7 +165,7 @@ class Command(BaseCommand):
             print(rzp_key)
             # rzp_key = input(f"razorpay payment id for amount '{int(basket.total_incl_tax * 100)}' : ")
             payment = {
-                "payment": "cash",
+                "payment": "razor_pay",
                 "razorpay_payment_id": rzp_key
             }
         else:

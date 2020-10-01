@@ -117,7 +117,7 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
         reference = source.reference or self.get_reference_from_source(source)
         payment_pgr = PaymentGateWayResponse.objects.filter(source=source).first()
         if not reference:
-            reference = payment_pgr.response.get('payment', {}).get('razor_pay', {}).get('razorpay_payment_id', '')
+            reference = payment_pgr.response and payment_pgr.response.get('payment', {}).get('razor_pay', {}).get('razorpay_payment_id', '')
         if not reference:
             msg = 'Transaction Reference not found for razorpay payment.'
             print(msg)
