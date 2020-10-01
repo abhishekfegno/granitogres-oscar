@@ -327,7 +327,7 @@ class ConsignmentReturn(Constant, models.Model):
             ).from_staff(staff).to_customer().transfer(
                 self.order_line.order.total_incl_tax * -1,
                 description=f"Returned money while Returning #{self.order_line.id} (of order "
-                            f"#{self.order_line.order.number} ) to #{self.order_line..email} on {timezone.now()}"
+                            f"#{self.order_line.order.number} ) to #{self.order_line.order.email} on {timezone.now()}"
             )
         self.status = self.COMPLETED
         self.reason = reason
