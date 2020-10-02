@@ -37,6 +37,7 @@ class SendOTP(APIView):
             out['error'] = mns.errors
             return Response(out, status=400)
         else:
+
             otp = OTP.generate(mns.validated_data['mobile'], request.data.get('is_delivery_boy_request', False))
             status = otp.send_message()
             out['id'] = otp.id

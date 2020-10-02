@@ -24,11 +24,19 @@ class MobileNumberSerializer(serializers.Serializer):
     def create(self, validated_data):
         pass
 
-    # def validate_mobile(self, mobile):
-    #     is_valid_number = re.match(mobile_number_format, mobile)
-    #     if not is_valid_number:
-    #         raise serializers.ValidationError('Mobile number is not valid')
-    #     return mobile
+    def validate_mobile(self, mobile):
+        """
+        As per change, Delivery boy should not be able to register, but must be added from Backend by Admin!
+        """
+        is_delivery_boy_request = self.context['request'].data.get('is_delivery_boy_request', False)
+        if is_delivery_boy_request:
+            if not User.objects.filter(username=mobile).exists():
+                raise serializers.ValidationError('Mobile number is not valid')
+        mobile_number_format = r'^\d{10}$'
+        is_valid_number = re.match(mobile_number_format, mobile)
+        if not is_valid_number:
+            raise serializers.ValidationError('Mobile number is not valid')
+        return mobile
 
 
 class OtpSerializer(MobileNumberSerializer):
