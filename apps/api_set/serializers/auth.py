@@ -29,13 +29,16 @@ class MobileNumberSerializer(serializers.Serializer):
         As per change, Delivery boy should not be able to register, but must be added from Backend by Admin!
         """
         is_delivery_boy_request = self.context['request'].data.get('is_delivery_boy_request', False)
-        if is_delivery_boy_request:
-            if not User.objects.filter(username=mobile).exists():
-                raise serializers.ValidationError('Mobile number is not valid')
         mobile_number_format = r'^\d{10}$'
         is_valid_number = re.match(mobile_number_format, mobile)
         if not is_valid_number:
             raise serializers.ValidationError('Mobile number is not valid')
+        if is_delivery_boy_request:
+            user = User.objects.filter(username=mobile).first()
+            if not user:
+                raise serializers.ValidationError('Mobile number is not valid')
+            if user.is_delivery_boy is not True:
+                raise serializers.ValidationError('This user is not permitted to continue!')
         return mobile
 
 

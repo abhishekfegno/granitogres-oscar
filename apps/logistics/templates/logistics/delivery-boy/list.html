@@ -63,9 +63,10 @@
                         <td>{{ boy.status_text|default:"-" }}</td>
                         <td>
                             <div>
-                                <form action="{% url 'logistics:dashboard-delivery-boy-update' pk=boy.id  %}"
+                                <form action="{% url 'logistics:dashboard-delivery-boy-update' pk='00000000'  %}"
                                       method="post">
                                     {% csrf_token %}
+
                                     <input type="submit"
                                            class="btn btn-{% if boy.is_delivery_boy %}danger{% else %}success{% endif %}"
                                            name="submit"

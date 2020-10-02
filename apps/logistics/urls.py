@@ -10,6 +10,7 @@ urlpatterns = [
     path('delivery-agent/', include([
         path('', delivery_boy.DeliveryBoyList.as_view(), name=f"dashboard-delivery-boy-list"),
         path('add/', delivery_boy.DeliveryBoyCreate.as_view(), name=f"dashboard-delivery-boy-create"),
+        path('promote/', delivery_boy.promote_user, name=f"dashboard-delivery-boy-promote"),
         path('<int:pk>/update/', delivery_boy.DeliveryBoyUpdate.as_view(), name=f"dashboard-delivery-boy-update-form"),
         path('<int:pk>/', delivery_boy.actions, name=f"dashboard-delivery-boy-update"),
         path('action/<int:pk>/', delivery_boy.actions, name=f"dashboard-delivery-boy-update"),
