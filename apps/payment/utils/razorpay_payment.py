@@ -3,7 +3,7 @@ import time
 import requests
 from django.conf import settings
 from django.utils import timezone
-from oscar.apps.payment.models import Source
+from apps.payment.models import Source
 from oscarapicheckout import states
 from oscarapicheckout.methods import PaymentMethod, Transaction
 

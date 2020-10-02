@@ -21,7 +21,7 @@ class RefundFacade(object):
             self.payment_methods.append(PaymentMethod())
 
     def get_sources_model_from_order(self, order, reference=''):
-        return Source.objects.get_or_create(order=order, defailts={'reference': reference})[0]
+        return Source.objects.get_or_create(order=order, defaults={'reference': reference})[0]
 
     def get_source_n_method(self, order, reference=None):
         for source in self.get_sources_model_from_order(order, reference=reference):

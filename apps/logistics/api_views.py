@@ -1,24 +1,22 @@
-from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 from django.utils.decorators import method_decorator
 from oscar_accounts.models import Transfer, Transaction
-from oscarapi.serializers.checkout import OrderLineSerializer
-from rest_framework import status, authentication
-from rest_framework.authentication import SessionAuthentication, BaseAuthentication
+from rest_framework import status
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view
-from rest_framework.generics import ListAPIView, RetrieveAPIView, UpdateAPIView, GenericAPIView, get_object_or_404
+from rest_framework.generics import ListAPIView, RetrieveAPIView, GenericAPIView, get_object_or_404
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.api_set.serializers.orders import OrderListSerializer, OrderDetailSerializer, OrderMoreDetailSerializer, \
     LineDetailSerializer
-from apps.logistics.models import DeliveryTrip, ConsignmentReturn
+from apps.logistics.models import DeliveryTrip
 from apps.logistics.serializers import DeliveryTripSerializer, ArchivedTripListSerializer, TransactionSerializer
 from apps.logistics.utils import TransferCOD
-from apps.order.models import Order, Sum
+from apps.order.models import Sum
 
 
 def _delivery_boy_login_required(func):

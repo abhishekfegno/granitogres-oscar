@@ -51,7 +51,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         return str(instance.total_discount_incl_tax)
 
     def get_source(self, order):
-        source = RefundFacade().get_sources_model_from_order(order).first()
+        source = RefundFacade().get_sources_model_from_order(order)
         if source:
             return {
                 'payment_type': source.source_type.name,

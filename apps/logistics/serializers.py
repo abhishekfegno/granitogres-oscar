@@ -24,7 +24,7 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
     def get_orders(self, instance):
 
         def get_source_data(order):
-            source = RefundFacade().get_sources_model_from_order(order).first()
+            source = RefundFacade().get_sources_model_from_order(order)
             if source:
                 return {
                     'payment_type': source.source_type.name,
@@ -66,7 +66,7 @@ class DeliveryTripSerializer(serializers.ModelSerializer):
 
     def get_returns(self, instance):
         def get_return_data(order):
-            source = RefundFacade().get_sources_model_from_order(order).first()
+            source = RefundFacade().get_sources_model_from_order(order)
             if source:
                 return {
                     'payment_type': source.source_type.name,
