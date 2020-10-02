@@ -28,6 +28,7 @@ class Command(BaseCommand):
             master = sources and sources[:1]
             slaves = sources[1:]
             for slave in slaves:
+                fixed += 1
                 slave.is_active = False
                 slave.save()
 
