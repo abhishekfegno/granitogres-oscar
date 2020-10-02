@@ -3,8 +3,24 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
-from oscar.apps.payment.models import *  # noqa isort:skip
 from django.contrib.postgres.fields import HStoreField
+from oscar.apps.payment import abstract_models
+
+
+class SourceManager(models.Manager):
+
+    def get_queryset(self):
+        return super(SourceManager, self).get_queryset().filter(is_active=True)
+
+
+class Source(abstract_models.AbstractSource):
+    is_active = models.BooleanField(default=True)
+
+    objects = SourceManager()
+    all = models.Manager()
+
+
+from oscar.apps.payment.models import *  # noqa isort:skip
 
 
 class PaymentGateWayResponse(models.Model):

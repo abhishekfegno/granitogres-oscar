@@ -1,8 +1,6 @@
 from django.utils import timezone
-from django.utils.module_loading import import_string
-from oscar.apps.payment.models import Source
+from apps.payment.models import Source
 from oscarapicheckout import states
-from apps.mod_oscarapi import states as custom_states
 from oscarapicheckout.methods import Transaction, PaymentMethod, SourceType
 
 from apps.payment.models import COD, PaymentGateWayResponse, CODRepayments

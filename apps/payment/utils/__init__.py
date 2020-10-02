@@ -1,11 +1,8 @@
 from decimal import Decimal
-
 from django.conf import settings
-from django.db import models, transaction
-
-from apps.mod_oscarapi import states
-from apps.order.models import Order, PaymentEvent, PaymentEventQuantity, LinePrice, Line
-from oscar.apps.payment.models import Transaction, SourceType, Source
+from django.db import transaction
+from apps.order.models import Order, PaymentEventQuantity, Line
+from apps.payment.models import Transaction, Source
 
 from apps.payment.models import COD
 

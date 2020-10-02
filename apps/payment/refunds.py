@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.utils.module_loading import import_string
-from oscar.apps.payment.models import Source
+from apps.payment.models import Source
 
 
 class RefundFacade(object):
@@ -21,10 +21,7 @@ class RefundFacade(object):
             self.payment_methods.append(PaymentMethod())
 
     def get_sources_model_from_order(self, order, reference=''):
-        kwg = {'order': order}
-        if reference:
-            kwg['reference'] = reference
-        return Source.objects.filter(**kwg).prefetch_related('source_type', 'order', 'order__lines').order_by('id')
+        return Source.objects.get_or_create(order=order, defailts={'reference': reference})[0]
 
     def get_source_n_method(self, order, reference=None):
         for source in self.get_sources_model_from_order(order, reference=reference):
@@ -43,9 +40,8 @@ class RefundFacade(object):
         Procedure.
             ✔ 1. Order Status has already been updated. So leave it.
             ✔ 2. Get the succeeded Order State.
-            ✔ 3. Create a Transaction Record
             ✔ 4. Create a PaymentEvent
-
+            ✔ 3. Create a Transaction Record
         """
 
         if order.status not in settings.OSCAR_ORDER_REFUNDABLE_STATUS:

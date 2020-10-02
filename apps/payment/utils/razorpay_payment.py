@@ -58,7 +58,7 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
 
     def _get_external_payment(self, source, amount, reference, description=None):
         """
-        Get Client, GEt Payment Gateway Rrsponse,reference
+        Get Client, GEt Payment Gateway Rrsponse, reference
         """
         client = self.client
         # EXTERNAL PAYMENT      # espicially for the purpose of COD.
@@ -108,7 +108,9 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
             pgr.response = {'id': reference, 'entity': 'payment', 'amount': amount, 'currency': source.currency,
                             'status': 'already_captured', 'error': str(e)}
             pgr.save()
-            return states.Declined(source.amount_debited, source_id=source.pk)
+            source.is_active = False        # moving these sources inactive
+            source.save()
+            return states.Declined(source.amount_allocated, source_id=source.pk)
         else:
             return states.Complete(source.amount_debited, source_id=source.pk)
 

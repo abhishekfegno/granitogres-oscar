@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q, Sum
 from django.utils.functional import cached_property
-from oscar.apps.payment.models import Source
+from apps.payment.models import Source
 from oscar.core.loading import get_model
 from oscar.core.utils import get_default_currency
 from oscar.templatetags.currency_filters import currency
