@@ -320,7 +320,7 @@ class ConsignmentReturn(Constant, models.Model):
     def mark_as_completed(self, reason=None):
         EventHandler().handle_order_line_status_change(self.order_line, settings.ORDER_STATUS_RETURNED,
                                                        note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
-        source = self.order_line.order.sources.prefetch_related('source_type').last()
+        source = self.order_line.order.sources.filter(is_active=True).prefetch_related('source_type').last()
         if source and source.source_type.code == Cash.code:
             staff = self.delivery_trip.agent
             transfer = TransferCOD(

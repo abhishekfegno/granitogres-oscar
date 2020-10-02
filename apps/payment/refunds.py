@@ -21,15 +21,16 @@ class RefundFacade(object):
             self.payment_methods.append(PaymentMethod())
 
     def get_sources_model_from_order(self, order, reference=''):
-        return Source.objects.get_or_create(order=order, defaults={'reference': reference})[0]
+        source, _ = Source.objects.get_or_create(order=order, defaults={'reference': reference})
+        return source
 
     def get_source_n_method(self, order, reference=None):
-        for source in self.get_sources_model_from_order(order, reference=reference):
-            # there should be only one per order. and we have
-            # single transactions only.
-            for payment_method in self.payment_methods:
-                if payment_method.name == source.source_type.name:
-                    return source, payment_method
+        source = self.get_sources_model_from_order(order, reference=reference)
+        # there should be only one per order. and we have
+        # single transactions only.
+        for payment_method in self.payment_methods:
+            if payment_method.name == source.source_type.name:
+                return source, payment_method
         return None, None
 
     def refund_order(self, order, **kwargs):

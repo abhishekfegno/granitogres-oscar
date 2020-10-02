@@ -167,6 +167,7 @@ def order_delivered_status_change(request, method, pk, action, *a, **k):
         try:
             return func(*args, **kwargs), None
         except Exception as e:
+            raise e
             return None, {'error': str(e)}
 
     status_code = 200
