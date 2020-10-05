@@ -155,6 +155,9 @@ class DeliveryTrip(Constant, models.Model):
                                  'order_line__order__user',
                                  'order_line__order__shipping_address')
 
+    def is_status_editable(self):
+        return self.status == self.YET_TO_START or self.status == self.ON_TRIP
+
     def update_self(self):
         self.trip_date = datetime.date.today()
         self.trip_time = timezone.now().time()
@@ -165,7 +168,7 @@ class DeliveryTrip(Constant, models.Model):
         """
         In the assumption that, 'request_cancelled' can be set by user.
         """
-        if not self.is_editable:
+        if not self.is_status_editable:
             if raise_error:
                 raise Exception("Consignments are not editable")
             return
