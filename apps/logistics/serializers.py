@@ -123,7 +123,8 @@ class ArchivedTripListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DeliveryTrip
-        fields = ('id', 'route', 'info', 'trip_date', 'trip_time', 'cods_to_collect', 'cods_to_return', 'status', )
+        fields = ('id', 'route', 'info', 'trip_date', 'trip_time',
+                  'cods_to_collect', 'cods_to_return', 'cods_balance', 'status', )
 
 
 class AccountSerializer(serializers.ModelSerializer):

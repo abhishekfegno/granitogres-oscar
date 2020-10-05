@@ -261,7 +261,7 @@ class DeliveryTrip(Constant, models.Model):
         for source in sources:
             if source.source_type.name == Cash.name:
                 net += source.order.total_incl_tax
-        return currency(net, get_default_currency())
+        return net
 
     @cached_property
     def cods_to_return(self):
@@ -277,7 +277,11 @@ class DeliveryTrip(Constant, models.Model):
             if source.source_type.name == Cash.name:
                 for item in order_set[source.order]:
                     net += item.line_price_incl_tax
-        return currency(net, get_default_currency())
+        return net
+
+    @cached_property
+    def cods_balance(self):
+        return self.cods_to_collect - self.cods_to_return
 
 
 class ConsignmentDelivery(Constant, models.Model):
