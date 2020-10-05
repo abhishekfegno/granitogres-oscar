@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q, Sum
 from django.utils.functional import cached_property
-from apps.payment.models import Source
+from apps.payment.models import Source, SourceType
 from oscar.core.loading import get_model
 from oscar.core.utils import get_default_currency
 from oscar.templatetags.currency_filters import currency
@@ -323,6 +323,13 @@ class ConsignmentDelivery(Constant, models.Model):
         self.status = self.CANCELLED
         self.reason = reason
         self.save()
+
+    @property
+    def payment_type(self):
+        st = SourceType.objects.filter(source__order=self.order).first()
+        if st:
+            return st.name
+
 
     @cached_property
     def transaction_source_n_method(self):

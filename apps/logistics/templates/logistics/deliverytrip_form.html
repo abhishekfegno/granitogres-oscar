@@ -243,6 +243,7 @@
                             <td><a href="{% url 'dashboard:order-detail' number=con_ord.order.number %}">{{ con_ord.order.number }}</a> ({{ con_ord.order.status }})</td>
                             <td>{{ con_ord.order.shipping_address }}</td>
                             <td>{{ con_ord.order.total_incl_tax }}</td>
+                            <td>{{ con_ord.payment_type }}</td>
                             <td>{{ con_ord.payment_status }}</td>
                         </tr>
                         {% endfor %}
