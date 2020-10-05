@@ -44,7 +44,10 @@ class Repository(CoreRepository):
     def get_available_shipping_methods(self, basket, user=None, shipping_addr=None, request=None, **kwargs):
         country = postcode = None
         if shipping_addr is None:
-            raise forms.ValidationError("Shipping Address")
+            if request and request.user.is_authenticated and request.user.default_shipping_address:
+                shipping_addr = request.user.default_shipping_address
+            else:
+                raise forms.ValidationError("Shipping Address Required")
         if type(shipping_addr) in [dict, collections.OrderedDict]:
             country = shipping_addr['country']
             postcode = shipping_addr['postcode']

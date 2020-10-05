@@ -1,11 +1,15 @@
+from django.conf import settings
 from oscar.apps.partner.availability import Unavailable
 from oscar.core.loading import get_model, get_class
 from oscar.core.utils import get_default_currency
+from oscar.templatetags.currency_filters import currency
 from oscarapi.utils.loading import get_api_classes
 from rest_framework import serializers
 
 from apps.api_set.serializers.catalogue import custom_ProductListSerializer
 from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin
+from apps.mod_oscarapi.calculators import OrderTotalCalculator
+from lib.currencies import get_symbol
 
 Basket = get_model("basket", "Basket")
 Line = get_model("basket", "Line")
@@ -65,12 +69,39 @@ class WncLineSerializer(BasketLineSerializer):
 class WncBasketSerializer(BasketSerializer):
     lines = serializers.SerializerMethodField()
     currency = serializers.SerializerMethodField()
+    shipping = serializers.SerializerMethodField()
+    net_total = serializers.SerializerMethodField()
+    currency_symbol = serializers.SerializerMethodField()
+
+    shipping_cost = None
+    total_amt = None
+
+    def get_shipping_instance(self, basket):
+        instance = basket
+        ship = Repository().get_default_shipping_method(
+            basket=instance, shipping_addr=self.context['request'].user.default_shipping_address,
+        )
+        self.shipping_cost = ship.calculate(instance)
+        self.total_amt = OrderTotalCalculator(request=self.context['request']).calculate(instance, self.shipping_cost)
 
     def get_lines(self, instance):
         return WncLineSerializer(instance.lines.all(), context=self.context, many=True).data
 
     def get_currency(self, instance):
         return instance.currency or get_default_currency()
+
+    def get_shipping(self, instance):
+        if not self.shipping_cost:
+            self.get_shipping_instance(instance)
+        return self.shipping_cost.__dict__
+
+    def get_net_total(self, instance):
+        if not self.total_amt:
+            self.get_shipping_instance(instance)
+        return self.total_amt.__dict__
+
+    def get_currency_symbol(self, instance):
+        return get_symbol(instance.currency)
 
     class Meta:
         model = Basket
@@ -79,12 +110,10 @@ class WncBasketSerializer(BasketSerializer):
             "status",
             "lines",
             "url",
-            "total_excl_tax",
-            "total_excl_tax_excl_discounts",
-            "total_incl_tax",
-            "total_incl_tax_excl_discounts",
-            "total_tax",
+            "shipping",
+            "net_total",
             "currency",
+            "currency_symbol",
             "voucher_discounts",
             "offer_discounts",
             "is_tax_known",

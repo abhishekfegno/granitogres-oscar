@@ -11,6 +11,7 @@ from random import randint
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.utils.functional import cached_property
 from oscar.core.compat import get_user_model
 
 from apps.api_set import app_settings
@@ -76,6 +77,11 @@ class User(AbstractUser):
     @property
     def otp(self):
         return hasattr(self, '_otp') and self._otp or None
+
+    @cached_property
+    def default_shipping_address(self):
+        from apps.address.models import UserAddress
+        return UserAddress.objects.filter(user=self).order_by('-is_default_for_shipping').first()
 
     def get_short_name(self):
         return self.first_name or self.last_name or self.username

@@ -110,7 +110,7 @@ class Command(BaseCommand):
         )
         print("Logged in Status ", response)
         if response.status_code == 200:
-            print("Logged in as : ", user.get_short_name(), "[ ", user.pk, " ]")
+            print("Logged in as : ", user.get_short_name(), "[", user.username, "]")
             self.s = s
             if response.headers['X-Geo-Location-ID'] == 'None':
                 self.s.get(self.BASE_URL)
@@ -156,11 +156,14 @@ class Command(BaseCommand):
         return basket
 
     def generate_data(self, basket, user=None, method=None):
+        basket_url = self.BASE_URL + '_basket/'
         if method.code == 'cash':
             payment = {"payment": "cash"}
         elif method.code == 'razor_pay':
-            print(f"Open {self.BASE_URL.replace('/api/v1/', '/rzp/')}?amt={int(basket.total_incl_tax * 100)} ")
-            print(f'Amount : INR {basket.total_incl_tax} /-')
+            response = self.s.get(basket_url).json()
+            total_rate = response['net_total']['incl_tax']
+            print(f"Open {self.BASE_URL.replace('/api/v1/', '/rzp/')}?amt={int(total_rate * 100)} ")
+            print(f'Amount : INR {total_rate} /-')
             rzp_key = input("razorpay_payment_id : ")
             print(rzp_key)
             # rzp_key = input(f"razorpay payment id for amount '{int(basket.total_incl_tax * 100)}' : ")

@@ -54,6 +54,10 @@ class Constant:
         return self.status == self.CANCELLED
 
     @property
+    def is_editable(self):
+        return self.status == self.YET_TO_START or self.status == self.ON_TRIP
+
+    @property
     def css_badge_class(self):
         if self.is_under_planning:
             return 'badge badge-info'
@@ -125,14 +129,24 @@ class DeliveryTrip(Constant, models.Model):
 
     @property
     def possible_delivery_orders(self):
-        qs = ConsignmentDelivery.objects.filter(delivery_trip__isnull=True)
+        delivery_order_statuses = [
+            settings.ORDER_STATUS_CONFIRMED,
+            settings.ORDER_STATUS_OUT_FOR_DELIVERY,
+        ]
+        qs = ConsignmentDelivery.objects.filter(delivery_trip__isnull=True, order__status__in=delivery_order_statuses)
         if self.pk:
             qs |= ConsignmentDelivery.objects.filter(delivery_trip=self)
         return qs.select_related('delivery_trip', 'order', 'order__shipping_address', 'order__user', )
 
     @property
     def possible_delivery_returns(self):
-        qs = ConsignmentReturn.objects.filter(delivery_trip__isnull=True)
+        delivery_return_statuses = [
+            settings.ORDER_STATUS_RETURN_APPROVED,
+        ]
+        qs = ConsignmentReturn.objects.filter(
+            delivery_trip__isnull=True,
+            order_line__status__in=delivery_return_statuses,
+        )
         if self.pk:
             qs |= ConsignmentReturn.objects.filter(delivery_trip=self)
 
@@ -147,10 +161,15 @@ class DeliveryTrip(Constant, models.Model):
         self.status = self.COMPLETED
         self.save()
 
-    def mark_as_completed(self, reason=''):
+    def mark_as_completed(self, reason='', raise_error=False):
         """
         In the assumption that, 'request_cancelled' can be set by user.
         """
+        if not self.is_editable:
+            if raise_error:
+                raise Exception("Consignments are not editable")
+            return
+
         assert not self.delivery_consignments.exclude(status__in=[self.COMPLETED, self.CANCELLED]).exists(), \
             "Could mark as complete because there are incomplete delivery consignments."
 
@@ -216,7 +235,12 @@ class DeliveryTrip(Constant, models.Model):
             self.save()
         return self.status == self.COMPLETED
 
-    def cancel_consignment(self, reason=''):
+    def cancel_consignment(self, reason='', raise_error=False):
+        if not self.is_editable:
+            if raise_error:
+                raise Exception("Consignments are not editable")
+            return
+
         for dc in self.delivery_consignments.all():
             dc.cancel_consignment(reason)
         for dc in self.return_consignments.all():
@@ -260,7 +284,12 @@ class ConsignmentDelivery(Constant, models.Model):
     status = models.CharField(choices=Constant.CHOICES, default=Constant.YET_TO_START, max_length=20)
     reason = models.TextField(null=True, blank=True)
 
-    def mark_as_completed(self, reason=None):
+    def mark_as_completed(self, reason=None, raise_error=False):
+        if not self.is_editable:
+            if raise_error:
+                raise Exception("Consignments are not editable")
+            return
+
         if hasattr(self, 'order'):
             EventHandler().handle_order_status_change(self.order, settings.ORDER_STATUS_DELIVERED,
                                                       note_msg=reason, note_type=NOTE_BY_DELIVERY_BOY)
@@ -277,7 +306,12 @@ class ConsignmentDelivery(Constant, models.Model):
         self.reason = reason
         self.save()
 
-    def cancel_consignment(self, reason=None):
+    def cancel_consignment(self, reason=None, raise_error=False):
+        if not self.is_editable:
+            if raise_error:
+                raise Exception("Consignments are not editable")
+            return
+
         if reason is None:
             reason = "Order Could not be delivered, We could not reach you at that point."
         if hasattr(self, 'order'):

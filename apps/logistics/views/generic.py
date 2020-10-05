@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.response import Response
 # from rest_framework.generics import ListAPIView
 
-from apps.logistics.models import DeliveryTrip, ConsignmentDelivery
+from apps.logistics.models import DeliveryTrip, ConsignmentDelivery, ConsignmentReturn
 from apps.users.models import User
 
 
@@ -20,12 +20,12 @@ class TripCreationForm(forms.ModelForm):
     route = forms.CharField(max_length=128, required=False, )
     agent = forms.ModelChoiceField(User.objects.filter(is_delivery_boy=True), required=True)
     selected_orders = forms.ModelMultipleChoiceField(
-        ConsignmentDelivery.objects.all(),
+        ConsignmentDelivery.objects.all(),      # overriding later
         required=False,
         widget=forms.MultipleHiddenInput())
 
     selected_returns = forms.ModelMultipleChoiceField(
-        ConsignmentDelivery.objects.all(),
+        ConsignmentReturn.objects.all(),      # overriding later
         required=False,
         widget=forms.MultipleHiddenInput())
 
