@@ -326,10 +326,8 @@ class ConsignmentDelivery(Constant, models.Model):
 
     @property
     def payment_type(self):
-        st = SourceType.objects.filter(source__order=self.order).first()
-        if st:
-            return st.name
-
+        st = Source.objects.filter(order=self.order).select_related('source_type').first()
+        return st and st.source_type and st.source_type.name
 
     @cached_property
     def transaction_source_n_method(self):
