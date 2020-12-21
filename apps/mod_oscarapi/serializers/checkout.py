@@ -99,16 +99,14 @@ class UserAddressSerializer(CoreUserAddressSerializer):
     location_data = serializers.SerializerMethodField()
 
     def get_location_data(self, instance):
-        distance = None
         if self.context['request'] and self.context['request'].session.get('location') and instance.location:
             location_id = self.context['request'].session.get('location')
             loc_obj = Location.objects.filter(pk=location_id).last()
-            if loc_obj:
-                distance = loc_obj.location.distance(instance.location)
-        return {
-            **instance.location_data,
-            'distance': distance,
-        }
+            return loc_obj and {
+                **loc_obj.location_data,
+                'distance': loc_obj.location.distance(instance.location),
+            }
+        return None
 
     def validate(self, attrs):
         attrs = super(UserAddressSerializer, self).validate(attrs)
