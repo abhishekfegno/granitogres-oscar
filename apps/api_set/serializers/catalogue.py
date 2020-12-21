@@ -164,7 +164,6 @@ class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMi
     attributes = serializers.SerializerMethodField()
     product_class = serializers.SlugRelatedField(slug_field="slug", queryset=ProductClass.objects, allow_null=True)
     options = OptionSerializer(many=True, required=False)
-    # siblings = serializers.SerializerMethodField()
     variants = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
     about = serializers.SerializerMethodField()
@@ -199,7 +198,7 @@ class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMi
             'benifits',
             'other_product_info',
             'variable_weight_policy',
-            'deliverable',
+            # 'deliverable',
         )
 
     def get_variants(self, instance):
