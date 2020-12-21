@@ -102,6 +102,16 @@ class Location(models.Model):
         if self.zone:
             return self.zone.partner
 
+    @property
+    def location_data(self):
+        return {
+            'latitude': self.location.x,
+            'longitude': self.location.y,
+            'location_name': self.location_name,
+            'zone': {
+                'name': self.zone and self.zone.name
+            },
+        }
 
 class OTP(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
