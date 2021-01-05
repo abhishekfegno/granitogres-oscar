@@ -23,6 +23,8 @@ class Cash(PaymentRefundMixin, PaymentMethod):
 
         lines = kwargs.get('lines', order.lines.all())
         line_quantities = kwargs.get('line_quantities', [line.active_quantity for line in lines])
+        # for line, qty in zip(lines, line_quantities):
+        #     self.make_event_quantity(event, line, qty)
         cod = COD.objects.create(
             order=source.order,
             amount=amount,

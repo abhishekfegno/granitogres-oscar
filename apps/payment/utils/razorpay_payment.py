@@ -124,7 +124,7 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
         if not reference:
             msg = 'Transaction Reference not found for razorpay payment.'
             print(msg)
-            raise Exception(msg)
+            raise AlertException(msg)
         order = source.order
 
         # EXTERNAL PAYMENT

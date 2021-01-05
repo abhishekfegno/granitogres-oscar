@@ -1,3 +1,4 @@
+import json
 import sys
 from random import randint
 
@@ -11,7 +12,6 @@ from apps.address.models import UserAddress, Country
 from apps.basket.models import Basket
 from apps.catalogue.models import Product
 from apps.mod_oscarapi.serializers.checkout import CheckoutSerializer
-from apps.order.models import ShippingAddress
 from apps.partner.strategy import Selector
 from apps.users.models import User
 
@@ -59,6 +59,7 @@ class Command(BaseCommand):
         data = self.generate_data(
             basket, basket.owner, _method
         )
+        print(json.dumps(data))
         self.checkout(data)
 
     def get_user(self, **options):

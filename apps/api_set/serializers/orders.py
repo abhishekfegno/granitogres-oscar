@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+from django.conf import settings
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
 from rest_framework import serializers
@@ -135,6 +136,10 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
 
     def get_status_changes(self, instance):
         return [{
+            'old_status': None,
+            'new_status': settings.ORDER_STATUS_PLACED,
+            'date_created': instance.date_placed,
+        }] + [{
             'old_status': status.old_status,
             'new_status': status.new_status,
             'date_created': status.date_created,

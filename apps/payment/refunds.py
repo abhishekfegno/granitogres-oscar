@@ -31,6 +31,7 @@ class RefundFacade(object):
         for payment_method in self.payment_methods:
             if payment_method.name == source.source_type.name:
                 return source, payment_method
+                # payment_method  will be always RazorPay()
         return None, None
 
     def refund_order(self, order, **kwargs):
@@ -41,8 +42,8 @@ class RefundFacade(object):
         Procedure.
             ✔ 1. Order Status has already been updated. So leave it.
             ✔ 2. Get the succeeded Order State.
-            ✔ 4. Create a PaymentEvent
             ✔ 3. Create a Transaction Record
+            ✔ 4. Create a PaymentEvent
         """
 
         if order.status not in settings.OSCAR_ORDER_REFUNDABLE_STATUS:
@@ -108,8 +109,13 @@ class RefundFacade(object):
         lines = _lines
         line_quantities = _qty
         source, payment_method = self.get_source_n_method(order)
+
         return payment_method.refund_order_partially(source=source, order=order, lines=lines, amount=amount,
                                                      line_quantities=line_quantities, **kwargs)
+
+
+
+
 
 
 

@@ -13,9 +13,24 @@ from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
 
 Transaction = get_model('payment', 'Transaction')
+Line = get_model('order', 'Line')
 
 
 class EventHandler(processing.EventHandler):
+
+    @staticmethod
+    def pipeline_order_lines(order, new_status):
+        if new_status in (
+                settings.ORDER_STATUS_CONFIRMED,
+                settings.ORDER_STATUS_SHIPPED,
+                settings.ORDER_STATUS_OUT_FOR_DELIVERY,
+                settings.ORDER_STATUS_DELIVERED,
+        ):
+            order.lines.exclude(
+                status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS
+            ).update(status=new_status)
+
+        return
 
     @transaction.atomic
     def handle_order_status_change(self, order: Order, new_status: str, note_msg=None, note_type='System'):
@@ -35,23 +50,16 @@ class EventHandler(processing.EventHandler):
         """
 
         if (
+                old_status not in settings.OSCAR_ORDER_REFUNDABLE_STATUS
+                and
                 new_status in settings.OSCAR_ORDER_REFUNDABLE_STATUS
-                and old_status not in settings.OSCAR_ORDER_REFUNDABLE_STATUS
         ):
             refunds.RefundFacade().refund_order(order=order)
             order.lines.update(refunded_quantity=models.F('quantity'))
-
-        if new_status in (settings.ORDER_STATUS_DELIVERED, ):
-            """
-            Update Order Lines Status  as Delivered along with Order Getting Delivered.
-            """
-            order.lines.exclude(
-                status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS
-            ).update(status=new_status)
-
+        self.pipeline_order_lines(order, new_status)
         if note_msg:
             """
-            Add note if there is a note msg.
+            Add note if there is an EventHandler note msg.
             """
             self.create_note(order, note_msg, note_type=note_type)
 
@@ -68,10 +76,10 @@ class EventHandler(processing.EventHandler):
         self.validate_payment_event(
             order, event_type, amount, lines, line_quantities, **kwargs)
 
-        if event_type.name == Transaction.DEBIT:
-            Cash().record_payment(request=None, order=order, method_key='cash', amount=amount, reference='',
-                                  lines=lines, line_quantities=line_quantities, **kwargs)
-
+        # if event_type.name == Transaction.DEBIT:
+        #     Cash().record_payment(request=None, order=order, method_key='cash', amount=amount, reference='',
+        #                           lines=lines, line_quantities=line_quantities, **kwargs)
+        #
         # if event_type.name == Transaction.REFUND:
         #     RefundFacade().refund_admin_defined_payment(
         #         order, event_type, amount, lines=lines, line_quantities=line_quantities, **kwargs
@@ -90,6 +98,9 @@ class EventHandler(processing.EventHandler):
         Change Order Status
         """
         old_status = order_line.status
+        if old_status == new_status:
+            return
+        order = order_line.order
         order_line.set_status(new_status)
 
         """ 
@@ -100,11 +111,13 @@ class EventHandler(processing.EventHandler):
             refunds.RefundFacade().refund_order_line(line=order_line)
             order_line.refunded_quantity = order_line.quantity
             order_line.save()
+
         if note_msg:
             """
-            Add note if there is a note msg.
+            Add note if there is an EventHandler note msg.
             """
-            self.create_note(order_line.order, note_msg, note_type)
+            self.create_note(order, message=note_msg, note_type=note_type)
+
 
 
 

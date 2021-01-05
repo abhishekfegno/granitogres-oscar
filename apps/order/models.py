@@ -5,11 +5,24 @@ from oscar.apps.order.abstract_models import *
 
 __all__ = ['PaymentEventQuantity', 'ShippingEventQuantity']
 
+from oscar.templatetags.datetime_filters import timedelta
+
 from apps.users.models import Location
 
 
 class Order(AbstractOrder):
-    pass
+
+    def is_cancelable(self):
+        return bool(self.status in settings.OSCAR_USER_CANCELLABLE_ORDER_STATUS)
+
+    @property
+    def last_date_to__return(self):
+        delta = timedelta(days=settings.DEFAULT_PERIOD_OF_RETURN)
+        return self.date_placed + delta
+
+    @property
+    def is_return_date_expired(self):
+        return bool(self.last_date_to__return >= timezone.now())
 
 
 class OrderNote(AbstractOrderNote):
@@ -57,8 +70,47 @@ class Line(AbstractLine):
     refunded_quantity = models.PositiveSmallIntegerField(default=0)
 
     @property
+    def last_date_to__return(self):
+        delta = timedelta(days=settings.DEFAULT_PERIOD_OF_RETURN)
+        return self.order.date_placed + delta
+
+    @property
+    def is_return_date_expired(self):
+        return bool(self.last_date_to__return >= timezone.now())
+
+    @property
     def active_quantity(self):
         return self.quantity - self.refunded_quantity
+
+    @property
+    def is_returnable(self):
+        if self.order.is_return_date_expired:
+            return False
+        if not (self.is_refundable or self.is_replaceable):
+            return False
+        if self.refunded_quantity:  # is greater than 0
+            return False
+        return True
+
+    @property
+    def is_refundable(self):
+        return True
+
+    @property
+    def is_replaceable(self):
+        return True
+
+    @property
+    def could_not_return_message(self):
+        if self.status != settings.ORDER_STATUS_DELIVERED:
+            return "Return Could not be Initiated as order status is not Delivered."
+        elif self.order.is_return_date_expired:
+            return "Return Could not be Initiated Last date to Initiate Return is over."
+        elif not self.is_replaceable and not self.is_refundable:
+            return "Could not Refund or Replace the item."
+        elif self.refunded_quantity > 0:
+            return "Item already returned or replaced once."
+        return None
 
 
 class LinePrice(AbstractLinePrice):

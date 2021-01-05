@@ -1,10 +1,11 @@
 from decimal import Decimal
-from django.conf import settings
-from django.db import transaction
-from apps.order.models import Order, PaymentEventQuantity, Line
-from apps.payment.models import Transaction, Source
 
+from django.conf import settings
+from django.db import models, transaction
+from apps.order.models import Order, PaymentEventQuantity, Line, PaymentEvent, LinePrice 
 from apps.payment.models import COD
+
+from apps.payment.models import Transaction, SourceType, Source
 
 
 class PaymentRefundMixin(object):
@@ -44,7 +45,6 @@ class PaymentRefundMixin(object):
         response = self.create_actual_refund_with_gateway(
             source=source, amount=amount
         )
-        print("create_actual_refund_with_gateway Response : ", response)  # TODO : Remove
         assert type(response) is dict and 'id' in response.keys(), \
             "You have to return the response from gateway as dict with transaction_id as 'id'"
 
@@ -63,6 +63,7 @@ class PaymentRefundMixin(object):
         call from RefundFacade.refund_order
         """
         order = source.order
+        refundable_lines = order.lines.all().exclude(status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS)
         refundable_amount = self.get_max_refundable_amount(source, amount_to_refund=None)
         event = self.__refund_amount_method(
             source=source,
@@ -70,7 +71,7 @@ class PaymentRefundMixin(object):
             amount_verified=True,
         )
 
-        for line in order.lines.all().exclude(status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS):
+        for line in refundable_lines:
             self.make_event_quantity(event, line, line.quantity)
 
         return True

@@ -1,9 +1,9 @@
-
+from django.contrib.postgres.fields import HStoreField, JSONField
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.contrib.postgres.fields import HStoreField
+
 from oscar.apps.payment import abstract_models
 
 
