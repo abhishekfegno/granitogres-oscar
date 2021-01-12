@@ -1,12 +1,14 @@
 from django.conf import settings
 from django.core.paginator import Paginator
 from oscar.core.loading import get_model
+from oscarapicheckout.serializers import OrderSerializer
 from rest_framework import status, serializers
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from apps.api_set.serializers.basket import BasketSerializer
+from apps.api_set.serializers.basket import WncBasketSerializer
 from apps.api_set.serializers.orders import OrderListSerializer, OrderDetailSerializer, OrderMoreDetailSerializer
 from apps.order.processing import EventHandler
 from apps.utils.urls import list_api_formatter
@@ -84,14 +86,17 @@ def order_line_return_request(request, *a, **k):
     order_lines = _order.lines.all().filter(id__in=request.data.get('line_ids'))
     handler = EventHandler()
     try:
-        for line in order_lines:
-            handler.handle_order_line_status_change(line, settings.ORDER_STATUS_RETURN_REQUESTED,
-                                                    note_msg=request.data.get('reason', 'Undefined'), note_type="User")
+        if order_lines:
+            for line in order_lines:
+                handler.handle_order_line_status_change(line, settings.ORDER_STATUS_RETURN_REQUESTED,
+                                                        note_msg=request.data.get('reason', 'Undefined'), note_type="User")
+        else:
+            raise Exception(f"No Line(s)  Found against Order {_order.number}: Lines {request.data.get('line_ids')}")
     except Exception as e:
         errors['errors']['non_field_errors'] = str(e)
         return Response(errors, status=400)
     else:
-        return Response(BasketSerializer(_order).data, status=200)
+        return Response(OrderDetailSerializer(_order, context={'request': request}).data, status=200)
 
 
 
