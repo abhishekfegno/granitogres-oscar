@@ -1,12 +1,14 @@
 from django.conf import settings
 from django.core.paginator import Paginator
 from oscar.core.loading import get_model
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
+from apps.api_set.serializers.basket import BasketSerializer
 from apps.api_set.serializers.orders import OrderListSerializer, OrderDetailSerializer, OrderMoreDetailSerializer
+from apps.order.processing import EventHandler
 from apps.utils.urls import list_api_formatter
 
 Order = get_model('order', 'Order')
@@ -52,6 +54,44 @@ def orders_more_detail(request, *a, **k):
     _object = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
     serializer_class = OrderMoreDetailSerializer
     return Response(serializer_class(_object, context={'request': request}).data)
+
+
+@api_view(("POST",))
+@_login_required
+def order_line_return_request(request, *a, **k):
+    """
+    POST {
+        "line_ids": [15, 26, 14],
+        "reason": "some reason"
+    }
+
+    """
+
+    #  Validations
+    errors = {
+        "errors": {}
+    }
+
+    if type(request.data.get('line_ids', None)) is not list:
+        errors['errors']['line_ids'] = "Required"
+    if not request.data.get('reason', None):
+        errors['errors']['reason'] = "Required"
+    if len(errors['errors'].keys()):
+        return Response(errors, status=400)
+
+    # Body
+    _order = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
+    order_lines = _order.lines.all().filter(id__in=request.data.get('line_ids'))
+    handler = EventHandler()
+    try:
+        for line in order_lines:
+            handler.handle_order_line_status_change(line, settings.ORDER_STATUS_RETURN_REQUESTED,
+                                                    note_msg=request.data.get('reason', 'Undefined'), note_type="User")
+    except Exception as e:
+        errors['errors']['non_field_errors'] = str(e)
+        return Response(errors, status=400)
+    else:
+        return Response(BasketSerializer(_order).data, status=200)
 
 
 

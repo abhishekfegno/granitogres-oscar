@@ -174,7 +174,7 @@ from .config.static import *
 from .config.templates import *
 
 """
-Email : woodncart@gmail.com
+Email : grocery@gmail.com
 Password : globalfurnimart@456
 Mobile : 9497270863
 DOB : 18-05-1995

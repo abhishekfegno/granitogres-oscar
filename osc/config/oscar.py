@@ -69,7 +69,9 @@ OSCAR_ORDER_STATUS_PIPELINE = {
     'Placed': ('Order Confirmed', 'Payment Declined', 'Canceled'),  # admin / user can cancel an order / an item
     'Order Confirmed': ('Out For Delivery', 'Delivered', 'Canceled'),  # only admin can set these statuses
     'Out For Delivery': ('Delivered', 'Canceled'),  # only admin can set these statuses
-    'Delivered': (),
+    'Delivered': ('Return Requested', ),
+    'Return Requested': ('Return Approved', ),
+    'Return Approved': ('Returned', ),
     'Payment Declined': (),
     'Canceled': (),
 

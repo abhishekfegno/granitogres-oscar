@@ -22,7 +22,7 @@ class EventHandler(processing.EventHandler):
     def pipeline_order_lines(order, new_status):
         if new_status in (
                 settings.ORDER_STATUS_CONFIRMED,
-                settings.ORDER_STATUS_SHIPPED,
+                # settings.ORDER_STATUS_SHIPPED,
                 settings.ORDER_STATUS_OUT_FOR_DELIVERY,
                 settings.ORDER_STATUS_DELIVERED,
         ):

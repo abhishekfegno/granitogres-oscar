@@ -10,7 +10,7 @@ from apps.api_set.views.catalogue import (
 from apps.api_set.views.index import (
     index, home, offers, offer_products
 )
-from apps.api_set.views.orders import orders, orders_detail, orders_more_detail
+from apps.api_set.views.orders import orders, orders_detail, orders_more_detail, order_line_return_request
 from apps.api_set.views.product_listing_query_based import product_list
 
 from apps.api_set.views.public import availability
@@ -35,6 +35,7 @@ home_urlpatterns = [
     path("v1/_orders/", orders, name="api-orders"),
     path("v1/_orders/<int:pk>/", orders_detail, name="api-orders-detail"),
     path("v1/_orders/<int:pk>/more/", orders_more_detail, name="api-orders-more"),
+    path("v1/_orders/<int:pk>/return-request/", order_line_return_request, name="order_line_return_request"),
     path("v1/auth/", include(v1__registration_apis)),
 ]
 
