@@ -237,6 +237,11 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 'label': _('Pages'),
                 'url_name': 'dashboard:page-list',
             },
+            {
+                'label': _('Predefined Return Reasons'),
+                'url_name': 'dashboard-custom:dashboard-return-reason-list',
+                'access_fn': admin_or_staff,
+            },
             # {
             #     'label': _('Email templates'),
             #     'url_name': 'dashboard:comms-list',

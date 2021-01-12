@@ -1,0 +1,68 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load i18n %}
+{% load render_table from django_tables2 %}
+{% load category_tags ecommerce_additionals %}
+
+{% block title %}
+{{ title }} | {% trans "Create Attribute Option Group" %} | {{ block.super }}
+{% endblock %}
+{% block body_class %}Offer Banners {{ block.super }} Offer Banners{% endblock %}
+{% block navbar %}
+{% if not is_popup %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+{% block dashboard_nav %}
+{% if not is_popup %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="active">{{ title }}s</li>
+</ul>
+{% endblock %}
+
+{% block header %}
+<div class="page-header">
+    <a href="{{ create_new_url }}" class="btn btn-primary btn-lg pull-right"><i class="icon-plus"></i> New {{ title }} </a>
+    <h1>{{ title }}s</h1>
+</div>
+{% endblock header %}
+
+{% block dashboard_content %}
+
+{% if banner_list %}
+<div class="container-fluid">
+    <div class="row">
+        {% for banner in banner_list %}
+
+        <div class="col-md-3 row-equal-height" style="margin-bottom:30px">
+            <h3>#{{ banner.id }}. {{ banner.title }}</h3>
+            {% if banner.banner %}
+            <figure>
+                <img src="{{ banner.banner.url }}" alt="" width="100%" height="auto">
+                <figcaption>
+                    Position : {{ banner.position }}
+                    {% if banner.product_range %}| Products Count : {{ banner.products|length }}{% endif %}
+                </figcaption>
+            </figure>
+            {% endif %}
+            {% if banner.subtitle %}
+
+            {% endif %}
+            <a href="{% url banner.rev_name pk=banner.pk %}" class="btn btn-info btn-sm " style="width:100%" > Edit </a>
+        </div>
+        {% if forloop.counter|mod:"4"  %}
+    </div>
+    <div class="row" >
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<h6>Add your first {{ title }} <a href="{{ create_new_url }}"> here </a>.</h6>
+{% endif %}
+
+{% endblock dashboard_content %}

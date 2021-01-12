@@ -1,0 +1,55 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load i18n %}
+{% load render_table from django_tables2 %}
+{% load category_tags ecommerce_additionals %}
+
+{% block title %}
+{{ title }} | {% trans "Create Attribute Option Group" %} | {{ block.super }}
+{% endblock %}
+{% block body_class %}Offer Banners {{ block.super }} Offer Banners{% endblock %}
+
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="active">{{ title }}s</li>
+</ul>
+{% endblock %}
+
+{% block header %}
+<div class="page-header">
+    <a href="{{ create_new_url }}" class="btn btn-primary btn-lg pull-right"><i class="icon-plus"></i> New {{ title }} </a>
+    <h1>{{ title }}s</h1>
+</div>
+{% endblock header %}
+
+{% block dashboard_content %}
+
+{% if banner_list %}
+<div class="">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped table-bordered table-hover">
+                <caption>{{ title }}</caption>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Position</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for banner in object_list %}
+                <tr>
+                    <td><a href="{{ banner.get_absolute_url }}">#{{ banner.id }} {{ banner.title }}</a></td>
+                    <td>{{ banner.position }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<h6>"Add your first {{ title }}."</h6>
+{% endif %}
+
+{% endblock dashboard_content %}

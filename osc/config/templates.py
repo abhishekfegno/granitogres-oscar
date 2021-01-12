@@ -37,8 +37,9 @@ TEMPLATES = [
                 #     # # 'path.to.custom.Loader',
                 # ]),
             # ],
-            # 'libraries': {
-            # }
+            'libraries': {
+                'ecommerce_additionals': 'apps.dashboard.templatetags.ecommerce_additionals',
+            }
         },
     },
 ]
