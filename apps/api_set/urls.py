@@ -13,7 +13,7 @@ from apps.api_set.views.index import (
 from apps.api_set.views.orders import orders, orders_detail, orders_more_detail, order_line_return_request
 from apps.api_set.views.product_listing_query_based import product_list
 
-from apps.api_set.views.public import availability
+from apps.api_set.views.public import availability, return_reasons_list
 from apps.api_set.views.wishlist import wish_list
 
 from apps.api_set.views.auth import (
@@ -81,6 +81,8 @@ wish_list_urlpatterns = [
 
 public_apis = [
     path("v1/check-availability/<int:product>@<int:pincode>/", availability, name="api-availability"),
+    path("v1/return-reasons-list/", return_reasons_list, name="return-reasons-list"),
+
 ]
 
 

@@ -2,12 +2,20 @@ import pgeocode
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from apps.api_set.serializers.public import ReturnReasonSerializer
+from apps.dashboard.custom.models import ReturnReason
+
 indian_pin_code_data = {}
 
 
 def get_pin(country_code):
     global indian_pin_code_data
     indian_pin_code_data[country_code] = pgeocode.Nominatim(country_code)
+
+
+@api_view(("GET",))
+def return_reasons_list(request, *a, **kwargs):
+    return Response(ReturnReasonSerializer(ReturnReason.objects.all()).data, status=200)
 
 
 @api_view(("GET",))

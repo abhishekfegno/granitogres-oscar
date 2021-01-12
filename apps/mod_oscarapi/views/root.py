@@ -61,6 +61,7 @@ def PUBLIC_APIS(r, f):
             ("My Orders Detail", reverse("api-orders-detail", kwargs={'pk': 10}, request=r, format=f)),
             ("My Orders More Details", reverse("api-orders-more", kwargs={'pk': 10}, request=r, format=f)),
             ("Order Item Return Request", reverse("order_line_return_request", kwargs={'pk': 10}, request=r, format=f)),
+            ("Return Reason List", reverse("return-reasons-list", request=r, format=f)),
         ])),
 
         ("Addresses", collections.OrderedDict([
