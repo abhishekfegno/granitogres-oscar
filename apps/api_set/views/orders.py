@@ -77,7 +77,7 @@ def order_line_return_request(request, *a, **k):
     if type(request.data.get('line_ids', None)) is not list:
         errors['errors']['line_ids'] = "Required"
     if not request.data.get('reason', None):
-        errors['errors']['reason'] = "Required"
+        errors['errors']['reasons'] = "Required"
     if len(errors['errors'].keys()):
         return Response(errors, status=400)
 
@@ -89,7 +89,11 @@ def order_line_return_request(request, *a, **k):
         if order_lines:
             for line in order_lines:
                 handler.handle_order_line_status_change(line, settings.ORDER_STATUS_RETURN_REQUESTED,
-                                                        note_msg=request.data.get('reason', 'Undefined'), note_type="User")
+                                                        note_type="User")
+                order = line.order
+                for reason in request.data.get('reason', []):
+                    handler.create_note(order, message=reason, note_type="User")
+
         else:
             raise Exception(f"No Line(s)  Found against Order {_order.number}: Lines {request.data.get('line_ids')}")
     except Exception as e:
