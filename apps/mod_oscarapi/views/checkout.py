@@ -203,6 +203,7 @@ class CheckoutView(OscarAPICheckoutView):
                 "line4": shipping_address.line4,
                 "state": shipping_address.state,
                 "postcode": shipping_address.postcode,
+                "address_type": shipping_address.address_type,
                 "phone_number": data.get('phone_number') or f"+91 {request.user.username}",
                 "notes": data.get('notes'),
                 "country": request.build_absolute_uri(f"/api/v1/countries/{shipping_address.country.pk}/"),

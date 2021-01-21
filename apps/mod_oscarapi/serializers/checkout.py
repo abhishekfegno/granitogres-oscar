@@ -144,6 +144,7 @@ class UserAddressSerializer(CoreUserAddressSerializer):
             "country",
             "url",
             "location",
+            "address_type",
             "is_default_for_shipping",
             "is_default_for_billing",
             "location_data",

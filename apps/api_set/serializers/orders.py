@@ -94,6 +94,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
         return {
             'method': instance.shipping_method,
             'address': _inst('summary'),
+            'address_type': _inst('address_type'),
             'tax': {
                 'excl_tax': currency(instance.shipping_excl_tax, instance.currency),
                 'tax': currency(instance.shipping_tax, instance.currency),

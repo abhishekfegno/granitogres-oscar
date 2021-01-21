@@ -39,6 +39,7 @@ class CommunicationEvent(AbstractCommunicationEvent):
 
 class ShippingAddress(AbstractShippingAddress):
     location = PointField(null=True, blank=True)
+    address_type = models.CharField(max_length=12, null=True, blank=True)
 
     @property
     def summary_line(self):
