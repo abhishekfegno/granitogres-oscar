@@ -43,7 +43,34 @@ def _login_and_location_required(func):
 class CheckoutView(OscarAPICheckoutView):
     __doc__ = """
     Prepare an order for checkout.
-    
+
+    NEW FROMAT:
+    POST 
+    # COD
+    {
+        "basket": f"https://store.demo.fegno.com/api/v1/baskets/{basket.id}/",
+        "basket_id": basket.id,
+        # "total": float(basket.total_incl_tax),
+        "notes": "Some Notes for address as string.",
+        "phone_number": "+919497270863",
+        "shipping_address": (User Address ID),
+        "billing_address": (User Address ID),
+        "payment": cash
+    }
+    # Prepaid
+    {
+        "basket": f"https://store.demo.fegno.com/api/v1/baskets/{basket.id}/",
+        "basket_id": basket.id,
+        # "total": float(basket.total_incl_tax),
+        "notes": "Some Notes for address as string.",
+        "phone_number": "+919497270863",
+        "shipping_address": (User Address ID),
+        "billing_address": (User Address ID),
+        "payment": "razor_pay",
+        "razorpay_payment_id": "pay_A2IJ20983u498hR"
+    }
+
+    OLD DEPRICATED FORMAT
     POST(basket, shipping_address,
     [total, shipping_method_code, shipping_charge, billing_address]):
     {

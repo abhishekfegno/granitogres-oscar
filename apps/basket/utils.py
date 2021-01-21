@@ -9,6 +9,5 @@ def order_to_basket(order, request):
     for line in order.lines.all():
         basket.add_product(line.product, line.quantity, )
     basket = apply_offers(request, basket)
-
     return basket
 

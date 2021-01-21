@@ -2,6 +2,7 @@ from sqlite3 import IntegrityError
 
 from django import forms
 from django.conf import settings
+from oscar.apps.address.models import Country
 from oscar.core import prices
 from oscarapi.basket.operations import assign_basket_strategy
 from oscarapi.serializers.checkout import UserAddressSerializer as CoreUserAddressSerializer, UserAddress
@@ -97,6 +98,10 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
 class UserAddressSerializer(CoreUserAddressSerializer):
     location = PointSerializer(required=True, write_only=True)
     location_data = serializers.SerializerMethodField()
+    country = serializers.SerializerMethodField()
+
+    def get_country(self, instance):
+        return settings.USER_ADDRESS['COUNTRY']
 
     def get_location_data(self, instance):
         if self.context['request'] and self.context['request'].session.get('location') and instance.location:
@@ -115,6 +120,10 @@ class UserAddressSerializer(CoreUserAddressSerializer):
         if not zone:
             raise forms.ValidationError("Currently we are not delivering to this location.")
         return attrs
+    
+    def save(self, **kwargs):
+        country = {'country': Country.objects.filter(iso_3166_1_a2=settings.USER_ADDRESS['COUNTRY']).first()}
+        return super(UserAddressSerializer, self).save(**(country if country['country'] else {}), **kwargs)
 
     class Meta:
         model = UserAddress
@@ -135,5 +144,7 @@ class UserAddressSerializer(CoreUserAddressSerializer):
             "country",
             "url",
             "location",
+            "is_default_for_shipping",
+            "is_default_for_billing",
             "location_data",
         )

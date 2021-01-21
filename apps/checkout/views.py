@@ -20,7 +20,7 @@ SITE_NAME = 'WoodN\'Cart'
 
 
 class PaymentDetailsView(RazorPayPaymentMixin, CodPaymentMixin, CorePaymentDetailsView):
-    add_additional_context = []
+    # add_additional_context = []
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):

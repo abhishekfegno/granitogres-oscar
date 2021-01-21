@@ -1,15 +1,20 @@
+from django.conf import settings
 from django.db.transaction import atomic
 from oscar.core.utils import slugify
 from django.contrib.gis.geos import Point
+
+COUNTRY_NAME_MAP = {
+    'IN': 'India'
+}
 
 
 @atomic
 def populate_pincode(apps, schema_editor):
     import pgeocode
-    geo_india = pgeocode.Nominatim('IN')
+    geo_india = pgeocode.Nominatim(settings.USER_ADDRESS['COUNTRY'])
     from apps.availability.models import PinCode
     PinCode.objects.all().delete()
-    root = PinCode.add_root(name="India", code=None)
+    root = PinCode.add_root(name=COUNTRY_NAME_MAP[settings.USER_ADDRESS['COUNTRY']], code=None)
     numpy_data = geo_india._data.to_numpy()
     state = {}
     district = {}
