@@ -78,13 +78,18 @@ class WncBasketSerializer(BasketSerializer):
 
     def get_shipping_instance(self, basket):
         instance = basket
+        if self.context['request'].user.is_authenticated:
+            shipping_address = self.context['request'].user.default_shipping_address
+        else:
+            shipping_address = None
         ship = Repository().get_default_shipping_method(
-            basket=instance, shipping_addr=self.context['request'].user.default_shipping_address,
+            basket=instance, shipping_addr=shipping_address,
         )
         self.shipping_cost = ship.calculate(instance)
         self.total_amt = OrderTotalCalculator(request=self.context['request']).calculate(instance, self.shipping_cost)
 
     def get_lines(self, instance):
+
         return WncLineSerializer(instance.lines.all(), context=self.context, many=True).data
 
     def get_currency(self, instance):
