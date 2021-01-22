@@ -42,23 +42,19 @@ class Repository(CoreRepository):
     methods = [OwnDeliveryKerala()]  # init shipping method to default hand delivery
 
     def get_available_shipping_methods(self, basket, user=None, shipping_addr=None, request=None, **kwargs):
-        country = postcode = None
-        if shipping_addr is None:
-            if request and request.user.is_authenticated and request.user.default_shipping_address:
-                shipping_addr = request.user.default_shipping_address
-            else:
-                raise forms.ValidationError("Shipping Address Required")
-        if type(shipping_addr) in [dict, collections.OrderedDict]:
-            country = shipping_addr['country']
-            postcode = shipping_addr['postcode']
-        elif shipping_addr is not None:
-            country = shipping_addr.country
-            postcode = shipping_addr.postcode
-        if (
-            shipping_addr is None
-            or country.code != 'IN'
-            or postcode[:2] not in ['67', '68', '69']
-        ):
-            raise forms.ValidationError("Could Not Ship to This Location. ")
         return self.methods
+        # country = postcode = None
+        # if shipping_addr is None:
+        #     if request and request.user.is_authenticated and request.user.default_shipping_address:
+        #         shipping_addr = request.user.default_shipping_address
+        #     else:
+        #         raise forms.ValidationError("Shipping Address Required")
+        # if type(shipping_addr) in [dict, collections.OrderedDict]:
+        #     country = shipping_addr['country']
+        #     postcode = shipping_addr['postcode']
+        # elif shipping_addr is not None:
+        #     country = shipping_addr.country
+        #     postcode = shipping_addr.postcode
+        #
+        # return self.methods
 

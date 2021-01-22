@@ -16,7 +16,7 @@ from .payment_view_mixins.stripe_view import StripePaymentMixin
 
 SourceType = get_model('payment', 'SourceType')
 Source = get_model('payment', 'Source')
-SITE_NAME = 'WoodN\'Cart'
+SITE_NAME = 'Grocery'
 
 
 class PaymentDetailsView(RazorPayPaymentMixin, CodPaymentMixin, CorePaymentDetailsView):
@@ -69,7 +69,7 @@ class PaymentDetailsView(RazorPayPaymentMixin, CodPaymentMixin, CorePaymentDetai
         from pytz import timezone
         ist = timezone('Asia/Kolkata')
         ist_time = datetime.now(ist)
-        return f"Payment with WoodN'Cart against order #{order_number} with an amount of " \
+        return f"Payment with {SITE_NAME} against order #{order_number} with an amount of " \
                f" {total.incl_tax} INR on {ist_time.strftime('%Y-%m-%d_%H-%M-%S')}"
 
     def payment_metadata(self, order_number, total, **kwargs):
