@@ -108,7 +108,7 @@ class UserAddressSerializer(CoreUserAddressSerializer):
             location_id = self.context['request'].session.get('location')
             loc_obj = Location.objects.filter(pk=location_id).last()
             return loc_obj and {
-                **loc_obj.location_data,
+                **instance.location_data,
                 'distance': loc_obj.location.distance(instance.location),
             }
         return None
