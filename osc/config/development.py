@@ -95,3 +95,5 @@ USER_ADDRESS = {
 
 }
 
+DEFAULT_PERIOD_OF_RETURN = {'minutes': 180}
+

@@ -34,12 +34,49 @@ class LineDetailSerializer(serializers.ModelSerializer):
 class OrderListSerializer(serializers.ModelSerializer):
     url = HyperlinkedIdentityField('api-orders-detail')
     lines = LineDetailSerializer(many=True)
+    is_returnable = serializers.SerializerMethodField()
+    is_cancellable = serializers.SerializerMethodField()
+    can_return_until = serializers.SerializerMethodField()
+
+    def get_is_returnable(self, instance):
+        order = instance
+        if not order.delivery_time:
+            return {
+                'status': False,
+                'reason': 'Order is not yet delivered!'
+            }
+        if order.is_return_time_expired:
+            return {
+                'status': False,
+                'reason': 'Return Time Elapsed.'
+            }
+        if order.lines.filter(status___in=[
+            settings.ORDER_STATUS_RETURN_REQUESTED,
+            settings.ORDER_STATUS_RETURN_APPROVED,
+            settings.ORDER_STATUS_RETURNED
+        ]).exists():
+            return {
+                'status': False,
+                'reason': 'You already have initiated / processed a return request.'
+            }
+
+        return {
+                'status': True,
+                'reason': f'You can return any item within ' + str(order.max_time_to__return)
+            }
+
+    def get_is_cancellable(self, instance):
+        return instance.is_cancelable
+
+    def get_can_return_until(self, instance):
+        return instance.max_time_to__return
 
     class Meta:
         model = Order
         fields = (
             'id', 'number', 'currency', 'total_incl_tax',
-            'num_lines', 'status', 'url', 'date_placed', 'lines'
+            'num_lines', 'status', 'url', 'date_placed', 'lines',
+            'is_returnable', 'is_cancellable', 'can_return_until'
         )
 
 

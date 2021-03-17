@@ -91,11 +91,11 @@ POS_02: str = 'position_02'
 
 
 @api_view(("GET",))
-# @cache_page(60 * 60 * 2)
+@cache_page(60 * 60 * 2)
 def offers(request, *a, **k):
     offer_banner = OfferBanner.objects.all().exclude(
         display_area=OfferBanner.HOME_PAGE
-    ).order_by('position')                      #.values('display_area', 'position', 'banner', 'product_range')
+    ).order_by('position')                      #   .values('display_area', 'position', 'banner', 'product_range')
     _out = {OFFER_TOP_LABEL: [], OFFER_MIDDLE_LABEL: [], OFFER_BOTTOM_LABEL: []}
     for item in offer_banner:
         _out[{

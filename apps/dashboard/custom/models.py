@@ -23,6 +23,7 @@ class OfferBanner(models.Model):
     OFFER_TOP = 'offer_page_top'
     OFFER_MIDDLE = 'offer_page_middle'
     OFFER_BOTTOM = 'offer_page_bottom'
+
     MODEL_CHOICES = [
         (HOME_PAGE, 'Display on Home Page'),
         (OFFER_TOP, 'Offer Page Top Lengthy Banner'),
@@ -32,7 +33,7 @@ class OfferBanner(models.Model):
 
     POSITION_CHOICES = [
         (1, 'Slot 1'),
-        (2, 'Slot 2')
+        (2, 'Slot 2'),
     ]
 
     display_area = models.CharField(max_length=30, choices=MODEL_CHOICES, default=MODEL_CHOICES[1][0])

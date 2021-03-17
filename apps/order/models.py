@@ -1,4 +1,5 @@
 from django.contrib.gis.db.models import PointField
+from django.utils.functional import cached_property
 from oscar.apps.address.abstract_models import (
     AbstractBillingAddress, AbstractShippingAddress)
 from oscar.apps.order.abstract_models import *
@@ -16,13 +17,20 @@ class Order(AbstractOrder):
         return bool(self.status in settings.OSCAR_USER_CANCELLABLE_ORDER_STATUS)
 
     @property
-    def last_date_to__return(self):
-        delta = timedelta(days=settings.DEFAULT_PERIOD_OF_RETURN)
+    def max_time_to__return(self):
+        delta = timedelta(**settings.DEFAULT_PERIOD_OF_RETURN)
         return self.date_placed + delta
 
     @property
-    def is_return_date_expired(self):
-        return bool(self.last_date_to__return >= timezone.now())
+    def is_return_time_expired(self):
+        if not self.delivery_time:
+            return False
+        return bool(self.delivery_time > timezone.now())
+
+    @cached_property
+    def delivery_time(self):
+        delivered_status = self.status_changes.filter(new_status=settings.ORDER_STATUS_DELIVERED).order_by('date_created').first()
+        return delivered_status and delivered_status.date_created
 
 
 class OrderNote(AbstractOrderNote):
