@@ -88,7 +88,7 @@ class Line(AbstractLine):
 
     @property
     def last_date_to__return(self):
-        delta = datetime.timedelta(days=settings.DEFAULT_PERIOD_OF_RETURN)
+        delta = datetime.timedelta(**settings.DEFAULT_PERIOD_OF_RETURN)
         return self.order.date_placed + delta
 
     @property
