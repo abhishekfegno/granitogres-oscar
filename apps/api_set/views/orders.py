@@ -35,7 +35,23 @@ def orders(request, *a, **k):
     serializer_class = OrderListSerializer
     page_number = request.GET.get('page', 1)
     page_size = request.GET.get('page_size', settings.DEFAULT_PAGE_SIZE)
-    queryset = Order.objects.filter(user=request.user)
+    queryset = Order.objects.filter(user=request.user).prefetch_related(
+        'lines', 'lines__product',
+        'lines__product__images').select_related('shipping_address')
+    paginator = Paginator(queryset, page_size)  # Show 18 contacts per page.
+    page_obj = paginator.get_page(page_number)
+    product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
+    return Response(list_api_formatter(request, page_obj=page_obj, results=product_data))
+
+
+@api_view(("GET",))
+@_login_required
+def orders_v2(request, *a, **k):
+    cxt = {'context': {'request': request}}
+    serializer_class = OrderListSerializer
+    page_number = request.GET.get('page', 1)
+    page_size = request.GET.get('page_size', settings.DEFAULT_PAGE_SIZE)
+    queryset = Order.objects.filter(user=request.user).prefetch_related('lines', 'lines__product', 'lines__product__images')
     paginator = Paginator(queryset, page_size)  # Show 18 contacts per page.
     page_obj = paginator.get_page(page_number)
     product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data

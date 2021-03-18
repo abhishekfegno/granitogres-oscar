@@ -1,36 +1,44 @@
+import datetime
+
 from django.contrib.gis.db.models import PointField
 from django.utils.functional import cached_property
 from oscar.apps.address.abstract_models import (
     AbstractBillingAddress, AbstractShippingAddress)
 from oscar.apps.order.abstract_models import *
 
-__all__ = ['PaymentEventQuantity', 'ShippingEventQuantity']
+__all__ = ['PaymentEventQuantity', 'ShippingEventQuantity', 'Order']
 
-from oscar.templatetags.datetime_filters import timedelta
 
 from apps.users.models import Location
+from apps.utils.utils import get_statuses
 
 
 class Order(AbstractOrder):
+    date_delivered = models.DateTimeField(null=True, blank=True, help_text="Date of Consignment Delivery")
 
+    @property
     def is_cancelable(self):
         return bool(self.status in settings.OSCAR_USER_CANCELLABLE_ORDER_STATUS)
 
     @property
     def max_time_to__return(self):
-        delta = timedelta(**settings.DEFAULT_PERIOD_OF_RETURN)
-        return self.date_placed + delta
+        delta = datetime.timedelta(**settings.DEFAULT_PERIOD_OF_RETURN)
+        return self.delivery_time and (self.delivery_time + delta)
 
     @property
     def is_return_time_expired(self):
-        if not self.delivery_time:
-            return False
-        return bool(self.delivery_time > timezone.now())
+        return not self.delivery_time or (self.max_time_to__return and bool(self.max_time_to__return > timezone.now()))
 
     @cached_property
     def delivery_time(self):
-        delivered_status = self.status_changes.filter(new_status=settings.ORDER_STATUS_DELIVERED).order_by('date_created').first()
-        return delivered_status and delivered_status.date_created
+        if self.status in get_statuses(775):
+            return None     # as the package is not delivered
+        if not self.date_delivered:
+            print(self.date_delivered, "------ P1 -----")
+            date_delivered = self.status_changes.filter(new_status=settings.ORDER_STATUS_DELIVERED).order_by('date_created').first()
+            self.date_delivered = date_delivered and date_delivered.date_created
+            self.date_delivered and self.save()
+        return self.date_delivered
 
 
 class OrderNote(AbstractOrderNote):
@@ -80,7 +88,7 @@ class Line(AbstractLine):
 
     @property
     def last_date_to__return(self):
-        delta = timedelta(days=settings.DEFAULT_PERIOD_OF_RETURN)
+        delta = datetime.timedelta(days=settings.DEFAULT_PERIOD_OF_RETURN)
         return self.order.date_placed + delta
 
     @property

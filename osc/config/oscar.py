@@ -77,6 +77,10 @@ OSCAR_ORDER_STATUS_PIPELINE = {
 
 }
 
+OSCAR_USER_CANCELLABLE_ORDER_STATUS = (
+    'Placed', 'Order Confirmed',  'Out For Delivery',
+)
+
 OSCAR_LINE_STATUS_PIPELINE = {
     'Placed': ('Canceled',),                                 # user can cancel an item until order confirm
     'Order Confirmed': (),                                   # admin can deliver or confirm item

@@ -10,7 +10,7 @@ from apps.api_set.views.catalogue import (
 from apps.api_set.views.index import (
     index, home, offers, offer_products
 )
-from apps.api_set.views.orders import orders, orders_detail, orders_more_detail, order_line_return_request
+from apps.api_set.views.orders import orders, orders_detail, orders_more_detail, order_line_return_request, orders_v2
 from apps.api_set.views.product_listing_query_based import product_list
 
 from apps.api_set.views.public import availability, return_reasons_list

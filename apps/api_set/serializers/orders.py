@@ -19,8 +19,10 @@ class LineDetailSerializer(serializers.ModelSerializer):
     product = ProductListSerializer()
 
     def get_product(self, instance):
+        # product_as_qs = Product.objects.filter(id=instance.product_id)
+        # return custom_ProductListSerializer(product_as_qs, context=self.context).data
         product_as_qs = Product.objects.filter(id=instance.product_id)
-        return custom_ProductListSerializer(product_as_qs, context=self.context).data
+        return custom_ProductListSerializer([instance.product], context=self.context).data
 
     class Meta:
         model = Line
@@ -50,7 +52,7 @@ class OrderListSerializer(serializers.ModelSerializer):
                 'status': False,
                 'reason': 'Return Time Elapsed.'
             }
-        if order.lines.filter(status___in=[
+        if order.lines.filter(status__in=[
             settings.ORDER_STATUS_RETURN_REQUESTED,
             settings.ORDER_STATUS_RETURN_APPROVED,
             settings.ORDER_STATUS_RETURNED
@@ -69,7 +71,7 @@ class OrderListSerializer(serializers.ModelSerializer):
         return instance.is_cancelable
 
     def get_can_return_until(self, instance):
-        return instance.max_time_to__return
+        return str(instance.max_time_to__return)
 
     class Meta:
         model = Order
