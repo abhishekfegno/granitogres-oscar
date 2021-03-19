@@ -156,7 +156,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                 'amount_debited': currency(source.amount_debited, instance.currency),
                 'amount_refunded': currency(source.amount_refunded, instance.currency),
                 'reference': source.reference,
-            } for source in instance.sources.all()]
+            } for source in instance.sources.all().select_related('source_type')]
         }
 
     def get_discounts(self, instance):

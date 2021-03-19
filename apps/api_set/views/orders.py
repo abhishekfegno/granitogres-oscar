@@ -61,7 +61,13 @@ def orders_v2(request, *a, **k):
 @api_view(("GET",))
 @_login_required
 def orders_detail(request, *a, **k):
-    _object = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
+    _object = get_object_or_404(Order.objects.filter(user=request.user).prefetch_related(
+        'lines',
+        'lines__attributes',
+        'lines__product__images',
+    ).select_related(
+        # 'billing_address', 'shipping_address',
+    ), pk=k.get('pk'))
     serializer_class = OrderDetailSerializer
     return Response(serializer_class(_object, context={'request': request}).data)
 
@@ -69,7 +75,11 @@ def orders_detail(request, *a, **k):
 @api_view(("GET",))
 @_login_required
 def orders_more_detail(request, *a, **k):
-    _object = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
+    _object = get_object_or_404(Order.objects.filter(user=request.user).prefetch_related(
+        'lines',
+    ).select_related(
+        'billing_address', 'shipping_address'
+    ), pk=k.get('pk'))
     serializer_class = OrderMoreDetailSerializer
     return Response(serializer_class(_object, context={'request': request}).data)
 
