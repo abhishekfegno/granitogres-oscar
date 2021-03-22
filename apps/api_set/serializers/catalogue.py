@@ -82,7 +82,7 @@ class CategorySerializer(serializers.ModelSerializer):
                 diff_percentage=ExpressionWrapper(  # wrap expression : (field_1 - field_2) * 100 / field_1
                     (F(field_1) - F(field_2)) * Decimal('100.0') / (F(field_1)),
                     output_field=IntegerField()))
-            percent = sr2.aggregate(Max('diff_percentage'))['diff_percentage__max']
+            percent = sr2.aggregate(Max('diff_percentage'))['diff_percentage__max'] or 0
             return round_off_base * math.ceil(percent/round_off_base)     # to round 43 to 45 and 46 to 50
         return 0
 

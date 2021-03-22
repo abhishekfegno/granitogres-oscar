@@ -241,10 +241,10 @@ class Command(BaseCommand):
                         is_public=True,
                         upc=None,
                         description=short_description,
-                        product_class=FMCG,
+                        product_class=None,
                         parent=parent_product
                     )
-                    child_product.categories.add(cat_obj)
+                    # child_product.categories.add(cat_obj)
                     sr = StockRecord.objects.filter(partner=partner, product=child_product).first()
                     if not sr:
                         sr = StockRecord.objects.create(
