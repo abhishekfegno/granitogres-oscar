@@ -25,7 +25,9 @@ AvailabilitySerializer = get_api_class('serializers.product', 'AvailabilitySeria
 class ProductPrimaryImageFieldMixin(object):
 
     def get_primary_image(self, instance):
-        req = self.context['request'] # noqa: mixin assured
+        if instance.is_child:
+            return None
+        req = self.context['request']        # noqa: mixin assured
         img = instance.primary_image()
         img_mob = img['original'] if type(img) is dict else img.thumbnail_mobile_listing
         return {
@@ -77,7 +79,6 @@ class ProductPriceFieldMixin(object):
             }
         return purchase_info_as_dict(purchase_info, **availability)
 
-
         # cache.delete(cache_key.product_price_data__key(product.id))
         # return cache_library(
         #     cache_key.product_price_data__key(product.id),
@@ -93,7 +94,7 @@ class ProductPriceFieldMixinLite(object):
         def _inner():
             if product.is_parent:
                 return dummy_purchase_info_lite_as_dict(availability=False, availability_message='')
-            purchase_info = get_purchase_info(product, request=self.context['request'])  # noqa
+            purchase_info = get_purchase_info(product, request=self.context['request'])  # noqa: mixin ensures
             addittional_informations = {
                 "availability": bool(purchase_info.availability.is_available_to_buy),
                 "availability_message": purchase_info.availability.short_message,

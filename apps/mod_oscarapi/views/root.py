@@ -20,20 +20,31 @@ def PUBLIC_APIS(r, f):
         ])),
         ("Index Page", collections.OrderedDict([
             ("Home", reverse("api-home", request=r, format=f)),
-            ("Index", reverse("api-index", request=r, format=f)),
+            ("Index", collections.OrderedDict([
+                ("v1", reverse("api-index", request=r, format=f)),
+                ("v2", reverse("api-index-v2", request=r, format=f)),
+            ])),
             ("Budget Bag", reverse("wnc-budget_bag", request=r, format=f)),
             ("Offers", reverse("api-offers", request=r, format=f)),
         ])),
         ("Catalogue", collections.OrderedDict([
             ("Category API", reverse("wnc-categories-list", request=r, format=f)),
-            ("Products API", reverse("wnc-all-product-list", request=r, format=f)),
+            ("Products API", collections.OrderedDict([
+                ("v1", reverse("wnc-all-product-list", request=r, format=f)),
+                ("v2", reverse("wnc-all-product-list-v2", request=r, format=f)),
+            ])),
+            ("Products for Category API", collections.OrderedDict([
+                ("v1", reverse("wnc-category-product-list", request=r, format=f, kwargs={"category": 'fruit'})),
+                ("v2", reverse("wnc-category-product-list-v2", request=r, format=f, kwargs={"category": 'fruit'})),
+            ])),
             ("Product Suggestion API", reverse("wnc-product-suggestions", request=r, format=f) + '?q=8GB'),
             ("Product Filter Options", reverse("wnc-filter-options", request=r, format=f,
                                                kwargs={'pk': 2})),
-            ("Products for Category API", reverse("wnc-category-product-list", request=r, format=f,
-                                                  kwargs={"category": 'fruit'})),
-            ("Product Details Web", reverse("wnc-category-product-detail-web", request=r, format=f,
-                                            kwargs={"product": '138'})),
+
+            ("Product Details Web", collections.OrderedDict([
+                ("v1", reverse("wnc-category-product-detail-web", request=r, format=f, kwargs={"product": '138'})),
+                ("v2", reverse("wnc-category-product-detail-web-v2", request=r, format=f, kwargs={"product": '138'}))]),
+             ),
         ])),
         ("Basket", collections.OrderedDict([
             ("Display Basket ", reverse("wnc-get-basket", request=r, format=f)),
@@ -60,7 +71,7 @@ def PUBLIC_APIS(r, f):
             ("My Orders", collections.OrderedDict([
                 ("v1", reverse("api-orders", request=r, format=f)),
                 ("v2", reverse("api-orders-v2", request=r, format=f)),
-                ])),
+            ])),
             ("My Orders Detail", reverse("api-orders-detail", kwargs={'pk': 10}, request=r, format=f)),
             ("My Orders More Details", reverse("api-orders-more", kwargs={'pk': 10}, request=r, format=f)),
             ("Order Item Return Request", reverse("order_line_return_request", kwargs={'pk': 10}, request=r, format=f)),

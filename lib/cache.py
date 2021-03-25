@@ -5,7 +5,7 @@ from oscar.core.loading import get_model
 from lib import cache_key
 
 
-def cache_library(key, cb=None, default=None):
+def cache_library(key, cb=None, default=None, ttl=settings.DEFAULT_CACHE_TTL):
     """
     Cache Manager for Project.
     :key: = key of cache.

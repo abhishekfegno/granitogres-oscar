@@ -22,7 +22,7 @@ StockRecord = get_model('partner', 'StockRecord')
 
 class Product(AbstractProduct):
     search = SearchVectorField(null=True)
-
+    selected_stock_record = None
     # just cached pricing
     effective_price = models.FloatField(_('Effective Retail Price.'), null=True, blank=True)
     retail_price = models.FloatField(_('Retail Price.'), null=True, blank=True)
@@ -121,8 +121,11 @@ class Product(AbstractProduct):
 
 class Category(AbstractCategory):
 
-    image = ImageField(_('Image'), upload_to='categories', blank=True,
+    image = ImageField(_('Image'), upload_to='categories', blank=False,
                        null=True, max_length=255)
+    icon = ImageField(_('Icon Image'), upload_to='categories', blank=False,
+                      help_text="Used to display in Homepage Icon. Suggested svg images or img less than 255X255px",
+                      null=True, max_length=255)
 
     @property
     def thumbnail_web_listing(self):
@@ -134,6 +137,15 @@ class Category(AbstractCategory):
     def img_thumb_mob(self):
         if self.image:
             return get_thumbnail(self.image, '500x600', crop='center', quality=98).url
+        return image_not_found()
+
+    @property
+    def icon_thumb_mob(self):
+        try:
+            if self.icon:
+                return get_thumbnail(self.icon, '128x128', crop='center', quality=98).url
+        except Exception as e:
+            pass
         return image_not_found()
 
 

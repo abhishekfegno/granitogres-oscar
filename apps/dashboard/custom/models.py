@@ -46,6 +46,7 @@ class OfferBanner(models.Model):
     )
     banner = models.ImageField(upload_to='offer-banners/')
     product_range = models.ForeignKey('offer.Range', on_delete=models.SET_NULL, blank=False, null=True)
+    partner = models.ForeignKey('partner.Partner', on_delete=models.SET_NULL, blank=False, null=True)
 
     @property
     def redirect_to_order(self):
@@ -105,17 +106,19 @@ class ReturnReason(AbstractCURDModel):
     def get_absolute_url(self):
         return reverse(self.rev_name, kwargs={'pk': self.pk})
 
-# class HomePageMegaBanner(AbstractCURDModel):
-#     referrer = 'home-page-mega-banner'
-#     banner = models.ImageField(upload_to='home-banner-images', help_text="Recommended : '1920x690'")
-#     product_range = models.ForeignKey('offer.Range', on_delete=models.CASCADE,
-#                                       related_name='home_banners_included_this')
-#
-#     def home_banner_wide_image(self, request=empty()):
-#         return request.build_absolute_uri(
-#             get_thumbnail(self.banner, '1920x690', crop='center', quality=98).url
-#         )
-#
+
+class HomePageMegaBanner(AbstractCURDModel):
+    referrer = 'home-page-mega-banner'
+    banner = models.ImageField(upload_to='home-banner-images', help_text="Recommended : '1920x690'")
+    product_range = models.ForeignKey('offer.Range', on_delete=models.CASCADE,
+                                      related_name='home_banners_included_this')
+
+    def home_banner_wide_image(self, request=empty()):
+        return request.build_absolute_uri(
+            get_thumbnail(self.banner, '1920x690', crop='center', quality=98).url
+        )
+
+
 #
 # class FAQ(AbstractCURDModel):
 #     referrer = 'faq'
@@ -190,6 +193,5 @@ class ReturnReason(AbstractCURDModel):
 #
 
 # models_list = (FAQ, HomePageMegaBanner, OfferBanner, ContactUsEnquiry, BlogTag, BlogInsight)
-models_list = (ReturnReason ,)
 
-
+models_list = (ReturnReason, HomePageMegaBanner,)

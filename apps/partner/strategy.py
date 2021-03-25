@@ -17,11 +17,12 @@ class Selector(object):
             zone = Zones.objects.filter().last()
             if zone:
                 zone = zone.id
-
+                request.session['zone'] = zone
         if not zone and (not request and user):
             last_location = user.location_set.filter(is_active=True).last()
             if last_location and last_location.zone_id:
                 zone = last_location.zone_id
+                request.session['zone'] = zone
 
         if zone:
             return ZoneBasedIndianPricingStrategy(zone, request=request, user=user, **kwargs)

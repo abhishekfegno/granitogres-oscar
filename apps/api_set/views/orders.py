@@ -92,14 +92,9 @@ def order_line_return_request(request, *a, **k):
         "line_ids": [15, 26, 14],
         "reason": "some reason"
     }
-
     """
-
     #  Validations
-    errors = {
-        "errors": {}
-    }
-
+    errors = {"errors": {}}
     if type(request.data.get('line_ids', None)) is not list:
         errors['errors']['line_ids'] = "Required"
     if not request.data.get('reason', None):

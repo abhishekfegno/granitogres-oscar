@@ -26,6 +26,7 @@ class ZoneUpdate(UpdateView):
     def get_success_url(self):
         return reverse('availability:zones-update',  kwargs={'pk': self.object.pk})
 
+
 class ZoneCreate(CreateView):
     form_class = ZoneForm
     queryset = Zones.objects.all()

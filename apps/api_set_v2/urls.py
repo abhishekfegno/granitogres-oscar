@@ -1,8 +1,25 @@
 from django.conf.urls import url
 from django.urls import path, include
+# Loading V1 Apis In order to patch
+from apps.api_set.views.index import (
+    home, offer_products
+)
+# from apps.api_set.views.orders import orders, orders_detail, orders_more_detail, order_line_return_request, orders_v2
+# from apps.api_set.views.product_listing_query_based import product_list
 
+# from apps.api_set.views.public import availability, return_reasons_list
+# from apps.api_set.views.wishlist import wish_list
+
+# from apps.api_set.views.auth import (
+#     SendOTP, resend_otp, LoginWithOTP,
+# )
+#  End loading v1 apis
+from apps.api_set_v2.views.catalogue import product_detail_web
+
+from apps.api_set_v2.views.index import index
 from apps.api_set_v2.views.orders import orders_detail
 from apps.api_set_v2.views.orders import orders
+from apps.api_set_v2.views.product_listing_query_based import product_list
 
 v1__registration_apis = [
     # path('send-otp/', SendOTP.as_view(), name="api-v1--send-otp"),
@@ -12,9 +29,9 @@ v1__registration_apis = [
 ]
 
 home_urlpatterns = [
-    # path("home/", home, name="api-home"),
-    # path("index/", index, name="api-index"),
-    # path("offers/", offers, name="api-offers"),
+    path("home/", home, name="api-home-v2"),
+    path("index/", index, name="api-index-v2"),
+    # DEPRECATED # path("offers/", offers, name="api-offers"),
     # path("offers/<slug:slug>/", offer_products, name="api-offer-products"),
     path("_orders/", orders, name="api-orders-v2"),
     path("_orders/<int:pk>/", orders_detail, name="api-orders-detail-v2"),
@@ -34,11 +51,11 @@ account_urlpatterns = [
 
 catalogue_urlpatterns = [
     path("catalogue/", include([
-        #     path("c/", categories_list_cached, name="wnc-categories-list"),                             # category
-        #     path("c/all/", product_list, name="wnc-all-product-list"),                                  # category
-        #     path("c/all/new/", product_list_new, name="wnc-all-product-list-new"),                    # category
-        # path("c/<slug:category>/", product_list, name="wnc-category-product-list"),                 # category
-        # path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web"),      # detail
+            # path("c/", categories_list_cached, name="wnc-categories-list"),                             # category
+            path("c/all/", product_list, name="wnc-all-product-list-v2"),                                  # category
+            # path("c/all/new/", product_list_new, name="wnc-all-product-list-new"),                    # category
+        path("c/<slug:category>/", product_list, name="wnc-category-product-list-v2"),                 # category
+        path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),      # detail
         # path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),                            # filter
         # path("suggestions/", product_suggestions, name="wnc-product-suggestions"),                  # category
         # path("mob/", include([]))

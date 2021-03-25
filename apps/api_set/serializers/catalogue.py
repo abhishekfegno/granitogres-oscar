@@ -202,8 +202,19 @@ class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMi
         )
 
     def get_variants(self, instance):
+        from django.db import connection
+        start = len(connection.queries)
         if instance.is_parent:
-            return custom_ProductListSerializer(instance.children.all(), self.context).data
+            data = custom_ProductListSerializer(instance.children.all(), self.context).data
+            end = len(connection.queries)
+            print("QUERIES CALLED : ", end - start)
+            return data
+        if instance.is_child:
+            data = custom_ProductListSerializer(instance.parent.children.all(), self.context).data
+            end = len(connection.queries)
+            print("QUERIES CALLED : ", end - start)
+            return data
+        return
 
 
 class ProductDetailMobileSerializer(ProductListSerializer, serializers.ModelSerializer):

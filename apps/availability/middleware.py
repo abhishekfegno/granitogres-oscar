@@ -2,6 +2,7 @@ from django.core.signing import Signer, BadSignature
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.functional import lazy, SimpleLazyObject
 from apps.availability.settings import *
+from apps.availability.zones.facade import ZoneFacade
 from apps.users.models import Location
 
 
@@ -23,6 +24,7 @@ class AvailabilityZoneMiddleware(MiddlewareMixin):
     def process_request(self, request):
         request.session['location'] = request.session.get('location', None)
         request.session['zone'] = zone = request.session.get('zone', None)
+        # import pdb;pdb.set_trace()
         if str(request.path).startswith('/api/'):
             if (
                     not zone
@@ -31,8 +33,9 @@ class AvailabilityZoneMiddleware(MiddlewareMixin):
                 location = Location.objects.filter(user=request.user).order_by('is_active', 'id').last()
             elif request.session.get('location'):
                 location = Location.objects.filter(id=request.session.get('location')).last()
-            else: location = None
-            print("Location : ", location)
+            else:
+                location = None
+
             if location:
                 location_id = location.id
                 zone_id = location.zone.id if location.zone else None
@@ -40,6 +43,11 @@ class AvailabilityZoneMiddleware(MiddlewareMixin):
                 request.session['location'] = location_id
                 request.session['location_coordinates'] = location_coordinates
                 request.session['zone'] = zone_id
+            if not location and request.user.is_authenticated:
+                sa = request.user.default_shipping_address
+                if sa and sa.location:
+                    zone = ZoneFacade().check_deliverability(sa.location)
+                    ZoneFacade().set_zone(request, zone=zone, point=sa.location)
 
     def process_response(self, request, response):
         response['X-Geo-Location-ID'] = request.session.get('location')

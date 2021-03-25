@@ -18,6 +18,8 @@ class ZoneBasedStockRecord(object):
     key = "prod:{} zone_id:{}"
 
     def select_stockrecord(self, product, ):
+        if product.selected_stock_record:
+            return product.selected_stock_record
         if self.zone_id:
             key = self.key.format(product.id, self.zone_id)
             if key not in self._selected_stock_record or self._selected_stock_record.get('key'):

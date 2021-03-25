@@ -277,6 +277,11 @@ OSCAR_DASHBOARD_NAVIGATION = [
             {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
              'access_fn': admin_or_staff},
 
+            {'label': _('Launch Banners'),
+             'url_name': 'dashboard-custom:dashboard-home-page-mega-banner-list',
+             'access_fn': admin_or_staff
+             },
+
             {'label': _('Offer Banners'),
              'url_name': 'dashboard-custom:dashboard-offer-banner-list',
              'access_fn': admin_or_staff

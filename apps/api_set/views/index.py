@@ -139,8 +139,8 @@ def offer_products(request, *a, **k):
     serializer_class = ProductListSerializer
     page_number = request.GET.get('page', 1)
     page_size = request.GET.get('page_size', settings.DEFAULT_PAGE_SIZE)
-
-    obj = get_object_or_404(OfferBanner, code=k.get('slug'), offer__status=ConditionalOffer.OPEN)
+    zone = request.session.get('zone')
+    obj = get_object_or_404(OfferBanner, code=k.get('slug'), partner__zone__id=zone, offer__status=ConditionalOffer.OPEN)
     queryset = obj.products().filter(
         structure__in=['standalone', 'child'], is_public=True, stockrecords__isnull=False
     ).distinct('id').order('-id')
