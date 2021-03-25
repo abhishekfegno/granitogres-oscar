@@ -2,7 +2,7 @@ from django.conf.urls import url
 from django.urls import path, include
 # Loading V1 Apis In order to patch
 from apps.api_set.views.index import (
-    home, offer_products
+    home, offer_products, offers
 )
 # from apps.api_set.views.orders import orders, orders_detail, orders_more_detail, order_line_return_request, orders_v2
 # from apps.api_set.views.product_listing_query_based import product_list
@@ -32,7 +32,7 @@ home_urlpatterns = [
     path("home/", home, name="api-home-v2"),
     path("index/", index, name="api-index-v2"),
     # DEPRECATED # path("offers/", offers, name="api-offers"),
-    # path("offers/<slug:slug>/", offer_products, name="api-offer-products"),
+    # DEPRECATED path("offers/<int:pk>/", offer_products, name="api-offer-products-v2"),       #! instead use product_list api!
     path("_orders/", orders, name="api-orders-v2"),
     path("_orders/<int:pk>/", orders_detail, name="api-orders-detail-v2"),
     # path("_orders/<int:pk>/more/", orders_more_detail, name="api-orders-more"),

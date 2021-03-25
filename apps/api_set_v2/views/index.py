@@ -1,17 +1,23 @@
 from collections import defaultdict
 
+from django.conf import settings
+from django.core.paginator import Paginator
 from django.db.models import Sum, Case, When, Value, F, CharField, Q
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
+from oscar.apps.offer.models import ConditionalOffer
 from rest_framework.decorators import api_view
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
+from apps.api_set.serializers.catalogue import ProductListSerializer
 from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite
 from apps.api_set_v2.serializers.catalogue import CategorySerializer, ProductSimpleListSerializer
 from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.catalogue.models import Category, Product
-from apps.dashboard.custom.models import HomePageMegaBanner
+from apps.dashboard.custom.models import HomePageMegaBanner, OfferBanner
 from apps.partner.models import StockRecord
+from apps.utils.urls import list_api_formatter
 from lib.cache import cache_library
 
 
@@ -60,3 +66,4 @@ def index(request, *a, **k):
         return out
     zone = request.session.get('zone')
     return Response(cache_library(cache_key(zone), cb=_inner, ttl=60*60*3))
+
