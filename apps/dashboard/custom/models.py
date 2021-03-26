@@ -123,6 +123,16 @@ class InAppBanner(AbstractCURDModel):
     def get_absolute_url(self):
         return reverse(self.rev_name, kwargs={'pk': self.pk})
 
+    def home_banner_wide_image(self, request=empty()):
+        if self.type == self.SLIDER_BANNER:
+            return request.build_absolute_uri(
+                get_thumbnail(self.banner, '156x156', crop='center', quality=98).url
+            )
+
+        return request.build_absolute_uri(
+            get_thumbnail(self.banner, '343x148', crop='center', quality=98).url
+        )
+
 
 class HomePageMegaBanner(AbstractCURDModel):
     referrer = 'home-page-mega-banner'
@@ -132,7 +142,7 @@ class HomePageMegaBanner(AbstractCURDModel):
 
     def home_banner_wide_image(self, request=empty()):
         return request.build_absolute_uri(
-            get_thumbnail(self.banner, '1920x690', crop='center', quality=98).url
+            get_thumbnail(self.banner, '312x128', crop='center', quality=98).url
         )
 
 
