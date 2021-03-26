@@ -4,6 +4,7 @@ from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.db import models
 from django.db.models import F
+from django.db.models.signals import post_save
 from django.db.transaction import atomic
 from oscar.apps.catalogue.abstract_models import AbstractProduct, AbstractCategory, AbstractProductImage, \
     AbstractProductAttribute
@@ -229,3 +230,12 @@ class SearchResponses(models.Model):
     @classmethod
     def populate(cls):
         return cls.objects.all()
+
+
+def clear_cache_product(sender, instance, **kwargs):
+    cache.delete_pattern("product_list__page:*")
+
+
+post_save.connect(clear_cache_product, sender=Product)
+
+

@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from oscar.apps.offer.models import ConditionalOffer, Range
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -126,11 +127,13 @@ def product_list(request, category='all', **kwargs):
         rc = None
         return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc)
 
-    # if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not _search and not _filter and not _sort:
-    #     c_key = cache_key.product_list__key.format(page_number, page_size, category)
-    #     if settings.DEBUG:
-    #         cache.delete(c_key)
-    #     out = cache_library(c_key, cb=_inner)
-    # else:
-    #     out = _inner()
-    return Response(_inner())
+    if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not _search and not _filter and not _sort:
+        c_key = cache_key.product_list__key.format(page_number, page_size, category)
+        # if settings.DEBUG:
+        #     cache.delete(c_key)
+        out = cache_library(c_key, cb=_inner, ttl=180)
+    else:
+        out = _inner()
+    return Response(out)
+
+

@@ -1,3 +1,4 @@
+import random
 from collections import defaultdict
 
 from django.conf import settings
@@ -15,7 +16,7 @@ from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin, Produ
 from apps.api_set_v2.serializers.catalogue import CategorySerializer, ProductSimpleListSerializer
 from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.catalogue.models import Category, Product
-from apps.dashboard.custom.models import HomePageMegaBanner, OfferBanner
+from apps.dashboard.custom.models import HomePageMegaBanner, OfferBanner, InAppBanner
 from apps.partner.models import StockRecord
 from apps.utils.urls import list_api_formatter
 from lib.cache import cache_library
@@ -25,7 +26,7 @@ def get_home_content(request):
     pmg_mixin = ProductPrimaryImageFieldMixin()
     price_mixin = ProductPriceFieldMixinLite()
     pmg_mixin.context = price_mixin.context = {'request': request}
-    categories = Category.get_root_nodes().exclude(slug="featured").only('id', 'name', 'slug', 'path')
+    categories = Category.get_root_nodes().exclude(slug="featured").only('id', 'name', 'slug', 'path').order_by('-numchild')[:2]
     out = []
     cat_data = defaultdict(list)
     for cat in categories:
@@ -36,18 +37,26 @@ def get_home_content(request):
         )
         for parent_product, data in product_data.items():
             cat_data[cat].append(data)
+    banners = list(InAppBanner.objects.all().filter(banner__isnull=False, product_range_id__isnull=False))
+    def _(b):
+        return {'product_range': b.product_range_id, 'banner': request.build_absolute_uri(b.banner.url)}
+    slider_banner = [_(b) for b in banners if b.type == b.SLIDER_BANNER]
+    full_screen_banner = [_(b) for b in banners if b.type == b.FULL_SCREEN_BANNER]
     for cat, data in cat_data.items():
+        count = random.randint(3, 6)
         out.append({
             'name': cat.name,
             'slug': cat.slug,
             'products': data,
+            'slider_banners': random.choices(slider_banner, k=count),
+            'full_screen_banner': random.choice(full_screen_banner)
         })
     return out
 
 
 @api_view(("GET",))
 def index(request, *a, **k):
-    cache_key = 'apps.api_set_v2.views.index?zone={}&v=1.0.1'.format
+    cache_key = 'apps.api_set_v2.views.index?zone={}&v=1.0.2'.format
 
     def _inner():
         out = {'categories': []}

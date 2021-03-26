@@ -218,19 +218,27 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'label': _('Offers'),
         'icon': 'icon-bullhorn',
         'children': [
-            {
-                'label': _('Offers'),
-                'url_name': 'dashboard:offer-list',
-            },
-            {
-                'label': _('Vouchers'),
-                'url_name': 'dashboard:voucher-list',
-            },
-            {
-                'label': _('Voucher Sets'),
-                'url_name': 'dashboard:voucher-set-list',
-            },
-
+            {'label': _('In app Banners'),
+             'url_name': 'dashboard-custom:dashboard-in-app-banner-list',
+             'access_fn': admin_or_staff
+             },
+            {'label': _('Launch Banners'),
+             'url_name': 'dashboard-custom:dashboard-home-page-mega-banner-list',
+             'access_fn': admin_or_staff
+             },
+            {'label': _('Offer Banners'),
+             'url_name': 'dashboard-custom:dashboard-offer-banner-list',
+             'access_fn': admin_or_staff
+             },
+            {'label': _('Offers'),
+             'url_name': 'dashboard:offer-list',
+             },
+            {'label': _('Vouchers'),
+             'url_name': 'dashboard:voucher-list',
+             },
+            {'label': _('Voucher Sets'),
+             'url_name': 'dashboard:voucher-set-list',
+             },
         ],
     },
     {

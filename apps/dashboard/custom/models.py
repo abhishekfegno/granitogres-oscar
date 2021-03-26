@@ -2,6 +2,7 @@
 
 from django.core import validators
 from django.db import models
+from django.db.models.signals import post_save
 from django.urls import reverse
 from sorl.thumbnail import get_thumbnail
 
@@ -107,6 +108,22 @@ class ReturnReason(AbstractCURDModel):
         return reverse(self.rev_name, kwargs={'pk': self.pk})
 
 
+class InAppBanner(AbstractCURDModel):
+    referrer = 'in-app-banner'
+    SLIDER_BANNER = "Slider"
+    FULL_SCREEN_BANNER = "Full Screen"
+    BANNER_TYPE = [
+        (SLIDER_BANNER, SLIDER_BANNER),
+        (FULL_SCREEN_BANNER, FULL_SCREEN_BANNER),
+    ]
+    product_range = models.ForeignKey('offer.Range', on_delete=models.CASCADE, blank=False, null=False)
+    banner = models.ImageField(upload_to='offer-banners/')
+    type = models.CharField(max_length=20, choices=BANNER_TYPE, default=BANNER_TYPE[0][1])
+
+    def get_absolute_url(self):
+        return reverse(self.rev_name, kwargs={'pk': self.pk})
+
+
 class HomePageMegaBanner(AbstractCURDModel):
     referrer = 'home-page-mega-banner'
     banner = models.ImageField(upload_to='home-banner-images', help_text="Recommended : '1920x690'")
@@ -194,4 +211,13 @@ class HomePageMegaBanner(AbstractCURDModel):
 
 # models_list = (FAQ, HomePageMegaBanner, OfferBanner, ContactUsEnquiry, BlogTag, BlogInsight)
 
-models_list = (ReturnReason, HomePageMegaBanner,)
+models_list = (ReturnReason, HomePageMegaBanner, InAppBanner)
+
+
+def clear_cache(sender, instance, **kwargs):
+    from django.core.cache import cache
+    cache.delete_pattern("apps.api_set_v2.views.index?zone*")
+
+
+post_save.connect(clear_cache, sender=HomePageMegaBanner)
+post_save.connect(clear_cache, sender=InAppBanner)

@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from django.urls import path, include
 # Loading V1 Apis In order to patch
+from apps.api_set.views.catalogue import product_suggestions
 from apps.api_set.views.index import (
     home, offer_products, offers
 )
@@ -51,13 +52,13 @@ account_urlpatterns = [
 
 catalogue_urlpatterns = [
     path("catalogue/", include([
-            # path("c/", categories_list_cached, name="wnc-categories-list"),                             # category
-            path("c/all/", product_list, name="wnc-all-product-list-v2"),                                  # category
-            # path("c/all/new/", product_list_new, name="wnc-all-product-list-new"),                    # category
-        path("c/<slug:category>/", product_list, name="wnc-category-product-list-v2"),                 # category
-        path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),      # detail
-        # path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),                            # filter
-        # path("suggestions/", product_suggestions, name="wnc-product-suggestions"),                  # category
+            # path("c/", categories_list_cached, name="wnc-categories-list"),                               # category
+            path("c/all/", product_list, name="wnc-all-product-list-v2"),                                   # category
+            # path("c/all/new/", product_list_new, name="wnc-all-product-list-new"),                        # category
+        path("c/<slug:category>/", product_list, name="wnc-category-product-list-v2"),                      # category
+        path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),           # detail
+        # path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),                                  # filter
+        path("suggestions/", product_suggestions, name="wnc-product-suggestions"),                          # category
         # path("mob/", include([]))
     ]))
 ]

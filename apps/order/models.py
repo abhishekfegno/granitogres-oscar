@@ -1,6 +1,8 @@
 import datetime
 
 from django.contrib.gis.db.models import PointField
+from django.core.cache import cache
+from django.db.models.signals import post_save
 from django.utils.functional import cached_property
 from oscar.apps.address.abstract_models import (
     AbstractBillingAddress, AbstractShippingAddress)
@@ -157,4 +159,10 @@ class PaymentEventType(AbstractPaymentEventType):
 class OrderDiscount(AbstractOrderDiscount):
     pass
 
+
+def clear_cache_order(sender, instance, **kwargs):
+    cache.delete_pattern("apps.api_set_v2.views.orders?user={}&*".format(instance.user_id))
+
+
+post_save.connect(clear_cache_order, sender=Order)
 

@@ -112,7 +112,7 @@ def product_suggestions(request, **kwargs):
     queryset = Product.browsable.browsable()
     _search = request.GET.get('q')
     _max_size = 10
-    out = {'results': [],   'class': None, }
+    out = {'results': [],  'class': None, }
     if _search:
         queryset = apply_search(queryset=queryset, search=_search)
         rc = recommended_class(queryset)
