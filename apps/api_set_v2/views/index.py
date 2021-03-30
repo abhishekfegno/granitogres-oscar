@@ -73,6 +73,6 @@ def index(request, *a, **k):
         out['content'] = get_home_content(request)
         return out
 
-    return Response(_inner())
-    # zone = request.session.get('zone')
-    # return Response(cache_library(cache_key(zone), cb=_inner, ttl=60 * 60 * 3))
+    # return Response(_inner())
+    zone = request.session.get('zone')
+    return Response(cache_library(cache_key(zone), cb=_inner, ttl=60 * 60 * 3))
