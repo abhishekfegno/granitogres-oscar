@@ -26,20 +26,20 @@ def get_home_content(request):
     pmg_mixin = ProductPrimaryImageFieldMixin()
     price_mixin = ProductPriceFieldMixinLite()
     pmg_mixin.context = price_mixin.context = {'request': request}
-    categories = Category.get_root_nodes().exclude(slug="featured").only('id', 'name', 'slug', 'path').order_by('-numchild')[:2]
+    categories = Category.get_root_nodes().exclude(slug="featured").only('id', 'name', 'slug', 'path').order_by(
+        '-numchild')[:2]
     out = []
     cat_data = defaultdict(list)
+
     for cat in categories:
-        product_data = get_optimized_product_dict(
-            request=request,
-            qs_filter=Q(categories__in=Category.get_tree(cat)),
-            limit=4,
-        )
+        product_data = get_optimized_product_dict(request=request, qs_filter=Q(categories__in=Category.get_tree(cat)), limit=4, )
         for parent_product, data in product_data.items():
             cat_data[cat].append(data)
     banners = list(InAppBanner.objects.all().filter(banner__isnull=False, product_range_id__isnull=False))
+
     def _(b):
         return {'product_range': b.product_range_id, 'banner': b.home_banner_wide_image(request)}
+
     slider_banner = [_(b) for b in banners if b.type == b.SLIDER_BANNER]
     full_screen_banner = [_(b) for b in banners if b.type == b.FULL_SCREEN_BANNER]
     for cat, data in cat_data.items():
@@ -56,7 +56,7 @@ def get_home_content(request):
 
 @api_view(("GET",))
 def index(request, *a, **k):
-    cache_key = 'apps.api_set_v2.views.index?zone={}&v=1.0.2'.format
+    cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.2'.format
 
     def _inner():
         out = {'categories': []}
@@ -70,9 +70,9 @@ def index(request, *a, **k):
             'banner': banner.home_banner_wide_image(request),
             'product_range': banner.product_range_id
         } for banner in HomePageMegaBanner.objects.filter(product_range__isnull=False).order_by('-position')]
-
         out['content'] = get_home_content(request)
         return out
-    zone = request.session.get('zone')
-    return Response(cache_library(cache_key(zone), cb=_inner, ttl=60*60*3))
 
+    return Response(_inner())
+    # zone = request.session.get('zone')
+    # return Response(cache_library(cache_key(zone), cb=_inner, ttl=60 * 60 * 3))

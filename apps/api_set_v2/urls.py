@@ -50,7 +50,6 @@ catalogue_urlpatterns = [
         path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),           # detail
         path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),                                  # filter
         path("suggestions/", product_suggestions, name="wnc-product-suggestions"),                          # category
-        # path("mob/", include([]))
     ]))
 ]
 

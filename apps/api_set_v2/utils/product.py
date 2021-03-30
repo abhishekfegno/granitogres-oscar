@@ -37,7 +37,7 @@ def get_optimized_product_dict(
     else:
         product_set = Product.objects.filter(
             qs_filter, is_public=True,
-            stockrecords__isnull=False
+            # stockrecords__isnull=False
         )
         if offset and limit:
             product_set = product_set[offset:limit]
