@@ -51,7 +51,7 @@ def get_optimized_product_dict(
         num_in_stock__gt=0 if needs_stock else -1,
     ).select_related(
         'product', 'product__product_class', 'product__parent', 'product__parent__product_class'
-    ).prefetch_related('product__images', 'product__parent__images')
+    ).prefetch_related('product__images', 'product__parent__images',)
     if zone:
         sr_set = sr_set.filter(partner__zone__id=zone)
 

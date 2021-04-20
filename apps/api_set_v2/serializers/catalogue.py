@@ -24,10 +24,16 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFie
                                   serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
+    weight = serializers.SerializerMethodField()
+
+    def get_weight(self, instance):
+        if instance.is_parent:
+            return None
+        return instance.attr.weight
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'primary_image', 'price')
+        fields = ('id', 'title', 'primary_image', 'price', 'weight')
 
 
 class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductDetailSerializerMixin, serializers.ModelSerializer):
