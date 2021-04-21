@@ -23,8 +23,11 @@ v1__registration_apis = [
 home_urlpatterns = [
     path("home/", home, name="api-home-v2"),
     path("index/", index, name="api-index-v2"),
-    # DEPRECATED # path("offers/", offers, name="api-offers"),
-    # DEPRECATED path("offers/<int:pk>/", offer_products, name="api-offer-products-v2"),       #! instead use product_list api!
+
+    path("offers/", offers, name="api-offers"),
+    path("offers/<int:pk>/", offer_products, name="api-offer-products-v2"),       #! instead use product_list api!
+
+
     path("_orders/", orders, name="api-orders-v2"),
     path("_orders/<int:pk>/", orders_detail, name="api-orders-detail-v2"),
     path("_orders/<int:pk>/more/", orders_more_detail, name="api-orders-more"),
