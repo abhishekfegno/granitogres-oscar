@@ -33,10 +33,13 @@ view_checkout = never_cache(CheckoutView.as_view())
 
 urlpatterns = [
     path('api/v1/checkout/', view_checkout, name='api-checkout'),               # Must be before oscar_api.urls
+    path('api/v2/checkout/', view_checkout, name='api-checkout'),               # Must be before oscar_api.urls
     # path('api/v1/', include(apps.get_app_config("oscarapicheckout").urls[0])),  # Must be before oscar_api.urls
 
     path('api/v1/', include('oscarapi.urls')),
     path('api/v1/buy-now/', include('apps.buynow.urls')),
+    path('api/v2/', include('oscarapi.urls')),
+    path('api/v2/buy-now/', include('apps.buynow.urls')),
 
     path('api/', include('apps.api_set.urls')),                                 # prone to versioning
     path('api/v2/', include('apps.api_set_v2.urls')),                                 # prone to versioning
