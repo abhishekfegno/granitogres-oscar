@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
 from apps.api_set.serializers.mixins import ProductDetailSerializerMixin
 from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite
@@ -25,6 +26,10 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFie
     primary_image = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
     weight = serializers.SerializerMethodField()
+    url = serializers.SerializerMethodField()
+
+    def get_url(self, instance):
+        return reverse('product-detail', kwargs={'pk': instance.pk}, request=self.context.get('request'))
 
     def get_weight(self, instance):
         if instance.is_parent:
@@ -33,7 +38,7 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFie
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'primary_image', 'price', 'weight')
+        fields = ('id', 'title', 'primary_image', 'price', 'weight', 'url')
 
 
 class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductDetailSerializerMixin, serializers.ModelSerializer):
