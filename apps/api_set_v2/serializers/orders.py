@@ -34,12 +34,17 @@ class OrderListSerializer(serializers.ModelSerializer):
                 'should_display': True,
                 'reason': f'You already have initiated / processed  a return request against {line_statuses} items.'
             }
+        t = "---"
+        try:
+            t = str(order.max_time_to__return.strptime("%c"))
+        except:
+            t = f"{order.max_time_to__return}"
         return {
                 'status': True,
                 'should_display': False,
                 'reason': f'You can return any item ' + ((
                         order.max_time_to__return
-                        and ('within ' + str(order.max_time_to__return.strptime("%c")))
+                        and ('within ' + t)
                 ) or '')
             }
 
