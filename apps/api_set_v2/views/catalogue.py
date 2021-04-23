@@ -30,7 +30,7 @@ def product_detail_web(request, product: Product): # needs parent product
         request=request,
         qs=[product, ],
     ).values()
-    sol = product.sorted_recommended_products
+    sol = request.basket.sorted_recommended_products + product.sorted_recommended_products
 
     for r in response:
         response = r
@@ -60,7 +60,7 @@ def product_detail_web(request, product: Product): # needs parent product
         "people_also_bought": [
             a for a in get_optimized_product_dict(
                 request=request,
-                qs=request.basket.primary_recommendations.all(),
+                qs=request.basket.sorted_recommended_products,
             ).values()
         ]
     }
