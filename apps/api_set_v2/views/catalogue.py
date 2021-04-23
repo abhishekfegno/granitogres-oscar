@@ -57,12 +57,6 @@ def product_detail_web(request, product: Product): # needs parent product
             request=request,
             qs=sol,
         ).values()],
-        "people_also_bought": [
-            a for a in get_optimized_product_dict(
-                request=request,
-                qs=request.basket.sorted_recommended_products,
-            ).values()
-        ]
     }
 
     if request.session.get('location'):
