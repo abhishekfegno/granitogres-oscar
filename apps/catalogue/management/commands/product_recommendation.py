@@ -5,7 +5,7 @@ from django.core.management import BaseCommand
 from efficient_apriori import apriori
 
 from apps.basket.models import Basket, Line as BasketLine
-from apps.catalogue.models import ProductRecommendation, CartSpecificProductRecommendation
+from apps.catalogue.models import ProductRecommendation, CartSpecificProductRecommendation, Product
 
 from apps.order.models import Line as OrderLine
 
@@ -28,6 +28,10 @@ class Command(BaseCommand):
         product_data = [tuple(lines) for lines in group_by_order.values()]
         return product_data
 
+    def get_parent_product_mapping(self):
+        dataset = Product.objects.filter(structure__in=[Product.STANDALONE, Product.CHILD]).values('structure', 'parent', 'id')
+        return {p['id']: p['id'] if p['structure'] == Product.STANDALONE else p['parent'] for p in dataset}
+
     def handle(self, *args, **options):
 
         recommendations = []
@@ -35,6 +39,7 @@ class Command(BaseCommand):
 
         basket_lines = self.get_basket_lines()
         product_data = self.formatted_product_data()
+        parent_product = self.get_parent_product_mapping()
 
         # "old_recommendations" to be deleted after successful running of the whole script.
         old_recommendations = list(ProductRecommendation.objects.all().values_list('pk', flat=True))
@@ -47,7 +52,7 @@ class Command(BaseCommand):
 
         print("freq_item_set", freq_item_set)
         print("rules", rules)
-
+        print("parent_product", parent_product)
         # rules_rhs = filter(lambda rule: len(rule.lhs) == 2 and len(rule.rhs) == 1, rules)
 
         for rule in sorted(rules, key=lambda rule: rule.lift):
@@ -57,8 +62,8 @@ class Command(BaseCommand):
                 for rec in rule.rhs:
                     recommendations.append(
                         ProductRecommendation(
-                            primary_id=rule.lhs[0],
-                            recommendation_id=rec,
+                            primary_id=parent_product[rule.lhs[0]],
+                            recommendation_id=parent_product[rec],
                             ranking=rule.lift
                         )
                     )
@@ -70,14 +75,14 @@ class Command(BaseCommand):
                             cart_recommendations.append(
                                 CartSpecificProductRecommendation(
                                     primary_id=basket_id,
-                                    recommendation_id=rec,
-                                    ranking=rule.lift
+                                    recommendation_id=parent_product[rec],
+                                    ranking=len(rule.lhs)*rule.lift
                                 )
                             )
+        ProductRecommendation.objects.filter().delete()
+        CartSpecificProductRecommendation.objects.filter().delete()
         ProductRecommendation.objects.bulk_create(recommendations, ignore_conflicts=True)
         CartSpecificProductRecommendation.objects.bulk_create(cart_recommendations, ignore_conflicts=True)
-        ProductRecommendation.objects.filter(pk__in=old_recommendations).delete()
-        CartSpecificProductRecommendation.objects.filter(pk__in=old_cart_recommendations).delete()
 
 
 
