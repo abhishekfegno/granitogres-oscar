@@ -7,7 +7,7 @@ from django.db.models import F
 from django.db.models.signals import post_save
 from django.db.transaction import atomic
 from oscar.apps.catalogue.abstract_models import AbstractProduct, AbstractCategory, AbstractProductImage, \
-    AbstractProductAttribute
+    AbstractProductAttribute, AbstractProductRecommendation
 from oscar.core.loading import get_model
 from sorl.thumbnail import get_thumbnail
 
@@ -195,7 +195,6 @@ class ProductAttribute(AbstractProductAttribute):
     is_varying = models.BooleanField(_('Is Varying For Child'), default=False)
 
 
-from oscar.apps.catalogue.models import *  # noqa isort:skip
 
 
 class SearchResponses(models.Model):
@@ -232,6 +231,25 @@ class SearchResponses(models.Model):
         return cls.objects.all()
 
 
+class ProductRecommendation(AbstractProductRecommendation):
+    pass
+
+
+class CartSpecificProductRecommendation(AbstractProductRecommendation):
+    primary = models.ForeignKey(
+        'basket.Basket',
+        on_delete=models.CASCADE,
+        related_name='primary_recommendations',
+        verbose_name=_("Cart"))
+
+    class Meta:
+        app_label = 'catalogue'
+        ordering = ['primary', '-ranking']
+        unique_together = ('primary', 'recommendation')
+        verbose_name = _('Basket Based recommendation')
+        verbose_name_plural = _('Basket Based recomendations')
+
+
 def clear_cache_product(sender, instance, **kwargs):
     cache.delete_pattern("product_list__page:*")
 
@@ -239,3 +257,4 @@ def clear_cache_product(sender, instance, **kwargs):
 post_save.connect(clear_cache_product, sender=Product)
 
 
+from oscar.apps.catalogue.models import *  # noqa isort:skip

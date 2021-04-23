@@ -16,6 +16,12 @@ class Basket(AbstractBuyNowBasket):
     add_product.alters_data = True
     add = add_product
 
+    @property
+    def sorted_recommended_products(self):
+        """Keeping order by recommendation ranking."""
+        return [r.recommendation for r in self.primary_recommendations
+                                              .select_related('recommendation').all()]
+
 from oscar.apps.basket.models import *  # noqa isort:skip
 
 
