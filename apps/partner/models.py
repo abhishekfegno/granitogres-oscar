@@ -1,12 +1,19 @@
-from django.contrib.gis.db.models import PointField
-from django.contrib.gis.forms import MultiPolygonField
 from django.core.cache import cache
 from django.db.models.signals import post_save
+from django.utils.translation import gettext_lazy
 from oscar.apps.partner.abstract_models import AbstractStockRecord, AbstractPartner
+from django.db import models
 
 
 class StockRecord(AbstractStockRecord):
-    pass
+    price_excl_tax = models.DecimalField(
+        gettext_lazy("Selling Price (excl. tax)"), decimal_places=2, max_digits=12,
+        blank=True, null=True)
+
+    # Deprecated - will be removed in Oscar 2.1
+    price_retail = models.DecimalField(
+        gettext_lazy("M.R.P. (retail)"), decimal_places=2, max_digits=12,
+        blank=True, null=True)
 
 
 class Partner(AbstractPartner):

@@ -218,16 +218,16 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'label': _('Offers'),
         'icon': 'icon-bullhorn',
         'children': [
-            {'label': _('In app Banners'),
-             'url_name': 'dashboard-custom:dashboard-in-app-banner-list',
-             'access_fn': admin_or_staff
-             },
-            {'label': _('Launch Banners'),
+            {'label': _('Home Page Mega Banners'),
              'url_name': 'dashboard-custom:dashboard-home-page-mega-banner-list',
              'access_fn': admin_or_staff
              },
-            {'label': _('Offer Banners'),
-             'url_name': 'dashboard-custom:dashboard-offer-banner-list',
+            {'label': _('In app Full Screen Banners'),
+             'url_name': 'dashboard-custom:dashboard-in-app-full-screen-banner-list',
+             'access_fn': admin_or_staff
+             },
+            {'label': _('In app Slider Banners'),
+             'url_name': 'dashboard-custom:dashboard-in-app-slider-banner-list',
              'access_fn': admin_or_staff
              },
             {'label': _('Offers'),
@@ -285,15 +285,15 @@ OSCAR_DASHBOARD_NAVIGATION = [
             {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
              'access_fn': admin_or_staff},
 
-            {'label': _('Launch Banners'),
-             'url_name': 'dashboard-custom:dashboard-home-page-mega-banner-list',
-             'access_fn': admin_or_staff
-             },
+            # {'label': _('Launch Banners'),
+            #  'url_name': 'dashboard-custom:dashboard-home-page-mega-banner-list',
+            #  'access_fn': admin_or_staff
+            #  },
 
-            {'label': _('Offer Banners'),
-             'url_name': 'dashboard-custom:dashboard-offer-banner-list',
-             'access_fn': admin_or_staff
-             },
+            # {'label': _('Offer Banners'),
+            #  'url_name': 'dashboard-custom:dashboard-offer-banner-list',
+            #  'access_fn': admin_or_staff
+            #  },
 
             {'label': _('Shipping charges'), 'url_name': 'dashboard:shipping-method-list', },
 

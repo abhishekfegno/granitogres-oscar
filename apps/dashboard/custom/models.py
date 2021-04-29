@@ -120,6 +120,9 @@ class InAppBanner(AbstractCURDModel):
     banner = models.ImageField(upload_to='offer-banners/')
     type = models.CharField(max_length=20, choices=BANNER_TYPE, default=BANNER_TYPE[0][1])
 
+    def __str__(self):
+        return f'{self.title} {self.type}'
+
     def get_absolute_url(self):
         return reverse(self.rev_name, kwargs={'pk': self.pk})
 
@@ -132,6 +135,42 @@ class InAppBanner(AbstractCURDModel):
         return request.build_absolute_uri(
             get_thumbnail(self.banner, '343x148', crop='center', quality=98).url
         )
+
+
+class InAppBannerManager(models.Manager):
+
+    def __init__(self, type_filter):
+        self.type_filter = type_filter
+        super().__init__()
+
+    def get_queryset(self):
+        return super().get_queryset().filter(type=self.type_filter)
+
+
+class AbstractInAppBanner(InAppBanner):
+    type_filter = InAppBanner.FULL_SCREEN_BANNER
+
+    def save(self, **kwargs):
+        self.type = self.type_filter
+        super(AbstractInAppBanner, self).save(**kwargs)
+
+
+class InAppFullScreenBanner(AbstractInAppBanner):
+    referrer = 'in-app-full-screen-banner'
+    type_filter = InAppBanner.FULL_SCREEN_BANNER
+    objects = InAppBannerManager(type_filter=type_filter)
+
+    class Meta:
+        proxy = True
+
+
+class InAppSliderBanner(AbstractInAppBanner):
+    referrer = 'in-app-slider-banner'
+    type_filter = InAppBanner.SLIDER_BANNER
+    objects = InAppBannerManager(type_filter=type_filter)
+
+    class Meta:
+        proxy = True
 
 
 class HomePageMegaBanner(AbstractCURDModel):
@@ -221,7 +260,7 @@ class HomePageMegaBanner(AbstractCURDModel):
 
 # models_list = (FAQ, HomePageMegaBanner, OfferBanner, ContactUsEnquiry, BlogTag, BlogInsight)
 
-models_list = (ReturnReason, HomePageMegaBanner, InAppBanner)
+models_list = (ReturnReason, HomePageMegaBanner, InAppFullScreenBanner, InAppSliderBanner, InAppBanner)
 
 
 def clear_cache(sender, instance, **kwargs):
