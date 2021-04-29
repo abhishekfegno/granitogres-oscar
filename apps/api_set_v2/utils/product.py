@@ -1,6 +1,6 @@
 from typing import Any, Union
 
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Case, Value, When, IntegerField
 from django.http import HttpRequest
 
 from apps.api_set_v2.serializers.catalogue import ProductSimpleListSerializer
@@ -39,21 +39,25 @@ def get_optimized_product_dict(
             qs_filter, is_public=True,
             # stockrecords__isnull=False
         )
-        if offset and limit:
-            product_set = product_set[offset:limit]
-        elif limit:
-            product_set = product_set[:limit]
-        elif offset:
-            product_set = product_set[offset:]
     sr_set = StockRecord.objects.filter(
-        product__parent__in=product_set,
+        Q(Q(product__parent__in=product_set)|Q(product__in=product_set)),
         product__structure__in=[Product.CHILD, Product.STANDALONE],
         num_in_stock__gt=0 if needs_stock else -1,
-    ).select_related(
+    ).annotate(to_first=Case(
+        When(num_in_stock=0, then=Value(0)), default=Value(1), output_field=IntegerField()
+    )).select_related(
         'product', 'product__product_class', 'product__parent', 'product__parent__product_class'
-    ).prefetch_related('product__images', 'product__parent__images',)
+    ).prefetch_related('product__images', 'product__parent__images').order_by('to_first')
     if zone:
         sr_set = sr_set.filter(partner__zone__id=zone)
+
+    # import pdb; pdb.set_trace()
+    # if offset and limit:
+    #     sr_set = sr_set[offset:limit]
+    # elif limit:
+    #     sr_set = sr_set[:limit]
+    # elif offset:
+    #     sr_set = sr_set[offset:]
 
     product_data = {}
     for sr in sr_set:
@@ -69,6 +73,8 @@ def get_optimized_product_dict(
             product_data[sr.product] = product_serializer_class(instance=sr.product,
                                                                 context={'request': request}).data
             product_data[sr.product]['variants'] = []
+        if len(product_data.keys()) >= limit:
+            break
     return product_data
 
 

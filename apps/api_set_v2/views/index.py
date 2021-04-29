@@ -56,12 +56,12 @@ def get_home_content(request):
 
 @api_view(("GET",))
 def index(request, *a, **k):
-    cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.4'.format
+    cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.1'.format
 
     def _inner():
         out = {'categories': []}
         cxt = {'context': {'request': request}}
-        category_set = Category.objects.filter().annotate(c=Sum('product__basket_lines')).order_by('depth', 'c')[:10]
+        category_set = Category.objects.filter().exclude(slug="featured").annotate(c=Sum('product__basket_lines')).order_by('depth', 'c')[:10]
         out['categories'] = CategorySerializer(category_set, **cxt, many=True).data
 
         out['offer_banners'] = [{
@@ -71,6 +71,6 @@ def index(request, *a, **k):
         out['content'] = get_home_content(request)
         return out
 
-    # return Response(_inner())
-    zone = request.session.get('zone')
-    return Response(cache_library(cache_key(zone), cb=_inner, ttl=60 * 60 * 3))
+    return Response(_inner())
+    # zone = request.session.get('zone')
+    # return Response(cache_library(cache_key(zone), cb=_inner, ttl=60 * 60 * 3))

@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def clear_current_catalogue():
-        if input("Clear Catalogue ? [Y/n]").lower() is not 'n':
+        if input("Clear Catalogue ? [Y/n]").lower() is not 'n': 
             print(' *** Clearing Current Catalogue! ***')
             Product.objects.all().delete()
             Category.objects.all().delete()
