@@ -88,6 +88,7 @@ class Command(BaseCommand):
             Product.objects.all().delete()
             Category.objects.all().delete()
             ProductImage.objects.all().delete()
+            Category.objects.all().delete()
 
     @staticmethod
     def get_a_partner():
@@ -165,12 +166,13 @@ class Command(BaseCommand):
             self.get_remote_image(product, image=data['p_img_url'])
 
     def handle(self, *args, **options):
+        self.clear_current_catalogue()
+
         self.partner: Partner = self.get_a_partner()
         self.fmcg: ProductClass = self.get_product_class()
         self.pa_weight, _ = ProductAttribute.objects.get_or_create(
             product_class=self.fmcg, name='Weight', code='weight',
             is_varying=True, type=ProductAttribute.TEXT)
-
         for cat in self.categories:
             cat_name = cat['category']
             sub_cat_name = cat['sub-category']
