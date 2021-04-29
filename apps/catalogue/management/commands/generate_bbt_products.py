@@ -176,16 +176,16 @@ class Command(BaseCommand):
             sub_cat_name = cat['sub-category']
             slug = cat['slug']
             cat_name_slug, sub_cat_slug = slug.strip('/').split('/')
-            data_set = self.generate_data(slug)
             print(cat_name, sub_cat_name)
             main_cat: Category = (
                     Category.objects.filter(slug=cat_name_slug).first()
-                    or Category.add_root(slug=sub_cat_slug, name=cat_name)
+                    or Category.add_root(slug=cat_name_slug, name=cat_name)
             )
             sub_cat: Category = (
                     main_cat.get_descendants().filter(slug=sub_cat_slug).first()
                     or main_cat.add_child(slug=sub_cat_slug, name=sub_cat_name)
             )
+            data_set = self.generate_data(slug)
             for row in data_set:
                 product = self.create_product(row)
                 product.categories.add(sub_cat)
