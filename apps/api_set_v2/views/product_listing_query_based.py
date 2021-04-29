@@ -126,7 +126,6 @@ def product_list(request, category='all', **kwargs):
             product_data = []
         rc = None
         return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc)
-
     if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not _search and not _filter and not _sort:
         c_key = cache_key.product_list__key.format(page_number, page_size, category)
         # if settings.DEBUG:

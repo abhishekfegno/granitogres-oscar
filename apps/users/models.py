@@ -113,6 +113,7 @@ class Location(models.Model):
             },
         }
 
+
 class OTP(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
                              related_name='otp_set', null=True, blank=True)

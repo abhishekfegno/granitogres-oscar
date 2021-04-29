@@ -31,7 +31,7 @@ def list_api_formatter(request, page_obj, results=None, **kwargs):
         ('count', page_obj.paginator.count),
         ('next_url', next_url),
         ('prev_url', prev_url),
-        ('results', results),
+        ('results', list(results)),
         *kwargs.items()
     ])
 
