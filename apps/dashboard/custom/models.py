@@ -154,6 +154,9 @@ class AbstractInAppBanner(InAppBanner):
         self.type = self.type_filter
         super(AbstractInAppBanner, self).save(**kwargs)
 
+    class Meta:
+        proxy = True
+
 
 class InAppFullScreenBanner(AbstractInAppBanner):
     referrer = 'in-app-full-screen-banner'
