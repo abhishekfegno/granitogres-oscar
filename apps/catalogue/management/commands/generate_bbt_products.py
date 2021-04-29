@@ -122,7 +122,7 @@ class Command(BaseCommand):
             sr = StockRecord.objects.create(
                 partner=self.partner,
                 product=product,
-                partner_sku=uuid.uuid4().hex[:6].upper(),
+                partner_sku=uuid.uuid4().hex.upper(),
                 price_currency="INR",
                 price_excl_tax=mrp,
                 price_retail=retail_price,
