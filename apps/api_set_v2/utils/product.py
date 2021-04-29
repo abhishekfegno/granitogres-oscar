@@ -39,8 +39,18 @@ def get_optimized_product_dict(
             qs_filter, is_public=True,
             # stockrecords__isnull=False
         )
+    if offset and limit:
+        product_set = product_set[offset:limit]
+    elif limit:
+        product_set = product_set[:limit]
+    elif offset:
+        product_set = product_set[offset:]
+
+    st_set_01 = StockRecord.objects.filter(product__in=product_set, product__structure=Product.STANDALONE).values_list('id')
+    st_set_02 = StockRecord.objects.filter(product__in=Product.objects.filter(parent__in=product_set), product__structure=Product.CHILD).values_list('id')
+
     sr_set = StockRecord.objects.filter(
-        Q(Q(product__parent__in=product_set)|Q(product__in=product_set)),
+        id__in=(st_set_01 | st_set_02),
         product__structure__in=[Product.CHILD, Product.STANDALONE],
         num_in_stock__gt=0 if needs_stock else -1,
     ).annotate(to_first=Case(
@@ -73,8 +83,6 @@ def get_optimized_product_dict(
             product_data[sr.product] = product_serializer_class(instance=sr.product,
                                                                 context={'request': request}).data
             product_data[sr.product]['variants'] = []
-        if not product_data.keys() and len(product_data.keys() or []) >= limit:
-            break
     return product_data
 
 

@@ -124,8 +124,8 @@ class Command(BaseCommand):
                 product=product,
                 partner_sku=uuid.uuid4().hex.upper(),
                 price_currency="INR",
-                price_excl_tax=mrp,
-                price_retail=retail_price,
+                price_excl_tax=retail_price,
+                price_retail=mrp,
                 num_in_stock=random.randrange(100, 600),
             )
         return sr
