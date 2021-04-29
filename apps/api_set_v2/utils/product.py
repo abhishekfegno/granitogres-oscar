@@ -73,7 +73,7 @@ def get_optimized_product_dict(
             product_data[sr.product] = product_serializer_class(instance=sr.product,
                                                                 context={'request': request}).data
             product_data[sr.product]['variants'] = []
-        if len(product_data.keys()) >= limit:
+        if not product_data.keys() and len(product_data.keys() or []) >= limit:
             break
     return product_data
 
