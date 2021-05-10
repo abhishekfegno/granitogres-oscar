@@ -85,4 +85,10 @@ class Command(BaseCommand):
         CartSpecificProductRecommendation.objects.bulk_create(cart_recommendations, ignore_conflicts=True)
 
 
+# flt = {'structure__in': [Product.STANDALONE, Product.PARENT]}
+# for p in Product.objects.filter(**flt):
+#     for r in Product.objects.exclude(pk=p.pk).filter(**flt).order_by('?')[:6]:
+#          p.primary_recommendations.create(recommendation=r)
+
+
 
