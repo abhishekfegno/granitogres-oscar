@@ -9,7 +9,7 @@ from apps.api_set.views.index import (
 from apps.api_set_v2.views.catalogue import product_detail_web
 
 from apps.api_set_v2.views.index import index
-from apps.api_set_v2.views.orders import orders_detail
+from apps.api_set_v2.views.orders import orders_detail, reorder_to_current_basket, reorder_to_temporary_basket
 from apps.api_set_v2.views.orders import orders
 from apps.api_set_v2.views.product_listing_query_based import product_list
 
@@ -33,6 +33,10 @@ home_urlpatterns = [
     path("_orders/<int:pk>/more/", orders_more_detail, name="api-orders-more"),
     path("_orders/<int:pk>/return-request/", order_line_return_request, name="order_line_return_request"),
     path("auth/", include(v1__registration_apis)),
+
+    path("_orders/<int:pk>/reorder-to-current-basket/", reorder_to_current_basket, name="api-reorder-to-current-basket-v2"),
+    path("_orders/<int:pk>/reorder-to-temporary-basket/", reorder_to_temporary_basket, name="api-reorder-to-temporary-basket-v2"),
+
 ]
 
 account_urlpatterns = [

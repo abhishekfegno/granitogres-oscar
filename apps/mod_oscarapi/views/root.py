@@ -76,6 +76,11 @@ def PUBLIC_APIS(r, f):
             ("My Orders More Details", reverse("api-orders-more", kwargs={'pk': 10}, request=r, format=f)),
             ("Order Item Return Request", reverse("order_line_return_request", kwargs={'pk': 10}, request=r, format=f)),
             ("Return Reason List", reverse("return-reasons-list", request=r, format=f)),
+            
+            ("Reorder", collections.OrderedDict([
+                ("Merge to New Temporary Basket", reverse("api-reorder-to-temporary-basket-v2", kwargs={'pk': 10}, request=r, format=f)),
+                ("Merge to Current Basket", reverse("api-reorder-to-current-basket-v2", kwargs={'pk': 10}, request=r, format=f) + "?clear_current_basket=1") ,
+            ]))
         ])),
 
         ("Addresses", collections.OrderedDict([
