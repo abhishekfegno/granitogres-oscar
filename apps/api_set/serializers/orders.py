@@ -107,9 +107,12 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         model = Order
         fields = (
             'id', 'number', 'currency',
-            'total_incl_tax',
+            'basket_total_before_discounts_excl_tax',
+            'basket_total_before_discounts_incl_tax',
             'total_discount_incl_tax',
             'shipping_incl_tax',
+            'total_tax',
+            'total_excl_tax',
             'total_incl_tax',
             'shipping_status',
             'source',
