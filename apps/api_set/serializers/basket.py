@@ -8,10 +8,10 @@ from rest_framework import serializers
 
 from apps.api_set.serializers.catalogue import custom_ProductListSerializer
 from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin
+from apps.basket.models import Basket
 from apps.mod_oscarapi.calculators import OrderTotalCalculator
 from lib.currencies import get_symbol
 
-Basket = get_model("basket", "Basket")
 Line = get_model("basket", "Line")
 Product = get_model("catalogue", "Product")
 Repository = get_class("shipping.repository", "Repository")
@@ -89,7 +89,6 @@ class WncBasketSerializer(BasketSerializer):
         self.total_amt = OrderTotalCalculator(request=self.context['request']).calculate(basket, self.shipping_cost)
 
     def get_lines(self, instance):
-
         return WncLineSerializer(instance.lines.all(), context=self.context, many=True).data
 
     def get_currency(self, instance):
@@ -115,11 +114,18 @@ class WncBasketSerializer(BasketSerializer):
             "status",
             "lines",
             "url",
-            "shipping",
-            "net_total",
             "currency",
             "currency_symbol",
-            "voucher_discounts",
-            "offer_discounts",
-            "is_tax_known",
+
+            "total_excl_tax_excl_discounts",
+            "total_incl_tax_excl_discounts",
+
+            "total_discount",
+
+            "total_excl_tax",
+            "total_tax",
+            "total_incl_tax",
+
+            "shipping",
+            "net_total",
         )
