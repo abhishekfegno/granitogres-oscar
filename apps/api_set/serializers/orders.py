@@ -87,9 +87,6 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     source = serializers.SerializerMethodField()
 
     def get_total_discount_incl_tax(self, instance):
-        import pdb;
-        pdb.set_trace()
-
         return str(instance.total_discount_incl_tax)
 
     def get_source(self, order):
