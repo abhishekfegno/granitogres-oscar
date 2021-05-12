@@ -133,7 +133,7 @@ def custom_ProductListSerializer(queryset, context,
         }
     result = []
     for product in queryset:
-        cache_key = f"___custom_ProductListSerializer__cached__product:{product.id}__zone:{request.session.get('zone', '0')}"
+        cache_key = f"___custom_ProductListSerializer__cached__product:{product.id}__zone_v1:{request.session.get('zone', '0')}"
         data = cache_library(cache_key, cb=lambda: _solve(product))
         result.append(data)
 

@@ -23,7 +23,6 @@ class LineDetailSerializer(serializers.ModelSerializer):
     # product = serializers.SerializerMethodField()
 
     def get_product(self, instance):
-        import pdb; pdb.set_trace()
         return custom_ProductListSerializer([instance.product], context=self.context, ignore_child_image=False).data
 
     class Meta:
