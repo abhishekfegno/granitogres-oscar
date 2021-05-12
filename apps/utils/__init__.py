@@ -58,13 +58,14 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
     if not purchase_info:
         return kwargs
     retail_rate = hasattr(purchase_info.stockrecord, 'price_retail') and purchase_info.stockrecord.price_retail or None
-    if retail_rate:
-        retail_rate = get_approximate_tax_for_retail(
-            purchase_info.price.incl_tax,
-            purchase_info.price.excl_tax,
-            retail_rate
-        )
+    # if retail_rate:
+    #     price_retail = get_approximate_tax_for_retail(
+    #         purchase_info.price.incl_tax,
+    #         purchase_info.price.excl_tax,
+    #         retail_rate
+    #     )
     return {
+        'excl_tax': float(purchase_info.price.effective_price),
         'effective_price': float(purchase_info.price.effective_price),
         'retail': int(retail_rate * 100) / 100,
         'currency': purchase_info.price.currency,
