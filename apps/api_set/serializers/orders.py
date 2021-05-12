@@ -6,19 +6,18 @@ from oscar.templatetags.currency_filters import currency
 from rest_framework import serializers
 from rest_framework.relations import HyperlinkedIdentityField
 
-from apps.api_set.serializers.catalogue import ProductListSerializer, ProductSimpleListSerializer, \
-    custom_ProductListSerializer
+from apps.api_set.serializers.catalogue import ProductListSerializer
+from apps.api_set_v2.serializers.catalogue import ProductSimpleListSerializer, custom_ProductListSerializer
 from apps.catalogue.models import Product
+from apps.order.models import Order, Line
 from apps.payment.refunds import RefundFacade
-
-Order = get_model('order', 'Order')
-Line = get_model('order', 'Line')
 
 
 class LineDetailSerializer(serializers.ModelSerializer):
     product = ProductListSerializer()
 
     def get_product(self, instance):
+
         # product_as_qs = Product.objects.filter(id=instance.product_id)
         # return custom_ProductListSerializer(product_as_qs, context=self.context).data
         product_as_qs = Product.objects.filter(id=instance.product_id)
@@ -88,6 +87,9 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     source = serializers.SerializerMethodField()
 
     def get_total_discount_incl_tax(self, instance):
+        import pdb;
+        pdb.set_trace()
+
         return str(instance.total_discount_incl_tax)
 
     def get_source(self, order):
@@ -106,6 +108,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         model = Order
         fields = (
             'id', 'number', 'currency',
+            'total_incl_tax',
             'total_discount_incl_tax',
             'shipping_incl_tax',
             'total_incl_tax',

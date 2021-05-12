@@ -83,10 +83,10 @@ class WncBasketSerializer(BasketSerializer):
         else:
             shipping_address = None
         ship = Repository().get_default_shipping_method(
-            basket=instance, shipping_addr=shipping_address,
+            basket=basket, shipping_addr=shipping_address,
         )
-        self.shipping_cost = ship.calculate(instance)
-        self.total_amt = OrderTotalCalculator(request=self.context['request']).calculate(instance, self.shipping_cost)
+        self.shipping_cost = ship.calculate(basket)
+        self.total_amt = OrderTotalCalculator(request=self.context['request']).calculate(basket, self.shipping_cost)
 
     def get_lines(self, instance):
 

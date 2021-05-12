@@ -195,8 +195,6 @@ class ProductAttribute(AbstractProductAttribute):
     is_varying = models.BooleanField(_('Is Varying For Child'), default=False)
 
 
-
-
 class SearchResponses(models.Model):
     """
     Not Using. Generated to use with Autosuggestion and mappng search with a type.
