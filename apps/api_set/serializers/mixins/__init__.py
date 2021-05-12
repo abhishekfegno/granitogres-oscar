@@ -24,8 +24,10 @@ AvailabilitySerializer = get_api_class('serializers.product', 'AvailabilitySeria
 
 class ProductPrimaryImageFieldMixin(object):
 
-    def get_primary_image(self, instance):
-        if instance.is_child:
+    def get_primary_image(self, instance, ignore_if_child=True):
+
+        if instance.is_child and ignore_if_child:
+            print("Not delivering child image")
             return None
         req = self.context['request']        # noqa: mixin assured
         img = instance.primary_image()

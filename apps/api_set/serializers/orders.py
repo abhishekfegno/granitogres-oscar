@@ -8,27 +8,30 @@ from rest_framework.relations import HyperlinkedIdentityField
 
 from apps.api_set.serializers.catalogue import ProductListSerializer
 from apps.api_set_v2.serializers.catalogue import ProductSimpleListSerializer, custom_ProductListSerializer
-from apps.catalogue.models import Product
 from apps.order.models import Order, Line
 from apps.payment.refunds import RefundFacade
 
 
+class ProductListSerializerForLine(ProductListSerializer):
+
+    def get_primary_image(self, instance, ignore_if_child=False):
+        return super(ProductListSerializer, self).get_primary_image(instance, ignore_if_child=ignore_if_child)
+
+
 class LineDetailSerializer(serializers.ModelSerializer):
-    product = ProductListSerializer()
+    product = ProductListSerializerForLine()
+    # product = serializers.SerializerMethodField()
 
     def get_product(self, instance):
-
-        # product_as_qs = Product.objects.filter(id=instance.product_id)
-        # return custom_ProductListSerializer(product_as_qs, context=self.context).data
-        product_as_qs = Product.objects.filter(id=instance.product_id)
-        return custom_ProductListSerializer([instance.product], context=self.context).data
+        import pdb; pdb.set_trace()
+        return custom_ProductListSerializer([instance.product], context=self.context, ignore_child_image=False).data
 
     class Meta:
         model = Line
         fields = (
             'id', 'product', 'quantity',
             'line_price_incl_tax',
-            'status', 'description', 'product'
+            'status', 'description', 'product', 'title'
         )
 
 
