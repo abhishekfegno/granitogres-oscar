@@ -40,9 +40,11 @@ def orders(request, *a, **k):
 
 
 def clone_order_to_basket(basket: Basket, order_to_get_copied: Order, clear_current_basket: bool = True, ):
-    copy_of_basket_lines = list(basket.lines.all().values_list('id', flat=True))
+    copy_of_basket_lines = list(basket.lines.all())
     error_messages = []
     at_least_one_is_success = False
+    if clear_current_basket:
+        basket.lines.all().delete()
     for line in order_to_get_copied.lines.all():
         if line.product is None:
             error_messages.append({
@@ -70,7 +72,10 @@ def clone_order_to_basket(basket: Basket, order_to_get_copied: Order, clear_curr
                 'is_a_bug': True,
             })
 
-    if at_least_one_is_success and clear_current_basket:
+    if not at_least_one_is_success:
+        # restoring
+        for item in copy_of_basket_lines:
+            basket.add_product(product=item.product, quantity=item.quantity)
         basket.lines.filter(id__in=copy_of_basket_lines).delete()
         basket.reset_offer_applications()
     return basket, error_messages
