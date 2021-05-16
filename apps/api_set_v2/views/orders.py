@@ -113,8 +113,8 @@ def do_reorder(basket: Basket, order: Order, request, clear_current_basket: bool
             lines_to_add.append(line)
         else:
             warnings.append({
-                'id': line.product.id,
-                'title': line.product.title,
+                'id': line.product and line.product.id,
+                'title': line.title,
                 'error': reason,
                 'is_generic_cart_error': False,
                 'is_a_bug': False,
@@ -127,8 +127,8 @@ def do_reorder(basket: Basket, order: Order, request, clear_current_basket: bool
         total_quantity)
     if not is_quantity_allowed:
         warnings.append({
-            'id': 0,
-            'title': '',
+            'id': None,
+            'title': '-',
             'error': reason,
             'is_generic_cart_error': True,
             'is_a_bug': False,
@@ -154,8 +154,8 @@ def do_reorder(basket: Basket, order: Order, request, clear_current_basket: bool
         return basket, warnings
     else:
         warnings.append({
-            'id': 0,
-            'title': '',
+            'id': None,
+            'title': '-',
             'error': ("It is not possible to re-order order %(number)s "
                       "as none of its lines are available to purchase") % {'number': order.number},
             'is_generic_cart_error': True,
