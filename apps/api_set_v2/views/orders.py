@@ -57,7 +57,10 @@ def clone_order_to_basket(basket: Basket, order_to_get_copied: Order, clear_curr
             })
             continue
         try:
-            basket.add_product(line.product, quantity=line.quantity)
+            basket_line, created = basket.add_product(line.product, quantity=line.quantity)
+            if not created:
+                basket_line.quantity = line.quantity
+                basket_line.save()
             at_least_one_is_success = True
         except ValueError as e:
             error_messages.append({
@@ -77,7 +80,11 @@ def clone_order_to_basket(basket: Basket, order_to_get_copied: Order, clear_curr
     if not at_least_one_is_success:
         # restoring
         for item in copy_of_basket_lines:
-            basket.add_product(product=item.product, quantity=item.quantity)
+            basket_line, created = basket.add_product(product=line.product, quantity=line.quantity)
+            if not created:
+                basket_line.quantity = line.quantity
+                basket_line.save()
+
         # basket.lines.filter(id__in=[item.id for item in copy_of_basket_lines]).delete()
         basket.reset_offer_applications()
     return basket, error_messages
