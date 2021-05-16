@@ -175,7 +175,8 @@ class Command(BaseCommand):
         else:
             print(basket, user, method)
             raise ModuleNotFoundError("Method is not in ")
-        uad = UserAddress.objects.filter(user=user, ).only('id').last()
+        # import pdb; pdb.set_trace()
+        uad = UserAddress.objects.filter().last()
         point = Point(float(12.785238498732), float(77.94478155806023))
         if uad is None:
             uad = UserAddress.objects.create(
@@ -188,6 +189,7 @@ class Command(BaseCommand):
                     "line2": "Vennikulam P O",
                     "line3": "Thiruvalla",
                     "line4": "Thiruvalla",
+                    "line5": "Thiruvalla",
                     "state": "Kerala",
                     "postcode": "689544",
                     "location": point,

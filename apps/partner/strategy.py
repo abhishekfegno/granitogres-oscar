@@ -15,9 +15,10 @@ class Selector(object):
         # TODO: FOR DEBUGGING PURPOSES
         if not zone:
             zone = Zones.objects.filter().last()
-            if zone:
+            if zone :
                 zone = zone.id
-                request.session['zone'] = zone
+                if request:
+                    request.session['zone'] = zone
         if not zone and (not request and user):
             last_location = user.location_set.filter(is_active=True).last()
             if last_location and last_location.zone_id:
