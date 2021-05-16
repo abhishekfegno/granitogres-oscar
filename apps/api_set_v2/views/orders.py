@@ -44,9 +44,7 @@ def clone_order_to_basket(basket: Basket, order_to_get_copied: Order, clear_curr
     error_messages = []
     at_least_one_is_success = False
     if clear_current_basket:
-        for line in basket.lines.all():
-            if line.product:
-                basket.add_product(line.product, -1*line.quantity)
+        basket.lines.all().delete()
         basket._lines = None
         basket.refresh_from_db()
     for line in order_to_get_copied.lines.all():
@@ -80,7 +78,7 @@ def clone_order_to_basket(basket: Basket, order_to_get_copied: Order, clear_curr
         # restoring
         for item in copy_of_basket_lines:
             basket.add_product(product=item.product, quantity=item.quantity)
-        basket.lines.filter(id__in=[item.id for item in copy_of_basket_lines]).delete()
+        # basket.lines.filter(id__in=[item.id for item in copy_of_basket_lines]).delete()
         basket.reset_offer_applications()
     return basket, error_messages
 
