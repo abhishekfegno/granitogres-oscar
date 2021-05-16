@@ -26,7 +26,7 @@ class Command(BaseCommand):
     s = None            # store request with session
     _passwd = None
     serializer_class = CheckoutSerializer
-    BASE_URL = 'http://{}/api/v1/'
+    BASE_URL = 'https://{}/api/v1/'
 
     def add_arguments(self, parser):
         parser.add_argument(
