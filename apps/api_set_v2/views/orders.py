@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.views.decorators.cache import cache_page
 from oscarapi.basket import operations
-from oscarapi.basket.operations import prepare_basket, assign_basket_strategy
+from oscarapi.basket.operations import prepare_basket, assign_basket_strategy, apply_offers
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -103,7 +103,7 @@ def do_reorder(basket: Basket, order: Order, request, clear_current_basket: bool
     """
     # Collect lines to be added to the basket and any warnings for lines
     # that are no longer available.
-    basket = request.basket
+    # basket = request.basket
     lines_to_add = []
 
     warnings = []
@@ -161,7 +161,6 @@ def do_reorder(basket: Basket, order: Order, request, clear_current_basket: bool
             'is_generic_cart_error': True,
             'is_a_bug': False,
         })
-        copy_of_basket_lines
         return basket, warnings
 
 
@@ -181,6 +180,7 @@ def reorder_to_current_basket(request, *args, **kwargs):
         request,
         clear_current_basket=clear_current_basket
     )
+    apply_offers(request, new_basket)
     data = get_response_dict_with_basket(new_basket, request)
     data['error_messages'] = error_messages
     return Response(data)
@@ -190,12 +190,14 @@ def reorder_to_current_basket(request, *args, **kwargs):
 def reorder_to_temporary_basket(request, *args, **kwargs):
     clear_current_basket = request.GET.get('clear_current_basket', 0) in [1, '1']
     order_to_get_copied: Order = get_object_or_404(Order.objects.all(), **kwargs)
+    new_empty_basket = generate_buy_now_basket(request)
     new_basket, error_messages = do_reorder(
-        generate_buy_now_basket(request),
+        new_empty_basket,
         order_to_get_copied,
         request,
         clear_current_basket=clear_current_basket
     )
+    apply_offers(request, new_basket)
     data = get_response_dict_with_basket(new_basket, request)
     data['error_messages'] = error_messages
     return Response(data)
