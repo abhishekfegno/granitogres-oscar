@@ -44,7 +44,11 @@ def clone_order_to_basket(basket: Basket, order_to_get_copied: Order, clear_curr
     error_messages = []
     at_least_one_is_success = False
     if clear_current_basket:
-        basket.lines.all().delete()
+        for line in basket.lines.all():
+            if line.product:
+                basket.add_product(line.product, -1*line.quantity)
+        basket._lines = None
+        basket.refresh_from_db()
     for line in order_to_get_copied.lines.all():
         if line.product is None:
             error_messages.append({
