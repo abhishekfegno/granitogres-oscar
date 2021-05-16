@@ -77,16 +77,16 @@ def clone_order_to_basket(basket: Basket, order_to_get_copied: Order, clear_curr
                 'is_a_bug': True,
             })
 
-    if not at_least_one_is_success:
-        # restoring
-        for item in copy_of_basket_lines:
-            basket_line, created = basket.add_product(product=line.product, quantity=line.quantity)
-            if not created:
-                basket_line.quantity = line.quantity
-                basket_line.save()
-
-        # basket.lines.filter(id__in=[item.id for item in copy_of_basket_lines]).delete()
-        basket.reset_offer_applications()
+    # if not at_least_one_is_success:
+    #     # restoring
+    #     for item in copy_of_basket_lines:
+    #         basket_line, created = basket.add_product(product=line.product, quantity=line.quantity)
+    #         if not created:
+    #             basket_line.quantity = line.quantity
+    #             basket_line.save()
+    #
+    #     # basket.lines.filter(id__in=[item.id for item in copy_of_basket_lines]).delete()
+    #     basket.reset_offer_applications()
     return basket, error_messages
 
 
