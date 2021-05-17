@@ -79,6 +79,7 @@ if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, "assets"))
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += path('qs/', TemplateView.as_view(template_name="dummy_search.html")),  # > Django-2.0
+    urlpatterns += path('sentry-debug/', lambda request: 1 / 0),
 
 
 def error_404(request, exception=None):
