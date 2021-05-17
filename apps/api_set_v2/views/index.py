@@ -1,24 +1,14 @@
 import random
 from collections import defaultdict
 
-from django.conf import settings
-from django.core.paginator import Paginator
-from django.db.models import Sum, Case, When, Value, F, CharField, Q
-from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie
-from oscar.apps.offer.models import ConditionalOffer
+from django.db.models import Sum, Q
 from rest_framework.decorators import api_view
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-
-from apps.api_set.serializers.catalogue import ProductListSerializer
 from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite
-from apps.api_set_v2.serializers.catalogue import CategorySerializer, ProductSimpleListSerializer
+from apps.api_set_v2.serializers.catalogue import CategorySerializer
 from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.catalogue.models import Category, Product
-from apps.dashboard.custom.models import HomePageMegaBanner, OfferBanner, InAppBanner
-from apps.partner.models import StockRecord
-from apps.utils.urls import list_api_formatter
+from apps.dashboard.custom.models import HomePageMegaBanner, InAppBanner
 from lib.cache import cache_library
 
 
@@ -63,7 +53,7 @@ def index(request, *a, **k):
     def _inner():
         out = {'categories': []}
         cxt = {'context': {'request': request}}
-        category_set = Category.objects.filter().exclude(slug="featured").annotate(c=Sum('product__basket_lines')).order_by('depth', 'c')[:10]
+        category_set = Category.objects.filter(depth=1).exclude(slug="featured").annotate(c=Sum('product__basket_lines')).order_by('depth', 'c')[:10]
         out['categories'] = CategorySerializer(category_set, **cxt, many=True).data
 
         out['offer_banners'] = [{
