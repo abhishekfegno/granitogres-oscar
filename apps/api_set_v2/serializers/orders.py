@@ -61,22 +61,22 @@ class OrderListSerializer(serializers.ModelSerializer):
     basket_total_incl_tax = serializers.SerializerMethodField()
 
     def get_basket_total_incl_tax(self, instance):
-        return float(instance.basket_total_incl_tax)
+        return instance.basket_total_incl_tax and float(instance.basket_total_incl_tax)
 
     total_incl_tax = serializers.SerializerMethodField()
 
     def get_total_incl_tax(self, instance):
-        return float(instance.total_incl_tax)
+        return instance.total_incl_tax and float(instance.total_incl_tax)
 
     shipping_incl_tax = serializers.SerializerMethodField()
 
     def get_shipping_incl_tax(self, instance):
-        return float(instance.shipping_incl_tax)
+        return instance.shipping_incl_tax and float(instance.shipping_incl_tax)
 
     total_excl_tax = serializers.SerializerMethodField()
 
     def get_total_excl_tax(self, instance):
-        return float(instance.total_excl_tax)
+        return instance.total_excl_tax and float(instance.total_excl_tax)
 
     class Meta:
         model = Order
