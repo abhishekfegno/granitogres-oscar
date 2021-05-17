@@ -29,25 +29,29 @@ class Command(BaseCommand):
     category_name = None
     img_list = []
     categories = [
-        {"category": "Fruits & Vegetables", "sub-category": "Cuts & Sprouts", 'slug': "/fruits-vegetables/cuts-sprouts/"},
-        {"category": "Fruits & Vegetables", "sub-category": "Exotic Fruits & Veggies", 'slug': "/fruits-vegetables/exotic-fruits-veggies/"},
-        {"category": "Fruits & Vegetables", "sub-category": "Fresh Fruits", 'slug': "/fruits-vegetables/fresh-fruits/"},
-        {"category": "Fruits & Vegetables", "sub-category": "Fresh Vegetables", 'slug': "/fruits-vegetables/fresh-vegetables/"},
-        {"category": "Fruits & Vegetables", "sub-category": "Herbs & Seasonings", 'slug': "/fruits-vegetables/herbs-seasonings/"},
-        {"category": "Fruits & Vegetables", "sub-category": "Organic Fruits & Vegetables", 'slug': "/fruits-vegetables/organic-fruits-vegetables/"},
+        # {"category": "Fruits & Vegetables", "sub-category": "Cuts & Sprouts", 'slug': "/fruits-vegetables/cuts-sprouts/"},
+        # {"category": "Fruits & Vegetables", "sub-category": "Exotic Fruits & Veggies", 'slug': "/fruits-vegetables/exotic-fruits-veggies/"},
+        # {"category": "Fruits & Vegetables", "sub-category": "Fresh Fruits", 'slug': "/fruits-vegetables/fresh-fruits/"},
+        # {"category": "Fruits & Vegetables", "sub-category": "Fresh Vegetables", 'slug': "/fruits-vegetables/fresh-vegetables/"},
+        # {"category": "Fruits & Vegetables", "sub-category": "Herbs & Seasonings", 'slug': "/fruits-vegetables/herbs-seasonings/"},
+        # {"category": "Fruits & Vegetables", "sub-category": "Organic Fruits & Vegetables", 'slug': "/fruits-vegetables/organic-fruits-vegetables/"},
+        #
+        # {"category": "Eggs, Meat & Fish", "sub-category": "Eggs", 'slug': "/eggs-meat-fish/eggs/"},
+        # {"category": "Eggs, Meat & Fish", "sub-category": "Fish & Sea Food", 'slug': "/eggs-meat-fish/fish-seafood/"},
+        # {"category": "Eggs, Meat & Fish", "sub-category": "Mutton & Lamb", 'slug': "/eggs-meat-fish/mutton-lamb/"},
+        # {"category": "Eggs, Meat & Fish", "sub-category": "Pork & Other Meats", 'slug': "/eggs-meat-fish/pork-other-meats/"},
+        # {"category": "Eggs, Meat & Fish", "sub-category": "Poultry", 'slug': "/eggs-meat-fish/poultry/"},
+        #
+        # {"category": "Beverages", "sub-category": "Coffee", 'slug': "/beverages/coffee/"},
+        # {"category": "Beverages", "sub-category": "Energy & Soft Drinks", 'slug': "/beverages/energy-soft-drinks/"},
+        # {"category": "Beverages", "sub-category": "Fruit Juices & Drinks", 'slug': "/beverages/fruit-juices-drinks/"},
+        # {"category": "Beverages", "sub-category": "Health Drink & Supplement", 'slug': "/beverages/health-drink-supplement/"},
+        # {"category": "Beverages", "sub-category": "Tea", 'slug': "/beverages/tea/"},
+        # {"category": "Beverages", "sub-category": "Water", 'slug': "/beverages/water/"},
 
-        {"category": "Eggs, Meat & Fish", "sub-category": "Eggs", 'slug': "/eggs-meat-fish/eggs/"},
-        {"category": "Eggs, Meat & Fish", "sub-category": "Fish & Sea Food", 'slug': "/eggs-meat-fish/fish-seafood/"},
-        {"category": "Eggs, Meat & Fish", "sub-category": "Mutton & Lamb", 'slug': "/eggs-meat-fish/mutton-lamb/"},
-        {"category": "Eggs, Meat & Fish", "sub-category": "Pork & Other Meats", 'slug': "/eggs-meat-fish/pork-other-meats/"},
-        {"category": "Eggs, Meat & Fish", "sub-category": "Poultry", 'slug': "/eggs-meat-fish/poultry/"},
 
-        {"category": "Beverages", "sub-category": "Coffee", 'slug': "/beverages/coffee/"},
-        {"category": "Beverages", "sub-category": "Energy & Soft Drinks", 'slug': "/beverages/energy-soft-drinks/"},
-        {"category": "Beverages", "sub-category": "Fruit Juices & Drinks", 'slug': "/beverages/fruit-juices-drinks/"},
-        {"category": "Beverages", "sub-category": "Health Drink & Supplement", 'slug': "/beverages/health-drink-supplement/"},
-        {"category": "Beverages", "sub-category": "Tea", 'slug': "/beverages/tea/"},
-        {"category": "Beverages", "sub-category": "Water", 'slug': "/beverages/water/"},
+
+
     ]
 
     @staticmethod
