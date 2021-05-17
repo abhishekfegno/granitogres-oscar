@@ -112,6 +112,7 @@ class ProductDetailSerializerMixin(object):
         return self.context['product'].get_title()
 
     def get_description(self, instance):
+
         return strip_tags(self.context['product'].description)
 
     def get_about(self, instance):
