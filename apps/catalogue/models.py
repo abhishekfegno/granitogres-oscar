@@ -252,6 +252,12 @@ def clear_cache_product(sender, instance, **kwargs):
     cache.delete_pattern("product_list__page:*")
 
 
+def clear_cache_category(sender, instance, **kwargs):
+    cache.delete_pattern("categories_list_cached")
+    cache.delete_pattern("apps.api_set_v2.views.index?zone=*")
+
+
+post_save.connect(clear_cache_category, sender=Category)
 post_save.connect(clear_cache_product, sender=Product)
 
 

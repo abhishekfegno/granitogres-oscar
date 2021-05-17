@@ -50,8 +50,8 @@ def get_home_content(request):
             'name': cat.name,
             'slug': cat.slug,
             'products': data,
-            'slider_banners': random.choices(slider_banner, k=count),
-            'full_screen_banner': random.choice(full_screen_banner)
+            'slider_banners': random.choices(slider_banner, k=count) if slider_banner else [],
+            'full_screen_banner': random.choice(full_screen_banner) if full_screen_banner else []
         })
     return out
 
