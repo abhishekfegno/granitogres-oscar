@@ -90,7 +90,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     source = serializers.SerializerMethodField()
 
     def get_total_discount_incl_tax(self, instance):
-        return str(instance.total_excl_tax)
+        return str(instance.total_discount_incl_tax)
 
     def get_source(self, order):
         source = RefundFacade().get_sources_model_from_order(order)
