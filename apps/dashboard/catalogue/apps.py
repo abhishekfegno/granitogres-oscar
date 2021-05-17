@@ -1,5 +1,4 @@
 import oscar.apps.dashboard.catalogue.apps as apps
-from oscar.core.loading import get_class
 
 
 class CatalogueDashboardConfig(apps.CatalogueDashboardConfig):
@@ -7,6 +6,11 @@ class CatalogueDashboardConfig(apps.CatalogueDashboardConfig):
 
     def ready(self):
         super().ready()
+        from apps.dashboard.catalogue.views import CategoryUpdateView, CategoryCreateView
+
+        self.category_create_view = CategoryCreateView
+        self.category_update_view = CategoryUpdateView
+
         from apps.dashboard.catalogue.views import ProductCreateUpdateView
         self.product_createupdate_view = ProductCreateUpdateView
         from apps.dashboard.catalogue.views import ProductClassCreateView, ProductClassUpdateView

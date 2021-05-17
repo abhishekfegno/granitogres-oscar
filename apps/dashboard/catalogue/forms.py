@@ -3,7 +3,9 @@ from oscar.apps.dashboard.catalogue import forms as base_forms
 
 
 # Product = get_model('catalogue', 'Product')
-from apps.catalogue.models import ProductAttribute
+from treebeard.forms import movenodeform_factory
+
+from apps.catalogue.models import ProductAttribute, Category
 
 
 class ProductForm(base_forms.ProductForm):
@@ -22,3 +24,6 @@ class ProductAttributesForm(base_forms.ProductAttributesForm):
         fields = ["name", "code", "type", "option_group", 'is_varying', "required"]
 
 
+CategoryForm = movenodeform_factory(
+    Category,
+    fields=['name', 'description', 'image', 'icon'])
