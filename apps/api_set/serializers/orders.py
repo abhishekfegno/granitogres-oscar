@@ -77,7 +77,8 @@ class OrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = (
-            'id', 'number', 'currency', 'total_incl_tax',
+            'id', 'number', 'currency',
+            'total_incl_tax',
             'num_lines', 'status', 'url', 'date_placed', 'lines',
             'is_returnable', 'is_cancellable', 'can_return_until'
         )
@@ -89,7 +90,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     source = serializers.SerializerMethodField()
 
     def get_total_discount_incl_tax(self, instance):
-        return str(instance.total_discount_incl_tax)
+        return str(instance.total_excl_tax)
 
     def get_source(self, order):
         source = RefundFacade().get_sources_model_from_order(order)
@@ -102,6 +103,26 @@ class OrderDetailSerializer(serializers.ModelSerializer):
                 'amount_available_for_refund': source.amount_available_for_refund,
                 'reference': source.reference,
             }
+
+    total_excl_tax = serializers.SerializerMethodField()
+
+    def get_total_excl_tax(self, instance):
+        return float(instance.total_excl_tax)
+
+    shipping_incl_tax = serializers.SerializerMethodField()
+
+    def get_shipping_incl_tax(self, instance):
+        return float(instance.shipping_incl_tax)
+
+    total_tax = serializers.SerializerMethodField()
+
+    def get_total_tax(self, instance):
+        return float(instance.total_tax)
+
+    total_incl_tax = serializers.SerializerMethodField()
+
+    def get_total_incl_tax(self, instance):
+        return float(instance.total_incl_tax)
 
     class Meta:
         model = Order

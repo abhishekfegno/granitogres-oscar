@@ -58,10 +58,34 @@ class OrderListSerializer(serializers.ModelSerializer):
         time_to_return = instance.max_time_to__return
         return time_to_return and str(time_to_return)
 
+    basket_total_incl_tax = serializers.SerializerMethodField()
+
+    def get_basket_total_incl_tax(self, instance):
+        return float(instance.basket_total_incl_tax)
+
+    total_incl_tax = serializers.SerializerMethodField()
+
+    def get_total_incl_tax(self, instance):
+        return float(instance.total_incl_tax)
+
+    shipping_incl_tax = serializers.SerializerMethodField()
+
+    def get_shipping_incl_tax(self, instance):
+        return float(instance.shipping_incl_tax)
+
+    total_excl_tax = serializers.SerializerMethodField()
+
+    def get_total_excl_tax(self, instance):
+        return float(instance.total_excl_tax)
+
     class Meta:
         model = Order
         fields = (
-            'id', 'number', 'currency', 'total_incl_tax', 'date_delivered',
+            'id', 'number', 'currency',
+            'basket_total_incl_tax',
+            'shipping_incl_tax',
+            'total_incl_tax', 'total_excl_tax',
+            'date_delivered',
             'num_lines', 'status', 'url', 'date_placed',
             'is_returnable', 'is_cancellable', 'can_return_until', 'is_on_the_way'
         )
