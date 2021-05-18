@@ -13,6 +13,17 @@ class Command(BaseCommand):
         DELETE FROM  order_paymentevent  CASCADE;
         DELETE FROM order_line  CASCADE;
         
+        DELETE FROM order_paymenteventquantity CASCADE;
+        DELETE FROM order_orderdiscount CASCADE;
+        DELETE FROM order_ordernote CASCADE;
+        DELETE FROM order_paymentevent CASCADE;
+        DELETE FROM order_lineprice CASCADE;
+        DELETE FROM logistics_consignmentreturn CASCADE;
+        DELETE FROM order_orderstatuschange CASCADE;
+        DELETE FROM order_line CASCADE;
+        DELETE FROM logistics_consignmentdelivery CASCADE;
+        DELETE FROM payment_transaction  CASCADE;
+        
         DELETE FROM payment_codrepayments  CASCADE;
         DELETE FROM payment_cod  CASCADE;
         

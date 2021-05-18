@@ -53,7 +53,7 @@ def index(request, *a, **k):
     def _inner():
         out = {'categories': []}
         cxt = {'context': {'request': request}}
-        category_set = Category.objects.filter(depth=1).exclude(slug="featured").annotate(c=Sum('product__basket_lines')).order_by('depth', 'c')[:10]
+        category_set = Category.get_root_nodes().exclude(slug="featured").annotate(c=Sum('product__basket_lines'))[:10]
         out['categories'] = CategorySerializer(category_set, **cxt, many=True).data
 
         out['offer_banners'] = [{
