@@ -11,6 +11,7 @@ from oscar.apps.catalogue.abstract_models import AbstractProduct, AbstractCatego
 from oscar.core.loading import get_model
 from sorl.thumbnail import get_thumbnail
 
+from apps.partner.models import StockRecord
 from apps.utils import image_not_found, get_purchase_info, purchase_info_lite_as_dict, purchase_info_as_dict
 from django.utils.translation import gettext_lazy as _
 
@@ -18,7 +19,6 @@ from lib import cache_key
 from lib.cache import cache_library
 from sorl.thumbnail import ImageField
 
-StockRecord = get_model('partner', 'StockRecord')
 
 
 class Product(AbstractProduct):

@@ -16,6 +16,7 @@ class StockRecord(AbstractStockRecord):
         blank=True, null=True)
 
 
+
 class Partner(AbstractPartner):
     pass
 
