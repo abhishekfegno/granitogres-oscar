@@ -224,10 +224,10 @@ class Command(BaseCommand):
                 sub_category: Category = self.get_category_object(sub_cat['GroupTitle'], sub_cat['GroupImagePath'], parent=main_cat)
 
                 data_set = self.generate_data(main_cat, sub_category, sub_cat)
-                [_ for _ in data_set]
-                print(1)
-                # for row in data_set:
-                #     product = self.create_product(row)
-                #     product.categories.add(sub_category)
+                # [_ for _ in data_set]
+                # print(1)
+                for row in data_set:
+                    product = self.create_product(row)
+                    product.categories.add(sub_category)
 
         cache.clear()
