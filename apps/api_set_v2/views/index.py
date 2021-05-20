@@ -34,13 +34,18 @@ def get_home_content(request):
 
     slider_banner = [_(b) for b in banners if b.type == b.SLIDER_BANNER]
     full_screen_banner = [_(b) for b in banners if b.type == b.FULL_SCREEN_BANNER]
+    segments = len(cat_data.keys())
+    slider_length = len(slider_banner)
+    segment_len = slider_length // segments
+    start, end = 0, segment_len
     for cat, data in cat_data.items():
-        count = random.randint(3, 6)
+        slides = random.shuffle(slider_banner[start:end])[:min(segment_len, 6)]
+        start, end = start + segment_len, end + segment_len
         out.append({
             'name': cat.name,
             'slug': cat.slug,
             'products': data,
-            'slider_banners': random.choices(slider_banner, k=count) if slider_banner else [],
+            'slider_banners': slides,
             'full_screen_banner': random.choice(full_screen_banner) if full_screen_banner else []
         })
     return out
