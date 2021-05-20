@@ -39,7 +39,9 @@ def get_home_content(request):
     segment_len = slider_length // segments
     start, end = 0, segment_len
     for cat, data in cat_data.items():
-        slides = random.shuffle(slider_banner[start:end])[:min(segment_len, 6)]
+        slides = slider_banner[start:end]
+        random.shuffle(slides)
+        slides = slides[:min(segment_len, 6)]
         start, end = start + segment_len, end + segment_len
         out.append({
             'name': cat.name,
