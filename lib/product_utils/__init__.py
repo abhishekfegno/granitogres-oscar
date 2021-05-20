@@ -83,7 +83,7 @@ def apply_filter(queryset, _filter, null_value_compatability='__'):
     return queryset
 
 
-def apply_search(queryset, search: str, mode: str = '_trigram', extends: bool = True):
+def apply_search(queryset, search: str, mode: str = '_similarity_rank', extends: bool = True):
     """
     search : string
     mode : selector_functions
