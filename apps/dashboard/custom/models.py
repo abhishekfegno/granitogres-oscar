@@ -1,5 +1,5 @@
 # /home/jk/code/grocery/apps/dashboard/custom/models.py
-
+from django.conf import settings
 from django.core import validators
 from django.db import models
 from django.db.models.signals import post_save
@@ -129,11 +129,11 @@ class InAppBanner(AbstractCURDModel):
     def home_banner_wide_image(self, request=empty()):
         if self.type == self.SLIDER_BANNER:
             return request.build_absolute_uri(
-                get_thumbnail(self.banner, '312x312', crop='center', quality=100).url
+                get_thumbnail(self.banner, settings.SHORT_SCREEN_BANNER_IMAGE_SIZE, crop='center', quality=100).url
             )
 
         return request.build_absolute_uri(
-            get_thumbnail(self.banner, '686x385', crop='center', quality=100).url
+            get_thumbnail(self.banner, settings.WIDE_SCREEN_BANNER_IMAGE_SIZE, crop='center', quality=100).url
         )
 
 
@@ -184,7 +184,7 @@ class HomePageMegaBanner(AbstractCURDModel):
 
     def home_banner_wide_image(self, request=empty()):
         return request.build_absolute_uri(
-            get_thumbnail(self.banner, '686x385', crop='center', quality=100).url
+            get_thumbnail(self.banner, settings.WIDE_SCREEN_BANNER_IMAGE_SIZE, crop='center', quality=100).url
         )
 
 
