@@ -86,10 +86,10 @@ def product_list(request, category='all', **kwargs):
 
     if _product_range:
         product_range = get_object_or_404(Range, pk=_product_range)
-        queryset = product_range.all_products().filter(structure__in=['standalone', 'child'], is_public=True)
+        queryset = product_range.all_products().filter(is_public=True)
     elif _offer_category:
         offer_banner_object = get_object_or_404(OfferBanner, code=_offer_category, offer__status=ConditionalOffer.OPEN)
-        queryset = offer_banner_object.products().filter(structure__in=['standalone', 'child'], is_public=True)
+        queryset = offer_banner_object.products().filter(is_public=True)
     elif category != 'all':
         queryset = category_filter(queryset=queryset, category_slug=category)
 
@@ -126,7 +126,7 @@ def product_list(request, category='all', **kwargs):
             product_data = []
         rc = None
         return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc)
-    if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not _search and not _filter and not _sort:
+    if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not any([_search, _filter, _sort, _offer_category, _product_range, ]):
         c_key = cache_key.product_list__key.format(page_number, page_size, category)
         # if settings.DEBUG:
         #     cache.delete(c_key)

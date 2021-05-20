@@ -20,7 +20,6 @@ from lib.cache import cache_library
 from sorl.thumbnail import ImageField
 
 
-
 class Product(AbstractProduct):
     search = SearchVectorField(null=True)
     selected_stock_record = None
