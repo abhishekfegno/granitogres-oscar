@@ -129,11 +129,11 @@ class InAppBanner(AbstractCURDModel):
     def home_banner_wide_image(self, request=empty()):
         if self.type == self.SLIDER_BANNER:
             return request.build_absolute_uri(
-                get_thumbnail(self.banner, '156x156', crop='center', quality=98).url
+                get_thumbnail(self.banner, '312x312', crop='center', quality=100).url
             )
 
         return request.build_absolute_uri(
-            get_thumbnail(self.banner, '343x148', crop='center', quality=98).url
+            get_thumbnail(self.banner, '686x385', crop='center', quality=100).url
         )
 
 
@@ -184,7 +184,7 @@ class HomePageMegaBanner(AbstractCURDModel):
 
     def home_banner_wide_image(self, request=empty()):
         return request.build_absolute_uri(
-            get_thumbnail(self.banner, '312x128', crop='center', quality=98).url
+            get_thumbnail(self.banner, '686x385', crop='center', quality=100).url
         )
 
 
