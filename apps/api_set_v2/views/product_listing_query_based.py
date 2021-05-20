@@ -63,7 +63,7 @@ FILTER_BY_CHOICES = [
 def product_list(request, category='all', **kwargs):
     """
     PRODUCT LISTING API, (powering,  list /c/all/, /c/<category_slug>/,  )
-
+    ===
     q = " A search term "
     product_range = '<product-range-id>'
     sort = any one from ['relevancy', 'rating', 'newest', 'price-desc', 'price-asc', 'title-asc', 'title-desc']
@@ -83,16 +83,20 @@ def product_list(request, category='all', **kwargs):
     page_size = int(request.GET.get('page_size', str(settings.DEFAULT_PAGE_SIZE)))
     out = {}
     # search_handler = get_product_search_handler_class()(request.GET, request.get_full_path(), [])
-
+    title = 'All'
     if _product_range:
         product_range = get_object_or_404(Range, pk=_product_range)
+        if product_range:
+            title = product_range.name
         queryset = product_range.all_products().filter(is_public=True)
     elif _offer_category:
         offer_banner_object = get_object_or_404(OfferBanner, code=_offer_category, offer__status=ConditionalOffer.OPEN)
+        if offer_banner_object and offer_banner_object.product_range:
+            title = offer_banner_object.product_range.name
         queryset = offer_banner_object.products().filter(is_public=True)
     elif category != 'all':
-        queryset = category_filter(queryset=queryset, category_slug=category)
-
+        queryset, cat = category_filter(queryset=queryset, category_slug=category, return_as_tuple=True)
+        title = cat.name
     if _filter:
         """
         input = weight__in:25,30,35|price__gte:25|price__lte:45
@@ -101,13 +105,14 @@ def product_list(request, category='all', **kwargs):
 
     if _search:
         queryset = apply_search(queryset=queryset, search=_search)
+        title = f"Search: '{_search}'"
 
     if _sort:
         _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
         queryset = apply_sort(queryset=queryset, sort=_sort)
 
     def _inner():
-        nonlocal queryset, page_number
+        nonlocal queryset, page_number, title
         # queryset = queryset.browsable().base_queryset()
         paginator = Paginator(queryset, page_size)  # Show 18 contacts per page.
         empty_list = False
@@ -129,7 +134,7 @@ def product_list(request, category='all', **kwargs):
         else:
             product_data = []
         rc = None
-        return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc)
+        return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc, title=title)
     if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not any([_search, _filter, _sort, _offer_category, _product_range, ]):
         c_key = cache_key.product_list__key.format(page_number, page_size, category)
         # if settings.DEBUG:
