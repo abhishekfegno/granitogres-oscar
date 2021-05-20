@@ -22,7 +22,7 @@ def _similarity_with_rank_search(queryset, search, extends=False):
     for s in search.split(' '):
         query |= SearchQuery(s)
     return queryset.annotate(
-        rank=SearchRank(F('title'), query),
+        rank=SearchRank(F('search'), query),
     ).filter(rank__gt=0).order_by('-rank')
 
 

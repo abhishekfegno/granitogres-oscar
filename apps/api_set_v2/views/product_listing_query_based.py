@@ -123,8 +123,8 @@ def product_list(request, category='all', **kwargs):
             from fuzzywuzzy import fuzz
             product_data = get_optimized_product_dict(qs=page_obj.object_list, request=request).values()
             # product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
-            if _search:
-                product_data = sorted(product_data, key=lambda p: fuzz.token_sort_ratio(_search.lower(), p['title'].lower()), reverse=True)
+            # if _search:
+            #     product_data = sorted(product_data, key=lambda p: fuzz.token_sort_ratio(_search.lower(), p['title'].lower()), reverse=True)
 
         else:
             product_data = []
