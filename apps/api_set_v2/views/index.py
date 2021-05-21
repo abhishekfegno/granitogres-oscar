@@ -87,8 +87,8 @@ def get_offer_content(request):
     off_data = defaultdict(list)
 
     for banner in offer_banners:
-        qs_filter = banner.product_range.all_products()
-        product_data = get_optimized_product_dict(request=request, qs=qs_filter, limit=4, )
+        qs = banner.product_range.all_products()
+        product_data = get_optimized_product_dict(request=request, qs=qs, limit=4, )
         for parent_product, data in product_data.items():
             off_data[banner].append(data)
     banners = list(offer_banners)
@@ -108,7 +108,7 @@ def get_offer_content(request):
         slides = slides[:min(segment_len, 6)]
         start, end = start + segment_len, end + segment_len
         out.append({
-            'id': cat.id,
+            'product_range': cat.id,
             'name': cat.title,
             'slug': cat.id,
             'products': data,
