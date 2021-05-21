@@ -110,7 +110,6 @@ POS_02: str = 'position_02'
 
 
 @api_view(("GET",))
-@cache_page(60 * 60 * 2)
 def offers(request, *a, **k):
     banners = list(InAppBanner.objects.all().filter(banner__isnull=False, product_range_id__isnull=False))
 
