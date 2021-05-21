@@ -1,5 +1,6 @@
 import random
 from collections import defaultdict
+from typing import List, Dict, Any, Optional
 
 from django.db.models import Sum, Q
 from django.templatetags.static import static
@@ -142,16 +143,16 @@ def offers(request, *a, **k):
     if len(slider_banner) < 2:
         slider_banner += slider_banner
 
-    def get_as_dict(_index, lengthy_banner=True) -> dict:
+    def get_as_dict(_index, lengthy_banner=True) -> List[Dict[str, Optional[Any]]]:
         nonlocal request, full_screen_banner, slider_banner
         banner_set = full_screen_banner if lengthy_banner else slider_banner
         if banner_set and _index < len(banner_set):
-            return banner_set[_index]
+            return [banner_set[_index], ]
         else:
-            return {
+            return [{
                 'banner': request.build_absolute_uri(static('static/l6.jpg' if lengthy_banner else 'static/m4.jpg')),
                 'product_range': None
-            }
+            }, ]
 
     _out = {
         OFFER_TOP_LABEL: {
