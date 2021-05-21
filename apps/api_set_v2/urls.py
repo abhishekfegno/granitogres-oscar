@@ -3,12 +3,12 @@ from django.urls import path, include
 # Loading V1 Apis In order to patch
 from apps.api_set.views.catalogue import product_suggestions
 from apps.api_set.views.index import (
-    home, offer_products, offers
+    home, offer_products
 )
 #  End loading v1 apis
 from apps.api_set_v2.views.catalogue import product_detail_web
 
-from apps.api_set_v2.views.index import index
+from apps.api_set_v2.views.index import index, offers
 from apps.api_set_v2.views.orders import orders_detail, reorder_to_current_basket, reorder_to_temporary_basket
 from apps.api_set_v2.views.orders import orders
 from apps.api_set_v2.views.product_listing_query_based import product_list
