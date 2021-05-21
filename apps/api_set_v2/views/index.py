@@ -92,29 +92,12 @@ def get_offer_content(request):
         product_data = get_optimized_product_dict(request=request, qs=qs, limit=4, )
         for parent_product, data in product_data.items():
             off_data[banner].append(data)
-    banners = list(offer_banners)
-
-    def _(b):
-        return {'product_range': b.product_range_id, 'banner': b.home_banner_wide_image(request)}
-
-    slider_banner = [_(b) for b in banners if b.type == b.SLIDER_BANNER]
-    full_screen_banner = [_(b) for b in banners if b.type == b.FULL_SCREEN_BANNER]
-    segments = len(off_data.keys())
-    slider_length = len(slider_banner)
-    segment_len = max(slider_length // segments, 2)     # need at least 2.
-    start, end = 0, segment_len
     for cat, data in off_data.items():
-        slides = slider_banner[start:end]
-        random.shuffle(slides)
-        slides = slides[:min(segment_len, 6)]
-        start, end = start + segment_len, end + segment_len
         out.append({
             'product_range': cat.id,
             'name': cat.title,
             'slug': cat.id,
             'products': data,
-            'slider_banners': slides,
-            'full_screen_banner': random.choice(full_screen_banner) if full_screen_banner else None
         })
     return out
 
@@ -132,7 +115,7 @@ def offers(request, *a, **k):
     banners = list(InAppBanner.objects.all().filter(banner__isnull=False, product_range_id__isnull=False))
 
     def _(b):
-        return {'product_range': b.product_range_id, 'banner': b.home_banner_wide_image(request)}
+        return {'banner': b.home_banner_wide_image(request), 'product_range': b.product_range_id, }
 
     slider_banner = [_(b) for b in banners if b.type == b.SLIDER_BANNER]
     full_screen_banner = [_(b) for b in banners if b.type == b.FULL_SCREEN_BANNER]
