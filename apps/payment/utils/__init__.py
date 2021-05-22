@@ -40,21 +40,26 @@ class PaymentRefundMixin(object):
         order = source.order
         if not kwargs.get('amount_verified', False):        # handled internally
             amount = self.get_max_refundable_amount(source, amount_to_refund=amount)    # confirm for any external call
-
+        print("Point 05: Creeating Gateway -- order cancellation", amount, source, source.source_type)
        # create actual payment
+
         response = self.create_actual_refund_with_gateway(
             source=source, amount=amount
         )
         assert type(response) is dict and 'id' in response.keys(), \
             "You have to return the response from gateway as dict with transaction_id as 'id'"
 
+        print("Point 06: Response from Gateway! -- order cancellation", response)
+
         # mark payment sources that we have refunded the money.
         source.refund(Decimal(amount), reference=response['id'])
+        print("Point 07: Marked Refund at sources! -- order cancellation", response)
 
         # create order transaction event object that we have refunded the money.
-        event = self.make_refund_event(  # noqa
+        event = self.make_refund_event(  # noqa: hpefully inherritable
             order=order, amount=amount, reference=response['id']
         )
+        print("Point 08: Made event Refundable! -- order cancellation", response)
         return event
 
     def refund_order(self, order: Order, source: Source, **kwargs):
@@ -65,6 +70,8 @@ class PaymentRefundMixin(object):
         order = source.order
         refundable_lines = order.lines.all().exclude(status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS)
         refundable_amount = self.get_max_refundable_amount(source, amount_to_refund=None)
+        print("Point 04: Max Refundable amount -- order cancellation", refundable_amount)
+
         event = self.__refund_amount_method(
             source=source,
             amount=float(refundable_amount),

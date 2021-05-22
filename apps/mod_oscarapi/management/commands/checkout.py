@@ -26,7 +26,7 @@ class Command(BaseCommand):
     s = None            # store request with session
     _passwd = None
     serializer_class = CheckoutSerializer
-    BASE_URL = 'https://{}/api/v1/'
+    BASE_URL = '{}://{}/api/v1/'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -43,6 +43,9 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--num-orders',  default='1', help="Number of orders you want to generate."
+        )
+        parser.add_argument(
+            '--secure',  default=False, help="needs https request?."
         )
         parser.add_argument(
             '--print-users',  action='store_true', help="Print Users List"
@@ -68,7 +71,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         _method = None
         self.options = options
-        self.BASE_URL = self.BASE_URL.format(options['host'])
+        self.BASE_URL = self.BASE_URL.format('https' if options['secure'] else 'http', options['host'])
         if options['print_users']:
             self.user = User.objects.order_by('?').first()
             print("Username\t| ID\t| First Name\t| is_active")

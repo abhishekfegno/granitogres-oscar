@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.paginator import Paginator
+from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_model
 from oscarapicheckout.serializers import OrderSerializer
 from rest_framework import status, serializers
@@ -10,10 +11,11 @@ from rest_framework.response import Response
 
 from apps.api_set.serializers.basket import WncBasketSerializer
 from apps.api_set.serializers.orders import OrderListSerializer, OrderDetailSerializer, OrderMoreDetailSerializer
+from apps.order.models import Order
 from apps.order.processing import EventHandler
 from apps.utils.urls import list_api_formatter
+from oscar.apps.order import exceptions as order_exceptions
 
-Order = get_model('order', 'Order')
 
 
 def _login_required(func):
@@ -124,5 +126,56 @@ def order_line_return_request(request, *a, **k):
         return Response(OrderDetailSerializer(_order, context={'request': request}).data, status=200)
 
 
+@api_view(("POST",))
+@_login_required
+def order_cancel_request(request, *a, **k):
+    """
+    POST {
+        "reason": "some reason"
+    }
+    """
+    #  Validations
+    out_status = 200
+    out = {
+        "message": None,
+        "errors": {
 
+        }
+    }
+
+    _order: Order = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
+
+    if not request.data.get('reason', None):
+        out['errors']['reason'] = "This field is Required"
+        out_status = 400
+        return Response(out, status=out_status)
+
+    if not _order.is_cancelable:
+        out['errors']['non_field_errors'] = f"Order with status {_order.status} cannot be cancelled!"
+        out_status = 400
+        return Response(out, status=out_status)
+
+    old_status, new_status = _order.status, settings.ORDER_STATUS_CANCELED
+    handler = EventHandler(request.user)
+
+    success_msg = (
+        "Order status changed from '%(old_status)s' to "
+        "'%(new_status)s'") % {'old_status': old_status,
+                               'new_status': new_status}
+    try:
+        print("Point 01 -- order cancellation")
+        handler.handle_order_status_change(_order, new_status, note_msg=success_msg)
+    except PaymentError as e:
+        out['errors']['non_field_errors'] = "Unable to change order status due to payment error"
+        out_status = 400
+
+    except order_exceptions.InvalidOrderStatus:
+        # The form should validate against this, so we should only end up
+        # here during race conditions.
+        out['errors']['non_field_errors'] = "Unable to change order status as the requested new status is not valid"
+        out_status = 400
+    else:
+        out['message'] = "Order has been cancelled!"
+        out_status = 200
+    return Response(out, status=out_status)
 

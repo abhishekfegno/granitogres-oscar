@@ -54,6 +54,8 @@ class EventHandler(processing.EventHandler):
                 and
                 new_status in settings.OSCAR_ORDER_REFUNDABLE_STATUS
         ):
+            print("Point 01: Refundable -- order cancellation")
+
             refunds.RefundFacade().refund_order(order=order)
             order.lines.update(refunded_quantity=models.F('quantity'))
         self.pipeline_order_lines(order, new_status)
