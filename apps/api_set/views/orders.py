@@ -165,7 +165,8 @@ def order_cancel_request(request, *a, **k):
     try:
         print("Point 01 -- order cancellation")
         handler.handle_order_status_change(_order, new_status, note_msg=success_msg)
-        handler.create_note(_order, request.data.get('reason'), note_type="User")
+        user = request.user.get_full_name() or request.user.username or "User"
+        handler.create_note(_order, request.data.get('reason'), note_type=user)
 
     except PaymentError as e:
         out['errors']['non_field_errors'] = "Unable to change order status due to payment error"
