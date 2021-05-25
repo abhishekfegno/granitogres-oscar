@@ -26,7 +26,7 @@ class OrderListSerializer(serializers.ModelSerializer):
                 'type': 'info',
                 'message': "On the way to your doorstep"
             }
-        return_statuses = [s.status for s in self.__return_lines]
+        return_statuses = [s.status for s in self.get_return_lines(instance)]
         if settings.ORDER_STATUS_RETURNED in  return_statuses:
             return {
                 'type': 'warning',
@@ -61,7 +61,7 @@ class OrderListSerializer(serializers.ModelSerializer):
                 'should_display': True,
                 'reason': 'Return Time is Over.'
             }
-        line_statuses = len(self.__return_lines)
+        line_statuses = len(self.get_return_lines(instance))
         if line_statuses:
             return {
                 'status': False,
