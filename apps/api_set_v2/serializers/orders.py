@@ -12,14 +12,48 @@ class OrderListSerializer(serializers.ModelSerializer):
     is_cancellable = serializers.SerializerMethodField()
     can_return_until = serializers.SerializerMethodField()
     is_on_the_way = serializers.SerializerMethodField()
+    info = serializers.SerializerMethodField()
+    __return_lines = None
 
+    def get_return_lines(self, instance):
+        if self.__return_lines is None:
+            self.__return_lines = instance.lines.filter(status__in=get_statuses(112))
+        return self.__return_lines
+    
+    def get_info(self, instance) -> dict:
+        if self.get_is_on_the_way(instance):
+            return {
+                'type': 'info',
+                'message': "On the way to your doorstep"
+            }
+        return_statuses = [s.status for s in self.__return_lines]
+        if settings.ORDER_STATUS_RETURNED in  return_statuses:
+            return {
+                'type': 'warning',
+                'message': "Partially returned"
+            }
+        elif settings.ORDER_STATUS_RETURN_APPROVED in return_statuses:
+            return {
+                'type': 'warning',
+                'message': "Returned approved!"
+            }
+        elif settings.ORDER_STATUS_RETURN_REQUESTED in return_statuses:
+            return {
+                'type': 'warning',
+                'message': "Return request waiting for approval"
+            }
+        return {
+                'type': 'success',
+                'message': ""
+            }
+    
     def get_is_returnable(self, instance) -> dict:
         order = instance
         if order.status in get_statuses(775):
             return {
                 'status': False,
                 'should_display': False,
-                'reason': 'Order is not yet delivered!'
+                'reason': 'Order is on the way!'
             }
         if order.is_return_time_expired:
             return {
@@ -27,14 +61,13 @@ class OrderListSerializer(serializers.ModelSerializer):
                 'should_display': True,
                 'reason': 'Return Time is Over.'
             }
-        line_statuses = order.lines.filter(status__in=get_statuses(112)).count()
+        line_statuses = len(self.__return_lines)
         if line_statuses:
             return {
                 'status': False,
                 'should_display': True,
                 'reason': f'You already have initiated / processed  a return request against {line_statuses} items.'
             }
-        t = "---"
         try:
             t = str(order.max_time_to__return.strptime("%c"))
         except:
