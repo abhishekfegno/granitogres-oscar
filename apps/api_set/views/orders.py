@@ -16,6 +16,7 @@ from apps.order.processing import EventHandler
 from apps.utils.urls import list_api_formatter
 from oscar.apps.order import exceptions as order_exceptions
 
+from apps.utils.utils import get_statuses
 
 
 def _login_required(func):
@@ -106,6 +107,18 @@ def order_line_return_request(request, *a, **k):
 
     # Body
     _order = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
+    if _order.status in get_statuses(775):
+        errors['errors']['non_field_errors'] = 'Order is not yet delivered!'
+    if _order.is_return_time_expired:
+        errors['errors']['non_field_errors'] = 'Return Time is Over.'
+    line_statuses = _order.lines.filter(status__in=get_statuses(112)).count()
+
+    if line_statuses:
+        errors['errors']['non_field_errors'] = f'You already have initiated / processed  a return request against {line_statuses} items.'
+
+    if 'non_field_errors' in errors['errors']:
+        return Response(errors, status=400)
+
     order_lines = _order.lines.all().filter(id__in=request.data.get('line_ids'))
     handler = EventHandler()
     try:
