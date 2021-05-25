@@ -43,6 +43,40 @@ class Order(AbstractOrder):
             self.date_delivered and self.save()
         return self.date_delivered
 
+    cancelled_order_statuses = settings.OSCAR_ORDER_REFUNDABLE_STATUS
+
+    @property
+    def cancelled_order_lines(self):
+        lines = []
+        for line in self.lines.all():
+            if line.status in self.cancelled_order_statuses:
+                lines.append(line)
+        return lines
+
+    @property
+    def cancelled_order_amount_excl_tax(self):
+        amount = 0
+        for line in self.cancelled_order_lines:
+            amount += line.line_price_excl_tax
+        return amount
+
+
+    @property
+    def cancelled_order_amount_incl_tax(self):
+        amount = 0
+        for line in self.cancelled_order_lines:
+            amount += line.line_price_incl_tax
+        return amount
+
+    @property
+    def balance_order_amount_after_cancelled_excl_tax(self):
+        return self.total_incl_tax - self.cancelled_order_amount_excl_tax
+
+    @property
+    def balance_order_amount_after_cancelled_incl_tax(self):
+        return self.total_incl_tax - self.cancelled_order_amount_incl_tax
+
+
 
 class OrderNote(AbstractOrderNote):
     pass
