@@ -14,6 +14,7 @@ def PUBLIC_APIS(r, f):
             ("Send OTP", reverse("api-v1--send-otp", request=r, format=f)),
             ("Resend OTP", reverse("api-v1--resend-otp", request=r, format=f)),
             ("Login With OTP", reverse("api-v1--login-otp", request=r, format=f)),
+            ("Login With OTP For Delivery Boy", reverse("api-v1--login--with-otp-for-delivery-boy", request=r, format=f)),
             ("Set / Change Location", reverse("availability-api:set-zone", request=r, format=f)),
             ("User Profile", reverse("rest_user_details", request=r, format=f)),
             ("API Logout", reverse("rest_logout", request=r, format=f)),

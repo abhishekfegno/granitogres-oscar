@@ -1,6 +1,7 @@
 from apps.api_set.urls import *
 from django.urls import path, include
 # Loading V1 Apis In order to patch
+from apps.api_set.views.auth import LoginWithOTPForDeliveryBoy
 from apps.api_set.views.catalogue import product_suggestions
 from apps.api_set.views.index import (
     home, offer_products
@@ -18,6 +19,7 @@ v1__registration_apis = [
     path('send-otp/', SendOTP.as_view(), name="api-v1--send-otp"),
     path('resend-otp/', resend_otp, name="api-v1--resend-otp"),
     path('login-with-otp/', LoginWithOTP.as_view(), name="api-v1--login-otp"),
+    path('login-with-otp-for-delivery-boy/', LoginWithOTPForDeliveryBoy.as_view(), name="api-v1--login--with-otp-for-delivery-boy"),
     # path('update-profile/', UpdateProfile.as_view(), name="api-v1--update-profile"),
 ]
 
