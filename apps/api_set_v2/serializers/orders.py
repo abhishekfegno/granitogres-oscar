@@ -118,7 +118,7 @@ class OrderListSerializer(serializers.ModelSerializer):
             'basket_total_incl_tax',
             'shipping_incl_tax',
             'total_incl_tax', 'total_excl_tax',
-            'date_delivered',
+            'date_delivered', 'info',
             'num_lines', 'status', 'url', 'date_placed',
             'is_returnable', 'is_cancellable', 'can_return_until', 'is_on_the_way'
         )
