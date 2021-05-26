@@ -17,7 +17,7 @@ from apps.api_set.views.public import availability, return_reasons_list
 from apps.api_set.views.wishlist import wish_list
 
 from apps.api_set.views.auth import (
-    SendOTP, resend_otp, LoginWithOTP,
+    SendOTP, resend_otp, LoginWithOTP, LoginWithOTPForDeliveryBoy,
 )
 
 v1__registration_apis = [
@@ -25,6 +25,9 @@ v1__registration_apis = [
     path('v1/resend-otp/', resend_otp, name="api-v1--resend-otp"),
     path('v1/login-with-otp/', LoginWithOTP.as_view(), name="api-v1--login-otp"),
     # path('v1/update-profile/', UpdateProfile.as_view(), name="api-v1--update-profile"),
+    path('login-with-otp-for-delivery-boy/', LoginWithOTPForDeliveryBoy.as_view(),
+         name="api-v1--login--with-otp-for-delivery-boy"),
+
 ]
 
 home_urlpatterns = [
