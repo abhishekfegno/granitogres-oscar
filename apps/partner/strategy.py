@@ -15,7 +15,7 @@ class Selector(object):
         # TODO: FOR DEBUGGING PURPOSES
         if not zone:
             zone = Zones.objects.filter().last()
-            if zone :
+            if zone:
                 zone = zone.id
                 if request:
                     request.session['zone'] = zone

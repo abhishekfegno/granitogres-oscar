@@ -30,7 +30,7 @@ class Order(AbstractOrder):
 
     @property
     def is_return_time_expired(self):
-        return not self.delivery_time or (self.max_time_to__return and bool(self.max_time_to__return > timezone.now()))
+        return not self.delivery_time or (self.max_time_to__return and bool(self.max_time_to__return < timezone.now()))
 
     @cached_property
     def delivery_time(self):
