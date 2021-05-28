@@ -263,7 +263,7 @@ class PlannedTripListView(ListAPIView):
     serializer_class = ArchivedTripListSerializer
     
     def get_queryset(self):
-        return super(PlannedTripListView, self).get_queryset().filter(agent=self.request.user, status=self.model.YET_TO_START)
+        return DeliveryTrip.objects.all().filter(agent=self.request.user, status=self.model.YET_TO_START).order_by('id')
 
 
 
