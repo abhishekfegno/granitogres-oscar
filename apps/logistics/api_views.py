@@ -6,7 +6,8 @@ from oscar_accounts.models import Transfer, Transaction
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view
-from rest_framework.generics import ListAPIView, RetrieveAPIView, GenericAPIView, get_object_or_404
+from rest_framework.generics import ListAPIView, RetrieveAPIView, GenericAPIView, get_object_or_404, \
+    RetrieveUpdateAPIView
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -71,7 +72,7 @@ class ArchivedTripsListView(ListAPIView):
         )
 
 
-class TripsDetailView(RetrieveAPIView):
+class TripsDetailView(RetrieveUpdateAPIView):
     serializer_class = DeliveryTripSerializer
     authentication_classes = (SessionAuthentication, )
     permission_classes = [DeliveryBoyPermission, ]
@@ -263,5 +264,6 @@ class PlannedTripListView(ListAPIView):
     
     def get_queryset(self):
         return super(PlannedTripListView, self).get_queryset().filter(agent=self.request.user, status=self.model.YET_TO_START)
+
 
 
