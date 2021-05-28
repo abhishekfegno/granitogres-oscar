@@ -257,3 +257,11 @@ class ArchivedTransactionList(TransactionList):
             'source', 'source__account_type', 'destination', 'destination__account_type').order_by('-date_created')
 
 
+class PlannedTripListView(ListAPIView):
+    model = DeliveryTrip
+    serializer_class = ArchivedTripListSerializer
+    
+    def get_queryset(self):
+        return self.get_queryset().filter(agent=self.request.user, status=self.model.YET_TO_START)
+
+

@@ -3,10 +3,12 @@ from django.urls import path, include
 from . import api_views
 
 app_name = 'logistics-api'
+
 from apps.logistics.api_views import TransactionList, ArchivedTransactionList, archived_transaction_list_summery
 
 urlpatterns = [
     path('trips/', include([
+        path('planned/', api_views.PlannedTripListView.as_view(), name="planned-trip"),
         path('active/', api_views.ActiveTripView.as_view(), name="active-trip"),
         path('archived/<str:trip_date>/', api_views.ArchivedTripsListView.as_view(), name="archived-list"),
         path('<int:pk>/detail/', api_views.TripsDetailView.as_view(), name="detail-trip"),
