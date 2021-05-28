@@ -11,6 +11,7 @@ from .models import Order, PaymentEventType
 from ..payment import refunds
 from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
+from ..utils.utils import get_statuses
 
 Transaction = get_model('payment', 'Transaction')
 Line = get_model('order', 'Line')
@@ -54,8 +55,6 @@ class EventHandler(processing.EventHandler):
                 and
                 new_status in settings.OSCAR_ORDER_REFUNDABLE_STATUS
         ):
-            print("Point 01: Refundable -- order cancellation")
-
             refunds.RefundFacade().refund_order(order=order)
             order.lines.update(refunded_quantity=models.F('quantity'))
         self.pipeline_order_lines(order, new_status)
@@ -113,7 +112,8 @@ class EventHandler(processing.EventHandler):
             refunds.RefundFacade().refund_order_line(line=order_line)
             order_line.refunded_quantity = order_line.quantity
             order_line.save()
-
+        if new_status in get_statuses(112):  # any status from processing requests
+            order.set_status(new_status)
         if note_msg:
             """
             Add note if there is an EventHandler note msg.
