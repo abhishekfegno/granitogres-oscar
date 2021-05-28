@@ -52,6 +52,7 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
         return attrs
 
     def validate(self, attrs):
+        super().validate(attrs)
         request = self.context["request"]
         attrs = self.lookup_annonymous(attrs, request)
         basket = attrs.get("basket")

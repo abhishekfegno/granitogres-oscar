@@ -156,21 +156,29 @@ class CheckoutView(OscarAPICheckoutView):
         # Validate the input
         data = request.data.copy()
         basket = Basket.open.filter(pk=data.get('basket_id', 0)).filter(owner=user).first()
+
         if basket is None:
             return Response({'errors': {"basket": [
                 "Basket does not Exists"
             ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
         basket = assign_basket_strategy(basket, request)
+        if basket.is_empty:
+            return Response({'errors': {"basket": [
+                "Basket is Empty!"
+            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         shipping_address = UserAddress.objects.filter(user=user, pk=data.get('shipping_address')).first()
         if shipping_address is None:
             return Response({'errors': {"shipping_address": [
                 "User Address for shipping does not exists"
             ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         billing_address = UserAddress.objects.filter(user=user, pk=data.get('billing_address')).first()
         if billing_address is None:
             return Response({'errors': {"billing_address": [
                 "User Address for billing does not exists"
             ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         try:
             ship = Repository().get_default_shipping_method(
                 basket=basket, shipping_addr=shipping_address,
@@ -179,6 +187,22 @@ class CheckoutView(OscarAPICheckoutView):
             return Response({'errors': {"shipping_address": [
                 "User Address for billing does not exists"
             ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        basket_errors = []
+        basket = data['basket']
+        for line in basket.all_lines():
+            result = basket.strategy.fetch_for_line(line)
+            is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
+            if not is_permitted:
+                # Create a meaningful message to return in the error response
+                # Translators: User facing error message in checkout
+                msg = "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
+                    'title': line.product.get_title(),
+                    'reason': reason,
+                }
+                basket_errors.append(msg)
+        if basket_errors:
+            return Response({'errors': {"basket": basket_errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         shipping_cost: prices.Price = ship.calculate(basket)
         # total_amt = float(basket.total_incl_tax + shipping_cost.incl_tax)
@@ -235,8 +259,6 @@ class CheckoutView(OscarAPICheckoutView):
                 }
             }
         }
-        pprint.pprint(sample_data)
-
         c_ser = self.get_serializer(data=sample_data)
         if not c_ser.is_valid():
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)

@@ -39,6 +39,7 @@ class WncLineSerializer(BasketLineSerializer):
     product = serializers.SerializerMethodField()
     stockrecord = serializers.SlugRelatedField(slug_field='pk', read_only=True)
     warning = serializers.SerializerMethodField()
+    warning_type = serializers.SerializerMethodField()
 
     def get_product(self, instance):
         product = instance.product.parent if instance.product.is_child else instance.product
@@ -51,15 +52,30 @@ class WncLineSerializer(BasketLineSerializer):
         data['variants'] = variants
         return data
 
+    __warning = ...
+
     def get_warning(self, instance):
-        if isinstance(instance.purchase_info.availability, Unavailable):
-            return "'%(product)s' is no longer available"
+        if self.__warning is ...:
+            if isinstance(instance.purchase_info.availability, Unavailable):
+                self.__warning = "'%(product)s' is no longer available"
+            self.__warning = instance.get_warning()
+        return self.__warning
+
+    def get_warning_type(self, instance):
+        self.get_warning(instance)
+        if 'no longer available' in self.__warning:
+            return "error"
+        if 'increased' in self.__warning:
+            return 'warning'
+        if 'decreased' in self.__warning:
+            return 'info'
+        return ''
 
     class Meta:
         model = Line
 
         fields = (
-            'id', 'url', 'quantity', 'warning', 'product', 'attributes',
+            'id', 'url', 'quantity', 'warning_type', 'warning', 'product', 'attributes',
             'price_currency', 'price_excl_tax', 'price_incl_tax',
             'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
             'is_tax_known', 'warning', 'stockrecord', 'date_created',

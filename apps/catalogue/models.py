@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
@@ -23,6 +25,7 @@ from sorl.thumbnail import ImageField
 class Product(AbstractProduct):
     search = SearchVectorField(null=True)
     selected_stock_record = None
+
     # just cached pricing
     effective_price = models.FloatField(_('Effective Retail Price.'), null=True, blank=True)
     retail_price = models.FloatField(_('Retail Price.'), null=True, blank=True)
@@ -32,6 +35,17 @@ class Product(AbstractProduct):
     benifits = models.TextField(null=True, blank=True)
     other_product_info = models.TextField(null=True, blank=True)
     variable_weight_policy = models.TextField(null=True, blank=True)
+    tax = models.SmallIntegerField(default=18, choices=[
+        (5, '5% GST'),
+        (12, '12% GST'),
+        (18, '18% GST'),
+        (28, '28% GST'),
+        (0, '0% Tax'),
+    ])
+
+    @property
+    def tax_value(self) -> Decimal:
+        return Decimal(f"{self.tax / 100}")
 
     class Meta(AbstractProduct.Meta):
         indexes = [
