@@ -33,7 +33,11 @@ def get_home_content(request):
     banners = list(InAppBanner.objects.all().filter(banner__isnull=False, product_range_id__isnull=False))
 
     def _(b):
-        return {'product_range': b.product_range_id, 'banner': b.home_banner_wide_image(request)}
+        return {
+            'title': b.title,
+            'product_range': b.product_range_id,
+            'banner': b.home_banner_wide_image(request),
+        }
 
     slider_banner = [_(b) for b in banners if b.type == b.SLIDER_BANNER]
     full_screen_banner = [_(b) for b in banners if b.type == b.FULL_SCREEN_BANNER]
@@ -114,7 +118,7 @@ def offers(request, *a, **k):
     banners = list(InAppBanner.objects.all().filter(banner__isnull=False, product_range_id__isnull=False))
 
     def _(b):
-        return {'banner': b.home_banner_wide_image(request), 'product_range': b.product_range_id, }
+        return {'title': b.title, 'banner': b.home_banner_wide_image(request), 'product_range': b.product_range_id, }
 
     slider_banner = [_(b) for b in banners if b.type == b.SLIDER_BANNER]
     full_screen_banner = [_(b) for b in banners if b.type == b.FULL_SCREEN_BANNER]
@@ -132,8 +136,9 @@ def offers(request, *a, **k):
             return [banner_set[_index], ]
         else:
             return [{
+                'title': 'Banner Not Set',
                 'banner': request.build_absolute_uri(static('static/l6.jpg' if lengthy_banner else 'static/m4.jpg')),
-                'product_range': None
+                'product_range': 0
             }, ]
 
     _out = {
