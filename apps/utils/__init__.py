@@ -41,7 +41,8 @@ def purchase_info_as_dict(purchase_info, **kwargs):
         'stockrecord': hasattr(purchase_info.stockrecord, 'id') and purchase_info.stockrecord.id or None,
         'partner_id': hasattr(purchase_info.stockrecord, 'partner_id') and purchase_info.stockrecord.partner_id or None,
         'partner_sku': hasattr(purchase_info.stockrecord, 'partner_sku') and purchase_info.stockrecord.partner_sku or None,
-        'low_stock': purchase_info.stockrecord and purchase_info.stockrecord.low_stock_threshold and purchase_info.stockrecord.num_in_stock <= purchase_info.stockrecord.low_stock_threshold,
+        'low_stock': purchase_info.stockrecord and purchase_info.stockrecord.low_stock_threshold and purchase_info.stockrecord.net_stock_level <= purchase_info.stockrecord.low_stock_threshold,
+        'net_stock_level': purchase_info.stockrecord and purchase_info.stockrecord.net_stock_level,
         'effective_price': purchase_info.price.effective_price,
         'currency': purchase_info.price.currency,
         'symbol': get_symbol(purchase_info.price.currency),
@@ -68,6 +69,8 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
         'excl_tax': float(purchase_info.price.effective_price),
         'effective_price': float(purchase_info.price.effective_price),
         'retail': int(retail_rate * 100) / 100,
+        'low_stock': purchase_info.stockrecord and purchase_info.stockrecord.low_stock_threshold and purchase_info.stockrecord.net_stock_level <= purchase_info.stockrecord.low_stock_threshold,
+        'net_stock_level': purchase_info.stockrecord and purchase_info.stockrecord.net_stock_level,
         'currency': purchase_info.price.currency,
         'symbol': get_symbol(purchase_info.price.currency),
         **kwargs
@@ -76,8 +79,11 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
 
 def dummy_purchase_info_lite_as_dict(**kwargs):
     return {
+        'excl_tax': 0,
         'effective_price': 0,
         'retail': 0,
+        'low_stock': False,
+        'net_stock_level': 0,
         'currency': 'INR',
         'symbol': get_symbol('INR'),
         **kwargs

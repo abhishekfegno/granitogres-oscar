@@ -63,13 +63,15 @@ class WncLineSerializer(BasketLineSerializer):
 
     def get_warning_type(self, instance):
         self.get_warning(instance)
+        if not self.__warning:
+            return
         if 'no longer available' in self.__warning:
             return "error"
         if 'increased' in self.__warning:
             return 'warning'
         if 'decreased' in self.__warning:
             return 'info'
-        return ''
+        return
 
     class Meta:
         model = Line

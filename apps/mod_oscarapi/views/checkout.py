@@ -188,21 +188,20 @@ class CheckoutView(OscarAPICheckoutView):
                 "User Address for billing does not exists"
             ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        basket_errors = []
-        basket = data['basket']
-        for line in basket.all_lines():
-            result = basket.strategy.fetch_for_line(line)
-            is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
-            if not is_permitted:
-                # Create a meaningful message to return in the error response
-                # Translators: User facing error message in checkout
-                msg = "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
-                    'title': line.product.get_title(),
-                    'reason': reason,
-                }
-                basket_errors.append(msg)
-        if basket_errors:
-            return Response({'errors': {"basket": basket_errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        # basket_errors = []
+        # for line in basket.all_lines():
+        #     result = basket.strategy.fetch_for_line(line)
+        #     is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
+        #     if not is_permitted:
+        #         # Create a meaningful message to return in the error response
+        #         # Translators: User facing error message in checkout
+        #         msg = "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
+        #             'title': line.product.get_title(),
+        #             'reason': reason,
+        #         }
+        #         basket_errors.append(msg)
+        # if basket_errors:
+        #     return Response({'errors': {"basket": basket_errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         shipping_cost: prices.Price = ship.calculate(basket)
         # total_amt = float(basket.total_incl_tax + shipping_cost.incl_tax)
