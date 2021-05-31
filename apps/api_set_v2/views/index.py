@@ -71,6 +71,7 @@ def index(request, *a, **k):
         out['categories'] = CategorySerializer(category_set, **cxt, many=True).data
 
         out['offer_banners'] = [{
+            'title': banner.title,
             'banner': banner.home_banner_wide_image(request),
             'product_range': banner.product_range_id
         } for banner in HomePageMegaBanner.objects.filter(product_range__isnull=False).order_by('-position')]
