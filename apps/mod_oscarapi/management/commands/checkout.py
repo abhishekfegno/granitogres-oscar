@@ -51,7 +51,7 @@ class Command(BaseCommand):
             '--print-users',  action='store_true', help="Print Users List"
         )
         parser.add_argument(
-            '--user',  default='1', help='Get User',
+            '--user',  default='1', help='Get User id',
         )
 
     def post(self, _method, checkout_only_current_basket=False):
@@ -121,7 +121,8 @@ class Command(BaseCommand):
             return
         else:
             print("Could Not Login")
-            print(response.text)
+            print("REQUEST: ", login_data)
+            print("RESPONSE: ", response.text)
             sys.exit(0)
 
     def checkout(self, data):
