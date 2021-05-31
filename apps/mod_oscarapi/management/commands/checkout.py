@@ -112,6 +112,8 @@ class Command(BaseCommand):
             self.BASE_URL + 'rest-auth/login/',
             login_data
         )
+        print("REQUEST: ", login_data)
+
         print("Logged in Status ", response)
         if response.status_code == 200:
             print("Logged in as : ", user.get_short_name(), "[", user.username, "]")
@@ -121,7 +123,6 @@ class Command(BaseCommand):
             return
         else:
             print("Could Not Login")
-            print("REQUEST: ", login_data)
             print("RESPONSE: ", response.text)
             sys.exit(0)
 
