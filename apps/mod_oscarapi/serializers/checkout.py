@@ -101,7 +101,6 @@ class UserAddressSerializer(CoreUserAddressSerializer):
     location = PointSerializer(required=True, write_only=True)
     location_data = serializers.SerializerMethodField()
     country = serializers.SerializerMethodField()
-    is_in_zone = serializers.SerializerMethodField()
 
     def get_country(self, instance):
         return settings.USER_ADDRESS['COUNTRY']
