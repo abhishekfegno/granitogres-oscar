@@ -72,7 +72,8 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
         posted_shipping_charge = attrs.get("shipping_charge")
 
         if posted_shipping_charge is not None:
-            posted_shipping_charge = prices.Price(**posted_shipping_charge)
+            if isinstance(posted_shipping_charge, dict):
+                posted_shipping_charge = prices.Price(**posted_shipping_charge)
             # test submitted data.
             if not posted_shipping_charge == shipping_charge:
                 message = (
@@ -84,7 +85,7 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
         posted_total = attrs.get("total")
         total = OrderTotalCalculator().calculate(basket, shipping_charge)
         if posted_total is not None:
-            if posted_total != total.incl_tax:
+            if posted_total != total:
                 message = ("Total incorrect %s != %s" % (posted_total, total.incl_tax))
                 raise serializers.ValidationError(message)
         # update attrs with validated data.
