@@ -72,6 +72,7 @@ class Command(BaseCommand):
         _method = None
         self.options = options
         self.BASE_URL = self.BASE_URL.format('https' if options['secure'] else 'http', options['host'])
+        print(self.BASE_URL)
         if options['print_users']:
             self.user = User.objects.order_by('?').first()
             print("Username\t| ID\t| First Name\t| is_active")
@@ -113,7 +114,6 @@ class Command(BaseCommand):
             login_data
         )
         print("REQUEST: ", login_data)
-
         print("Logged in Status ", response)
         if response.status_code == 200:
             print("Logged in as : ", user.get_short_name(), "[", user.username, "]")
@@ -122,9 +122,11 @@ class Command(BaseCommand):
                 self.s.get(self.BASE_URL)
             return
         else:
+            import pdb; pdb.set_trace()
             print("Could Not Login")
             print("RESPONSE: ", response.text)
-            sys.exit(0)
+            if input("Exit? Y/n") in 'Yy':
+                sys.exit(0)
 
     def checkout(self, data):
         response = self.s.post(

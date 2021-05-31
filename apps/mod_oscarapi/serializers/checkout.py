@@ -101,6 +101,7 @@ class UserAddressSerializer(CoreUserAddressSerializer):
     location = PointSerializer(required=True, write_only=True)
     location_data = serializers.SerializerMethodField()
     country = serializers.SerializerMethodField()
+    is_in_zone = serializers.SerializerMethodField()
 
     def get_country(self, instance):
         return settings.USER_ADDRESS['COUNTRY']
@@ -108,10 +109,12 @@ class UserAddressSerializer(CoreUserAddressSerializer):
     def get_location_data(self, instance):
         if self.context['request'] and self.context['request'].session.get('location') and instance.location:
             location_id = self.context['request'].session.get('location')
-            loc_obj = Location.objects.filter(pk=location_id).last()
+            loc_obj = Location.objects.filter(pk=location_id).select_related('zone').last()
+            is_in_zone = loc_obj and loc_obj.zone and loc_obj.zone.zone and loc_obj.zone.zone.contains(instance.location)
             return loc_obj and {
                 **instance.location_data,
                 'distance': loc_obj.location.distance(instance.location),
+                'is_in_zone': is_in_zone,
             }
         return None
 

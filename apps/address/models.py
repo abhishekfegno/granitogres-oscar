@@ -68,7 +68,7 @@ class UserAddress(AbstractUserAddress):
         return ", ".join(self.get_field_values(fields))
 
     @property
-    def location_data(self):
+    def location_data(self) -> dict:
         if self.location:
             return {
                 'latitude': self.location.x,
