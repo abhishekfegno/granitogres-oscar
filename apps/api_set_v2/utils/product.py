@@ -39,7 +39,7 @@ def get_optimized_product_dict(
             qs_filter, is_public=True,
             # stockrecords__isnull=False
         )
-    if offset and limit:
+    if offset and limit:    
         product_set = product_set[offset:limit]
     elif limit:
         product_set = product_set[:limit]

@@ -30,6 +30,7 @@ def product_detail_web(request, product: Product): # needs parent product
     response = get_optimized_product_dict(
         request=request,
         qs=[product, ],
+        needs_stock=False,
     ).values()
     sol = request.basket.sorted_recommended_products + product.sorted_recommended_products
 

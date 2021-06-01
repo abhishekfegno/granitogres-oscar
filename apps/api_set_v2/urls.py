@@ -86,7 +86,6 @@ wish_list_urlpatterns = [
 public_apis = [
     path("check-availability/<int:product>@<int:pincode>/", availability, name="api-availability"),
     path("return-reasons-list/", return_reasons_list, name="return-reasons-list"),
-
 ]
 
 
