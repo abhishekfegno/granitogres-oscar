@@ -12,7 +12,7 @@ from rest_framework import status
 from rest_framework.response import Response
 # from rest_framework.generics import ListAPIView
 
-from apps.logistics.models import DeliveryTrip, ConsignmentDelivery, ConsignmentReturn, Slot
+from apps.logistics.models import DeliveryTrip, ConsignmentDelivery, ConsignmentReturn
 from apps.users.models import User
 
 
