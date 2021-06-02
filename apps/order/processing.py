@@ -21,16 +21,10 @@ class EventHandler(processing.EventHandler):
 
     @staticmethod
     def pipeline_order_lines(order, new_status):
-        if new_status in (
-                settings.ORDER_STATUS_CONFIRMED,
-                # settings.ORDER_STATUS_SHIPPED,
-                settings.ORDER_STATUS_OUT_FOR_DELIVERY,
-                settings.ORDER_STATUS_DELIVERED,
-        ):
+        if new_status in get_statuses(1+2+4+8):
             order.lines.exclude(
                 status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS
             ).update(status=new_status)
-
         return
 
     @transaction.atomic
@@ -58,6 +52,15 @@ class EventHandler(processing.EventHandler):
             refunds.RefundFacade().refund_order(order=order)
             order.lines.update(refunded_quantity=models.F('quantity'))
         self.pipeline_order_lines(order, new_status)
+        
+        all_lines = order.lines.all().select_related('stockrecord')
+        if new_status in get_statuses(8):
+            lines_to_be_consumed = all_lines.filter(status__in=get_statuses(8))
+            self.consume_stock_allocations(order, lines_to_be_consumed)
+        elif new_status in get_statuses(128):
+            lines_to_be_cancelled = all_lines.filter(status__in=get_statuses(128))
+            self.cancel_stock_allocations(order, lines_to_be_cancelled)
+
         if note_msg:
             """
             Add note if there is an EventHandler note msg.
@@ -114,12 +117,43 @@ class EventHandler(processing.EventHandler):
             order_line.save()
         if new_status in get_statuses(112):  # any status from processing requests
             order.set_status(new_status)
+
+        if new_status in get_statuses(8):
+            self.consume_stock_allocations(order, [order_line])
+        elif new_status in get_statuses(128):
+            self.cancel_stock_allocations(order, [order_line])
+
         if note_msg:
             """
             Add note if there is an EventHandler note msg.
             """
             self.create_note(order, message=note_msg, note_type=note_type)
+    
+    def consume_stock_allocations(self, order, lines=None, line_quantities=None):
+        """
+        Consume the stock allocations for the passed lines.
 
+        If no lines/quantities are passed, do it for all lines.
+        """
+        if not lines:
+            lines = order.lines.all()
+        if not line_quantities:
+            line_quantities = [line.quantity for line in lines]
+        for line, qty in zip(lines, line_quantities):
+            if line.stockrecord:
+                line.stockrecord.consume_allocation(qty)
 
+    def cancel_stock_allocations(self, order, lines=None, line_quantities=None):
+        """
+        Cancel the stock allocations for the passed lines.
 
+        If no lines/quantities are passed, do it for all lines.
+        """
+        if not lines:
+            lines = order.lines.all()
+        if not line_quantities:
+            line_quantities = [line.quantity for line in lines]
+        for line, qty in zip(lines, line_quantities):
+            if line.stockrecord:
+                line.stockrecord.cancel_allocation(qty)
 
