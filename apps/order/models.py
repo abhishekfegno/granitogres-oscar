@@ -20,6 +20,10 @@ class Order(AbstractOrder):
     date_delivered = models.DateTimeField(null=True, blank=True, help_text="Date of Consignment Delivery")
 
     @property
+    def preferred_slot_text(self):
+        return '10:00AM - 1:00PM'
+
+    @property
     def is_cancelable(self):
         return bool(self.status in settings.OSCAR_USER_CANCELLABLE_ORDER_STATUS)
 

@@ -7,11 +7,12 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, UpdateView
 from django import forms
+from django.views.generic.edit import ModelFormMixin, BaseCreateView
 from rest_framework import status
 from rest_framework.response import Response
 # from rest_framework.generics import ListAPIView
 
-from apps.logistics.models import DeliveryTrip, ConsignmentDelivery, ConsignmentReturn
+from apps.logistics.models import DeliveryTrip, ConsignmentDelivery, ConsignmentReturn, Slot
 from apps.users.models import User
 
 
@@ -188,3 +189,15 @@ class CancalledTripsListView(ListView):
                                         **kwargs)
 
 
+# @method_decorator(login_required, name="dispatch")
+# @method_decorator(user_passes_test(lambda user: user.is_superuser), name="dispatch")
+# class SlotListView(ListView, BaseCreateView):
+#     queryset = Slot.objects.all()
+#     template_name = 'logistics/slot_list.html'
+#
+#     def get_context_data(self, *, object_list=None, **kwargs):
+#         return super().get_context_data(object_list=object_list,
+#                                         TITLE="Slot List",
+#                                         **kwargs)
+#
+#

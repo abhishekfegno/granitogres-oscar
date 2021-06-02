@@ -28,6 +28,9 @@ urlpatterns = [
         path('cancelled/', CancalledTripsListView.as_view(), name="cancelled-trips"),
 
     ])),
+    path('slot/', include([
+        # path('', SlotListView.as_view(), name="slot-list"),
+    ])),
 ]
 
 

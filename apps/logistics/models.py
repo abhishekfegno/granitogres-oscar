@@ -90,6 +90,27 @@ class Constant:
         }
 
 
+# class Slot(models.Model):
+#     start_time = models.TimeField()
+#     end_time = models.TimeField()
+#     max_orders = models.PositiveIntegerField(default=20, help_text="Max no of orders which can be delivered during trip, 0 for unlimited!")
+#     is_active = models.PositiveIntegerField(default=True)
+#
+#
+# class SlotObject(models.Model):
+#     slot = models.ForeignKey(Slot, on_delete=models.SET_NULL, )
+#     date = models.DateField()
+#     __orders = None
+#
+#     def currently_holding_count(self):
+#         if self.__orders is None:
+#             self.__orders = Order.objects.filter(consignmentdelivery__delivery_trip__slot=self)
+#         return len(self.__orders)
+#
+#     def can_add_items(self, quantity):
+#         return
+#
+
 class DeliveryTrip(Constant, models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -100,6 +121,7 @@ class DeliveryTrip(Constant, models.Model):
     route = models.CharField(max_length=128, null=True, blank=True)
     info = models.CharField(max_length=256, null=True, blank=True)
     reason = models.TextField(null=True, blank=True)
+    # slot = models.ForeignKey(SlotObject, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"{self.agent} on {self.created_at} {self.status}"
