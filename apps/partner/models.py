@@ -6,6 +6,13 @@ from django.db import models
 
 
 class StockRecord(AbstractStockRecord):
+
+    cost_price = models.DecimalField(
+        "Selling Price (incl. tax)", decimal_places=2, max_digits=12,
+        help_text="Just to take the value as input, this will not used for any calculation "
+                  "other than calculation `price_excl_tax` field",
+        blank=True, null=True)
+
     price_excl_tax = models.DecimalField(
         gettext_lazy("Selling Price (excl. tax)"), decimal_places=2, max_digits=12,
         blank=True, null=True)
@@ -14,6 +21,11 @@ class StockRecord(AbstractStockRecord):
     price_retail = models.DecimalField(
         gettext_lazy("M.R.P. (retail)"), decimal_places=2, max_digits=12,
         blank=True, null=True)
+
+    def save(self, **kwargs):
+        if self.cost_price:
+            self.price_excl_tax = self.cost_price * 100 / (100 + self.product.tax)
+        super(StockRecord, self).save(**kwargs)
 
 
 class Partner(AbstractPartner):
