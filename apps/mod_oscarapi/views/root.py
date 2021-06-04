@@ -91,6 +91,10 @@ def PUBLIC_APIS(r, f):
             ("basket-add-product", reverse("api-basket-add-product", request=r, format=f)),
             ("basket-add-voucher", reverse("api-basket-add-voucher", request=r, format=f)),
         ])),
+        ("Push Notifications", collections.OrderedDict([
+            ("Apns Device Authorized List", reverse("apnsdevice-list", request=r, format=f)),
+            ("Fcm / Gcm Device Authorized List", reverse("gcmdevice-list", request=r, format=f)),
+        ])),
 
         ("Logistics", collections.OrderedDict([
             ("Active Trip", reverse("logistics-api:active-trip", request=r, format=f)),

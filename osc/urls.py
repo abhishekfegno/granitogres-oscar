@@ -31,6 +31,7 @@ from django.views.i18n import JavaScriptCatalog
 
 view_checkout = never_cache(CheckoutView.as_view())
 
+
 urlpatterns = [
     path('api/v1/checkout/', view_checkout, name='api-checkout'),               # Must be before oscar_api.urls
     path('api/v2/checkout/', view_checkout, name='api-checkout'),               # Must be before oscar_api.urls
@@ -51,7 +52,6 @@ urlpatterns = [
     path('api/v1/avalilability/', include('apps.availability.api')),
     path('dashboard/avalilability/', include('apps.availability.urls')),
     path('dashboard/logistics/', include('apps.logistics.urls')),
-
     # https://github.com/django-oscar/django-oscar-accounts
     path('dashboard/accounts/', apps.get_app_config('accounts_dashboard').urls),
 
@@ -61,7 +61,7 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),  # > Django-2.0
     path('admin/', admin.site.urls),
 
-    path('api/push/', include('apps.api_set.push_notification_registration')),
+    path('api/v2/push/', include('apps.api_set.push_notification_registration')),
     path('', include('apps.users.urls')),
     path('', include('apps.dashboard.custom.urls')),
     path('', include(apps.get_app_config('oscar').urls[0])),  # > Django-2.0

@@ -121,11 +121,11 @@ class OrderListSerializer(serializers.ModelSerializer):
     
     def get_is_returnable(self, instance) -> dict:
         order = instance
-        if order.status in get_statuses(775):
+        if order.status in get_statuses(775):   # 4 +2+1+256+512
             return {
                 'status': False,
                 'should_display': False,
-                'reason': 'Order is on the way!'
+                'reason': 'Order is not delivered yet!'
             }
         if order.is_return_time_expired:
             return {

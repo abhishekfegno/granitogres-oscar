@@ -41,7 +41,6 @@ class Order(AbstractOrder):
         if self.status in get_statuses(775):
             return None     # as the package is not delivered
         if not self.date_delivered:
-            print(self.date_delivered, "------ P1 -----")
             date_delivered = self.status_changes.filter(new_status=settings.ORDER_STATUS_DELIVERED).order_by('date_created').first()
             self.date_delivered = date_delivered and date_delivered.date_created
             self.date_delivered and self.save()
@@ -79,7 +78,6 @@ class Order(AbstractOrder):
     @property
     def balance_order_amount_after_cancelled_incl_tax(self):
         return self.total_incl_tax - self.cancelled_order_amount_incl_tax
-
 
 
 class OrderNote(AbstractOrderNote):

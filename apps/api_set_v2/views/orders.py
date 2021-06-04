@@ -29,7 +29,8 @@ def orders(request, *a, **k):
         serializer_class = OrderListSerializer
         page_number = request.GET.get('page', 1)
         page_size = request.GET.get('page_size', settings.DEFAULT_PAGE_SIZE)
-        queryset = Order.objects.filter(user=request.user).prefetch_related(
+        # queryset = Order.objects.filter(user=request.user).prefetch_related(
+        queryset = Order.objects.filter().prefetch_related(
             'lines',  # calculate any cancelled or cancelling order lines
             # cutting down 60% of queries
         ).order_by('-id')

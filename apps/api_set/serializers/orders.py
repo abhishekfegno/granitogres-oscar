@@ -93,7 +93,6 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     should_show_line_status = serializers.SerializerMethodField()
 
     def get_info(self, instance) -> dict:
-
         is_cancelled = instance.status == settings.ORDER_STATUS_CANCELED
         has_cancelled_items = any([
             line.status == settings.ORDER_STATUS_CANCELED
