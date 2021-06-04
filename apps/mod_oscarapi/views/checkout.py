@@ -1,5 +1,6 @@
 import pprint
 
+from django.db.models import F
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.conf import settings
@@ -23,8 +24,8 @@ from ..serializers.checkout import (
     CheckoutSerializer, UserAddressSerializer,
 )
 from ...basket.models import Basket
+from ...payment import refunds
 from ...shipping.repository import Repository
-from ...users.models import Location
 from ...api_set.serializers.basket import WncBasketSerializer
 from ...basket.utils import order_to_basket
 
@@ -158,35 +159,25 @@ class CheckoutView(OscarAPICheckoutView):
         basket = Basket.open.filter(pk=data.get('basket_id', 0)).filter(owner=user).first()
 
         if basket is None:
-            return Response({'errors': {"basket": [
-                "Basket does not Exists"
-            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "Basket does not Exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
         basket = assign_basket_strategy(basket, request)
         if basket.is_empty:
-            return Response({'errors': {"basket": [
-                "Basket is Empty!"
-            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "Basket is Empty!"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         shipping_address = UserAddress.objects.filter(user=user, pk=data.get('shipping_address')).first()
         if shipping_address is None:
-            return Response({'errors': {"shipping_address": [
-                "User Address for shipping does not exists"
-            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "User Address for shipping does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         billing_address = UserAddress.objects.filter(user=user, pk=data.get('billing_address')).first()
         if billing_address is None:
-            return Response({'errors': {"billing_address": [
-                "User Address for billing does not exists"
-            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "User Address for billing does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         try:
             ship = Repository().get_default_shipping_method(
                 basket=basket, shipping_addr=shipping_address,
             )
         except serializers.ValidationError:
-            return Response({'errors': {"shipping_address": [
-                "User Address for billing does not exists"
-            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "User Address for billing does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         # basket_errors = []
         # for line in basket.all_lines():
@@ -260,12 +251,13 @@ class CheckoutView(OscarAPICheckoutView):
         }
         c_ser = self.get_serializer(data=sample_data)
         if not c_ser.is_valid():
-            return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
+            string = ""
+            for error, data in c_ser.errors['errors']:
+                string += f"{error}:{data}\n"
+            return Response({"errors": string}, status.HTTP_406_NOT_ACCEPTABLE)
         location = shipping_address.location
         if not location:
-            return Response({'errors': {"non_field_errors": [
-                "You have not provided your location yet."
-            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "You have not provided your location yet."}, status=status.HTTP_406_NOT_ACCEPTABLE)
         # Freeze basket
         basket = c_ser.validated_data.get('basket')
         basket.freeze()
@@ -295,13 +287,25 @@ class CheckoutView(OscarAPICheckoutView):
         if order.status == settings.ORDER_STATUS_PAYMENT_DECLINED:
             basket = order_to_basket(order, request=request)
             b_ser = WncBasketSerializer(basket, context={'request': request})
+            payment_refunded = False
+            try:
+                refunds.RefundFacade().refund_order(order=order)
+                order.lines.update(refunded_quantity=F('quantity'))
+            except:
+                pass
+            else:
+                payment_refunded = True
+
             return Response({
+                'errors': "Payment Declined!",
                 'new_basket': b_ser.data,
+                'payment_refunded': payment_refunded,
                 'failed_order': o_ser.data,
-                'message': "Payment Declined!",
-            }, status=400)
+            }, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         # Return order data
+        data = o_ser.data
+        data['errors'] = None
         return Response(o_ser.data)
 
     def _record_payments(self, previous_states, request, order, methods, data):
