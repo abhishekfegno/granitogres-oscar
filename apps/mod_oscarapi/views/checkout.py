@@ -149,8 +149,9 @@ class CheckoutView(OscarAPICheckoutView):
     
     """
     serializer_class = CheckoutSerializer
+    order_object = None
 
-    def post(self, request, format=None):
+    def post_format(self, request, format=None):
         # Wipe out any previous state data
         utils.clear_consumed_payment_method_states(request)
         user = request.user if request.user and request.user.is_authenticated else None
@@ -252,8 +253,9 @@ class CheckoutView(OscarAPICheckoutView):
         c_ser = self.get_serializer(data=sample_data)
         if not c_ser.is_valid():
             string = ""
-            for error, data in c_ser.errors['errors']:
+            for error, data in c_ser.errors:
                 string += f"{error}:{data}\n"
+                break
             return Response({"errors": string}, status.HTTP_406_NOT_ACCEPTABLE)
         location = shipping_address.location
         if not location:
@@ -264,6 +266,7 @@ class CheckoutView(OscarAPICheckoutView):
 
         # Save Order
         order = c_ser.save()
+        self.order_object = order
         request.session[CHECKOUT_ORDER_ID] = order.id
 
         # adding location from user request to
@@ -287,19 +290,9 @@ class CheckoutView(OscarAPICheckoutView):
         if order.status == settings.ORDER_STATUS_PAYMENT_DECLINED:
             basket = order_to_basket(order, request=request)
             b_ser = WncBasketSerializer(basket, context={'request': request})
-            payment_refunded = False
-            try:
-                refunds.RefundFacade().refund_order(order=order)
-                order.lines.update(refunded_quantity=F('quantity'))
-            except:
-                pass
-            else:
-                payment_refunded = True
-
             return Response({
                 'errors': "Payment Declined!",
                 'new_basket': b_ser.data,
-                'payment_refunded': payment_refunded,
                 'failed_order': o_ser.data,
             }, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -307,6 +300,19 @@ class CheckoutView(OscarAPICheckoutView):
         data = o_ser.data
         data['errors'] = None
         return Response(o_ser.data)
+
+    def post(self, request, format=None):
+        resp = self.post_format(request, format=None)
+        if resp.status_code == status.HTTP_406_NOT_ACCEPTABLE:
+            payment_refunded = False
+            try:
+                if self.order_object:
+                    refunds.RefundFacade().refund_order(order=self.order_object)
+                    self.order_object.lines.update(refunded_quantity=F('quantity'))
+            except:
+                pass
+
+        return resp
 
     def _record_payments(self, previous_states, request, order, methods, data):
         order_balance = [order.total_incl_tax]
