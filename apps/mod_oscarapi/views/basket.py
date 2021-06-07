@@ -20,10 +20,10 @@ class AddProductView(CoreAddProductView):
             self, basket, product, quantity, options
     ):  # pylint: disable=unused-argument
         availability = basket.strategy.fetch_for_product(product).availability
-
-        # check if product is available at all
-        if not availability.is_available_to_buy:
-            return False, availability.message
+        if quantity > 0:
+            # check if product is available at all
+            if not availability.is_available_to_buy:
+                return False, availability.message
 
         current_qty = basket.product_quantity(product)
         desired_qty = current_qty + quantity
