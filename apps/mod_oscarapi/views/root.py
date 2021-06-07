@@ -94,6 +94,7 @@ def PUBLIC_APIS(r, f):
         ("Push Notifications", collections.OrderedDict([
             ("Apns Device Authorized List", reverse("apnsdevice-list", request=r, format=f)),
             ("Fcm / Gcm Device Authorized List", reverse("gcmdevice-list", request=r, format=f)),
+            ("Test", reverse("logistics:test_push", request=r, format=f)),
         ])),
 
         ("Logistics", collections.OrderedDict([
