@@ -193,7 +193,7 @@ class CheckoutView(OscarAPICheckoutView):
                 }
                 basket_errors.append(msg)
         if basket_errors:
-            return Response({'errors': {"basket": basket_errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "\n".join(basket_errors)}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         shipping_cost: prices.Price = ship.calculate(basket)
         # total_amt = float(basket.total_incl_tax + shipping_cost.incl_tax)
