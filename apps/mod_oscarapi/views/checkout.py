@@ -302,17 +302,21 @@ class CheckoutView(OscarAPICheckoutView):
         return Response(o_ser.data)
 
     def post(self, request, format=None):
-        resp = self.post_format(request, format=None)
-        if resp.status_code == status.HTTP_406_NOT_ACCEPTABLE:
-            payment_refunded = False
-            try:
-                if self.order_object:
-                    refunds.RefundFacade().refund_order(order=self.order_object)
-                    self.order_object.lines.update(refunded_quantity=F('quantity'))
-            except:
-                pass
+        try:
+            resp = self.post_format(request, format=None)
+            if resp.status_code == status.HTTP_406_NOT_ACCEPTABLE:
+                payment_refunded = False
+                try:
+                    if self.order_object:
+                        refunds.RefundFacade().refund_order(order=self.order_object)
+                        self.order_object.lines.update(refunded_quantity=F('quantity'))
+                except:
+                    pass
 
-        return resp
+            return resp
+        except Exception as e:
+            print(e)
+            return Response({'errors': str(e)}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     def _record_payments(self, previous_states, request, order, methods, data):
         order_balance = [order.total_incl_tax]
