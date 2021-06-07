@@ -47,7 +47,7 @@ class LogisticsPushNotification(PushNotification):
         self.order = order
         super(LogisticsPushNotification, self).__init__(trip.agent)
 
-    def send_cancellation_message(self, items, amount):
+    def send_cancellation_message(self, items):
         title = f"Cancelled {len(items)} Items from "
         message = ", ".join([i.product_title for i in items])
         self.send_message(title, message)

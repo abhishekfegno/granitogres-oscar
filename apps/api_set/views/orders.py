@@ -64,7 +64,7 @@ def orders_v2(request, *a, **k):
 @api_view(("GET",))
 @_login_required
 def orders_detail(request, *a, **k):
-    _object = get_object_or_404(Order.objects.filter(user=request.user).prefetch_related(
+    _object = get_object_or_404(Order.objects.filter().prefetch_related(
         'lines',
         'lines__attributes',
         'lines__product__images',
@@ -78,7 +78,7 @@ def orders_detail(request, *a, **k):
 @api_view(("GET",))
 @_login_required
 def orders_more_detail(request, *a, **k):
-    _object = get_object_or_404(Order.objects.filter(user=request.user).prefetch_related(
+    _object = get_object_or_404(Order.objects.filter().prefetch_related(
         'lines',
     ).select_related(
         'billing_address', 'shipping_address'
