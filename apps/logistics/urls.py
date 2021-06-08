@@ -23,7 +23,7 @@ def test_push(request):
     if request.method == 'POST':
         title = request.data.get('title', 'Grocery App Push Notification Testing!')
         message = request.data.get('message', 'Some Long Message')
-        from apps.utils.push.pushnotifications import PushNotification
+        from apps.utils.pushnotifications import PushNotification
         PushNotification(request.user).send_message(title, message)
         return Response({'response': 'success'})
     return Response({'response': 'try post method'})
