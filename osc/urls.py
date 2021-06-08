@@ -62,6 +62,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('api/v2/push/', include('apps.api_set.push_notification_registration')),
+    path('api/v1/push/', include('apps.api_set.push_notification_registration')),
     path('', include('apps.users.urls')),
     path('', include('apps.dashboard.custom.urls')),
     path('', include(apps.get_app_config('oscar').urls[0])),  # > Django-2.0
