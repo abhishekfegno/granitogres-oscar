@@ -56,20 +56,25 @@ class WncLineSerializer(BasketLineSerializer):
 
     def get_warning(self, instance):
         if self.__warning is ...:
-            if isinstance(instance.purchase_info.availability, Unavailable):
+            if (
+                isinstance(instance.purchase_info.availability, Unavailable)
+                or instance.stockrecord.net_stock_level < instance.quantity
+            ):
                 self.__warning = "'%(product)s' is no longer available"
-            self.__warning = instance.get_warning()
+            else:
+                self.__warning = None
+            # self.__warning = instance.get_warning()
         return self.__warning
 
     def get_warning_type(self, instance):
-        self.get_warning(instance)
-        if not self.__warning:
+        warning = self.get_warning(instance)
+        if not warning:
             return
-        if 'no longer available' in self.__warning:
+        if 'no longer available' in warning:
             return "error"
-        if 'increased' in self.__warning:
+        if 'increased' in warning:
             return 'warning'
-        if 'decreased' in self.__warning:
+        if 'decreased' in warning:
             return 'info'
         return
 

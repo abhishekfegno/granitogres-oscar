@@ -59,6 +59,7 @@ def PUBLIC_APIS(r, f):
             # ("Payment Methods", reverse("api-checkout-payment-methods", request=r, format=f)),
             # ("API Payment Status", reverse("api-payment", request=r, format=f)),
             # ("API Payment Status Detail", reverse("api-payment", request=r, format=f, kwargs={"pk": 1})),
+            ("API Checkout Validation", reverse("api-checkout-validation", request=r, format=f)),
             ("API Checkout", reverse("api-checkout", request=r, format=f)),
         ])),
         # ("Buy Now", collections.OrderedDict([

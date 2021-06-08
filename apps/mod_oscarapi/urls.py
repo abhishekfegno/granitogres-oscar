@@ -208,6 +208,7 @@ urlpatterns = [
         name="category-child-list",
     ),
     path("users/<int:pk>/", UserDetail.as_view(), name="user-detail"),
+    path("validate-checkout/", CheckoutValidationView.as_view(), name="api-checkout-validation"),
     path("checkout/", CheckoutView.as_view(), name="api-checkout"),
     path("orders/", OrderList.as_view(), name="order-list"),
     path("orders/<int:pk>/", OrderDetail.as_view(), name="order-detail"),
