@@ -6,6 +6,7 @@ from django.utils.functional import Promise
 from apps.partner.strategy import Selector
 from lib.currencies import get_symbol
 from lib.utils import get_approximate_tax_for_retail
+from . import push
 
 
 def image_not_found(request=None):
