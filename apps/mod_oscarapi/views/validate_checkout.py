@@ -53,8 +53,6 @@ class CheckoutValidationView(OscarAPICheckoutView):
             errors_out['has_error'] = True
         if errors_out['has_error']:
             return Response(errors_out, status=status.HTTP_400_BAD_REQUEST)
-        import ipdb
-        ipdb.set_trace()
         for line in basket.all_lines():
             result = basket.strategy.fetch_for_line(line)
             is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
