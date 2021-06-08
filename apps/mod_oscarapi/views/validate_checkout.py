@@ -3,7 +3,7 @@ from django.utils.decorators import method_decorator
 from oscarapi.basket.operations import assign_basket_strategy
 from oscarapicheckout import utils
 from oscarapicheckout.views import CheckoutView as OscarAPICheckoutView
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.response import Response
 
 from .checkout import _login_and_location_required
@@ -12,6 +12,9 @@ from ..serializers.checkout import (
 )
 from ...basket.models import Basket
 from ...payment import refunds
+
+class CheckoutValidationSerializer(serializers.Serializer):
+    basket_id = serializers.PrimaryKeyRelatedField(queryset=Basket.open.all()|Basket.buy_now.all())
 
 
 @method_decorator(_login_and_location_required, name="dispatch")
@@ -22,7 +25,7 @@ class CheckoutValidationView(OscarAPICheckoutView):
         "basket_id": basket.id,
     }
     """
-    serializer_class = CheckoutSerializer
+    serializer_class = CheckoutValidationSerializer
     order_object = None
     
     def post(self, request, format=None):
@@ -42,13 +45,16 @@ class CheckoutValidationView(OscarAPICheckoutView):
         if basket is None:
             errors_out['common_error'] = "Basket does not Exists"
             errors_out['has_error'] = True
+        if errors_out['has_error']:
+            return Response(errors_out, status=status.HTTP_400_BAD_REQUEST)
         basket = assign_basket_strategy(basket, request)
         if basket.is_empty:
             errors_out['common_error'] = "Basket is Empty!"
             errors_out['has_error'] = True
         if errors_out['has_error']:
             return Response(errors_out, status=status.HTTP_400_BAD_REQUEST)
-
+        import ipdb
+        ipdb.set_trace()
         for line in basket.all_lines():
             result = basket.strategy.fetch_for_line(line)
             is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)

@@ -28,9 +28,7 @@ from rest_framework.documentation import include_docs_urls
 from apps.mod_oscarapi.views.checkout import CheckoutView
 from django.views.i18n import JavaScriptCatalog
 
-
 view_checkout = never_cache(CheckoutView.as_view())
-validate_checkout = never_cache(CheckoutValidationView.as_view())
 
 
 urlpatterns = [

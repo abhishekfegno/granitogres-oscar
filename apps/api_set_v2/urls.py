@@ -1,3 +1,5 @@
+from django.views.decorators.cache import never_cache
+
 from apps.api_set.urls import *
 from django.urls import path, include
 # Loading V1 Apis In order to patch
@@ -14,6 +16,9 @@ from apps.api_set_v2.views.index import index, offers
 from apps.api_set_v2.views.orders import orders_detail, reorder_to_current_basket, reorder_to_temporary_basket
 from apps.api_set_v2.views.orders import orders
 from apps.api_set_v2.views.product_listing_query_based import product_list
+from apps.mod_oscarapi.views.validate_checkout import CheckoutValidationView
+validate_checkout = never_cache(CheckoutValidationView.as_view())
+
 
 v1__registration_apis = [
     path('send-otp/', SendOTP.as_view(), name="api-v1--send-otp"),
@@ -86,6 +91,7 @@ wish_list_urlpatterns = [
 public_apis = [
     path("check-availability/<int:product>@<int:pincode>/", availability, name="api-availability"),
     path("return-reasons-list/", return_reasons_list, name="return-reasons-list"),
+    path("validate_checkout", validate_checkout, name="api-checkout-validation"),
 ]
 
 
