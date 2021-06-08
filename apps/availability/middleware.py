@@ -24,7 +24,6 @@ class AvailabilityZoneMiddleware(MiddlewareMixin):
     def process_request(self, request):
         request.session['location'] = request.session.get('location', None)
         request.session['zone'] = zone = request.session.get('zone', None)
-        # import pdb;pdb.set_trace()
         if str(request.path).startswith('/api/'):
             if (
                     not zone

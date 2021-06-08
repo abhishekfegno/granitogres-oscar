@@ -61,7 +61,6 @@ def get_optimized_product_dict(
     if zone:
         sr_set = sr_set.filter(partner__zone__id=zone)
 
-    # import pdb; pdb.set_trace()
     # if offset and limit:
     #     sr_set = sr_set[offset:limit]
     # elif limit:

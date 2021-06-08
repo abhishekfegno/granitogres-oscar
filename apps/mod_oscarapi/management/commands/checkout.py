@@ -122,7 +122,6 @@ class Command(BaseCommand):
                 self.s.get(self.BASE_URL)
             return
         else:
-            import pdb; pdb.set_trace()
             print("Could Not Login")
             print("RESPONSE: ", response.text)
             if input("Exit? Y/n") in 'Yy':
@@ -182,7 +181,6 @@ class Command(BaseCommand):
         else:
             print(basket, user, method)
             raise ModuleNotFoundError("Method is not in ")
-        # import pdb; pdb.set_trace()
         uad = UserAddress.objects.filter().last()
         point = Point(float(12.785238498732), float(77.94478155806023))
         if uad is None:
