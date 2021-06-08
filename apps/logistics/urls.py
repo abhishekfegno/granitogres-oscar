@@ -1,13 +1,10 @@
 from django.urls import path, include
-from rest_framework import serializers
 from rest_framework.decorators import api_view
-from rest_framework.generics import GenericAPIView
-from rest_framework.views import APIView
 
 from apps.api_set.views.orders import _login_required
 from apps.logistics.views.generic import *
 from apps.logistics.views import delivery_boy
-from apps.utils.pushnotifications import PushNotification
+from apps.push.pushnotifications import PushNotification
 
 app_name = 'logistics'
 

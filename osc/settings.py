@@ -166,6 +166,7 @@ from .config.drf import *
 # from .config.elastic import *
 from .config.oscar import *
 from .config.payments import *
+from .config.push_notifications import *
 from .config.production import *
 from .config.project import *
 from .config.route import *
@@ -173,6 +174,7 @@ from .config.search import *
 from .config.sms import *
 from .config.static import *
 from .config.templates import *
+
 
 """
 Email : grocery@gmail.com
