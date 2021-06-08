@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view
 from apps.api_set.views.orders import _login_required
 from apps.logistics.views.generic import *
 from apps.logistics.views import delivery_boy
-from apps.push.pushnotifications import PushNotification
+from apps.utils.push.pushnotifications import PushNotification
 
 app_name = 'logistics'
 

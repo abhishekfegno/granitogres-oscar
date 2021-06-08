@@ -13,25 +13,25 @@ PUSH_NOTIFICATIONS_SETTINGS = {
 
         "CONFIG": 'push_notifications.conf.AppConfig',
         "APPLICATIONS": {
-                "GROCERY": {
+                "com.fegno.ecom.eshop": {
                         # PLATFORM (required) determines what additional settings are required.
                         "PLATFORM": "FCM",
 
                         # required FCM setting
                         "API_KEY": os.environ.get('FCM_API_KEY', ),
                 },
-                "GROCERY_IOS": {
+                "com.fegno.ecom.eshop2": {
                         # PLATFORM (required) determines what additional settings are required.
                         "PLATFORM": "APNS",
                         # required APNS setting
                         "CERTIFICATE": os.path.join(BASE_DIR, 'keys', 'cert.pem'),
                 },
-                "DELIVERYBOY": {
+                "com.fegno.delivery_boy_application": {
                         # PLATFORM (required) determines what additional settings are required.
                         "PLATFORM": "FCM",
 
                         # required APNS setting
-                        "API_KEY": os.environ.get('FCM_API_KEY', ),
+                        "API_KEY": os.environ.get('FCM_API_KEY'),
                 },
         }
 
