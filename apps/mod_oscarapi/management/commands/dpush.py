@@ -13,7 +13,9 @@ class Command(BaseCommand):
         message = 'Some Long Message'
         from apps.utils.pushnotifications import PushNotification
         try:
-            PushNotification(*u).send_message(title, message)
+            resp = PushNotification(*u).send_message(title, message)
+            print("==="*20)
+            print(resp)
         except HTTPError as err:
             print(err)
             print(err.msg)
