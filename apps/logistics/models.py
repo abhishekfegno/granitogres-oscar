@@ -20,6 +20,8 @@ from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
 
 from apps.order.models import Order
+from ..utils.pushnotifications import LogisticsPushNotification
+
 OrderLine = get_model('order', 'Line')
 
 NOTE_BY_DELIVERY_BOY = "Reason From Delivery App"
@@ -181,6 +183,7 @@ class DeliveryTrip(Constant, models.Model):
         return self.status == self.YET_TO_START or self.status == self.ON_TRIP
 
     def update_self(self):
+        LogisticsPushNotification(trip=self, order=None).send_trip_completed_message()
         self.trip_date = datetime.date.today()
         self.trip_time = timezone.now().time()
         self.status = self.COMPLETED
@@ -251,6 +254,7 @@ class DeliveryTrip(Constant, models.Model):
         self.delivery_consignments.update(status=Constant.ON_TRIP)
         self.return_consignments.update(status=Constant.ON_TRIP)
         self.save()
+        LogisticsPushNotification(trip=self, order=None).send_trip_started_message()
 
     def get_completed(self):
         if self.status == self.COMPLETED:
@@ -273,6 +277,7 @@ class DeliveryTrip(Constant, models.Model):
         self.status = self.CANCELLED
         self.reason = reason
         self.save()
+
 
     @cached_property
     def cods_to_collect(self):
@@ -349,6 +354,7 @@ class ConsignmentDelivery(Constant, models.Model):
         self.status = self.CANCELLED
         self.reason = reason
         self.save()
+        LogisticsPushNotification(trip=self.delivery_trip, order=self.order).send_cancellation_message(self.order)
 
     @property
     def payment_type(self):

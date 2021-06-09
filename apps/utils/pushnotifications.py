@@ -1,4 +1,6 @@
+import os
 from pprint import pprint
+from typing import Optional
 
 from django.conf import settings
 from push_notifications.models import GCMDevice, APNSDevice, APNSDeviceQuerySet, GCMDeviceQuerySet
@@ -14,11 +16,12 @@ class MessageProtocol:
     action = None
     icon = None
 
-    def __init__(self, title, message, action, icon=None):
+    def __init__(self, title, message, action, icon=None, **kwargs):
         self.title = title
         self.message = message
         self.action = action
         self.icon = icon
+        self.kwargs = kwargs
 
     def as_dict(self):
         """
@@ -51,7 +54,8 @@ class MessageProtocol:
         """
         return {
             "message_title": self.title, "message_body": self.message + "\nTap to View More!",
-            'click_action': self.action, 'message_icon': self.icon
+            'click_action': self.action, 'message_icon': self.icon,
+            **self.kwargs
         }
 
 
@@ -83,14 +87,16 @@ class PushNotification:
             ).values_list("registration_id", flat=True))
 
             if registration_ids:
-                push_service = FCMNotification(
-                    api_key=settings.PUSH_NOTIFICATIONS_SETTINGS['APPLICATIONS'][app_id]['API_KEY'])
-                result = push_service.notify_multiple_devices(
-                    registration_ids=registration_ids,
-                    **kwargs
-                )
-                response.append(result)
-
+                try:
+                    push_service = FCMNotification(
+                        api_key=settings.PUSH_NOTIFICATIONS_SETTINGS['APPLICATIONS'][app_id]['API_KEY'])
+                    result = push_service.notify_multiple_devices(
+                        registration_ids=registration_ids,
+                        **kwargs
+                    )
+                    response.append(result)
+                except Exception as e:
+                    print(e)
         return response
 
     def apn_send_message(self, queryset, message, **kwargs):
@@ -118,9 +124,9 @@ class PushNotification:
                 # response.append(result)
         return response
 
-    def send_message(self, title, message, action='just_popup_action', icon=None):
+    def send_message(self, title, message, action='just_popup_action', **kwargs):
         # FCM / GCM
-        payload = MessageProtocol(title, message, action, icon)
+        payload = MessageProtocol(title, message, action, **kwargs)
         responses = {}
         if self.fcm_devices:
             responses['fcm'] = self.fcm_send_message(self.fcm_devices, payload.message, **payload.as_dict())
@@ -134,14 +140,14 @@ class PushNotification:
 
 class LogisticsPushNotification(PushNotification):
 
-    def __init__(self, trip: DeliveryTrip, order: Order):
+    def __init__(self, trip: DeliveryTrip, order: Optional[Order] = None):
         self.trip = trip
         self.order = order
         super(LogisticsPushNotification, self).__init__(trip.agent)
 
-    def send_cancellation_message(self, items):
-        title = f"Cancelled {len(items)} Items from "
-        message = ", ".join([i.product_title for i in items])
+    def send_cancellation_message(self, order: Order):
+        title = f"Cancelled {len(order)} Item(s) from #{order.number}"
+        message = ", ".join([i.product_title for i in order.lines.all()])
         self.send_message(title, message)
 
     def send_trip_started_message(self):
@@ -153,3 +159,95 @@ class LogisticsPushNotification(PushNotification):
         title = f"Grocery Logistics"
         message = "You have successfully completed the trip."
         self.send_message(title, message)
+
+
+class OrderStatusPushNotification(PushNotification):
+    OSCAR_ORDER_STATUS_CHANGE_MESSAGE = {
+        settings.ORDER_STATUS_PLACED: {
+            'title': 'Your order has been placed! Please Refer #{order.number} for more details.',
+            'message': 'You have ordered {", ".join([i.product_title for i in order.lines.all()[:3]])}. Tap to open',
+        },
+        settings.ORDER_STATUS_CONFIRMED: {
+            'title': 'We are Preparing your Basket! Please Refer #{order.number} for more details.',
+            'message': 'Order Confirmed! Please Refer #{order.number} for more details. Tap to open',
+        },
+        settings.ORDER_STATUS_OUT_FOR_DELIVERY: {
+            'title': 'On the Way to delivery with #{order.number}! Please Refer #{order.number} for more details.',
+            'message': 'We might reach you within a couple of hours! Tap to open',
+        },
+        settings.ORDER_STATUS_DELIVERED: {
+            'title': 'Your Order #{order.number} has been delivered! ',
+            'message': 'We might reach you within a couple of hours! Tap to open',
+        },
+        settings.ORDER_STATUS_RETURN_REQUESTED: {
+            'title': 'Your Return Request for some items has been forwarded!',
+            'message': '#{order.number}! {", ".join([i.product_title for i in order.lines.filter(status="Return '
+                       'Requested")])} Tap to open',
+        },
+        settings.ORDER_STATUS_RETURN_APPROVED: {
+            'title': 'Your Return Request has been Approved!',
+            'message': '#{order.number}! {", ".join([i.product_title for i in order.lines.filter(status="Return '
+                       'Approved")])} Tap to open',
+        },
+        settings.ORDER_STATUS_RETURNED: {
+            'title': 'Return Completed! Payment has been processed! ',
+            'message': 'Return request against #{order.number} has been completed! Payment will be into your account '
+                       'withn 2-7 working days Tap to open',
+        },
+        settings.ORDER_STATUS_CANCELED: {
+            'title': 'Your Order #{order.number} Has Been Cancelled!!',
+            'message': 'Please Check your orders for more details! #{order.number}! Tap to open',
+        },
+        settings.ORDER_STATUS_PAYMENT_DECLINED: {
+            'title': 'Payment Has Been Declined! Order #{order.number}!',
+            'message': 'Please Check your orders for more details! #{order.number}! Tap to open',
+        },
+    }
+
+    def send_status_update(self, order, new_status):
+        title = settings.OSCAR_ORDER_STATUS_CHANGE_MESSAGE[new_status]['title'].format(order=order)[:256]
+        message = settings.OSCAR_ORDER_STATUS_CHANGE_MESSAGE[new_status]['message'].format(order=order)[:256]
+        kwargs = {
+                'order_id': order.id,
+                'order_number': order.number,
+                'order_status': new_status,
+        }
+        self.send_message(title, message, action='open_orders', extra_notification_kwargs=kwargs)
+
+    def send_refund_update(self, order, amount):
+        title = "Refund Initiated!"
+        message = f"Refund of amount of {amount} has been Initiated!"
+        kwargs = {
+            'order_id': order.id,
+            'order_number': order.number,
+            'amount': amount,
+        }
+        self.send_message(title, message, action='open_orders', extra_notification_kwargs=kwargs)
+
+
+class NewOfferPushNotification(PushNotification):
+
+    def __init__(self, *users):         # noqa
+        self.fcm_devices: GCMDeviceQuerySet = GCMDevice.objects.filter() or None
+        self.apn_devices: APNSDeviceQuerySet = APNSDevice.objects.filter() or None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

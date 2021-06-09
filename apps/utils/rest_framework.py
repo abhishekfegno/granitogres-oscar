@@ -56,6 +56,7 @@ class APNSDeviceSerializer(ModelSerializer):
 
 
 class UniqueRegistrationSerializerMixin(Serializer):
+
     def validate(self, attrs):
         devices = None
         primary_key = None
@@ -160,7 +161,11 @@ class DeviceViewSetMixin(object):
     def perform_create(self, serializer):
         if self.request.user.is_authenticated:
             serializer.save(user=self.request.user)
-        return super(DeviceViewSetMixin, self).perform_create(serializer)
+        out = super(DeviceViewSetMixin, self).perform_create(serializer)
+        if serializer.instance.id and serializer.instance.device_id:
+            qs = self.queryset.model.objects.exclude(pk=serializer.instance.id).filter(device_id=serializer.instance.device_id)
+            qs.update(active=False)
+        return out
 
     def perform_update(self, serializer):
         if self.request.user.is_authenticated:

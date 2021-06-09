@@ -7,6 +7,7 @@ from django.urls import reverse
 from sorl.thumbnail import get_thumbnail
 
 from apps.utils import image_not_found
+from apps.utils.pushnotifications import NewOfferPushNotification
 
 
 class empty:
@@ -266,6 +267,11 @@ class HomePageMegaBanner(AbstractCURDModel):
 models_list = (ReturnReason, HomePageMegaBanner, InAppFullScreenBanner, InAppSliderBanner, InAppBanner)
 
 
+def notify_users_on_create(sender, instance, created, **kwargs):
+    if created:
+        NewOfferPushNotification().send_message("You have got a new Offer", instance.title)
+
+
 def clear_cache(sender, instance, **kwargs):
     from django.core.cache import cache
     cache.delete_pattern("apps.api_set_v2.views.index?zone*")
@@ -273,3 +279,10 @@ def clear_cache(sender, instance, **kwargs):
 
 post_save.connect(clear_cache, sender=HomePageMegaBanner)
 post_save.connect(clear_cache, sender=InAppBanner)
+
+post_save.connect(notify_users_on_create, sender=HomePageMegaBanner)
+post_save.connect(notify_users_on_create, sender=InAppBannerManager)
+post_save.connect(notify_users_on_create, sender=InAppSliderBanner)
+
+
+

@@ -11,6 +11,7 @@ from .models import Order, PaymentEventType
 from ..payment import refunds
 from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
+from ..utils.pushnotifications import OrderStatusPushNotification
 from ..utils.utils import get_statuses
 
 Transaction = get_model('payment', 'Transaction')
@@ -38,7 +39,7 @@ class EventHandler(processing.EventHandler):
         """
         old_status = order.status
         order.set_status(new_status)
-
+        OrderStatusPushNotification(order.user).send_status_update(order, new_status)
         """ 
         Handle Refund and Update of Refund Quantity on `new_status` == 'Return'. 
         Refund Can be proceeded only after changing Order Status.
@@ -77,6 +78,8 @@ class EventHandler(processing.EventHandler):
         refunds though where the payment event may be unrelated to a particular
         shipping event and doesn't directly correspond to a set of lines.
         """
+        OrderStatusPushNotification(order.user).send_refund_update(order, amount)
+
         self.validate_payment_event(
             order, event_type, amount, lines, line_quantities, **kwargs)
 

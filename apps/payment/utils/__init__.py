@@ -6,6 +6,7 @@ from apps.order.models import Order, PaymentEventQuantity, Line, PaymentEvent, L
 from apps.payment.models import COD
 
 from apps.payment.models import Transaction, SourceType, Source
+from apps.utils.pushnotifications import OrderStatusPushNotification
 
 
 class PaymentRefundMixin(object):
@@ -60,6 +61,7 @@ class PaymentRefundMixin(object):
             order=order, amount=amount, reference=response['id']
         )
         print("Point 08: Made event Refundable! -- order cancellation", response)
+        OrderStatusPushNotification(order.user).send_refund_update(order, amount)
         return event
 
     def refund_order(self, order: Order, source: Source, **kwargs):
