@@ -94,6 +94,7 @@ class PushNotification:
         return response
 
     def apn_send_message(self, queryset, message, **kwargs):
+        # TRY DOC https://pypi.org/project/pyapns-client/
         data = kwargs.pop("extra", {})
         if message is not None:
             data["message"] = message
