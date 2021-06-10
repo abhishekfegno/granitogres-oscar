@@ -73,10 +73,9 @@ class PushNotification:
 
     def get_apn_ids(self):
         out = []
-        if self.USER_TYPE is not None:        
-            for app_id in settings.PUSH_NOTIFICATIONS_SETTINGS['APPLICATIONS']:
-                ut = settings.PUSH_NOTIFICATIONS_SETTINGS['APPLICATIONS'][app_id]['USER_TYPE']
-                if ut == self.USER_TYPE:
+        if self.USER_TYPE is not None:
+            for app_id in settings.PUSH_DEVICES:
+                if settings.PUSH_DEVICES[app_id] == self.USER_TYPE:
                     out.append(app_id)
         return out
 
@@ -243,6 +242,7 @@ class OrderStatusPushNotification(PushNotification):
 
 
 class NewOfferPushNotification(PushNotification):
+    USER_TYPE = 'CUSTOMER'
 
     def __init__(self, *users):         # noqa
         self.fcm_devices: GCMDeviceQuerySet = GCMDevice.objects.filter() or None
