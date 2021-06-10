@@ -1,3 +1,4 @@
+import logging
 import os
 from pprint import pprint
 from typing import Optional
@@ -6,8 +7,8 @@ from django.conf import settings
 from push_notifications.models import GCMDevice, APNSDevice, APNSDeviceQuerySet, GCMDeviceQuerySet
 from pyfcm import FCMNotification
 
-from apps.logistics.models import DeliveryTrip
 from apps.order.models import Order
+logger = logging.getLogger(__name__)
 
 
 class MessageProtocol:
@@ -97,6 +98,8 @@ class PushNotification:
                     response.append(result)
                 except Exception as e:
                     print(e)
+                    logger.error(e)
+                    raise e
         return response
 
     def apn_send_message(self, queryset, message, **kwargs):
@@ -141,7 +144,7 @@ class PushNotification:
 
 class LogisticsPushNotification(PushNotification):
 
-    def __init__(self, trip: DeliveryTrip, order: Optional[Order] = None):
+    def __init__(self, trip, order = None):
         self.trip = trip
         self.order = order
         super(LogisticsPushNotification, self).__init__(trip.agent)

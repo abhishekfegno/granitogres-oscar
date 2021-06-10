@@ -40,7 +40,7 @@ class CheckoutValidationView(OscarAPICheckoutView):
         user = request.user if request.user and request.user.is_authenticated else None
         # Validate the input
         data = request.data.copy()
-        basket = Basket.open.filter(pk=data.get('basket_id', 0)).filter(owner=user).first()
+        basket = Basket.open.filter(pk=data.get('basket_id', 0)).filter().first()
         
         if basket is None:
             errors_out['common_error'] = "Basket does not Exists"
