@@ -65,9 +65,20 @@ class PushNotification:
     Instead od django-push-notification, we are using pyfcm to send message to server!
     since we have got some authentication issue with the package!
     """
+    USER_TYPE = None
+
     def __init__(self, *users):
         self.fcm_devices: GCMDeviceQuerySet = GCMDevice.objects.filter(user__in=users) or None
         self.apn_devices: APNSDeviceQuerySet = APNSDevice.objects.filter(user__in=users) or None
+
+    def get_apn_ids(self):
+        out = []
+        if self.USER_TYPE is not None:        
+            for app_id in settings.PUSH_NOTIFICATIONS_SETTINGS['APPLICATIONS']:
+                ut = settings.PUSH_NOTIFICATIONS_SETTINGS['APPLICATIONS'][app_id]['USER_TYPE']
+                if ut == self.USER_TYPE:
+                    out.append(app_id)
+        return out
 
     def fcm_send_message(self, queryset, message, **kwargs):
         response = []
@@ -77,11 +88,11 @@ class PushNotification:
         if message is not None:
             data["message"] = message
 
-        app_ids = queryset.filter(
-            active=True
-        ).order_by("application_id").values_list("application_id", flat=True).distinct()
+        # app_ids = queryset.filter(
+        #     active=True,
+        # ).order_by("application_id").values_list("application_id", flat=True).distinct()
 
-        for app_id in app_ids:
+        for app_id in self.get_apn_ids():
 
             registration_ids = list(queryset.filter(
                 active=True, cloud_message_type=cloud_type, application_id=app_id
@@ -104,16 +115,15 @@ class PushNotification:
 
     def apn_send_message(self, queryset, message, **kwargs):
         # TRY DOC https://pypi.org/project/pyapns-client/
-
         data = kwargs.pop("extra", {})
         if message is not None:
             data["message"] = message
-        app_ids = queryset.filter(
-            active=True
-        ).order_by("application_id").values_list("application_id", flat=True).distinct()
+        # app_ids = queryset.filter(
+        #     active=True
+        # ).order_by("application_id").values_list("application_id", flat=True).distinct()
         response = []
         cloud_type = "FCM"
-        for app_id in app_ids:
+        for app_id in self.get_apn_ids():
             registration_ids = list(queryset.filter(
                 active=True, cloud_message_type=cloud_type, application_id=app_id
             ).values_list("registration_id", flat=True))
@@ -143,7 +153,9 @@ class PushNotification:
 
 
 class LogisticsPushNotification(PushNotification):
-
+    
+    USER_TYPE = 'DELIVERY_BOY'
+    
     def __init__(self, trip, order = None):
         self.trip = trip
         self.order = order
@@ -168,7 +180,7 @@ class LogisticsPushNotification(PushNotification):
 OSCAR_ORDER_STATUS_CHANGE_MESSAGE = {
     settings.ORDER_STATUS_PLACED: {
         'title': 'Your order has been placed! Please Refer #{order.number} for more details.',
-        'message': 'You have ordered {", ".join([i.product_title for i in order.lines.all()[:3]])}. Tap to open',
+        'message': 'You have ordered {", ".join([i.product_title for i in order.lines.all()[:3]])}. ',
     },
     settings.ORDER_STATUS_CONFIRMED: {
         'title': 'We are Preparing your Basket! Please Refer #{order.number} for more details.',
@@ -184,13 +196,11 @@ OSCAR_ORDER_STATUS_CHANGE_MESSAGE = {
     },
     settings.ORDER_STATUS_RETURN_REQUESTED: {
         'title': 'Your Return Request for some items has been forwarded!',
-        'message': '#{order.number}! {", ".join([i.product_title for i in order.lines.filter(status="Return '
-                   'Requested")])} Tap to open',
+        'message': '#{order.number}! {", ".join([i.product_title for i in order.lines.filter(status="Return Requested")])}',
     },
     settings.ORDER_STATUS_RETURN_APPROVED: {
         'title': 'Your Return Request has been Approved!',
-        'message': '#{order.number}! {", ".join([i.product_title for i in order.lines.filter(status="Return '
-                   'Approved")])} Tap to open',
+        'message': '#{order.number}! {", ".join([i.product_title for i in order.lines.filter(status="Return Approved")])}',
     },
     settings.ORDER_STATUS_RETURNED: {
         'title': 'Return Completed! Payment has been processed! ',
@@ -199,16 +209,17 @@ OSCAR_ORDER_STATUS_CHANGE_MESSAGE = {
     },
     settings.ORDER_STATUS_CANCELED: {
         'title': 'Your Order #{order.number} Has Been Cancelled!!',
-        'message': 'Please Check your orders for more details! #{order.number}! Tap to open',
+        'message': 'Please Check your orders for more details! #{order.number}! ',
     },
     settings.ORDER_STATUS_PAYMENT_DECLINED: {
         'title': 'Payment Has Been Declined! Order #{order.number}!',
-        'message': 'Please Check your orders for more details! #{order.number}! Tap to open',
+        'message': 'Please Check your orders for more details! #{order.number}! ',
     },
 }
 
 
 class OrderStatusPushNotification(PushNotification):
+    USER_TYPE = 'CUSTOMER'
 
     def send_status_update(self, order, new_status):
         title = OSCAR_ORDER_STATUS_CHANGE_MESSAGE[new_status]['title'].format(order=order)[:256]

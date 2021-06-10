@@ -16,15 +16,16 @@ PUSH_NOTIFICATIONS_SETTINGS = {
                 "com.fegno.ecom.eshop": {
                         # PLATFORM (required) determines what additional settings are required.
                         "PLATFORM": "FCM",
-
                         # required FCM setting
                         "API_KEY": os.environ.get('FCM_API_KEY', ),
+                        "USER_TYPE": "CUSTOMER"
                 },
                 "com.fegno.ecom.eshop2": {
                         # PLATFORM (required) determines what additional settings are required.
                         "PLATFORM": "APNS",
                         # required APNS setting
                         "CERTIFICATE": os.path.join(BASE_DIR, 'keys', 'cert.pem'),
+                        "USER_TYPE": "CUSTOMER"
                 },
                 "com.fegno.delivery_boy_application": {
                         # PLATFORM (required) determines what additional settings are required.
@@ -32,6 +33,7 @@ PUSH_NOTIFICATIONS_SETTINGS = {
 
                         # required APNS setting
                         "API_KEY": os.environ.get('FCM_API_KEY'),
+                        "USER_TYPE": "DELIVERY_BOY"
                 },
         }
 
