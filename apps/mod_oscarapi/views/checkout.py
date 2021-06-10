@@ -312,7 +312,6 @@ class CheckoutView(OscarAPICheckoutView):
                         self.order_object.lines.update(refunded_quantity=F('quantity'))
                 except:
                     pass
-
             return resp
         except Exception as e:
             print(e)
