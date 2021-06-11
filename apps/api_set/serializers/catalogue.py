@@ -124,6 +124,8 @@ def custom_ProductListSerializer(queryset, context,
                 reverse('product-detail', kwargs={'pk': product.id})
             ),
             "price": price_serializer_mixin.get_price(product),
+            "is_meet": product.is_meet,
+            "is_vegetarian": product.is_vegetarian,
             "weight": getattr(
                 product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'
             ) if not product.is_parent else None,
@@ -193,6 +195,8 @@ class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMi
             "options",
             # "siblings",
             "variants",
+            'is_meet',
+            'is_vegetarian',
             'about',
             'storage_and_uses',
             'benifits',

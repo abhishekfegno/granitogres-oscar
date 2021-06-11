@@ -42,6 +42,8 @@ class Product(AbstractProduct):
         (28, '28% GST'),
         (0, '0% Tax'),
     ])
+    is_vegetarian = models.BooleanField(default=False)
+    is_meet = models.BooleanField(default=False)
 
     @property
     def tax_value(self) -> Decimal:
@@ -123,6 +125,12 @@ class Product(AbstractProduct):
         # Removing cache which loads siblings
         if self.is_parent:
             key = cache_key.parent_product_sibling_data__key(self.id)
+            cache.delete(key)
+            key = cache_key.product_price_data__key(self.id)
+            cache.delete(key)
+            key = cache_key.product_price_data_lite__key(self.id)
+            cache.delete(key)
+            key = cache_key.product_price_data_lite__key(self.id)
             cache.delete(key)
 
         # Removing all category in listing page which contains this product
