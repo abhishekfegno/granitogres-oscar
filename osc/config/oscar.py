@@ -3,6 +3,7 @@ from oscar.defaults import *
 OSCARAPI_OVERRIDE_MODULES = ["apps.mod_oscarapi"]
 
 OSCARAPI_BLOCK_ADMIN_API_ACCESS = True
+OSCAR_MAX_PER_LINE_QUANTITY = 12
 
 OSCAR_DEFAULT_CURRENCY = 'INR'
 OSCAR_SHOP_NAME = 'Shopprix'
