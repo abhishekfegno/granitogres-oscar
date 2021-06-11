@@ -42,7 +42,7 @@ def purchase_info_as_dict(purchase_info, **kwargs):
         'partner_id': hasattr(purchase_info.stockrecord, 'partner_id') and purchase_info.stockrecord.partner_id or None,
         'partner_sku': hasattr(purchase_info.stockrecord, 'partner_sku') and purchase_info.stockrecord.partner_sku or None,
         'low_stock': purchase_info.stockrecord and purchase_info.stockrecord.low_stock_threshold and purchase_info.stockrecord.net_stock_level <= purchase_info.stockrecord.low_stock_threshold,
-        'net_stock_level': purchase_info.stockrecord and purchase_info.stockrecord.net_stock_level,
+        'net_stock_level': purchase_info.stockrecord and max(purchase_info.stockrecord.net_stock_level or 0, 0),
         'effective_price': purchase_info.price.effective_price,
         'currency': purchase_info.price.currency,
         'symbol': get_symbol(purchase_info.price.currency),
@@ -70,7 +70,7 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
         'effective_price': float(purchase_info.price.effective_price),
         'retail': int(retail_rate * 100) / 100,
         'low_stock': purchase_info.stockrecord and purchase_info.stockrecord.low_stock_threshold and purchase_info.stockrecord.net_stock_level <= purchase_info.stockrecord.low_stock_threshold,
-        'net_stock_level': purchase_info.stockrecord and purchase_info.stockrecord.net_stock_level,
+        'net_stock_level': purchase_info.stockrecord and max(purchase_info.stockrecord.net_stock_level or 0, 0),
         'currency': purchase_info.price.currency,
         'symbol': get_symbol(purchase_info.price.currency),
         **kwargs
