@@ -149,11 +149,9 @@ def do_reorder(basket: Basket, order: Order, request, clear_current_basket: bool
                 options.append({
                     'option': attribute.option,
                     'value': attribute.value})
-        basket.add_product(line.product, line.quantity, options)
+        basket.add_product(line.product, min(line.quantity, settings.OSCAR_MAX_PER_LINE_QUANTITY), options)
 
-    if len(lines_to_add) > 0:
-        return basket, warnings
-    else:
+    if len(lines_to_add) == 0:
         warnings.append({
             'id': None,
             'title': '-',
@@ -162,7 +160,7 @@ def do_reorder(basket: Basket, order: Order, request, clear_current_basket: bool
             'is_generic_cart_error': True,
             'is_a_bug': False,
         })
-        return basket, warnings
+    return basket, warnings
 
 
 def get_response_dict_with_basket(basket, request):

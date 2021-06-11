@@ -21,7 +21,6 @@ class Basket(AbstractBuyNowBasket):
         Returns (line, created).
           line: the matching basket line
           created: whether the line was created or updated
-
         """
         if options is None:
             options = []

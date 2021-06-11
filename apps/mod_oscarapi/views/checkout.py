@@ -192,6 +192,14 @@ class CheckoutView(OscarAPICheckoutView):
                     'reason': reason,
                 }
                 basket_errors.append(msg)
+            elif not is_permitted:
+                # Create a meaningful message to return in the error response
+                # Translators: User facing error message in checkout
+                msg = "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
+                    'title': line.product.get_title(),
+                    'reason': reason,
+                }
+                basket_errors.append(msg)
         if basket_errors:
             return Response({'errors': "\n".join(basket_errors)}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
