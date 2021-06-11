@@ -1,3 +1,4 @@
+from django.conf import settings
 from oscarapi.basket import operations
 from oscarapi.utils.loading import get_api_classes
 
@@ -19,14 +20,24 @@ class AddProductView(CoreAddProductView):
     def validate(
             self, basket, product, quantity, options
     ):  # pylint: disable=unused-argument
+
+        if quantity > settings.OSCAR_MAX_PER_LINE_QUANTITY:
+            return False, "You could not add more than %d items of %s in the same order" % (
+                settings.OSCAR_MAX_PER_LINE_QUANTITY, product
+            )
         availability = basket.strategy.fetch_for_product(product).availability
         if quantity > 0:
+
             # check if product is available at all
             if not availability.is_available_to_buy:
                 return False, availability.message
 
             current_qty = basket.product_quantity(product)
             desired_qty = current_qty + quantity
+            if desired_qty > settings.OSCAR_MAX_PER_LINE_QUANTITY:
+                return False, "You could not add more than %d items of %s in the same order" % (
+                    settings.OSCAR_MAX_PER_LINE_QUANTITY, product
+                )
 
             # check if we can buy this quantity
             allowed, message = availability.is_purchase_permitted(desired_qty)
