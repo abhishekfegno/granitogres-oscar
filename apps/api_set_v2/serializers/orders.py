@@ -20,9 +20,7 @@ class OrderListSerializer(serializers.ModelSerializer):
     __return_lines = None
 
     def get_return_lines(self, instance):
-        if self.__return_lines is None:
-            self.__return_lines = instance.lines.filter(status__in=get_statuses(112))
-        return self.__return_lines
+        return instance.lines.filter(status__in=get_statuses(112))
     
     def get_info(self, instance) -> dict:
 

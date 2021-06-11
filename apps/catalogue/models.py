@@ -8,9 +8,10 @@ from django.db import models
 from django.db.models import F
 from django.db.models.signals import post_save
 from django.db.transaction import atomic
-from oscar.apps.catalogue.abstract_models import AbstractProduct, AbstractCategory, AbstractProductImage, \
+from oscar.apps.catalogue.abstract_models import (
+    AbstractProduct, AbstractCategory, AbstractProductImage,
     AbstractProductAttribute, AbstractProductRecommendation
-from oscar.core.loading import get_model
+)
 from sorl.thumbnail import get_thumbnail
 
 from apps.partner.models import StockRecord
