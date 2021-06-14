@@ -97,26 +97,28 @@ def order_line_return_request(request, *a, **k):
     }
     """
     #  Validations
-    errors = {"errors": {}}
+    errors = {"errors": None}
     if type(request.data.get('line_ids', None)) is not list:
-        errors['errors']['line_ids'] = "Required"
+        errors['errors'] = "You have to select some lines!"
+        return Response(errors, status=400)
+
     if not request.data.get('reason', None):
-        errors['errors']['reasons'] = "Required"
-    if len(errors['errors'].keys()):
+        errors['errors'] = "Reason Field is Required"
         return Response(errors, status=400)
 
     # Body
     _order = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
     if _order.status in get_statuses(775):
-        errors['errors']['non_field_errors'] = 'Order is not yet delivered!'
+        errors['errors'] = 'Order is not yet delivered!'
+        return Response(errors, status=400)
     if _order.is_return_time_expired:
-        errors['errors']['non_field_errors'] = 'Return Time is Over.'
+        errors['errors'] = 'Return Time is Over.'
+        return Response(errors, status=400)
+
     line_statuses = _order.lines.filter(status__in=get_statuses(112)).count()
 
     if line_statuses:
-        errors['errors']['non_field_errors'] = f'You already have initiated / processed  a return request against {line_statuses} items.'
-
-    if 'non_field_errors' in errors['errors']:
+        errors['errors'] = f'You already have initiated / processed  a return request against {line_statuses} items.'
         return Response(errors, status=400)
 
     order_lines = _order.lines.all().filter(id__in=request.data.get('line_ids'))
@@ -133,7 +135,7 @@ def order_line_return_request(request, *a, **k):
         else:
             raise Exception(f"No Line(s)  Found against Order {_order.number}: Lines {request.data.get('line_ids')}")
     except Exception as e:
-        errors['errors']['non_field_errors'] = str(e)
+        errors['errors'] = str(e)
         return Response(errors, status=400)
     else:
         return Response(OrderDetailSerializer(_order, context={'request': request}).data, status=200)
@@ -159,14 +161,12 @@ def order_cancel_request(request, *a, **k):
     _order: Order = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
 
     if not request.data.get('reason', None):
-        out['errors']['reason'] = "This field is Required"
-        out_status = 400
-        return Response(out, status=out_status)
+        out['errors'] = "Reason field is Required"
+        return Response(out, status=400)
 
     if not _order.is_cancelable:
-        out['errors']['non_field_errors'] = f"Order with status {_order.status} cannot be cancelled!"
-        out_status = 400
-        return Response(out, status=out_status)
+        out['errors'] = f"Order with status {_order.status} cannot be cancelled!"
+        return Response(out, status=400)
 
     old_status, new_status = _order.status, settings.ORDER_STATUS_CANCELED
     handler = EventHandler(request.user)
@@ -182,13 +182,13 @@ def order_cancel_request(request, *a, **k):
         handler.create_note(_order, request.data.get('reason'), note_type=user)
 
     except PaymentError as e:
-        out['errors']['non_field_errors'] = "Unable to change order status due to payment error"
-        out_status = 400
+        out['errors'] = "Unable to change order status due to payment error"
+        return Response(out, status=400)
 
     except order_exceptions.InvalidOrderStatus:
         # The form should validate against this, so we should only end up
         # here during race conditions.
-        out['errors']['non_field_errors'] = "Unable to change order status as the requested new status is not valid"
+        out['errors'] = "Unable to change order status as the requested new status is not valid"
         out_status = 400
     else:
         out['message'] = "Order has been cancelled!"
