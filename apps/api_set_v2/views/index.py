@@ -44,7 +44,10 @@ def get_home_content(request):
     full_screen_banner = [_(b) for b in banners if b.type == b.FULL_SCREEN_BANNER]
     segments = len(cat_data.keys())
     slider_length = len(slider_banner)
-    segment_len = slider_length // segments
+    if segments:
+        segment_len = slider_length // segments
+    else:
+        segment_len = 1
     start, end = 0, segment_len
     for cat, data in cat_data.items():
         slides = slider_banner[start:end]
@@ -63,7 +66,7 @@ def get_home_content(request):
 
 @api_view(("GET",))
 def index(request, *a, **k):
-    cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.1'.format
+    cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.2'.format
 
     def _inner():
         out = {'categories': []}
