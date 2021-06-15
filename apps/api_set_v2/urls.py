@@ -10,6 +10,7 @@ from apps.api_set.views.index import (
 )
 #  End loading v1 apis
 from apps.api_set.views.orders import order_cancel_request
+from apps.api_set.views.public import cancel_reasons_list
 from apps.api_set_v2.views.catalogue import product_detail_web
 
 from apps.api_set_v2.views.index import index, offers
@@ -91,6 +92,7 @@ wish_list_urlpatterns = [
 public_apis = [
     path("check-availability/<int:product>@<int:pincode>/", availability, name="api-availability"),
     path("return-reasons-list/", return_reasons_list, name="return-reasons-list"),
+    path("cancel-reasons-list/", cancel_reasons_list, name="cancel-reasons-list"),
     path("validate_checkout/", validate_checkout, name="api-checkout-validation"),
 ]
 

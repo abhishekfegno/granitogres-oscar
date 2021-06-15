@@ -78,6 +78,7 @@ def PUBLIC_APIS(r, f):
             ("My Orders More Details", reverse("api-orders-more", kwargs={'pk': 10}, request=r, format=f)),
             ("Order Item Return Request", reverse("order_line_return_request", kwargs={'pk': 10}, request=r, format=f)),
             ("Order Cancellation List - POST", reverse("order_cancel_request", kwargs={'pk': 10},  request=r, format=f)),
+            ("Cancel Reason List", reverse("cancel-reasons-list", request=r, format=f)),
             ("Return Reason List", reverse("return-reasons-list", request=r, format=f)),
 
             ("Reorder", collections.OrderedDict([

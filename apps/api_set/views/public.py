@@ -15,7 +15,12 @@ def get_pin(country_code):
 
 @api_view(("GET",))
 def return_reasons_list(request, *a, **kwargs):
-    return Response(ReturnReasonSerializer(ReturnReason.objects.all(), many=True).data, status=200)
+    return Response(ReturnReasonSerializer(ReturnReason.objects.filter(reason_type='return'), many=True).data, status=200)
+
+
+@api_view(("GET",))
+def cancel_reasons_list(request, *a, **kwargs):
+    return Response(ReturnReasonSerializer(ReturnReason.objects.filter(reason_type='cancel'), many=True).data, status=200)
 
 
 @api_view(("GET",))

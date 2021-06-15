@@ -103,6 +103,10 @@ class AbstractCURDModel(models.Model):
 
 
 class ReturnReason(AbstractCURDModel):
+    reason_type = models.CharField(max_length=256, default='return', choices=[
+        ('return', 'Return'),
+        ('cancel', 'Cancel'),
+    ])
     referrer = 'return-reason'
 
     def get_absolute_url(self):
