@@ -44,7 +44,7 @@ class OrderListSerializer(serializers.ModelSerializer):
 
     def get_is_returnable(self, instance):
         order = instance
-        if not order.delivery_time:
+        if not order.delivery_time or order.status != settings.ORDER_STATUS_DELIVERED:
             return {
                 'status': False,
                 'reason': 'Order is not yet delivered!'

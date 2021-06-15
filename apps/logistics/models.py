@@ -1,5 +1,7 @@
 import datetime
 from collections import defaultdict
+
+from django.contrib.postgres.fields import JSONField
 from django.utils import timezone
 from decimal import Decimal
 
@@ -438,6 +440,16 @@ class ConsignmentReturn(Constant, models.Model):
             ).get_or_create(order_line=line)
             return consignment_return
 
+
+class FailedRefund(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    source = models.ForeignKey(Source, on_delete=models.SET_NULL, null=True)
+    reference = models.CharField(max_length=64, null=True)
+    last_response = models.TextField(null=True, blank=True)
+    amount_to_refund = models.FloatField(default=0.0)
+    amount_balance_at_rzp = models.FloatField(default=0.0)
+    notes = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 

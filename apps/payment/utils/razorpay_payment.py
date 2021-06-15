@@ -3,6 +3,8 @@ import time
 import requests
 from django.conf import settings
 from django.utils import timezone
+
+from apps.logistics.models import FailedRefund
 from apps.payment.models import Source
 from oscarapicheckout import states
 from oscarapicheckout.methods import PaymentMethod, Transaction
@@ -147,6 +149,15 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
                         (Payment Reference : {reference}). """
                 msg += f""" <br /> \nYou can copy / note down the reference number and go to razorpay dashboard 
                         to trigger a manual refund. """
+                fr = FailedRefund.objects.create(
+                    order=order,
+                    source=source,
+                    reference=reference,
+                    info=msg,
+                    last_response=payment_response,
+                    amount_to_refund=amount / 100,
+                    amount_balance_at_rzp=(payment_response['amount'] - payment_response['amount_refunded']) / 100
+                )
                 raise AlertException(msg)
 
             pgr = PaymentGateWayResponse(
