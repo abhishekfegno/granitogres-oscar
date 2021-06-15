@@ -12,7 +12,7 @@ def image_not_found(request=None):
     b = request.build_absolute_uri if request else lambda x: x
     return b(
         "{}{}".format(
-            settings.MEDIA_URL,
+            settings.STATIC_URL,
             settings.OSCAR_MISSING_IMAGE_URL
         )
     )

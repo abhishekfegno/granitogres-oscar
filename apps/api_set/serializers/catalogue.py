@@ -137,6 +137,7 @@ def custom_ProductListSerializer(queryset, context,
     for product in queryset:
         cache_key = f"___custom_ProductListSerializer__cached__product:{product.id}__zone_v1:{request.session.get('zone', '0')}"
         data = cache_library(cache_key, cb=lambda: _solve(product))
+        cache.delete(cache_key)
         result.append(data)
 
         # keeping original serializer compatibility so that they can take data as serializer(queryset, context).data

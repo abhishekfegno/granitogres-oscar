@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from oscar.apps.offer.models import ConditionalOffer, Range
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -69,7 +70,6 @@ def product_list(request, category='all', **kwargs):
         Where minprice, maxprice and  available_only are common for all.
         other dynamic parameters are available at  reverse('wnc-filter-options', kwarg={'pk': '<ProductClass: id>'})
     """
-
     queryset = Product.browsable.browsable()
     serializer_class = custom_ProductListSerializer
     _search = request.GET.get('q')

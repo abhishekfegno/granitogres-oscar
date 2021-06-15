@@ -203,13 +203,13 @@ class ProductImage(AbstractProductImage):
     @property
     def thumbnail_mobile_listing(self):
         if self.original:
-            return get_thumbnail(self.original, '163x178', crop='center', quality=98).url
+            return get_thumbnail(self.original, '163x178', crop='center', quality=98).url or image_not_found()
         return image_not_found()
 
     @property
     def thumbnail_mobile_detail(self):
         if self.original:
-            return get_thumbnail(self.original, '375x360', crop='center', quality=98).url
+            return get_thumbnail(self.original, '375x360', crop='center', quality=98).url or image_not_found()
         return image_not_found()
 
 
