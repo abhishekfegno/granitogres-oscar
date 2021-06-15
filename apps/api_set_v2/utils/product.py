@@ -40,9 +40,9 @@ def get_optimized_product_dict(
             # stockrecords__isnull=False
         )
     if offset and limit:
-        product_set = product_set[offset:limit]
+        product_set = product_set[offset:limit*2-1]
     elif limit:
-        product_set = product_set[:limit]
+        product_set = product_set[:limit*2-1]
     elif offset:
         product_set = product_set[offset:]
 
@@ -69,7 +69,7 @@ def get_optimized_product_dict(
     #     sr_set = sr_set[offset:]
 
     product_data = {}
-    for sr in sr_set:
+    for sr in sr_set[:limit]:
         sr.product.selected_stock_record = sr
         if sr.product.is_child:
             if sr.product.parent not in product_data.keys():

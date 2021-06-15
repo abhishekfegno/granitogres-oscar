@@ -18,6 +18,16 @@ def image_not_found(request=None):
     )
 
 
+def banner_not_found(request=None):
+    b = request.build_absolute_uri if request else lambda x: x
+    return b(
+        "{}{}".format(
+            settings.STATIC_URL,
+            settings.MISSING_BANNER_URL
+        )
+    )
+
+
 def get_purchase_info(product, request=None, user=None):
 
     strategy = Selector().strategy(request, user)

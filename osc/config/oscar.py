@@ -39,6 +39,7 @@ OSCAR_FROM_EMAIL = 'no-reply@grocery.com'
 OSCAR_OFFERS_INCL_TAX = False
 
 OSCAR_MISSING_IMAGE_URL = 'image_not_found.jpg'
+MISSING_BANNER_URL = 'banner.jpg'
 OSCAR_GOOGLE_ANALYTICS_ID = None
 
 # Other statuses

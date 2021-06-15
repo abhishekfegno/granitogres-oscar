@@ -12,6 +12,7 @@ from apps.api_set_v2.serializers.catalogue import CategorySerializer
 from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.catalogue.models import Category, Product
 from apps.dashboard.custom.models import HomePageMegaBanner, InAppBanner, OfferBanner
+from apps.utils import banner_not_found
 from lib.cache import cache_library
 
 
@@ -72,7 +73,7 @@ def index(request, *a, **k):
 
         out['offer_banners'] = [{
             'title': banner.title,
-            'banner': banner.home_banner_wide_image(request),
+            'banner': banner.home_banner_wide_image(request) if banner.banner else banner_not_found(request),
             'product_range': banner.product_range_id
         } for banner in HomePageMegaBanner.objects.filter(product_range__isnull=False).order_by('-position')]
         out['content'] = get_home_content(request)
