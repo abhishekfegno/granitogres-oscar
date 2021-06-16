@@ -125,6 +125,30 @@ class OrderListSerializer(serializers.ModelSerializer):
                 'should_display': False,
                 'reason': 'Order is not delivered yet!'
             }
+        if order.status in get_statuses(1671):
+            return {
+                'status': False,
+                'should_display': True,
+                'reason': 'Order is not yet delivered!'
+            }
+        if order.status in get_statuses(128 + 256 + 512):
+            return {
+                'status': False,
+                'should_display': True,
+                'reason': 'This order has already been cancelled!'
+            }
+        if order.status in get_statuses(112):
+            return {
+                'status': False,
+                'should_display': True,
+                'reason': 'You already have initiated another Return!'
+            }
+        if order.status in get_statuses(112):
+            return {
+                'status': False,
+                'should_display': True,
+                'reason': 'Return Time is Over.'
+            }
         if order.is_return_time_expired:
             return {
                 'status': False,

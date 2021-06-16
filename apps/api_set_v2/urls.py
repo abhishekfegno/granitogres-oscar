@@ -9,7 +9,7 @@ from apps.api_set.views.index import (
     home, offer_products
 )
 #  End loading v1 apis
-from apps.api_set.views.orders import order_cancel_request
+from apps.api_set.views.orders import order_cancel_request, order_return_request
 from apps.api_set.views.public import cancel_reasons_list
 from apps.api_set_v2.views.catalogue import product_detail_web
 
@@ -40,7 +40,7 @@ home_urlpatterns = [
     path("_orders/", orders, name="api-orders-v2"),
     path("_orders/<int:pk>/", orders_detail, name="api-orders-detail-v2"),
     path("_orders/<int:pk>/more/", orders_more_detail, name="api-orders-more"),
-    path("_orders/<int:pk>/return-request/", order_line_return_request, name="order_line_return_request"),
+    path("_orders/<int:pk>/return-request/", order_return_request, name="order_line_return_request"),
     path("_orders/<int:pk>/cancel-order/", order_cancel_request, name="order_cancel_request"),
 
     path("_orders/<int:pk>/reorder-to-current-basket/", reorder_to_current_basket, name="api-reorder-to-current-basket-v2"),

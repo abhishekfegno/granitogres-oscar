@@ -89,7 +89,7 @@ def orders_more_detail(request, *a, **k):
 
 @api_view(("POST",))
 @_login_required
-def order_line_return_request(request, *a, **k):
+def order_return_request(request, *a, **k):
     """
     POST {
         "line_ids": [15, 26, 14],
@@ -110,6 +110,9 @@ def order_line_return_request(request, *a, **k):
     _order = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
     if _order.status in get_statuses(1671):
         errors['errors'] = 'Order is not yet delivered!'
+        return Response(errors, status=400)
+    if _order.status in get_statuses(128+256+512):
+        errors['errors'] = 'This order has already been cancelled!'
         return Response(errors, status=400)
     if _order.status in get_statuses(112):
         errors['errors'] = 'You already have initiated another Return!'
