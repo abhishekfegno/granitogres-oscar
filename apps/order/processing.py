@@ -53,7 +53,7 @@ class EventHandler(processing.EventHandler):
             refunds.RefundFacade().refund_order(order=order)
             order.lines.update(refunded_quantity=models.F('quantity'))
         self.pipeline_order_lines(order, new_status)
-        
+
         all_lines = order.lines.all().select_related('stockrecord')
         if new_status in get_statuses(8):
             lines_to_be_consumed = all_lines.filter(status__in=get_statuses(8))
@@ -108,8 +108,8 @@ class EventHandler(processing.EventHandler):
                 if (
                         order.consignmentreturn.delivery_trip
                         and (
-                                order.consignmentreturn.delivery_trip.status
-                                == order.consignmentreturn.delivery_trip.ON_TRIP
+                        order.consignmentreturn.delivery_trip.status
+                        == order.consignmentreturn.delivery_trip.ON_TRIP
                 )):
                     PushNotification(order.consignmentreturn.delivery_trip.agent).send_message(
                         title=f"Return #{order.consignmentreturn.id} has been Cancelled!",
@@ -154,7 +154,8 @@ class EventHandler(processing.EventHandler):
             order, event_type, amount, lines, line_quantities, **kwargs)
 
     @transaction.atomic
-    def handle_order_line_status_change(self, order_line, new_status: str, note_msg=None, note_type='System'):
+    def handle_order_line_status_change(
+            self, order_line, new_status: str, note_msg=None, note_type='System', already_refunded_together=False):
         """
         Handle Order Status Change in Oscar.
         """
@@ -172,11 +173,12 @@ class EventHandler(processing.EventHandler):
         Handle Refund and Update of Refund Quantity on `new_status` == 'Return'. 
         Refund Can be proceeded only after changing Order Status.
         """
-        if new_status in settings.OSCAR_LINE_REFUNDABLE_STATUS:
-            refunds.RefundFacade().refund_order_line(line=order_line)
-            order_line.refunded_quantity = order_line.quantity
-            order_line.save()
-        if new_status in get_statuses(112):  # any status from processing requests
+        if not already_refunded_together:
+            if new_status in settings.OSCAR_LINE_REFUNDABLE_STATUS:
+                refunds.RefundFacade().refund_order_line(line=order_line)
+                order_line.refunded_quantity = order_line.quantity
+                order_line.save()
+        if new_status in get_statuses(64+32+16):  # any status from processing requests
             order.set_status(new_status)
 
         if new_status in get_statuses(8):
@@ -189,7 +191,7 @@ class EventHandler(processing.EventHandler):
             Add note if there is an EventHandler note msg.
             """
             self.create_note(order, message=note_msg, note_type=note_type)
-    
+
     def consume_stock_allocations(self, order, lines=None, line_quantities=None):
         """
         Consume the stock allocations for the passed lines.
