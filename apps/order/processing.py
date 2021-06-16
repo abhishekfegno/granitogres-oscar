@@ -70,7 +70,7 @@ class EventHandler(processing.EventHandler):
                         and order.consignmentdelivery.delivery_trip.status == order.consignmentdelivery.delivery_trip.ON_TRIP
                 ):
                     PushNotification(order.consignmentdelivery.delivery_trip.agent).send_message(
-                        title=f"Consignment #{order.consignmentdelivery.id} has been Delivered!",
+                        title=f"Consignment #handler{order.consignmentdelivery.id} has been Delivered!",
                         message="Hey, a delivery consignment has been marked as Delivered! Moving items to completed "
                                 "list!",
                     )

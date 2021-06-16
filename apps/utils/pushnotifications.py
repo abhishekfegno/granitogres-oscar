@@ -65,7 +65,7 @@ class PushNotification:
     Instead od django-push-notification, we are using pyfcm to send message to server!
     since we have got some authentication issue with the package!
     """
-    USER_TYPE = None
+    USER_TYPE = (settings.CUSTOMER, settings.DELIVERY_BOY, )
 
     def __init__(self, *users):
         self.fcm_devices: GCMDeviceQuerySet = GCMDevice.objects.filter(user__in=users) or None
@@ -153,7 +153,7 @@ class PushNotification:
 
 class LogisticsPushNotification(PushNotification):
     
-    USER_TYPE = 'DELIVERY_BOY'
+    USER_TYPE = (settings.DELIVERY_BOY, )
     
     def __init__(self, trip, order = None):
         self.trip = trip
@@ -218,7 +218,7 @@ OSCAR_ORDER_STATUS_CHANGE_MESSAGE = {
 
 
 class OrderStatusPushNotification(PushNotification):
-    USER_TYPE = 'CUSTOMER'
+    USER_TYPE = (settings.CUSTOMER, )
 
     def send_status_update(self, order, new_status):
         title = OSCAR_ORDER_STATUS_CHANGE_MESSAGE[new_status]['title'].format(order=order)[:256]
@@ -242,7 +242,7 @@ class OrderStatusPushNotification(PushNotification):
 
 
 class NewOfferPushNotification(PushNotification):
-    USER_TYPE = 'CUSTOMER'
+    USER_TYPE = (settings.CUSTOMER, )
 
     def __init__(self, *users):         # noqa
         self.fcm_devices: GCMDeviceQuerySet = GCMDevice.objects.filter() or None
