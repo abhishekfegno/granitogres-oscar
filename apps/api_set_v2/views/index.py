@@ -21,14 +21,16 @@ def get_home_content(request):
     price_mixin = ProductPriceFieldMixinLite()
     pmg_mixin.context = price_mixin.context = {'request': request}
     categories = Category.get_root_nodes().exclude(slug="featured").only('id', 'name', 'slug', 'path').order_by(
-        '-numchild')[:2]
+        '-numchild')
+    random.shuffle(categories)
+    categories = categories[:2]
     out = []
     cat_data = defaultdict(list)
 
     for cat in categories:
         cat_qs = Category.get_tree(cat)
         qs_filter = Q(categories__in=cat_qs) & Q(structure__in=[Product.STANDALONE, Product.PARENT])
-        product_data = get_optimized_product_dict(request=request, qs_filter=qs_filter, limit=4, )
+        product_data = get_optimized_product_dict(request=request, qs_filter=qs_filter, limit=4)
         for parent_product, data in product_data.items():
             cat_data[cat].append(data)
     banners = list(InAppBanner.objects.all().filter(banner__isnull=False, product_range_id__isnull=False))

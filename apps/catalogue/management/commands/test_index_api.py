@@ -5,6 +5,7 @@ from django.urls import reverse
 
 class Command(BaseCommand):
     BASE_URL = 'https://grocery.dev.fegno.com'
+    # BASE_URL = 'http://localhost:8000'
 
     def handle(self, *args, **options):
         url = self.BASE_URL + reverse('api-index-v2')
