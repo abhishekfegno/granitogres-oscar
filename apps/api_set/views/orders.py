@@ -108,8 +108,11 @@ def order_line_return_request(request, *a, **k):
 
     # Body
     _order = get_object_or_404(Order.objects.filter(user=request.user), pk=k.get('pk'))
-    if _order.status in get_statuses(775):
+    if _order.status in get_statuses(1671):
         errors['errors'] = 'Order is not yet delivered!'
+        return Response(errors, status=400)
+    if _order.status in get_statuses(112):
+        errors['errors'] = 'You already have initiated another Return!'
         return Response(errors, status=400)
     if _order.is_return_time_expired:
         errors['errors'] = 'Return Time is Over.'
