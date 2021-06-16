@@ -38,7 +38,7 @@ home_urlpatterns = [
     path("v1/_orders/", orders, name="api-orders"),
     path("v1/_orders/<int:pk>/", orders_detail, name="api-orders-detail"),
     path("v1/_orders/<int:pk>/more/", orders_more_detail, name="api-orders-more"),
-    path("v1/_orders/<int:pk>/return-request/", order_line_return_request, name="order_line_return_request"),
+    path("v1/_orders/<int:pk>/return-request/", order_return_request, name="order_line_return_request"),
     path("v1/auth/", include(v1__registration_apis)),
 ]
 
