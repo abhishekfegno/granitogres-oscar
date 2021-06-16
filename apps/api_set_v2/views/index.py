@@ -23,7 +23,7 @@ def get_home_content(request):
     categories = list(Category.get_root_nodes().exclude(slug="featured").only('id', 'name', 'slug', 'path').order_by(
         '-numchild'))
     random.shuffle(categories)
-    categories = categories[:3]
+    categories = categories[:2]
     out = []
     cat_data = defaultdict(list)
 
