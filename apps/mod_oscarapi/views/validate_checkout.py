@@ -46,13 +46,13 @@ class CheckoutValidationView(OscarAPICheckoutView):
             errors_out['common_error'] = "Basket does not Exists"
             errors_out['has_error'] = True
         if errors_out['has_error']:
-            return Response(errors_out, status=status.HTTP_400_BAD_REQUEST)
+            return Response(errors_out, status=status.HTTP_406_NOT_ACCEPTABLE)
         basket = assign_basket_strategy(basket, request)
         if basket.is_empty:
             errors_out['common_error'] = "Basket is Empty!"
             errors_out['has_error'] = True
         if errors_out['has_error']:
-            return Response(errors_out, status=status.HTTP_400_BAD_REQUEST)
+            return Response(errors_out, status=status.HTTP_406_NOT_ACCEPTABLE)
         for line in basket.all_lines():
             result = basket.strategy.fetch_for_line(line)
             is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
@@ -71,5 +71,5 @@ class CheckoutValidationView(OscarAPICheckoutView):
                 }
                 errors_out['has_error'] = True
         if errors_out['has_error']:
-            return Response(errors_out, status=status.HTTP_400_BAD_REQUEST)
+            return Response(errors_out, status=status.HTTP_406_NOT_ACCEPTABLE)
         return Response(errors_out)

@@ -66,7 +66,7 @@ def get_home_content(request):
 
 @api_view(("GET",))
 def index(request, *a, **k):
-    cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.2'.format
+    cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.3'.format
 
     def _inner():
         out = {'categories': []}
