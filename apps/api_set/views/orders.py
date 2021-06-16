@@ -40,7 +40,7 @@ def orders(request, *a, **k):
     page_size = request.GET.get('page_size', settings.DEFAULT_PAGE_SIZE)
     queryset = Order.objects.filter(user=request.user).prefetch_related(
         'lines', 'lines__product',
-        'lines__product__images').select_related('shipping_address')
+        'lines__product__images').select_related('shipping_address').order_by('-id')
     paginator = Paginator(queryset, page_size)  # Show 18 contacts per page.
     page_obj = paginator.get_page(page_number)
     product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
