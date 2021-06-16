@@ -11,7 +11,7 @@ from .models import Order, PaymentEventType
 from ..payment import refunds
 from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
-from ..utils.pushnotifications import OrderStatusPushNotification
+from ..utils.pushnotifications import OrderStatusPushNotification, PushNotification
 from ..utils.utils import get_statuses
 
 Transaction = get_model('payment', 'Transaction')
@@ -61,6 +61,64 @@ class EventHandler(processing.EventHandler):
         elif new_status in get_statuses(128):
             lines_to_be_cancelled = all_lines.filter(status__in=get_statuses(128))
             self.cancel_stock_allocations(order, lines_to_be_cancelled)
+        if hasattr(order, 'consignmentdelivery'):
+            if new_status == settings.ORDER_STATUS_DELIVERED:
+                order.consignmentdelivery.status = order.consignmentdelivery.COMPLETED
+                order.consignmentdelivery.save()
+                if (
+                        order.consignmentdelivery.delivery_trip
+                        and order.consignmentdelivery.delivery_trip.status == order.consignmentdelivery.delivery_trip.ON_TRIP
+                ):
+                    PushNotification(order.consignmentdelivery.delivery_trip.agent).send_message(
+                        title=f"Consignment #{order.consignmentdelivery.id} has been Delivered!",
+                        message="Hey, a delivery consignment has been marked as Delivered! Moving items to completed "
+                                "list!",
+                    )
+            elif new_status == settings.ORDER_STATUS_CANCELED:
+                order.consignmentdelivery.status = order.consignmentdelivery.CANCELLED
+                order.consignmentdelivery.save()
+                if (
+                        order.consignmentdelivery.delivery_trip
+                        and order.consignmentdelivery.delivery_trip.status == order.consignmentdelivery.delivery_trip.ON_TRIP
+                ):
+                    PushNotification(order.consignmentdelivery.delivery_trip.agent).send_message(
+                        title=f"Consignment #{order.consignmentdelivery.id} has been Cancelled!",
+                        message="Hey, a delivery consignment has been marked as Cancelled! Moving items to cancelled "
+                                "list!",
+                    )
+
+            elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
+                pass
+        if hasattr(order, 'consignmentreturn'):
+            if new_status == settings.ORDER_STATUS_RETURN_APPROVED:
+                order.consignmentreturn.status = order.consignmentreturn.COMPLETED
+                order.consignmentreturn.save()
+                if (
+                        order.consignmentreturn.delivery_trip
+                        and order.consignmentreturn.delivery_trip.status == order.consignmentreturn.delivery_trip.ON_TRIP
+                ):
+                    PushNotification(order.consignmentreturn.delivery_trip.agent).send_message(
+                        title=f"Return #{order.consignmentreturn.id} has been Picked Up!",
+                        message="Hey, A return consignment has been marked as Picked Up! Moving items to completed "
+                                "list!",
+                    )
+            elif old_status in get_statuses(32+16) and new_status == settings.ORDER_STATUS_DELIVERED:
+                order.consignmentreturn.status = order.consignmentreturn.CANCELLED
+                order.consignmentreturn.save()
+                if (
+                        order.consignmentreturn.delivery_trip
+                        and (
+                                order.consignmentreturn.delivery_trip.status
+                                == order.consignmentreturn.delivery_trip.ON_TRIP
+                )):
+                    PushNotification(order.consignmentreturn.delivery_trip.agent).send_message(
+                        title=f"Return #{order.consignmentreturn.id} has been Cancelled!",
+                        message="Hey, a return consignment has been marked as Cancelled! Moving items to cancelled "
+                                "list!",
+                    )
+
+            elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
+                pass
 
         if note_msg:
             """
