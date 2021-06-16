@@ -20,10 +20,10 @@ def get_home_content(request):
     pmg_mixin = ProductPrimaryImageFieldMixin()
     price_mixin = ProductPriceFieldMixinLite()
     pmg_mixin.context = price_mixin.context = {'request': request}
-    categories = Category.get_root_nodes().exclude(slug="featured").only('id', 'name', 'slug', 'path').order_by(
-        '-numchild')
+    categories = list(Category.get_root_nodes().exclude(slug="featured").only('id', 'name', 'slug', 'path').order_by(
+        '-numchild'))
     random.shuffle(categories)
-    categories = categories[:2]
+    categories = categories[:3]
     out = []
     cat_data = defaultdict(list)
 
