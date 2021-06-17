@@ -33,15 +33,30 @@ class OwnDeliveryKerala(methods.FixedPrice):
             incl_tax=Decimal('0.0'))
 
 
+class ExpressDelivery(methods.FixedPrice):
+    code = "express-delivery"
+    name = _("Express Delivery")
+
+    def calculate(self, basket, *args, **kwargs):
+        charge = Decimal(str(settings.EXPRESS_DELIVERY_CHARGE))
+        return prices.Price(
+            currency=basket.currency,
+            excl_tax=charge,
+            incl_tax=charge)
+
+
 class Repository(CoreRepository):
     """
     This class is included so that there is a choice of shipping methods.
     Oscar's default behaviour is to only have one.
     """
 
-    methods = [OwnDeliveryKerala()]  # init shipping method to default hand delivery
+    methods = [OwnDeliveryKerala(), ExpressDelivery()]  # init shipping method to default hand delivery
 
     def get_available_shipping_methods(self, basket, user=None, shipping_addr=None, request=None, **kwargs):
-
         return self.methods
+
+
+
+
 

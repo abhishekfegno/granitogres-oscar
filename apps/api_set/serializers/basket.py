@@ -10,11 +10,11 @@ from apps.api_set.serializers.catalogue import custom_ProductListSerializer
 from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin
 from apps.basket.models import Basket
 from apps.mod_oscarapi.calculators import OrderTotalCalculator
+from apps.shipping.repository import Repository
 from lib.currencies import get_symbol
 
 Line = get_model("basket", "Line")
 Product = get_model("catalogue", "Product")
-Repository = get_class("shipping.repository", "Repository")
 (
     BasketSerializer,
     BasketLineSerializer,
@@ -57,8 +57,8 @@ class WncLineSerializer(BasketLineSerializer):
     def get_warning(self, instance):
         if self.__warning is ...:
             if (
-                isinstance(instance.purchase_info.availability, Unavailable)
-                or instance.stockrecord.net_stock_level < instance.quantity
+                    isinstance(instance.purchase_info.availability, Unavailable)
+                    or instance.stockrecord.net_stock_level < instance.quantity
             ):
                 self.__warning = "'%(product)s' is no longer available"
             else:
@@ -93,6 +93,7 @@ class WncBasketSerializer(BasketSerializer):
     lines = serializers.SerializerMethodField()
     currency = serializers.SerializerMethodField()
     shipping = serializers.SerializerMethodField()
+    shipping_methods = serializers.SerializerMethodField()
     net_total = serializers.SerializerMethodField()
     currency_symbol = serializers.SerializerMethodField()
 
@@ -121,6 +122,21 @@ class WncBasketSerializer(BasketSerializer):
         if not self.shipping_cost:
             self.get_shipping_instance(instance)
         return self.shipping_cost.__dict__
+
+    def get_shipping_methods(self, instance):
+        if self.context['request'].user.is_authenticated:
+            shipping_address = self.context['request'].user.default_shipping_address
+        else:
+            shipping_address = None
+        out = {}
+        for ship in Repository().get_available_shipping_methods(
+                basket=instance, shipping_addr=shipping_address,
+                user=self.context['request'].user, request=self.context['request']):
+            out[ship.code] = {
+                "name": ship.name,
+                "calculation": ship.calculate(instance).__dict__
+            }
+        return out
 
     def get_net_total(self, instance):
         if not self.total_amt:

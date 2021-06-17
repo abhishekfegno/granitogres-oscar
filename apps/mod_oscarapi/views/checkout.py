@@ -174,9 +174,15 @@ class CheckoutView(OscarAPICheckoutView):
             return Response({'errors': "User Address for billing does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         try:
-            ship = Repository().get_default_shipping_method(
-                basket=basket, shipping_addr=shipping_address,
-            )
+            ship = None
+            shippingcode = data.get('shippingcode', 'free-shipping')
+            for repo in Repository().get_available_shipping_methods(basket, user=user, shipping_addr=shipping_address, request=request,):
+                if repo.code == shippingcode:
+                    ship = repo
+                break
+            if ship is None:
+                methods_are = ", ".join([r.code for r in Repository().get_available_shipping_methods(basket)])
+                return Response({'errors': f"Please Choose a valid Shipping Method! (Allowed methods are: {methods_are})"}, status=status.HTTP_406_NOT_ACCEPTABLE)
         except serializers.ValidationError:
             return Response({'errors': "User Address for billing does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
