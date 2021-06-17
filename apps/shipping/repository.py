@@ -17,7 +17,6 @@ from oscar.core import prices
 
 from apps.dashboard.custom.models import SiteConfig
 
-configuration = SiteConfig.get_solo()
 
 
 class OwnDeliveryKerala(methods.FixedPrice):
@@ -25,6 +24,7 @@ class OwnDeliveryKerala(methods.FixedPrice):
     name = _("Own Delivery")
 
     def calculate(self, basket, *args, **kwargs):
+        configuration = SiteConfig.get_solo()
         if basket.total_incl_tax < configuration.MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY:
             charge = Decimal(str(configuration.MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY))
             return prices.Price(
@@ -42,6 +42,7 @@ class ExpressDelivery(methods.FixedPrice):
     name = _("Express Delivery")
 
     def calculate(self, basket, *args, **kwargs):
+        configuration = SiteConfig.get_solo()
         charge = Decimal(str(configuration.MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY))
         return prices.Price(
             currency=basket.currency,
