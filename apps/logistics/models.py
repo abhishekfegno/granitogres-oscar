@@ -1,4 +1,5 @@
 import datetime
+from abc import ABC
 from collections import defaultdict
 
 from django.contrib.postgres.fields import JSONField
@@ -94,26 +95,28 @@ class Constant:
         }
 
 
-# class Slot(models.Model):
-#     start_time = models.TimeField()
-#     end_time = models.TimeField()
-#     max_orders = models.PositiveIntegerField(default=20, help_text="Max no of orders which can be delivered during trip, 0 for unlimited!")
-#     is_active = models.PositiveIntegerField(default=True)
-#
-#
-# class SlotObject(models.Model):
-#     slot = models.ForeignKey(Slot, on_delete=models.SET_NULL, )
-#     date = models.DateField()
-#     __orders = None
-#
-#     def currently_holding_count(self):
-#         if self.__orders is None:
-#             self.__orders = Order.objects.filter(consignmentdelivery__delivery_trip__slot=self)
-#         return len(self.__orders)
-#
-#     def can_add_items(self, quantity):
-#         return
-#
+class Slot(models.Model):
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    is_active = models.PositiveIntegerField(default=True)
+    max_orders = models.PositiveIntegerField(
+        default=20, help_text="Max no of orders which can be delivered during trip, 999 for unlimited!")
+
+
+class SlotObject(models.Model):
+    slot = models.ForeignKey(Slot, on_delete=models.SET_NULL, null=True)
+    expected_out_for_delivery = models.DateTimeField(null=True, blank=True)
+    date = models.DateField()
+    __orders = None
+
+    def currently_holding_count(self):
+        if self.__orders is None:
+            self.__orders = Order.objects.filter(consignmentdelivery__delivery_trip__slot=self)
+        return len(self.__orders)
+
+    def can_add_items(self, quantity):
+        return
+
 
 class DeliveryTrip(Constant, models.Model):
     created_at = models.DateTimeField(auto_now_add=True)

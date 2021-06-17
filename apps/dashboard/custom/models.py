@@ -4,6 +4,7 @@ from django.core import validators
 from django.db import models
 from django.db.models.signals import post_save
 from django.urls import reverse
+from solo.models import SingletonModel
 from sorl.thumbnail import get_thumbnail
 
 from apps.utils import image_not_found
@@ -193,7 +194,39 @@ class HomePageMegaBanner(AbstractCURDModel):
         )
 
 
-#
+class SiteConfig(SingletonModel):
+    site_name = models.CharField(max_length=256, default="Grocery Store")
+    period_of_return = models.PositiveSmallIntegerField(default=settings.DEFAULT_PERIOD_OF_RETURN['minutes'],
+                                                        help_text="In minutes")
+    MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY = models.PositiveSmallIntegerField(
+        default=settings.MINIMUM_BASKET_AMOUNT_FOR_FREE_DELIVERY,
+        help_text="MINIMUM BASKET AMOUNT FOR FREE DELIVERY")
+    DELIVERY_CHARGE_FOR_FREE_DELIVERY = models.PositiveSmallIntegerField(
+        default=settings.DELIVERY_CHARGE,
+        help_text="DELIVERY CHARGE")
+    DELIVERY_CHARGE_FOR_EXPRESS_DELIVERY = models.PositiveSmallIntegerField(
+        default=settings.EXPRESS_DELIVERY_CHARGE,
+        help_text="EXPRESS DELIVERY CHARGE")
+    EXPECTED_OUT_FOR_DELIVERY_DELAY = models.DurationField(
+        default="03:00:00",
+        help_text="Expected delay between End Slot, and Delivery Boy moving out for free delivery!")
+    EXPECTED_OUT_FOR_DELIVERY_DELAY_IN_EXPRESS_DELIVERY = models.DurationField(
+        default="03:00:00",
+        help_text="Expected delay between End Slot, and Delivery Boy moving out for express delivery"
+                  "([DD] [HH:[MM:]]SS[.uuuuuu] format)!")
+    DEFAULT_PERIOD_OF_RETURN = models.DurationField(
+        default="03:00:00",
+        help_text="Default Period of Return ([DD] [HH:[MM:]]SS[.uuuuuu] format)!")
+    DEFAULT_PERIOD_OF_PICKUP = models.DurationField(
+        default="01 00:00:00",
+        help_text="Default Period of Return ([DD] [HH:[MM:]]SS[.uuuuuu] format)!")
+
+    referrer = 'site-config'
+
+
+
+
+
 # class FAQ(AbstractCURDModel):
 #     referrer = 'faq'
 #

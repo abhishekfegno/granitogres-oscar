@@ -15,14 +15,18 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib import messages
 from oscar.core import prices
 
+from apps.dashboard.custom.models import SiteConfig
+
+configuration = SiteConfig.get_solo()
+
 
 class OwnDeliveryKerala(methods.FixedPrice):
     code = "free-shipping"
     name = _("Own Delivery")
 
     def calculate(self, basket, *args, **kwargs):
-        if basket.total_incl_tax < settings.MINIMUM_BASKET_AMOUNT_FOR_FREE_DELIVERY:
-            charge = Decimal(str(settings.DELIVERY_CHARGE))
+        if basket.total_incl_tax < configuration.MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY:
+            charge = Decimal(str(configuration.MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY))
             return prices.Price(
                 currency=basket.currency,
                 excl_tax=charge,
@@ -38,7 +42,7 @@ class ExpressDelivery(methods.FixedPrice):
     name = _("Express Delivery")
 
     def calculate(self, basket, *args, **kwargs):
-        charge = Decimal(str(settings.EXPRESS_DELIVERY_CHARGE))
+        charge = Decimal(str(configuration.MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY))
         return prices.Price(
             currency=basket.currency,
             excl_tax=charge,
