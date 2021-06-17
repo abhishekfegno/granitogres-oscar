@@ -30,9 +30,11 @@ def get_home_content(request):
     for cat in categories:
         cat_qs = Category.get_tree(cat)
         qs_filter = Q(categories__in=cat_qs) & Q(structure__in=[Product.STANDALONE, Product.PARENT])
-        product_data = get_optimized_product_dict(request=request, qs_filter=qs_filter, limit=4, needs_stock=False)
+        limit_per_cat = 4
+        product_data = get_optimized_product_dict(request=request, qs_filter=qs_filter, limit=limit_per_cat*3, needs_stock=False)
         for parent_product, data in product_data.items():
-            cat_data[cat].append(data)
+            if len(cat_data[cat]) < limit_per_cat:
+                cat_data[cat].append(data)
     banners = list(InAppBanner.objects.all().filter(banner__isnull=False, product_range_id__isnull=False))
 
     def _(b):

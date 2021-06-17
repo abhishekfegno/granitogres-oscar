@@ -45,9 +45,9 @@ def get_optimized_product_dict(
     # if needs_stock:
     #     product_set = product_set.filter(stockrecords__isnull=False)
     if offset and limit:
-        product_set = product_set[offset:limit*2]
+        product_set = product_set[offset:limit]
     elif limit:
-        product_set = product_set[:limit*2]
+        product_set = product_set[:limit]
     elif offset:
         product_set = product_set[offset:]
 
