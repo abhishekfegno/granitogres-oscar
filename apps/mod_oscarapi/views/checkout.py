@@ -54,9 +54,10 @@ class CheckoutView(OscarAPICheckoutView):
         # "total": float(basket.total_incl_tax),
         "notes": "Some Notes for address as string.",
         "phone_number": "+919497270863",
+        "shippingcode": <"free-shipping"|"express-delivery">,
         "shipping_address": (User Address ID),
         "billing_address": (User Address ID),
-        "payment": cash
+        "payment": cash,
     }
     # Prepaid
     {
@@ -65,6 +66,7 @@ class CheckoutView(OscarAPICheckoutView):
         # "total": float(basket.total_incl_tax),
         "notes": "Some Notes for address as string.",
         "phone_number": "+919497270863",
+        "shippingcode": <"free-shipping"|"express-delivery">,
         "shipping_address": (User Address ID),
         "billing_address": (User Address ID),
         "payment": "razor_pay",
