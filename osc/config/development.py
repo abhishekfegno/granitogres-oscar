@@ -1,6 +1,3 @@
-import os
-
-from django.urls import reverse_lazy
 from django.utils.functional import lazy
 
 DEBUG_TOOLBAR_PANELS = (
@@ -44,7 +41,7 @@ ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/email-verification/done/?verification=1'
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/email-verification/done/?verification=1'
 
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[WOOD`N CART] "
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Grocery] "
 
 SITE_ID = 1
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -92,7 +89,6 @@ STORES_GEODETIC_SRID = 4326
 
 USER_ADDRESS = {
     'COUNTRY': 'IN',
-
 }
 
 DEFAULT_PERIOD_OF_RETURN = {'minutes': 180}

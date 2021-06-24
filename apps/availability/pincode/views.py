@@ -29,7 +29,7 @@ AVAILABLE = 'available'
 
 
 class PincodeSelector(ListView):
-    template_name = 'availability/pincode/list.html'
+    template_name = 'availability/pincode/selector.html'
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_superuser:

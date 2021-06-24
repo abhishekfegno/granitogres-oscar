@@ -16,7 +16,7 @@ from lib.cache import cache_library
 @api_view(("GET",))
 @_login_required
 def orders(request, *a, **k):
-    cache_key = 'apps.api_set_v2.views.orders?user={}&v=1.0.0'.format
+    cache_key = 'apps.api_set_v2.views.orders?user={}&v=1.0.1'.format
 
     def _inner():
         cxt = {'context': {'request': request}}
