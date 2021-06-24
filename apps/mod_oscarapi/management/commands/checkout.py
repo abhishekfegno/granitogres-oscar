@@ -26,7 +26,7 @@ class Command(BaseCommand):
     s = None            # store request with session
     _passwd = None
     serializer_class = CheckoutSerializer
-    BASE_URL = 'http://{}/api/v1/'
+    BASE_URL = '{}://{}/api/v1/'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -45,10 +45,13 @@ class Command(BaseCommand):
             '--num-orders',  default='1', help="Number of orders you want to generate."
         )
         parser.add_argument(
+            '--secure',  default=False, help="needs https request?."
+        )
+        parser.add_argument(
             '--print-users',  action='store_true', help="Print Users List"
         )
         parser.add_argument(
-            '--user',  default='1', help='Get User',
+            '--user',  default='1', help='Get User id',
         )
 
     def post(self, _method, checkout_only_current_basket=False):
@@ -68,7 +71,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         _method = None
         self.options = options
-        self.BASE_URL = self.BASE_URL.format(options['host'])
+        self.BASE_URL = self.BASE_URL.format('https' if options['secure'] else 'http', options['host'])
+        print(self.BASE_URL)
         if options['print_users']:
             self.user = User.objects.order_by('?').first()
             print("Username\t| ID\t| First Name\t| is_active")
@@ -109,6 +113,7 @@ class Command(BaseCommand):
             self.BASE_URL + 'rest-auth/login/',
             login_data
         )
+        print("REQUEST: ", login_data)
         print("Logged in Status ", response)
         if response.status_code == 200:
             print("Logged in as : ", user.get_short_name(), "[", user.username, "]")
@@ -118,8 +123,9 @@ class Command(BaseCommand):
             return
         else:
             print("Could Not Login")
-            print(response.text)
-            sys.exit(0)
+            print("RESPONSE: ", response.text)
+            if input("Exit? Y/n") in 'Yy':
+                sys.exit(0)
 
     def checkout(self, data):
         response = self.s.post(
@@ -175,7 +181,7 @@ class Command(BaseCommand):
         else:
             print(basket, user, method)
             raise ModuleNotFoundError("Method is not in ")
-        uad = UserAddress.objects.filter(user=user, ).only('id').last()
+        uad = UserAddress.objects.filter().last()
         point = Point(float(12.785238498732), float(77.94478155806023))
         if uad is None:
             uad = UserAddress.objects.create(
@@ -188,6 +194,7 @@ class Command(BaseCommand):
                     "line2": "Vennikulam P O",
                     "line3": "Thiruvalla",
                     "line4": "Thiruvalla",
+                    "line5": "Thiruvalla",
                     "state": "Kerala",
                     "postcode": "689544",
                     "location": point,

@@ -28,6 +28,7 @@ AUTHENTICATION_BACKENDS = (
 INTERNAL_IPS = [
     '127.0.0.1',
     '192.168.1.100',
+    'grocery.dev.fegno.com',
 ]
 
 
@@ -92,4 +93,8 @@ USER_ADDRESS = {
 }
 
 DEFAULT_PERIOD_OF_RETURN = {'minutes': 180}
+
+WIDE_SCREEN_BANNER_IMAGE_SIZE = '686x385'
+SHORT_SCREEN_BANNER_IMAGE_SIZE = '312x312'
+
 

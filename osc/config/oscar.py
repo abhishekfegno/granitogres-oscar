@@ -1,8 +1,10 @@
+from django.urls import reverse_lazy
 from oscar.defaults import *
 
 OSCARAPI_OVERRIDE_MODULES = ["apps.mod_oscarapi"]
 
 OSCARAPI_BLOCK_ADMIN_API_ACCESS = True
+OSCAR_MAX_PER_LINE_QUANTITY = 12
 
 OSCAR_DEFAULT_CURRENCY = 'INR'
 OSCAR_SHOP_NAME = 'Shopprix'
@@ -38,6 +40,7 @@ OSCAR_FROM_EMAIL = 'no-reply@grocery.com'
 OSCAR_OFFERS_INCL_TAX = False
 
 OSCAR_MISSING_IMAGE_URL = 'image_not_found.jpg'
+MISSING_BANNER_URL = 'banner.jpg'
 OSCAR_GOOGLE_ANALYTICS_ID = None
 
 # Other statuses
@@ -287,6 +290,8 @@ OSCAR_DASHBOARD_NAVIGATION = [
 
             {'label': _('Availability: Pincode'), 'url_name': 'availability:pincode-selector',
              'access_fn': admin_or_staff},
+            {'label': _('Site Configuration'), 'url_name': 'dashboard-custom:site-config',
+             'access_fn': admin_or_staff},
 
             # {'label': _('Launch Banners'),
             #  'url_name': 'dashboard-custom:dashboard-home-page-mega-banner-list',
@@ -362,4 +367,5 @@ API_ENABLED_PAYMENT_METHODS = [
 
 MINIMUM_BASKET_AMOUNT_FOR_FREE_DELIVERY = 250     # in INR
 DELIVERY_CHARGE = 40            # in INR
+EXPRESS_DELIVERY_CHARGE = 180            # in INR
 

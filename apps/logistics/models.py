@@ -1,5 +1,8 @@
 import datetime
+from abc import ABC
 from collections import defaultdict
+
+from django.contrib.postgres.fields import JSONField
 from django.utils import timezone
 from decimal import Decimal
 
@@ -20,6 +23,8 @@ from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
 
 from apps.order.models import Order
+from ..utils.pushnotifications import LogisticsPushNotification
+
 OrderLine = get_model('order', 'Line')
 
 NOTE_BY_DELIVERY_BOY = "Reason From Delivery App"
@@ -90,6 +95,29 @@ class Constant:
         }
 
 
+class Slot(models.Model):
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    is_active = models.PositiveIntegerField(default=True)
+    max_orders = models.PositiveIntegerField(
+        default=20, help_text="Max no of orders which can be delivered during trip, 999 for unlimited!")
+
+
+class SlotObject(models.Model):
+    slot = models.ForeignKey(Slot, on_delete=models.SET_NULL, null=True)
+    expected_out_for_delivery = models.DateTimeField(null=True, blank=True)
+    date = models.DateField()
+    __orders = None
+
+    def currently_holding_count(self):
+        if self.__orders is None:
+            self.__orders = Order.objects.filter(consignmentdelivery__delivery_trip__slot=self)
+        return len(self.__orders)
+
+    def can_add_items(self, quantity):
+        return
+
+
 class DeliveryTrip(Constant, models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -100,6 +128,7 @@ class DeliveryTrip(Constant, models.Model):
     route = models.CharField(max_length=128, null=True, blank=True)
     info = models.CharField(max_length=256, null=True, blank=True)
     reason = models.TextField(null=True, blank=True)
+    # slot = models.ForeignKey(SlotObject, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"{self.agent} on {self.created_at} {self.status}"
@@ -159,6 +188,7 @@ class DeliveryTrip(Constant, models.Model):
         return self.status == self.YET_TO_START or self.status == self.ON_TRIP
 
     def update_self(self):
+        LogisticsPushNotification(trip=self, order=None).send_trip_completed_message()
         self.trip_date = datetime.date.today()
         self.trip_time = timezone.now().time()
         self.status = self.COMPLETED
@@ -229,6 +259,7 @@ class DeliveryTrip(Constant, models.Model):
         self.delivery_consignments.update(status=Constant.ON_TRIP)
         self.return_consignments.update(status=Constant.ON_TRIP)
         self.save()
+        LogisticsPushNotification(trip=self, order=None).send_trip_started_message()
 
     def get_completed(self):
         if self.status == self.COMPLETED:
@@ -251,6 +282,7 @@ class DeliveryTrip(Constant, models.Model):
         self.status = self.CANCELLED
         self.reason = reason
         self.save()
+
 
     @cached_property
     def cods_to_collect(self):
@@ -327,6 +359,7 @@ class ConsignmentDelivery(Constant, models.Model):
         self.status = self.CANCELLED
         self.reason = reason
         self.save()
+        LogisticsPushNotification(trip=self.delivery_trip, order=self.order).send_cancellation_message(self.order)
 
     @property
     def payment_type(self):
@@ -410,6 +443,16 @@ class ConsignmentReturn(Constant, models.Model):
             ).get_or_create(order_line=line)
             return consignment_return
 
+
+class FailedRefund(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    source = models.ForeignKey(Source, on_delete=models.SET_NULL, null=True)
+    reference = models.CharField(max_length=64, null=True)
+    last_response = models.TextField(null=True, blank=True)
+    amount_to_refund = models.FloatField(default=0.0)
+    amount_balance_at_rzp = models.FloatField(default=0.0)
+    notes = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 

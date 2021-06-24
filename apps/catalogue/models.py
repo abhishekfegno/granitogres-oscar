@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
@@ -6,11 +8,13 @@ from django.db import models
 from django.db.models import F
 from django.db.models.signals import post_save
 from django.db.transaction import atomic
-from oscar.apps.catalogue.abstract_models import AbstractProduct, AbstractCategory, AbstractProductImage, \
+from oscar.apps.catalogue.abstract_models import (
+    AbstractProduct, AbstractCategory, AbstractProductImage,
     AbstractProductAttribute, AbstractProductRecommendation
-from oscar.core.loading import get_model
+)
 from sorl.thumbnail import get_thumbnail
 
+from apps.partner.models import StockRecord
 from apps.utils import image_not_found, get_purchase_info, purchase_info_lite_as_dict, purchase_info_as_dict
 from django.utils.translation import gettext_lazy as _
 
@@ -18,12 +22,11 @@ from lib import cache_key
 from lib.cache import cache_library
 from sorl.thumbnail import ImageField
 
-StockRecord = get_model('partner', 'StockRecord')
-
 
 class Product(AbstractProduct):
     search = SearchVectorField(null=True)
     selected_stock_record = None
+
     # just cached pricing
     effective_price = models.FloatField(_('Effective Retail Price.'), null=True, blank=True)
     retail_price = models.FloatField(_('Retail Price.'), null=True, blank=True)
@@ -33,6 +36,19 @@ class Product(AbstractProduct):
     benifits = models.TextField(null=True, blank=True)
     other_product_info = models.TextField(null=True, blank=True)
     variable_weight_policy = models.TextField(null=True, blank=True)
+    tax = models.SmallIntegerField(default=18, choices=[
+        (5, '5% GST'),
+        (12, '12% GST'),
+        (18, '18% GST'),
+        (28, '28% GST'),
+        (0, '0% Tax'),
+    ])
+    is_vegetarian = models.BooleanField(default=False)
+    is_meet = models.BooleanField(default=False)
+
+    @property
+    def tax_value(self) -> Decimal:
+        return Decimal(f"{self.tax / 100}")
 
     class Meta(AbstractProduct.Meta):
         indexes = [
@@ -111,6 +127,12 @@ class Product(AbstractProduct):
         if self.is_parent:
             key = cache_key.parent_product_sibling_data__key(self.id)
             cache.delete(key)
+            key = cache_key.product_price_data__key(self.id)
+            cache.delete(key)
+            key = cache_key.product_price_data_lite__key(self.id)
+            cache.delete(key)
+            key = cache_key.product_price_data_lite__key(self.id)
+            cache.delete(key)
 
         # Removing all category in listing page which contains this product
         category_slugs = self.categories.all().values_list('slug')
@@ -181,20 +203,18 @@ class ProductImage(AbstractProductImage):
     @property
     def thumbnail_mobile_listing(self):
         if self.original:
-            return get_thumbnail(self.original, '163x178', crop='center', quality=98).url
+            return get_thumbnail(self.original, '163x178', crop='center', quality=98).url or image_not_found()
         return image_not_found()
 
     @property
     def thumbnail_mobile_detail(self):
         if self.original:
-            return get_thumbnail(self.original, '375x360', crop='center', quality=98).url
+            return get_thumbnail(self.original, '375x360', crop='center', quality=98).url or image_not_found()
         return image_not_found()
 
 
 class ProductAttribute(AbstractProductAttribute):
     is_varying = models.BooleanField(_('Is Varying For Child'), default=False)
-
-
 
 
 class SearchResponses(models.Model):
@@ -254,6 +274,12 @@ def clear_cache_product(sender, instance, **kwargs):
     cache.delete_pattern("product_list__page:*")
 
 
+def clear_cache_category(sender, instance, **kwargs):
+    cache.delete_pattern("categories_list_cached")
+    cache.delete_pattern("apps.api_set_v2.views.index?zone=*")
+
+
+post_save.connect(clear_cache_category, sender=Category)
 post_save.connect(clear_cache_product, sender=Product)
 
 

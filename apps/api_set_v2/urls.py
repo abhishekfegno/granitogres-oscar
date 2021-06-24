@@ -1,22 +1,31 @@
+from django.views.decorators.cache import never_cache
+
 from apps.api_set.urls import *
 from django.urls import path, include
 # Loading V1 Apis In order to patch
+from apps.api_set.views.auth import LoginWithOTPForDeliveryBoy
 from apps.api_set.views.catalogue import product_suggestions
 from apps.api_set.views.index import (
-    home, offer_products, offers
+    home, offer_products
 )
 #  End loading v1 apis
+from apps.api_set.views.orders import order_cancel_request, order_return_request
+from apps.api_set.views.public import cancel_reasons_list
 from apps.api_set_v2.views.catalogue import product_detail_web
 
-from apps.api_set_v2.views.index import index
-from apps.api_set_v2.views.orders import orders_detail
+from apps.api_set_v2.views.index import index, offers
+from apps.api_set_v2.views.orders import orders_detail, reorder_to_current_basket, reorder_to_temporary_basket
 from apps.api_set_v2.views.orders import orders
 from apps.api_set_v2.views.product_listing_query_based import product_list
+from apps.mod_oscarapi.views.validate_checkout import CheckoutValidationView
+validate_checkout = never_cache(CheckoutValidationView.as_view())
+
 
 v1__registration_apis = [
     path('send-otp/', SendOTP.as_view(), name="api-v1--send-otp"),
     path('resend-otp/', resend_otp, name="api-v1--resend-otp"),
     path('login-with-otp/', LoginWithOTP.as_view(), name="api-v1--login-otp"),
+    path('login-with-otp-for-delivery-boy/', LoginWithOTPForDeliveryBoy.as_view(), name="api-v1--login--with-otp-for-delivery-boy"),
     # path('update-profile/', UpdateProfile.as_view(), name="api-v1--update-profile"),
 ]
 
@@ -31,11 +40,17 @@ home_urlpatterns = [
     path("_orders/", orders, name="api-orders-v2"),
     path("_orders/<int:pk>/", orders_detail, name="api-orders-detail-v2"),
     path("_orders/<int:pk>/more/", orders_more_detail, name="api-orders-more"),
-    path("_orders/<int:pk>/return-request/", order_line_return_request, name="order_line_return_request"),
-    path("auth/", include(v1__registration_apis)),
+    path("_orders/<int:pk>/return-request/", order_return_request, name="order_line_return_request"),
+    path("_orders/<int:pk>/cancel-order/", order_cancel_request, name="order_cancel_request"),
+
+    path("_orders/<int:pk>/reorder-to-current-basket/", reorder_to_current_basket, name="api-reorder-to-current-basket-v2"),
+    path("_orders/<int:pk>/reorder-to-temporary-basket/", reorder_to_temporary_basket, name="api-reorder-to-temporary-basket-v2"),
+
 ]
 
 account_urlpatterns = [
+    path("auth/", include(v1__registration_apis)),
+
     path('rest-auth/registration/', include('rest_auth.registration.urls')),
     path('rest-auth/', include('rest_auth.urls')),
     path('account/', include('allauth.urls')),
@@ -77,7 +92,8 @@ wish_list_urlpatterns = [
 public_apis = [
     path("check-availability/<int:product>@<int:pincode>/", availability, name="api-availability"),
     path("return-reasons-list/", return_reasons_list, name="return-reasons-list"),
-
+    path("cancel-reasons-list/", cancel_reasons_list, name="cancel-reasons-list"),
+    path("validate_checkout/", validate_checkout, name="api-checkout-validation"),
 ]
 
 

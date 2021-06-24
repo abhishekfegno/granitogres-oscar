@@ -1,8 +1,9 @@
+from oscar.apps.partner.availability import Unavailable, StockRequired
 from oscar.core.loading import get_class
 from django.utils.translation import gettext_lazy as _
 
-Unavailable = get_class('partner.availability', 'Unavailable')
-StockRequired = get_class('partner.availability', 'StockRequired')
+# Unavailable = get_class('partner.availability', 'Unavailable')
+# StockRequired = get_class('partner.availability', 'StockRequired')
 
 
 class PinCodeNotFound(Unavailable):

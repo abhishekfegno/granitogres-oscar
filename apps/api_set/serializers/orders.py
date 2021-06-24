@@ -6,30 +6,32 @@ from oscar.templatetags.currency_filters import currency
 from rest_framework import serializers
 from rest_framework.relations import HyperlinkedIdentityField
 
-from apps.api_set.serializers.catalogue import ProductListSerializer, ProductSimpleListSerializer, \
-    custom_ProductListSerializer
-from apps.catalogue.models import Product
+from apps.api_set.serializers.catalogue import ProductListSerializer
+from apps.api_set_v2.serializers.catalogue import ProductSimpleListSerializer, custom_ProductListSerializer
+from apps.order.models import Order, Line
 from apps.payment.refunds import RefundFacade
+from apps.utils.utils import get_statuses
 
-Order = get_model('order', 'Order')
-Line = get_model('order', 'Line')
+
+class ProductListSerializerForLine(ProductListSerializer):
+
+    def get_primary_image(self, instance, ignore_if_child=False):
+        return super(ProductListSerializer, self).get_primary_image(instance, ignore_if_child=ignore_if_child)
 
 
 class LineDetailSerializer(serializers.ModelSerializer):
-    product = ProductListSerializer()
+    product = ProductListSerializerForLine()
+    # product = serializers.SerializerMethodField()
 
     def get_product(self, instance):
-        # product_as_qs = Product.objects.filter(id=instance.product_id)
-        # return custom_ProductListSerializer(product_as_qs, context=self.context).data
-        product_as_qs = Product.objects.filter(id=instance.product_id)
-        return custom_ProductListSerializer([instance.product], context=self.context).data
+        return custom_ProductListSerializer([instance.product], context=self.context, ignore_child_image=False).data
 
     class Meta:
         model = Line
         fields = (
             'id', 'product', 'quantity',
             'line_price_incl_tax',
-            'status', 'description', 'product'
+            'status', 'description', 'product', 'title'
         )
 
 
@@ -42,7 +44,7 @@ class OrderListSerializer(serializers.ModelSerializer):
 
     def get_is_returnable(self, instance):
         order = instance
-        if not order.delivery_time:
+        if not order.delivery_time or order.status != settings.ORDER_STATUS_DELIVERED:
             return {
                 'status': False,
                 'reason': 'Order is not yet delivered!'
@@ -76,7 +78,8 @@ class OrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = (
-            'id', 'number', 'currency', 'total_incl_tax',
+            'id', 'number', 'currency',
+            'total_incl_tax',
             'num_lines', 'status', 'url', 'date_placed', 'lines',
             'is_returnable', 'is_cancellable', 'can_return_until'
         )
@@ -86,6 +89,105 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     lines = LineDetailSerializer(many=True)
     total_discount_incl_tax = serializers.SerializerMethodField()
     source = serializers.SerializerMethodField()
+    info = serializers.SerializerMethodField()
+    should_show_line_status = serializers.SerializerMethodField()
+
+    def get_info(self, instance) -> dict:
+        is_cancelled = instance.status == settings.ORDER_STATUS_CANCELED
+        has_cancelled_items = any([
+            line.status == settings.ORDER_STATUS_CANCELED
+            for line in instance.lines.all()
+        ])
+        SUCCESS = 'success'
+        WARNING = 'warning'
+        HIDDEN = 'hide'
+        DANGER = 'error'
+
+        if instance.status == settings.ORDER_STATUS_PLACED:
+            return {
+                'type': SUCCESS,
+                'has_cancelled_items': has_cancelled_items,
+                'message': "Your Order has been placed!",
+            }
+        if instance.status == settings.ORDER_STATUS_CONFIRMED:
+            return {
+                'type': SUCCESS,
+                'has_cancelled_items': has_cancelled_items,
+                'message': "We are preparing your basket!"
+            }
+        if is_cancelled:
+            return {
+                'type': HIDDEN,
+                'has_cancelled_items': has_cancelled_items,
+                'message': ""
+            }
+        elif has_cancelled_items and instance.status == settings.ORDER_STATUS_CONFIRMED:
+            return {
+                'type': WARNING,
+                'has_cancelled_items': has_cancelled_items,
+                'message': ""
+            }
+
+        if instance.status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
+            return {
+                'type': WARNING,
+                'has_cancelled_items': has_cancelled_items,
+                'message': "We are about to reach you!"
+            }
+        if instance.status == settings.ORDER_STATUS_DELIVERED:
+            return {
+                'type': HIDDEN,
+                'has_cancelled_items': has_cancelled_items,
+                'message': ""
+            }
+
+        if instance.status == settings.ORDER_STATUS_RETURN_REQUESTED:
+            return {
+                'type': WARNING,
+                'has_cancelled_items': has_cancelled_items,
+                'message': "You Will receive a call from us!"
+            }
+        if instance.status == settings.ORDER_STATUS_RETURN_APPROVED:
+            return {
+                'type': WARNING,
+                'has_cancelled_items': has_cancelled_items,
+                'message': "The return will be picked up soon!"
+            }
+
+        if instance.status == settings.ORDER_STATUS_RETURNED:
+            return {
+                'type': WARNING,
+                'has_cancelled_items': has_cancelled_items,
+                'message': "The return will be picked up soon!"
+            }
+
+        return_statuses = [s.status for s in self.get_return_lines(instance)]
+        if settings.ORDER_STATUS_RETURNED in return_statuses:
+            return {
+                'type': WARNING,
+                'has_cancelled_items': has_cancelled_items,
+                'message': "Partially returned"
+            }
+        elif settings.ORDER_STATUS_RETURN_APPROVED in return_statuses:
+            return {
+                'type': WARNING,
+                'has_cancelled_items': has_cancelled_items,
+                'message': "Returned approved!"
+            }
+        elif settings.ORDER_STATUS_RETURN_REQUESTED in return_statuses:
+            return {
+                'type': WARNING,
+                'has_cancelled_items': has_cancelled_items,
+                'message': "Return request waiting for approval"
+            }
+        return {
+                'type': SUCCESS,
+                'has_cancelled_items': has_cancelled_items,
+                'message': ""
+            }
+
+    def get_should_show_line_status(self, instance) -> bool:
+        return instance.status in get_statuses(240)
 
     def get_total_discount_incl_tax(self, instance):
         return str(instance.total_discount_incl_tax)
@@ -102,16 +204,41 @@ class OrderDetailSerializer(serializers.ModelSerializer):
                 'reference': source.reference,
             }
 
+    total_excl_tax = serializers.SerializerMethodField()
+
+    def get_total_excl_tax(self, instance):
+        return float(instance.total_excl_tax)
+
+    shipping_incl_tax = serializers.SerializerMethodField()
+
+    def get_shipping_incl_tax(self, instance):
+        return float(instance.shipping_incl_tax)
+
+    total_tax = serializers.SerializerMethodField()
+
+    def get_total_tax(self, instance):
+        return float(instance.total_tax)
+
+    total_incl_tax = serializers.SerializerMethodField()
+
+    def get_total_incl_tax(self, instance):
+        return float(instance.total_incl_tax)
+
     class Meta:
         model = Order
         fields = (
             'id', 'number', 'currency',
+            'basket_total_before_discounts_excl_tax',
+            'basket_total_before_discounts_incl_tax',
             'total_discount_incl_tax',
             'shipping_incl_tax',
+            'total_tax',
+            'total_excl_tax',
             'total_incl_tax',
             'shipping_status',
             'source',
-            'num_lines', 'status', 'date_placed', 'lines'
+            'should_show_line_status',
+            'num_lines', 'status', 'date_placed', 'lines', 'info',
         )
 
 

@@ -1,6 +1,4 @@
 from django.conf import settings
-from oscar.apps.payment.exceptions import UnableToTakePayment, InvalidGatewayRequestError
-
 import razorpay
 
 from apps.checkout.facade.abstract_facade import AbstractFacade

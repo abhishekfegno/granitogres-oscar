@@ -12,8 +12,18 @@ def image_not_found(request=None):
     b = request.build_absolute_uri if request else lambda x: x
     return b(
         "{}{}".format(
-            settings.MEDIA_URL,
+            settings.STATIC_URL,
             settings.OSCAR_MISSING_IMAGE_URL
+        )
+    )
+
+
+def banner_not_found(request=None):
+    b = request.build_absolute_uri if request else lambda x: x
+    return b(
+        "{}{}".format(
+            settings.STATIC_URL,
+            settings.MISSING_BANNER_URL
         )
     )
 
@@ -41,7 +51,8 @@ def purchase_info_as_dict(purchase_info, **kwargs):
         'stockrecord': hasattr(purchase_info.stockrecord, 'id') and purchase_info.stockrecord.id or None,
         'partner_id': hasattr(purchase_info.stockrecord, 'partner_id') and purchase_info.stockrecord.partner_id or None,
         'partner_sku': hasattr(purchase_info.stockrecord, 'partner_sku') and purchase_info.stockrecord.partner_sku or None,
-        'low_stock': purchase_info.stockrecord and purchase_info.stockrecord.low_stock_threshold and purchase_info.stockrecord.num_in_stock <= purchase_info.stockrecord.low_stock_threshold,
+        'low_stock': purchase_info.stockrecord and purchase_info.stockrecord.low_stock_threshold and purchase_info.stockrecord.net_stock_level <= purchase_info.stockrecord.low_stock_threshold,
+        'net_stock_level': purchase_info.stockrecord and max(purchase_info.stockrecord.net_stock_level or 0, 0),
         'effective_price': purchase_info.price.effective_price,
         'currency': purchase_info.price.currency,
         'symbol': get_symbol(purchase_info.price.currency),
@@ -58,15 +69,18 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
     if not purchase_info:
         return kwargs
     retail_rate = hasattr(purchase_info.stockrecord, 'price_retail') and purchase_info.stockrecord.price_retail or None
-    if retail_rate:
-        retail_rate = get_approximate_tax_for_retail(
-            purchase_info.price.incl_tax,
-            purchase_info.price.excl_tax,
-            retail_rate
-        )
+    # if retail_rate:
+    #     price_retail = get_approximate_tax_for_retail(
+    #         purchase_info.price.incl_tax,
+    #         purchase_info.price.excl_tax,
+    #         retail_rate
+    #     )
     return {
+        'excl_tax': float(purchase_info.price.effective_price),
         'effective_price': float(purchase_info.price.effective_price),
         'retail': int(retail_rate * 100) / 100,
+        'low_stock': purchase_info.stockrecord and purchase_info.stockrecord.low_stock_threshold and purchase_info.stockrecord.net_stock_level <= purchase_info.stockrecord.low_stock_threshold,
+        'net_stock_level': purchase_info.stockrecord and max(purchase_info.stockrecord.net_stock_level or 0, 0),
         'currency': purchase_info.price.currency,
         'symbol': get_symbol(purchase_info.price.currency),
         **kwargs
@@ -75,8 +89,11 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
 
 def dummy_purchase_info_lite_as_dict(**kwargs):
     return {
+        'excl_tax': 0,
         'effective_price': 0,
         'retail': 0,
+        'low_stock': False,
+        'net_stock_level': 0,
         'currency': 'INR',
         'symbol': get_symbol('INR'),
         **kwargs

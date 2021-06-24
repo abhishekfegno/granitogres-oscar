@@ -8,6 +8,7 @@
 <li class="{% if active_tab == 'payment' %}active{% endif %}"><a href="#payment" data-toggle="tab">{% trans "Payment" %}</a></li>
 <li class="{% if active_tab == 'discounts' %}active{% endif %}"><a href="#discounts" data-toggle="tab">{% trans "Discounts" %}</a></li>
 <li class="{% if active_tab == 'notes' %}active{% endif %}"><a href="#notes" data-toggle="tab">{% trans "Notes" %}</a></li>
+<li class="{% if active_tab == 'return' %}active{% endif %}"><a href="#return" data-toggle="tab">{% trans "Returns" %}</a></li>
 <li class="pull-right {% if active_tab == 'howto' %}active{% endif %}"><a href="#howto" data-toggle="tab">{% trans "How To Use this page? Guideline" %}</a></li>
 {% endblock nav_tabs %}
 
@@ -109,8 +110,8 @@
     <thead>
     <tr>
         <th></th>
-<!--        <th title="Enter the quantity you want to affect the change with below action" style="cursor:crosshair">
-        <span>Selected QTY?</span> </th>-->
+        <!--        <th title="Enter the quantity you want to affect the change with below action" style="cursor:crosshair">
+                <span>Selected QTY?</span> </th>-->
         <th>{% trans "Line ID" %}</th>
         <th>{% trans "Quantity" %}</th>
         <th>{% trans "Product" %}</th>
@@ -129,20 +130,20 @@
         <td>
 
             {% if line.status != settings.ORDER_STATUS_CANCELED and line.status != settings.ORDER_STATUS_RETURNED %}
-                <input type="checkbox" onchange="reset_amount()" name="selected_line" value="{{ line.id }}" data-unitprice="{{ line.unit_price_incl_tax }}" />
-                <input type="number" style="display:none" onchange="window.reset_amount()" name="selected_line_qty_{{ line.id }}"
-                       class="selected_line_qty_input"
-                       value="{{ line.active_quantity }}"
-                       max="{{ line.active_quantity }}"/>
-            {% endif %}
-        </td>
-<!--        <td style="cursor:crosshair"
-            title="Enter the quantity you want to affect the change with below action for '{{ line.product.name|default:'this item.' }}'">
+            <input type="checkbox" onchange="reset_amount()" name="selected_line" value="{{ line.id }}" data-unitprice="{{ line.unit_price_incl_tax }}" />
             <input type="number" style="display:none" onchange="window.reset_amount()" name="selected_line_qty_{{ line.id }}"
                    class="selected_line_qty_input"
                    value="{{ line.active_quantity }}"
                    max="{{ line.active_quantity }}"/>
-        </td>-->
+            {% endif %}
+        </td>
+        <!--        <td style="cursor:crosshair"
+                    title="Enter the quantity you want to affect the change with below action for '{{ line.product.name|default:'this item.' }}'">
+                    <input type="number" style="display:none" onchange="window.reset_amount()" name="selected_line_qty_{{ line.id }}"
+                           class="selected_line_qty_input"
+                           value="{{ line.active_quantity }}"
+                           max="{{ line.active_quantity }}"/>
+                </td>-->
         <td><a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line.id %}">#{{ line.id }}</a></td>
         <td class="text-center"
             style="cursor:crosshair"
@@ -161,9 +162,9 @@
         </td>
         <td>
             {% if line.partner %}
-                <a href="{% url 'dashboard:partner-manage' pk=line.partner.id %}">{{ line.partner_name }}</a>
+            <a href="{% url 'dashboard:partner-manage' pk=line.partner.id %}">{{ line.partner_name }}</a>
             {% else %}
-                {{ line.partner_name }}
+            {{ line.partner_name }}
             {% endif %}
         </td>
         <td>{{ line.partner_sku }}</td>
@@ -266,6 +267,26 @@
         <th class="text-right">{{ order.total_incl_tax|currency:order.currency }}</th>
         <td></td>
     </tr>
+    {% if order.cancelled_order_lines %}
+    <tr>
+        <td colspan="7"></td>
+        <th>Refunded Amount</th>
+        <td class="text-right">{{ order.cancelled_order_amount_excl_tax|currency:order.currency }}</td>
+        <td class="text-right">{{ order.cancelled_order_amount_incl_tax|currency:order.currency }}</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td colspan="7"></td>
+        <th>Net Order Amount</th>
+        <td class="text-right">{{ order.balance_order_amount_after_cancelled_excl_tax|currency:order.currency }}</td>
+        <td class="text-right">{{ order.balance_order_amount_after_cancelled_incl_tax|currency:order.currency }}</td>
+        <td></td>
+    </tr>
+    {% endif %}
+    <tr>
+        <td colspan="100%"></td>
+    </tr>
+
     </tbody>
 </table>
 {% endblock order_lines %}
@@ -279,14 +300,14 @@
         <div class="">
             <label class="radio-inline">
                 <input type="radio" name="line_action" value="change_line_statuses" checked="checked"
-                onclick="window.display_select_qty_box(false)"
+                       onclick="window.display_select_qty_box(false)"
                 /> {% trans "Change line status to" %}
             </label>
             <label class="radio-inline">
                 <select name="new_status">
-                        <option value=""> -- {% trans "choose new status" %} -- </option>
+                    <option value=""> -- {% trans "choose new status" %} -- </option>
                     {% for status, text in settings.OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_BEFORE_DELIVERY %}
-                        <option value="{{ status }}">{{ text }}</option>
+                    <option value="{{ status }}">{{ text }}</option>
                     {% endfor %}
                 </select>
             </label>
@@ -299,14 +320,14 @@
         <div class="">
             <label class="radio-inline">
                 <input type="radio" name="line_action" value="change_line_statuses" checked="checked"
-                onclick="window.display_select_qty_box(false)"
+                       onclick="window.display_select_qty_box(false)"
                 /> {% trans "Change line status to" %}
             </label>
             <label class="radio-inline">
                 <select name="new_status">
                     <option value=""> -- {% trans "choose new status" %} -- </option>
                     {% for status, text in settings.OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_AFTER_DELIVERY %}
-                        <option value="{{ status }}">{{ text }}</option>
+                    <option value="{{ status }}">{{ text }}</option>
                     {% endfor %}
                 </select>
             </label>
@@ -315,7 +336,7 @@
     <hr />
     <input type="submit" value="{% trans 'Go!' %}" class="btn btn-primary" />
     {% else  %}
-        <p>Currently no actions are available now at this order status: '{{ order.status }}'. </p>
+    <p>Currently no actions are available now at this order status: '{{ order.status }}'. </p>
     {% endif %}
     {% comment %}
     <div class="form-group">
@@ -342,7 +363,7 @@
         <div class="">
             <label class="radio-inline">
                 <input type="radio" name="line_action" value="create_payment_event"
-                onclick="display_select_qty_box(true)" /> {% trans "Create payment event" %}
+                       onclick="display_select_qty_box(true)" /> {% trans "Create payment event" %}
             </label>
             <label class="radio-inline">
                 <select name="payment_event_type">
@@ -362,8 +383,8 @@
                     You can Pay back amount against any order lines. These order lines will not get cancelled.
                     Just the amount will be refunded. You could not revert it back.
             </span>
-            <br />
-            <input type="button" onclick="reset_amount()" value="Auto Calculate price from Selected Quantity">
+                <br />
+                <input type="button" onclick="reset_amount()" value="Auto Calculate price from Selected Quantity">
             </label>
         </div>
     </div>

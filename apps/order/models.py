@@ -10,6 +10,7 @@ from oscar.apps.order.abstract_models import *
 
 __all__ = ['PaymentEventQuantity', 'ShippingEventQuantity', 'Order']
 
+from oscar.models.fields import UppercaseCharField
 
 from apps.users.models import Location
 from apps.utils.utils import get_statuses
@@ -17,6 +18,10 @@ from apps.utils.utils import get_statuses
 
 class Order(AbstractOrder):
     date_delivered = models.DateTimeField(null=True, blank=True, help_text="Date of Consignment Delivery")
+
+    @property
+    def preferred_slot_text(self):
+        return '10:00AM - 1:00PM'
 
     @property
     def is_cancelable(self):
@@ -29,18 +34,50 @@ class Order(AbstractOrder):
 
     @property
     def is_return_time_expired(self):
-        return not self.delivery_time or (self.max_time_to__return and bool(self.max_time_to__return > timezone.now()))
+        return not self.delivery_time or (self.max_time_to__return and bool(self.max_time_to__return < timezone.now()))
 
     @cached_property
     def delivery_time(self):
         if self.status in get_statuses(775):
             return None     # as the package is not delivered
         if not self.date_delivered:
-            print(self.date_delivered, "------ P1 -----")
             date_delivered = self.status_changes.filter(new_status=settings.ORDER_STATUS_DELIVERED).order_by('date_created').first()
             self.date_delivered = date_delivered and date_delivered.date_created
             self.date_delivered and self.save()
         return self.date_delivered
+
+    cancelled_order_statuses = settings.OSCAR_ORDER_REFUNDABLE_STATUS
+
+    @property
+    def cancelled_order_lines(self):
+        lines = []
+        for line in self.lines.all():
+            if line.status in self.cancelled_order_statuses:
+                lines.append(line)
+        return lines
+
+    @property
+    def cancelled_order_amount_excl_tax(self):
+        amount = 0
+        for line in self.cancelled_order_lines:
+            amount += line.line_price_excl_tax
+        return amount
+
+
+    @property
+    def cancelled_order_amount_incl_tax(self):
+        amount = 0
+        for line in self.cancelled_order_lines:
+            amount += line.line_price_incl_tax
+        return amount
+
+    @property
+    def balance_order_amount_after_cancelled_excl_tax(self):
+        return self.total_incl_tax - self.cancelled_order_amount_excl_tax
+
+    @property
+    def balance_order_amount_after_cancelled_incl_tax(self):
+        return self.total_incl_tax - self.cancelled_order_amount_incl_tax
 
 
 class OrderNote(AbstractOrderNote):
@@ -58,6 +95,49 @@ class CommunicationEvent(AbstractCommunicationEvent):
 class ShippingAddress(AbstractShippingAddress):
     location = PointField(null=True, blank=True)
     address_type = models.CharField(max_length=12, null=True, blank=True)
+    line1 = models.CharField("House No", max_length=255)
+    line2 = models.CharField("Apartment Name", max_length=255, blank=True)
+    line3 = models.CharField("Street Details", max_length=255, blank=True)
+    line4 = models.CharField("Landmark", max_length=255, blank=True)
+    line5 = models.CharField("City", max_length=255, blank=True)
+    state = models.CharField("State/County", max_length=255, blank=True)
+    postcode = UppercaseCharField("Post/Zip-code", max_length=64, blank=True)
+
+    @property
+    def house_no(self):
+        return self.line1
+
+    @property
+    def apartment(self):
+        return self.line2
+
+    @property
+    def street(self):
+        return self.line3
+
+    @property
+    def landmark(self):
+        return self.line4
+
+    @property
+    def city(self):
+        return self.line5
+
+    @apartment.setter
+    def apartment(self, value):
+        self.line2 = value
+
+    @street.setter
+    def street(self, value):
+        self.line3 = value
+
+    @landmark.setter
+    def landmark(self, value):
+        self.line4 = value
+
+    @city.setter
+    def city(self, value):
+        self.line5 = value
 
     @property
     def summary_line(self):
@@ -65,7 +145,7 @@ class ShippingAddress(AbstractShippingAddress):
         Returns a single string summary of the address,
         separating fields using commas.
         """
-        fields = ['line1', 'line2', 'line3', 'line4', 'state', 'postcode', 'country']
+        fields = ['line1', 'line2', 'line3', 'line4', 'line5', 'state', 'postcode', 'country']
         return ", ".join(self.get_field_values(fields))
 
     def get_full_name(self):
@@ -82,7 +162,58 @@ class ShippingAddress(AbstractShippingAddress):
 
 
 class BillingAddress(AbstractBillingAddress):
-    pass
+    line1 = models.CharField("House No", max_length=255)
+    line2 = models.CharField("Apartment Name", max_length=255, blank=True)
+    line3 = models.CharField("Street Details", max_length=255, blank=True)
+    line4 = models.CharField("Landmark", max_length=255, blank=True)
+    line5 = models.CharField("City", max_length=255, blank=True)
+    state = models.CharField("State/County", max_length=255, blank=True)
+    postcode = UppercaseCharField("Post/Zip-code", max_length=64, blank=True)
+
+    @property
+    def house_no(self):
+        return self.line1
+
+    @property
+    def apartment(self):
+        return self.line2
+
+    @property
+    def street(self):
+        return self.line3
+
+    @property
+    def landmark(self):
+        return self.line4
+
+    @property
+    def city(self):
+        return self.line5
+
+    @apartment.setter
+    def apartment(self, value):
+        self.line2 = value
+
+    @street.setter
+    def street(self, value):
+        self.line3 = value
+
+    @landmark.setter
+    def landmark(self, value):
+        self.line4 = value
+
+    @city.setter
+    def city(self, value):
+        self.line5 = value
+
+    @property
+    def summary_line(self):
+        """
+        Returns a single string summary of the address,
+        separating fields using commas.
+        """
+        fields = ['line1', 'line2', 'line3', 'line4', 'line5', 'state', 'postcode', 'country']
+        return ", ".join(self.get_field_values(fields))
 
 
 class Line(AbstractLine):

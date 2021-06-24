@@ -3,15 +3,25 @@ import os
 
 from django.http import HttpResponseRedirect
 from django.urls import path, include, reverse
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, UpdateView
 
-from apps.dashboard.custom.models import models_list
+from apps.dashboard.custom.models import models_list, SiteConfig
 from apps.dashboard.custom.views.general import DashboardBlockList, DashboardCustomCreate, DashboardCustomDetail, \
     DashboardCustomDelete
 from apps.dashboard.custom.views.offer_banner import OfferBannerList, OfferBannerDetail, OfferBannerCreate, \
     OfferBannerDelete
 
 app_name = 'dashboard-custom'
+
+
+class UpdateSiteConfig(UpdateView):
+    def get_object(self, queryset=None):
+        return SiteConfig.get_solo()
+    template_name = "dashboard/site-config.html"
+    fields = "__all__"
+
+    def get_success_url(self):
+        return reverse('dashboard-custom:site-config')
 
 
 class Rzp(TemplateView):
@@ -45,6 +55,7 @@ def view_set(slug, l=None, c=None, r=None, d=None):
         path('<int:pk>/delete/', DashboardCustomDelete.as_view(**d), name=f'dashboard-{slug}-delete'),
     ])
 
+
 referrers = []
 
 for _model in models_list:
@@ -59,6 +70,7 @@ urlpatterns = [
             path('<int:pk>/', OfferBannerDetail.as_view(), name='dashboard-offer-banner-detail'),
             path('<int:pk>/delete/', OfferBannerDelete.as_view(), name='dashboard-offer-banner-delete'),
         ])),
+       path('site-configuration', UpdateSiteConfig.as_view(), name="site-config"),
     ] + referrers)),
     path('rzp/', Rzp.as_view(), name='rzp'),
 ]

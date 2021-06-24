@@ -1,12 +1,14 @@
 # /home/jk/code/grocery/apps/dashboard/custom/models.py
-
+from django.conf import settings
 from django.core import validators
 from django.db import models
 from django.db.models.signals import post_save
 from django.urls import reverse
+from solo.models import SingletonModel
 from sorl.thumbnail import get_thumbnail
 
 from apps.utils import image_not_found
+from apps.utils.pushnotifications import NewOfferPushNotification
 
 
 class empty:
@@ -102,6 +104,10 @@ class AbstractCURDModel(models.Model):
 
 
 class ReturnReason(AbstractCURDModel):
+    reason_type = models.CharField(max_length=256, default='return', choices=[
+        ('return', 'Return'),
+        ('cancel', 'Cancel'),
+    ])
     referrer = 'return-reason'
 
     def get_absolute_url(self):
@@ -129,11 +135,11 @@ class InAppBanner(AbstractCURDModel):
     def home_banner_wide_image(self, request=empty()):
         if self.type == self.SLIDER_BANNER:
             return request.build_absolute_uri(
-                get_thumbnail(self.banner, '156x156', crop='center', quality=98).url
+                get_thumbnail(self.banner, settings.SHORT_SCREEN_BANNER_IMAGE_SIZE, crop='center', quality=100).url
             )
 
         return request.build_absolute_uri(
-            get_thumbnail(self.banner, '343x148', crop='center', quality=98).url
+            get_thumbnail(self.banner, settings.WIDE_SCREEN_BANNER_IMAGE_SIZE, crop='center', quality=100).url
         )
 
 
@@ -184,11 +190,43 @@ class HomePageMegaBanner(AbstractCURDModel):
 
     def home_banner_wide_image(self, request=empty()):
         return request.build_absolute_uri(
-            get_thumbnail(self.banner, '312x128', crop='center', quality=98).url
+            get_thumbnail(self.banner, settings.WIDE_SCREEN_BANNER_IMAGE_SIZE, crop='center', quality=100).url
         )
 
 
-#
+class SiteConfig(SingletonModel):
+    site_name = models.CharField(max_length=256, default="Grocery Store")
+    period_of_return = models.PositiveSmallIntegerField(default=settings.DEFAULT_PERIOD_OF_RETURN['minutes'],
+                                                        help_text="In minutes")
+    MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY = models.PositiveSmallIntegerField(
+        default=settings.MINIMUM_BASKET_AMOUNT_FOR_FREE_DELIVERY,
+        help_text="MINIMUM BASKET AMOUNT FOR FREE DELIVERY")
+    DELIVERY_CHARGE_FOR_FREE_DELIVERY = models.PositiveSmallIntegerField(
+        default=settings.DELIVERY_CHARGE,
+        help_text="DELIVERY CHARGE")
+    DELIVERY_CHARGE_FOR_EXPRESS_DELIVERY = models.PositiveSmallIntegerField(
+        default=settings.EXPRESS_DELIVERY_CHARGE,
+        help_text="EXPRESS DELIVERY CHARGE")
+    EXPECTED_OUT_FOR_DELIVERY_DELAY = models.DurationField(
+        default="03:00:00",
+        help_text="Expected delay between End Slot, and Delivery Boy moving out for free delivery!")
+    EXPECTED_OUT_FOR_DELIVERY_DELAY_IN_EXPRESS_DELIVERY = models.DurationField(
+        default="03:00:00",
+        help_text="Expected delay between End Slot, and Delivery Boy moving out for express delivery"
+                  "([DD] [HH:[MM:]]SS[.uuuuuu] format)!")
+    DEFAULT_PERIOD_OF_RETURN = models.DurationField(
+        default="03:00:00",
+        help_text="Default Period of Return ([DD] [HH:[MM:]]SS[.uuuuuu] format)!")
+    DEFAULT_PERIOD_OF_PICKUP = models.DurationField(
+        default="01 00:00:00",
+        help_text="Default Period of Return ([DD] [HH:[MM:]]SS[.uuuuuu] format)!")
+
+    referrer = 'site-config'
+
+
+
+
+
 # class FAQ(AbstractCURDModel):
 #     referrer = 'faq'
 #
@@ -266,6 +304,11 @@ class HomePageMegaBanner(AbstractCURDModel):
 models_list = (ReturnReason, HomePageMegaBanner, InAppFullScreenBanner, InAppSliderBanner, InAppBanner)
 
 
+def notify_users_on_create(sender, instance, created, **kwargs):
+    if created:
+        NewOfferPushNotification().send_message("You have got a new Offer", instance.title)
+
+
 def clear_cache(sender, instance, **kwargs):
     from django.core.cache import cache
     cache.delete_pattern("apps.api_set_v2.views.index?zone*")
@@ -273,3 +316,10 @@ def clear_cache(sender, instance, **kwargs):
 
 post_save.connect(clear_cache, sender=HomePageMegaBanner)
 post_save.connect(clear_cache, sender=InAppBanner)
+
+post_save.connect(notify_users_on_create, sender=HomePageMegaBanner)
+post_save.connect(notify_users_on_create, sender=InAppBannerManager)
+post_save.connect(notify_users_on_create, sender=InAppSliderBanner)
+
+
+

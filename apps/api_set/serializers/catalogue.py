@@ -124,6 +124,8 @@ def custom_ProductListSerializer(queryset, context,
                 reverse('product-detail', kwargs={'pk': product.id})
             ),
             "price": price_serializer_mixin.get_price(product),
+            "is_meet": product.is_meet,
+            "is_vegetarian": product.is_vegetarian,
             "weight": getattr(
                 product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'
             ) if not product.is_parent else None,
@@ -133,8 +135,9 @@ def custom_ProductListSerializer(queryset, context,
         }
     result = []
     for product in queryset:
-        cache_key = f"___custom_ProductListSerializer__cached__product:{product.id}__zone:{request.session.get('zone', '0')}"
+        cache_key = f"___custom_ProductListSerializer__cached__product:{product.id}__zone_v1:{request.session.get('zone', '0')}"
         data = cache_library(cache_key, cb=lambda: _solve(product))
+        cache.delete(cache_key)
         result.append(data)
 
         # keeping original serializer compatibility so that they can take data as serializer(queryset, context).data
@@ -193,6 +196,8 @@ class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMi
             "options",
             # "siblings",
             "variants",
+            'is_meet',
+            'is_vegetarian',
             'about',
             'storage_and_uses',
             'benifits',

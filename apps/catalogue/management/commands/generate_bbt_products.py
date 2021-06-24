@@ -1,9 +1,13 @@
+import json
 import logging
+import os
 import random
 import uuid as uuid
 from urllib.request import urlopen
 
 import requests
+from django.conf import settings
+from django.core.cache import cache
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
 from django.core.management import BaseCommand
@@ -29,25 +33,47 @@ class Command(BaseCommand):
     category_name = None
     img_list = []
     categories = [
-        {"category": "Fruits & Vegetables", "sub-category": "Cuts & Sprouts", 'slug': "/fruits-vegetables/cuts-sprouts/"},
-        {"category": "Fruits & Vegetables", "sub-category": "Exotic Fruits & Veggies", 'slug': "/fruits-vegetables/exotic-fruits-veggies/"},
         {"category": "Fruits & Vegetables", "sub-category": "Fresh Fruits", 'slug': "/fruits-vegetables/fresh-fruits/"},
         {"category": "Fruits & Vegetables", "sub-category": "Fresh Vegetables", 'slug': "/fruits-vegetables/fresh-vegetables/"},
-        {"category": "Fruits & Vegetables", "sub-category": "Herbs & Seasonings", 'slug': "/fruits-vegetables/herbs-seasonings/"},
-        {"category": "Fruits & Vegetables", "sub-category": "Organic Fruits & Vegetables", 'slug': "/fruits-vegetables/organic-fruits-vegetables/"},
-
+        # {"category": "Fruits & Vegetables", "sub-category": "Cuts & Sprouts", 'slug': "/fruits-vegetables/cuts-sprouts/"},
+        # {"category": "Fruits & Vegetables", "sub-category": "Exotic Fruits & Veggies", 'slug': "/fruits-vegetables/exotic-fruits-veggies/"},
+        # {"category": "Fruits & Vegetables", "sub-category": "Herbs & Seasonings", 'slug': "/fruits-vegetables/herbs-seasonings/"},
+        # {"category": "Fruits & Vegetables", "sub-category": "Organic Fruits & Vegetables", 'slug': "/fruits-vegetables/organic-fruits-vegetables/"},
+        #
         {"category": "Eggs, Meat & Fish", "sub-category": "Eggs", 'slug': "/eggs-meat-fish/eggs/"},
         {"category": "Eggs, Meat & Fish", "sub-category": "Fish & Sea Food", 'slug': "/eggs-meat-fish/fish-seafood/"},
         {"category": "Eggs, Meat & Fish", "sub-category": "Mutton & Lamb", 'slug': "/eggs-meat-fish/mutton-lamb/"},
-        {"category": "Eggs, Meat & Fish", "sub-category": "Pork & Other Meats", 'slug': "/eggs-meat-fish/pork-other-meats/"},
         {"category": "Eggs, Meat & Fish", "sub-category": "Poultry", 'slug': "/eggs-meat-fish/poultry/"},
-
-        {"category": "Beverages", "sub-category": "Coffee", 'slug': "/beverages/coffee/"},
+        # {"category": "Eggs, Meat & Fish", "sub-category": "Pork & Other Meats", 'slug': "/eggs-meat-fish/pork-other-meats/"},
+        #
+        # {"category": "Beverages", "sub-category": "Coffee", 'slug': "/beverages/coffee/"},
+        # {"category": "Beverages", "sub-category": "Fruit Juices & Drinks", 'slug': "/beverages/fruit-juices-drinks/"},
         {"category": "Beverages", "sub-category": "Energy & Soft Drinks", 'slug': "/beverages/energy-soft-drinks/"},
-        {"category": "Beverages", "sub-category": "Fruit Juices & Drinks", 'slug': "/beverages/fruit-juices-drinks/"},
         {"category": "Beverages", "sub-category": "Health Drink & Supplement", 'slug': "/beverages/health-drink-supplement/"},
         {"category": "Beverages", "sub-category": "Tea", 'slug': "/beverages/tea/"},
         {"category": "Beverages", "sub-category": "Water", 'slug': "/beverages/water/"},
+
+        {"category": "Foodgrains, Oil & Masala", "sub-category": "Dals & Pulses", "slug": "/foodgrains-oil-masala/dals-pulses/"},
+        {"category": "Foodgrains, Oil & Masala", "sub-category": "Atta, Flours & Sooji", "slug": "/foodgrains-oil-masala/atta-flours-sooji/"},
+        {"category": "Foodgrains, Oil & Masala", "sub-category": "Rice & Rice Products", "slug": "/foodgrains-oil-masala/rice-rice-products/"},
+        {"category": "Foodgrains, Oil & Masala", "sub-category": "Masalas & Spices", "slug": "/foodgrains-oil-masala/masalas-spices/"},
+        {"category": "Foodgrains, Oil & Masala", "sub-category": "Edible Oils & Ghee", "slug": "/foodgrains-oil-masala/edible-oils-ghee/"},
+
+        {"category": "Cleaning & Household", "sub-category": "Detergents & Dishwash", "slug": "/cleaning-household/detergents-dishwash/"},
+        {"category": "Cleaning & Household", "sub-category": "Disposables, Garbage Bag", "slug": "/cleaning-household/disposables-garbage-bag/"},
+        {"category": "Cleaning & Household", "sub-category": "Mops, Brushes & Scrubs", "slug": "/cleaning-household/mops-brushes-scrubs/"},
+        {"category": "Cleaning & Household", "sub-category": "Stationery", "slug": "/cleaning-household/stationery/"},
+
+        {"category": "Baby Care", "sub-category": "Diapers & Wipes", "slug": "/baby-care/diapers-wipes/"},
+        {"category": "Baby Care", "sub-category": "Baby Bath & Hygiene", "slug": "/baby-care/baby-bath-hygiene/"},
+        {"category": "Baby Care", "sub-category": "Baby Accessories", "slug": "/baby-care/baby-accessories/"},
+
+        {"category": "Beauty & Hygiene", "sub-category": "Bath & Hand Wash", "slug": "/beauty-hygiene/bath-hand-wash/"},
+        {"category": "Beauty & Hygiene", "sub-category": "Hair Care", "slug": "/beauty-hygiene/hair-care/"},
+        {"category": "Beauty & Hygiene", "sub-category": "Skin Care", "slug": "/beauty-hygiene/skin-care/"},
+        {"category": "Beauty & Hygiene", "sub-category": "Makeup", "slug": "/beauty-hygiene/makeup/"},
+        {"category": "Beauty & Hygiene", "sub-category": "Fragrances & Deos", "slug": "/beauty-hygiene/fragrances-deos/"},
+
     ]
 
     @staticmethod
@@ -56,9 +82,24 @@ class Command(BaseCommand):
               "%22all%22]&sorted_on=popularity&listtype=pc"
 
         def generator(_category_slug):
-            response = requests.get(url.format(category_slug=_category_slug))
-            response_json = response.json()
-            data = response_json['tab_info'][0]['product_info']['products']
+            directory = os.path.join(settings.BASE_DIR, 'public', 'bbt-product-data')
+
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            filename_slug = _category_slug.replace('/', '.')
+            file_name = f'_{filename_slug}._.json'
+            filepath = os.path.join(directory, file_name)
+
+            if not os.path.exists(filepath) or not os.path.isfile(filepath):
+                response = requests.get(url.format(category_slug=_category_slug))
+                response_json = response.json()
+                data = response_json['tab_info'][0]['product_info']['products']
+                with open(filepath, 'w') as fp:
+                    json.dump(data, fp)
+            else:
+                with open(filepath, 'r') as fp:
+                    data = json.load(fp)
+
             for product in data:
                 print(' => Yielding Next Product!')
                 yield product
@@ -83,12 +124,15 @@ class Command(BaseCommand):
 
     @staticmethod
     def clear_current_catalogue():
-        if input("Clear Catalogue ? [Y/n]").lower() is not 'n': 
+        if input("Clear Catalogue ? [Y/n]").lower() is 'y':
             print(' *** Clearing Current Catalogue! ***')
             Product.objects.all().delete()
             Category.objects.all().delete()
             ProductImage.objects.all().delete()
             Category.objects.all().delete()
+        if input("Clear Order History ? [Y/n]").lower() is 'y':
+            from apps.order.management.commands.clearorders import Command as ClearOrderCommand
+            ClearOrderCommand().handle()
 
     @staticmethod
     def get_a_partner():
@@ -126,7 +170,7 @@ class Command(BaseCommand):
                 price_currency="INR",
                 price_excl_tax=retail_price,
                 price_retail=mrp,
-                num_in_stock=random.randrange(100, 600),
+                num_in_stock=random.randrange(1000, 2000),
             )
         return sr
 
@@ -191,3 +235,4 @@ class Command(BaseCommand):
             for row in data_set:
                 product = self.create_product(row)
                 product.categories.add(sub_cat)
+        cache.clear()

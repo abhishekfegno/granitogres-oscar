@@ -10,15 +10,17 @@ from lib.cache import cache_library
 class ProductPrimaryImageFieldMixin(object):
 
     def get_primary_image(self, instance):
-        if instance.is_child:
-            return None
         request = (self.context or {}).get('request', empty())  # noqa: mixin assured
         req = request.build_absolute_uri
+        if instance.is_child:
+            return {
+                'mobile': req(image_not_found()),
+            }
         img = instance.primary_image()
-        img_mob = img['original'] if type(img) is dict else img.thumbnail_mobile_listing
+        img_mob = image_not_found() if type(img) is dict else img.thumbnail_mobile_listing
         return {
             # 'web': req.build_absolute_uri(img_web),
-            'mobile': req(img_mob or image_not_found()),
+            'mobile': req(img_mob),
         }
 
 
@@ -77,7 +79,7 @@ class ProductPriceFieldMixin(object):
 class ProductPriceFieldMixinLite(object):
 
     def get_price(self, product):
-        key = 'ProductPriceFieldMixinLite__{0}__{1}'
+        key = 'ProductPriceFieldMixinLite__{0}__{1}_v1'
 
         def _inner():
             if product.is_parent:

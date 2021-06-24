@@ -1,5 +1,6 @@
 import pprint
 
+from django.db.models import F
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.conf import settings
@@ -23,8 +24,8 @@ from ..serializers.checkout import (
     CheckoutSerializer, UserAddressSerializer,
 )
 from ...basket.models import Basket
+from ...payment import refunds
 from ...shipping.repository import Repository
-from ...users.models import Location
 from ...api_set.serializers.basket import WncBasketSerializer
 from ...basket.utils import order_to_basket
 
@@ -53,9 +54,10 @@ class CheckoutView(OscarAPICheckoutView):
         # "total": float(basket.total_incl_tax),
         "notes": "Some Notes for address as string.",
         "phone_number": "+919497270863",
+        "shippingcode": <"free-shipping"|"express-delivery">,
         "shipping_address": (User Address ID),
         "billing_address": (User Address ID),
-        "payment": cash
+        "payment": cash,
     }
     # Prepaid
     {
@@ -64,6 +66,7 @@ class CheckoutView(OscarAPICheckoutView):
         # "total": float(basket.total_incl_tax),
         "notes": "Some Notes for address as string.",
         "phone_number": "+919497270863",
+        "shippingcode": <"free-shipping"|"express-delivery">,
         "shipping_address": (User Address ID),
         "billing_address": (User Address ID),
         "payment": "razor_pay",
@@ -148,37 +151,65 @@ class CheckoutView(OscarAPICheckoutView):
     
     """
     serializer_class = CheckoutSerializer
+    order_object = None
 
-    def post(self, request, format=None):
+    def post_format(self, request, format=None):
         # Wipe out any previous state data
         utils.clear_consumed_payment_method_states(request)
         user = request.user if request.user and request.user.is_authenticated else None
         # Validate the input
         data = request.data.copy()
         basket = Basket.open.filter(pk=data.get('basket_id', 0)).filter(owner=user).first()
+
         if basket is None:
-            return Response({'errors': {"basket": [
-                "Basket does not Exists"
-            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "Basket does not Exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
         basket = assign_basket_strategy(basket, request)
+        if basket.is_empty:
+            return Response({'errors': "Basket is Empty!"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         shipping_address = UserAddress.objects.filter(user=user, pk=data.get('shipping_address')).first()
         if shipping_address is None:
-            return Response({'errors': {"shipping_address": [
-                "User Address for shipping does not exists"
-            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "User Address for shipping does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         billing_address = UserAddress.objects.filter(user=user, pk=data.get('billing_address')).first()
         if billing_address is None:
-            return Response({'errors': {"billing_address": [
-                "User Address for billing does not exists"
-            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "User Address for billing does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         try:
-            ship = Repository().get_default_shipping_method(
-                basket=basket, shipping_addr=shipping_address,
-            )
+            ship = None
+            shippingcode = data.get('shippingcode', 'free-shipping')
+            for repo in Repository().get_available_shipping_methods(basket, user=user, shipping_addr=shipping_address, request=request,):
+                if repo.code == shippingcode:
+                    ship = repo
+                break
+            if ship is None:
+                methods_are = ", ".join([r.code for r in Repository().get_available_shipping_methods(basket)])
+                return Response({'errors': f"Please Choose a valid Shipping Method! (Allowed methods are: {methods_are})"}, status=status.HTTP_406_NOT_ACCEPTABLE)
         except serializers.ValidationError:
-            return Response({'errors': {"shipping_address": [
-                "User Address for billing does not exists"
-            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "User Address for billing does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        basket_errors = []
+        for line in basket.all_lines():
+            result = basket.strategy.fetch_for_line(line)
+            is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
+            if not is_permitted:
+                # Create a meaningful message to return in the error response
+                # Translators: User facing error message in checkout
+                msg = "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
+                    'title': line.product.get_title(),
+                    'reason': reason,
+                }
+                basket_errors.append(msg)
+            elif not is_permitted:
+                # Create a meaningful message to return in the error response
+                # Translators: User facing error message in checkout
+                msg = "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
+                    'title': line.product.get_title(),
+                    'reason': reason,
+                }
+                basket_errors.append(msg)
+        if basket_errors:
+            return Response({'errors': "\n".join(basket_errors)}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         shipping_cost: prices.Price = ship.calculate(basket)
         # total_amt = float(basket.total_incl_tax + shipping_cost.incl_tax)
@@ -235,22 +266,23 @@ class CheckoutView(OscarAPICheckoutView):
                 }
             }
         }
-        pprint.pprint(sample_data)
-
         c_ser = self.get_serializer(data=sample_data)
         if not c_ser.is_valid():
-            return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
+            string = ""
+            for error, data in c_ser.errors:
+                string += f"{error}:{data}\n"
+                break
+            return Response({"errors": string}, status.HTTP_406_NOT_ACCEPTABLE)
         location = shipping_address.location
         if not location:
-            return Response({'errors': {"non_field_errors": [
-                "You have not provided your location yet."
-            ]}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "You have not provided your location yet."}, status=status.HTTP_406_NOT_ACCEPTABLE)
         # Freeze basket
         basket = c_ser.validated_data.get('basket')
         basket.freeze()
 
         # Save Order
         order = c_ser.save()
+        self.order_object = order
         request.session[CHECKOUT_ORDER_ID] = order.id
 
         # adding location from user request to
@@ -275,13 +307,31 @@ class CheckoutView(OscarAPICheckoutView):
             basket = order_to_basket(order, request=request)
             b_ser = WncBasketSerializer(basket, context={'request': request})
             return Response({
+                'errors': "Payment Declined!",
                 'new_basket': b_ser.data,
                 'failed_order': o_ser.data,
-                'message': "Payment Declined!",
-            }, status=400)
+            }, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         # Return order data
+        data = o_ser.data
+        data['errors'] = None
         return Response(o_ser.data)
+
+    def post(self, request, format=None):
+        try:
+            resp = self.post_format(request, format=None)
+            if resp.status_code == status.HTTP_406_NOT_ACCEPTABLE:
+                payment_refunded = False
+                try:
+                    if self.order_object:
+                        refunds.RefundFacade().refund_order(order=self.order_object)
+                        self.order_object.lines.update(refunded_quantity=F('quantity'))
+                except:
+                    pass
+            return resp
+        except Exception as e:
+            print(e)
+            return Response({'errors': str(e)}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     def _record_payments(self, previous_states, request, order, methods, data):
         order_balance = [order.total_incl_tax]

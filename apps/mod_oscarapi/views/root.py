@@ -14,6 +14,7 @@ def PUBLIC_APIS(r, f):
             ("Send OTP", reverse("api-v1--send-otp", request=r, format=f)),
             ("Resend OTP", reverse("api-v1--resend-otp", request=r, format=f)),
             ("Login With OTP", reverse("api-v1--login-otp", request=r, format=f)),
+            ("Login With OTP For Delivery Boy", reverse("api-v1--login--with-otp-for-delivery-boy", request=r, format=f)),
             ("Set / Change Location", reverse("availability-api:set-zone", request=r, format=f)),
             ("User Profile", reverse("rest_user_details", request=r, format=f)),
             ("API Logout", reverse("rest_logout", request=r, format=f)),
@@ -58,6 +59,7 @@ def PUBLIC_APIS(r, f):
             # ("Payment Methods", reverse("api-checkout-payment-methods", request=r, format=f)),
             # ("API Payment Status", reverse("api-payment", request=r, format=f)),
             # ("API Payment Status Detail", reverse("api-payment", request=r, format=f, kwargs={"pk": 1})),
+            ("API Checkout Validation", reverse("api-checkout-validation", request=r, format=f)),
             ("API Checkout", reverse("api-checkout", request=r, format=f)),
         ])),
         # ("Buy Now", collections.OrderedDict([
@@ -75,7 +77,14 @@ def PUBLIC_APIS(r, f):
             ("My Orders Detail", reverse("api-orders-detail", kwargs={'pk': 10}, request=r, format=f)),
             ("My Orders More Details", reverse("api-orders-more", kwargs={'pk': 10}, request=r, format=f)),
             ("Order Item Return Request", reverse("order_line_return_request", kwargs={'pk': 10}, request=r, format=f)),
+            ("Order Cancellation List - POST", reverse("order_cancel_request", kwargs={'pk': 10},  request=r, format=f)),
+            ("Cancel Reason List", reverse("cancel-reasons-list", request=r, format=f)),
             ("Return Reason List", reverse("return-reasons-list", request=r, format=f)),
+
+            ("Reorder", collections.OrderedDict([
+                ("Merge to New Temporary Basket", reverse("api-reorder-to-temporary-basket-v2", kwargs={'pk': 10}, request=r, format=f)),
+                ("Merge to Current Basket", reverse("api-reorder-to-current-basket-v2", kwargs={'pk': 10}, request=r, format=f) + "?clear_current_basket=1") ,
+            ]))
         ])),
 
         ("Addresses", collections.OrderedDict([
@@ -84,11 +93,17 @@ def PUBLIC_APIS(r, f):
             ("basket-add-product", reverse("api-basket-add-product", request=r, format=f)),
             ("basket-add-voucher", reverse("api-basket-add-voucher", request=r, format=f)),
         ])),
+        ("Push Notifications", collections.OrderedDict([
+            ("Apns Device Authorized List", reverse("apnsdevice-list", request=r, format=f)),
+            ("Fcm / Gcm Device Authorized List", reverse("gcmdevice-list", request=r, format=f)),
+            ("Test", reverse("logistics:test_push", request=r, format=f)),
+        ])),
 
         ("Logistics", collections.OrderedDict([
             ("Active Trip", reverse("logistics-api:active-trip", request=r, format=f)),
             ("Archived Trips", reverse("logistics-api:archived-list", kwargs={"trip_date": "28-09-2020"},
                                        request=r, format=f)),
+            ("Planned Trips - NEW", reverse("logistics-api:planned-trip", request=r, format=f)),
             # trip details
             ("Trip Detail", reverse("logistics-api:detail-trip", kwargs={'pk': '8'}, request=r, format=f)),
             # order

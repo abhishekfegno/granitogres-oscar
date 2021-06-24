@@ -19,6 +19,7 @@ def get_statuses(code: int):
         256: settings.ORDER_STATUS_PENDING,             # Placed
         512: settings.ORDER_STATUS_PAYMENT_DECLINED,    # Payment Declined
     }
+
     statuses = []
     next_greatest_factor = max(list(_status_set.keys()))
 

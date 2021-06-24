@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.utils.module_loading import import_string
 from apps.payment.models import Source
+from apps.payment.utils import PaymentRefundMixin
 
 
 class RefundFacade(object):
@@ -54,7 +55,9 @@ class RefundFacade(object):
                 f"Could not Refund Order #{order.number} With Status '{order.status}'!"
             )
         source, payment_method = self.get_source_n_method(order)        # case 2 handled
+        payment_method: PaymentRefundMixin = payment_method
         # Generate Payment_event
+        print("Point 03: Refunding -- order cancellation", source, payment_method)
 
         return payment_method.refund_order(order=order, source=source)         # Case 3 & 4 handled
         # we are breaking the loop so as to get the first source

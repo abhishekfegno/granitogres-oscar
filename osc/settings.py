@@ -54,8 +54,9 @@ INSTALLED_APPS = [
     'apps.availability.apps.AvailabilityConfig',
     'apps.catalogue.apps.CatalogueConfig',
     'apps.dashboard.custom.apps.CustomConfig',
-    'apps.dashboard.users.apps.UsersDashboardConfig',
     'apps.dashboard.catalogue',
+    # 'apps.dashboard.catalogue.apps.CatalogueDashboardConfig',
+    'apps.dashboard.users.apps.UsersDashboardConfig',
     'apps.checkout.apps.CheckoutConfig',
     'apps.search.apps.SearchConfig',
     'apps.order.apps.OrderConfig',
@@ -165,6 +166,7 @@ from .config.drf import *
 # from .config.elastic import *
 from .config.oscar import *
 from .config.payments import *
+from .config.push_notifications import *
 from .config.production import *
 from .config.project import *
 from .config.route import *
@@ -172,6 +174,7 @@ from .config.search import *
 from .config.sms import *
 from .config.static import *
 from .config.templates import *
+
 
 """
 Email : grocery@gmail.com

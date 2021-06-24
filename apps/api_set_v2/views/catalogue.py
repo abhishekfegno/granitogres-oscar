@@ -1,6 +1,7 @@
 from pprint import pprint
 
 from django.db.models import Q
+from django.utils.html import strip_tags
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -29,6 +30,7 @@ def product_detail_web(request, product: Product): # needs parent product
     response = get_optimized_product_dict(
         request=request,
         qs=[product, ],
+        needs_stock=False,
     ).values()
     sol = request.basket.sorted_recommended_products + product.sorted_recommended_products
 
@@ -51,7 +53,7 @@ def product_detail_web(request, product: Product): # needs parent product
     response = {
         **response,
         "url": reverse('product-detail', request=request, kwargs={'pk': product.id}),
-        "description": product.description,
+        "description": strip_tags(product.description),
         'images': [request.build_absolute_uri(u.thumbnail_mobile_listing or image_not_found()) for u in product.get_all_images()],
         "recommended_products": [a for a in get_optimized_product_dict(
             request=request,

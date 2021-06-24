@@ -52,6 +52,7 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
         return attrs
 
     def validate(self, attrs):
+        super().validate(attrs)
         request = self.context["request"]
         attrs = self.lookup_annonymous(attrs, request)
         basket = attrs.get("basket")
@@ -71,7 +72,8 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
         posted_shipping_charge = attrs.get("shipping_charge")
 
         if posted_shipping_charge is not None:
-            posted_shipping_charge = prices.Price(**posted_shipping_charge)
+            if isinstance(posted_shipping_charge, dict):
+                posted_shipping_charge = prices.Price(**posted_shipping_charge)
             # test submitted data.
             if not posted_shipping_charge == shipping_charge:
                 message = (
@@ -83,7 +85,7 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
         posted_total = attrs.get("total")
         total = OrderTotalCalculator().calculate(basket, shipping_charge)
         if posted_total is not None:
-            if posted_total != total.incl_tax:
+            if posted_total != total:
                 message = ("Total incorrect %s != %s" % (posted_total, total.incl_tax))
                 raise serializers.ValidationError(message)
         # update attrs with validated data.
@@ -106,10 +108,12 @@ class UserAddressSerializer(CoreUserAddressSerializer):
     def get_location_data(self, instance):
         if self.context['request'] and self.context['request'].session.get('location') and instance.location:
             location_id = self.context['request'].session.get('location')
-            loc_obj = Location.objects.filter(pk=location_id).last()
+            loc_obj = Location.objects.filter(pk=location_id).select_related('zone').last()
+            is_in_zone = loc_obj and loc_obj.zone and loc_obj.zone.zone and loc_obj.zone.zone.contains(instance.location)
             return loc_obj and {
                 **instance.location_data,
                 'distance': loc_obj.location.distance(instance.location),
+                'is_in_zone': is_in_zone,
             }
         return None
 
@@ -136,6 +140,7 @@ class UserAddressSerializer(CoreUserAddressSerializer):
             "line2",
             "line3",
             "line4",
+            "line5",
             "state",
             "postcode",
             "search_text",

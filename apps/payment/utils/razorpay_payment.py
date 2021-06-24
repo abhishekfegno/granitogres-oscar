@@ -3,6 +3,8 @@ import time
 import requests
 from django.conf import settings
 from django.utils import timezone
+
+from apps.logistics.models import FailedRefund
 from apps.payment.models import Source
 from oscarapicheckout import states
 from oscarapicheckout.methods import PaymentMethod, Transaction
@@ -134,51 +136,65 @@ class RazorPay(PaymentRefundMixin, PaymentMethod):
                                 'remaining amount to be refunded is less than mentioned amount.'}
         payment_pgr.response = payment_response
         max_refundable_amount = payment_response['amount'] - payment_response['amount_refunded']
-        if amount > max_refundable_amount:
-            msg = f"""The Amount {source.currency} {amount / 100}/- is more than the 
-                    {source.currency} {max_refundable_amount / 100} /-.  
-                    The total amount of this order #{order.number} is 
-                    {source.currency}  {payment_response['amount'] / 100}/-"""
-
-            if payment_response['amount_refunded']:
-                msg += f" and we already have refunded {source.currency} {payment_response['amount_refunded']/100} "
-            msg += f""". In this situation, we could not proceed payment refund with the given amount. 
-                    (Payment Reference : {reference}). """
-            msg += f""" <br /> \nYou can copy / note down the reference number and go to razorpay dashboard 
-                    to trigger a manual refund. """
-            raise AlertException(msg)
-
-        pgr = PaymentGateWayResponse(
-            transaction_type=PaymentGateWayResponse.REFUND,
-            amount=amount,
-            source=source,
-            description=f'Refund of {source.currency} {amount} /- against Order ({source.order.number}) on {timezone.now()}',
-            parent_transaction=payment_pgr,
-        )
         try:
-            # success case
-            response = client.payment.refund(reference, str(amount)) # noqa
-            pgr.response = response
-            pgr.transaction_id = response['id']
+            if amount > max_refundable_amount:
+                msg = f"""The Amount {source.currency} {amount / 100}/- is more than the 
+                        {source.currency} {max_refundable_amount / 100} /-.  
+                        The total amount of this order #{order.number} is 
+                        {source.currency}  {payment_response['amount'] / 100}/-"""
 
-            # LOGGING RESPONSE
-            pgr.payment_status = True
-            pgr.save()
-            return response
+                if payment_response['amount_refunded']:
+                    msg += f" and we already have refunded {source.currency} {payment_response['amount_refunded']/100} "
+                msg += f""". In this situation, we could not proceed payment refund with the given amount. 
+                        (Payment Reference : {reference}). """
+                msg += f""" <br /> \nYou can copy / note down the reference number and go to razorpay dashboard 
+                        to trigger a manual refund. """
+                fr = FailedRefund.objects.create(
+                    order=order,
+                    source=source,
+                    reference=reference,
+                    info=msg,
+                    last_response=payment_response,
+                    amount_to_refund=amount / 100,
+                    amount_balance_at_rzp=(payment_response['amount'] - payment_response['amount_refunded']) / 100
+                )
+                raise AlertException(msg)
 
-        except (
-                razorpay.errors.BadRequestError,  # noqa
-                razorpay.errors.ServerError, # noqa
-                razorpay.errors.SignatureVerificationError, # noqa
-                requests.exceptions.ConnectionError,
-        ) as e:
-            # payment Rejected Error
-            pgr.payment_status = False
-            pgr.response = {'id': reference, 'entity': 'payment', 'amount': amount, 'currency': source.currency,
-                            'status': 'already_captured', 'error': str(e)}
-            pgr.save()
+            pgr = PaymentGateWayResponse(
+                transaction_type=PaymentGateWayResponse.REFUND,
+                amount=amount,
+                source=source,
+                description=f'Refund of {source.currency} {amount} /- against Order ({source.order.number}) on {timezone.now()}',
+                parent_transaction=payment_pgr,
+            )
+            try:
+                # success case
+                response = client.payment.refund(reference, str(amount)) # noqa
+                pgr.response = response
+                pgr.transaction_id = response['id']
+
+                # LOGGING RESPONSE
+                pgr.payment_status = True
+                pgr.save()
+                return response
+
+            except (
+                    razorpay.errors.BadRequestError,  # noqa
+                    razorpay.errors.ServerError, # noqa
+                    razorpay.errors.SignatureVerificationError, # noqa
+                    requests.exceptions.ConnectionError,
+            ) as e:
+                # payment Rejected Error
+                pgr.payment_status = False
+                pgr.response = {'id': reference, 'entity': 'payment', 'amount': amount, 'currency': source.currency,
+                                'status': 'already_captured', 'error': str(e)}
+                pgr.save()
+                return {'id': reference, 'entity': 'payment', 'amount': amount, 'currency': source.currency,
+                        'status': 'already_captured', 'error': str(e)}
+                # return states.Declined(source.amount_debited, source_id=source.pk)
+        except AlertException as e:
+
             return {'id': reference, 'entity': 'payment', 'amount': amount, 'currency': source.currency,
-                    'status': 'already_captured', 'error': str(e)}
-            # return states.Declined(source.amount_debited, source_id=source.pk)
+                    'status': 'failed', 'error': str(e)}
 
 

@@ -11,6 +11,8 @@ from .models import Order, PaymentEventType
 from ..payment import refunds
 from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
+from ..utils.pushnotifications import OrderStatusPushNotification, PushNotification
+from ..utils.utils import get_statuses
 
 Transaction = get_model('payment', 'Transaction')
 Line = get_model('order', 'Line')
@@ -20,16 +22,10 @@ class EventHandler(processing.EventHandler):
 
     @staticmethod
     def pipeline_order_lines(order, new_status):
-        if new_status in (
-                settings.ORDER_STATUS_CONFIRMED,
-                # settings.ORDER_STATUS_SHIPPED,
-                settings.ORDER_STATUS_OUT_FOR_DELIVERY,
-                settings.ORDER_STATUS_DELIVERED,
-        ):
+        if new_status in get_statuses(1+2+4+8):
             order.lines.exclude(
                 status__in=settings.OSCAR_LINE_REFUNDABLE_STATUS
             ).update(status=new_status)
-
         return
 
     @transaction.atomic
@@ -43,7 +39,7 @@ class EventHandler(processing.EventHandler):
         """
         old_status = order.status
         order.set_status(new_status)
-
+        OrderStatusPushNotification(order.user).send_status_update(order, new_status)
         """ 
         Handle Refund and Update of Refund Quantity on `new_status` == 'Return'. 
         Refund Can be proceeded only after changing Order Status.
@@ -57,6 +53,73 @@ class EventHandler(processing.EventHandler):
             refunds.RefundFacade().refund_order(order=order)
             order.lines.update(refunded_quantity=models.F('quantity'))
         self.pipeline_order_lines(order, new_status)
+
+        all_lines = order.lines.all().select_related('stockrecord')
+        if new_status in get_statuses(8):
+            lines_to_be_consumed = all_lines.filter(status__in=get_statuses(8))
+            self.consume_stock_allocations(order, lines_to_be_consumed)
+        elif new_status in get_statuses(128):
+            lines_to_be_cancelled = all_lines.filter(status__in=get_statuses(128))
+            self.cancel_stock_allocations(order, lines_to_be_cancelled)
+        if hasattr(order, 'consignmentdelivery'):
+            if new_status == settings.ORDER_STATUS_DELIVERED:
+                order.consignmentdelivery.status = order.consignmentdelivery.COMPLETED
+                order.consignmentdelivery.save()
+                if (
+                        order.consignmentdelivery.delivery_trip
+                        and order.consignmentdelivery.delivery_trip.status == order.consignmentdelivery.delivery_trip.ON_TRIP
+                ):
+                    PushNotification(order.consignmentdelivery.delivery_trip.agent).send_message(
+                        title=f"Consignment #handler{order.consignmentdelivery.id} has been Delivered!",
+                        message="Hey, a delivery consignment has been marked as Delivered! Moving items to completed "
+                                "list!",
+                    )
+            elif new_status == settings.ORDER_STATUS_CANCELED:
+                order.consignmentdelivery.status = order.consignmentdelivery.CANCELLED
+                order.consignmentdelivery.save()
+                if (
+                        order.consignmentdelivery.delivery_trip
+                        and order.consignmentdelivery.delivery_trip.status == order.consignmentdelivery.delivery_trip.ON_TRIP
+                ):
+                    PushNotification(order.consignmentdelivery.delivery_trip.agent).send_message(
+                        title=f"Consignment #{order.consignmentdelivery.id} has been Cancelled!",
+                        message="Hey, a delivery consignment has been marked as Cancelled! Moving items to cancelled "
+                                "list!",
+                    )
+
+            elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
+                pass
+        if hasattr(order, 'consignmentreturn'):
+            if new_status == settings.ORDER_STATUS_RETURN_APPROVED:
+                order.consignmentreturn.status = order.consignmentreturn.COMPLETED
+                order.consignmentreturn.save()
+                if (
+                        order.consignmentreturn.delivery_trip
+                        and order.consignmentreturn.delivery_trip.status == order.consignmentreturn.delivery_trip.ON_TRIP
+                ):
+                    PushNotification(order.consignmentreturn.delivery_trip.agent).send_message(
+                        title=f"Return #{order.consignmentreturn.id} has been Picked Up!",
+                        message="Hey, A return consignment has been marked as Picked Up! Moving items to completed "
+                                "list!",
+                    )
+            elif old_status in get_statuses(32+16) and new_status == settings.ORDER_STATUS_DELIVERED:
+                order.consignmentreturn.status = order.consignmentreturn.CANCELLED
+                order.consignmentreturn.save()
+                if (
+                        order.consignmentreturn.delivery_trip
+                        and (
+                        order.consignmentreturn.delivery_trip.status
+                        == order.consignmentreturn.delivery_trip.ON_TRIP
+                )):
+                    PushNotification(order.consignmentreturn.delivery_trip.agent).send_message(
+                        title=f"Return #{order.consignmentreturn.id} has been Cancelled!",
+                        message="Hey, a return consignment has been marked as Cancelled! Moving items to cancelled "
+                                "list!",
+                    )
+
+            elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
+                pass
+
         if note_msg:
             """
             Add note if there is an EventHandler note msg.
@@ -73,6 +136,8 @@ class EventHandler(processing.EventHandler):
         refunds though where the payment event may be unrelated to a particular
         shipping event and doesn't directly correspond to a set of lines.
         """
+        OrderStatusPushNotification(order.user).send_refund_update(order, amount)
+
         self.validate_payment_event(
             order, event_type, amount, lines, line_quantities, **kwargs)
 
@@ -89,7 +154,8 @@ class EventHandler(processing.EventHandler):
             order, event_type, amount, lines, line_quantities, **kwargs)
 
     @transaction.atomic
-    def handle_order_line_status_change(self, order_line, new_status: str, note_msg=None, note_type='System'):
+    def handle_order_line_status_change(
+            self, order_line, new_status: str, note_msg=None, note_type='System', already_refunded_together=False):
         """
         Handle Order Status Change in Oscar.
         """
@@ -107,10 +173,18 @@ class EventHandler(processing.EventHandler):
         Handle Refund and Update of Refund Quantity on `new_status` == 'Return'. 
         Refund Can be proceeded only after changing Order Status.
         """
-        if new_status in settings.OSCAR_LINE_REFUNDABLE_STATUS:
-            refunds.RefundFacade().refund_order_line(line=order_line)
-            order_line.refunded_quantity = order_line.quantity
-            order_line.save()
+        if not already_refunded_together:
+            if new_status in settings.OSCAR_LINE_REFUNDABLE_STATUS:
+                refunds.RefundFacade().refund_order_line(line=order_line)
+                order_line.refunded_quantity = order_line.quantity
+                order_line.save()
+        if new_status in get_statuses(64+32+16):  # any status from processing requests
+            order.set_status(new_status)
+
+        if new_status in get_statuses(8):
+            self.consume_stock_allocations(order, [order_line])
+        elif new_status in get_statuses(128):
+            self.cancel_stock_allocations(order, [order_line])
 
         if note_msg:
             """
@@ -118,6 +192,31 @@ class EventHandler(processing.EventHandler):
             """
             self.create_note(order, message=note_msg, note_type=note_type)
 
+    def consume_stock_allocations(self, order, lines=None, line_quantities=None):
+        """
+        Consume the stock allocations for the passed lines.
 
+        If no lines/quantities are passed, do it for all lines.
+        """
+        if not lines:
+            lines = order.lines.all()
+        if not line_quantities:
+            line_quantities = [line.quantity for line in lines]
+        for line, qty in zip(lines, line_quantities):
+            if line.stockrecord:
+                line.stockrecord.consume_allocation(qty)
 
+    def cancel_stock_allocations(self, order, lines=None, line_quantities=None):
+        """
+        Cancel the stock allocations for the passed lines.
+
+        If no lines/quantities are passed, do it for all lines.
+        """
+        if not lines:
+            lines = order.lines.all()
+        if not line_quantities:
+            line_quantities = [line.quantity for line in lines]
+        for line, qty in zip(lines, line_quantities):
+            if line.stockrecord:
+                line.stockrecord.cancel_allocation(qty)
 

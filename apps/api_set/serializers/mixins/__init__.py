@@ -24,10 +24,11 @@ AvailabilitySerializer = get_api_class('serializers.product', 'AvailabilitySeria
 
 class ProductPrimaryImageFieldMixin(object):
 
-    def get_primary_image(self, instance):
-        if instance.is_child:
-            return None
+    def get_primary_image(self, instance, ignore_if_child=True):
         req = self.context['request']        # noqa: mixin assured
+        if instance.is_child and ignore_if_child:
+            print("Not delivering child image")
+            return
         img = instance.primary_image()
         img_mob = img['original'] if type(img) is dict else img.thumbnail_mobile_listing
         return {
@@ -110,6 +111,7 @@ class ProductDetailSerializerMixin(object):
         return self.context['product'].get_title()
 
     def get_description(self, instance):
+
         return strip_tags(self.context['product'].description)
 
     def get_about(self, instance):

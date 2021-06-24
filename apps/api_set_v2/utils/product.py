@@ -32,13 +32,18 @@ def get_optimized_product_dict(
     """
     zone: int = request.session.get('zone')         # zone => Zone.pk
     if qs is not None:
-        if not qs: return {}
+        if not qs:
+            return {}
         product_set = qs
+        # product_set = Product.objects.filter(id__in=qs.values_list('id', flat=True))
+
     else:
         product_set = Product.objects.filter(
             qs_filter, is_public=True,
             # stockrecords__isnull=False
         )
+    # if needs_stock:
+    #     product_set = product_set.filter(stockrecords__isnull=False)
     if offset and limit:
         product_set = product_set[offset:limit]
     elif limit:
@@ -61,7 +66,6 @@ def get_optimized_product_dict(
     if zone:
         sr_set = sr_set.filter(partner__zone__id=zone)
 
-    # import pdb; pdb.set_trace()
     # if offset and limit:
     #     sr_set = sr_set[offset:limit]
     # elif limit:
@@ -70,7 +74,7 @@ def get_optimized_product_dict(
     #     sr_set = sr_set[offset:]
 
     product_data = {}
-    for sr in sr_set:
+    for sr in sr_set[:limit]:
         sr.product.selected_stock_record = sr
         if sr.product.is_child:
             if sr.product.parent not in product_data.keys():
@@ -83,7 +87,23 @@ def get_optimized_product_dict(
             product_data[sr.product] = product_serializer_class(instance=sr.product,
                                                                 context={'request': request}).data
             product_data[sr.product]['variants'] = []
+    if not needs_stock:
+        for product in product_set:
+            if product.is_child:
+                if product.parent not in product_data:
+                    if product.parent not in product_data.keys():
+                        product_data[product.parent] = product_serializer_class(instance=product.parent,
+                                                                                context={'request': request}).data
+                        product_data[product.parent]['variants'] = []
+                    product_data[product.parent]['variants'].append(
+                        product_serializer_class(instance=product, context={'request': request}).data)
+            elif product.is_standalone:  # parent or standalone
+                if product not in product_data:
+                    product_data[product] = product_serializer_class(instance=product,
+                                                                     context={'request': request}).data
+                    product_data[product]['variants'] = []
     return product_data
+
 
 
 

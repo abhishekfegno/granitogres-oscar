@@ -10,14 +10,14 @@ from apps.api_set.views.catalogue import (
 from apps.api_set.views.index import (
     index, home, offers, offer_products
 )
-from apps.api_set.views.orders import orders, orders_detail, orders_more_detail, order_line_return_request, orders_v2
+from apps.api_set.views.orders import orders, orders_detail, orders_more_detail, order_return_request, orders_v2
 from apps.api_set.views.product_listing_query_based import product_list
 
 from apps.api_set.views.public import availability, return_reasons_list
 from apps.api_set.views.wishlist import wish_list
 
 from apps.api_set.views.auth import (
-    SendOTP, resend_otp, LoginWithOTP,
+    SendOTP, resend_otp, LoginWithOTP, LoginWithOTPForDeliveryBoy,
 )
 
 v1__registration_apis = [
@@ -25,6 +25,9 @@ v1__registration_apis = [
     path('v1/resend-otp/', resend_otp, name="api-v1--resend-otp"),
     path('v1/login-with-otp/', LoginWithOTP.as_view(), name="api-v1--login-otp"),
     # path('v1/update-profile/', UpdateProfile.as_view(), name="api-v1--update-profile"),
+    path('login-with-otp-for-delivery-boy/', LoginWithOTPForDeliveryBoy.as_view(),
+         name="api-v1--login--with-otp-for-delivery-boy"),
+
 ]
 
 home_urlpatterns = [
@@ -35,7 +38,7 @@ home_urlpatterns = [
     path("v1/_orders/", orders, name="api-orders"),
     path("v1/_orders/<int:pk>/", orders_detail, name="api-orders-detail"),
     path("v1/_orders/<int:pk>/more/", orders_more_detail, name="api-orders-more"),
-    path("v1/_orders/<int:pk>/return-request/", order_line_return_request, name="order_line_return_request"),
+    path("v1/_orders/<int:pk>/return-request/", order_return_request, name="order_line_return_request"),
     path("v1/auth/", include(v1__registration_apis)),
 ]
 
