@@ -1,6 +1,11 @@
 from django.urls import reverse_lazy
 from oscar.defaults import *
 
+
+LOCATION_FETCHING_MODE_SET = ['pincode', 'geolocation']
+
+LOCATION_FETCHING_MODE = 'pincode'
+
 OSCARAPI_OVERRIDE_MODULES = ["apps.mod_oscarapi"]
 
 OSCARAPI_BLOCK_ADMIN_API_ACCESS = True
@@ -285,25 +290,13 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'label': _('Configurations'),
         'icon': 'icon-double-angle-down',
         'children': [
-            {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
-             'access_fn': admin_or_staff},
-
-            {'label': _('Availability: Pincode'), 'url_name': 'availability:pincode-selector',
-             'access_fn': admin_or_staff},
             {'label': _('Site Configuration'), 'url_name': 'dashboard-custom:site-config',
              'access_fn': admin_or_staff},
-
-            # {'label': _('Launch Banners'),
-            #  'url_name': 'dashboard-custom:dashboard-home-page-mega-banner-list',
-            #  'access_fn': admin_or_staff
-            #  },
-
-            # {'label': _('Offer Banners'),
-            #  'url_name': 'dashboard-custom:dashboard-offer-banner-list',
-            #  'access_fn': admin_or_staff
-            #  },
-
-            {'label': _('Shipping charges'), 'url_name': 'dashboard:shipping-method-list', },
+            {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
+             'access_fn': admin_or_staff},
+            {'label': _('Choose Pincodes with services'), 'url_name': 'availability:pincode-selector',
+             'access_fn': admin_or_staff},
+            # {'label': _('Shipping charges'), 'url_name': 'dashboard:shipping-method-list', },
 
         ]
     }, {

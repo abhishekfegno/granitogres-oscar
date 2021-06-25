@@ -166,5 +166,6 @@ class WncBasketSerializer(BasketSerializer):
             "total_incl_tax",
 
             "shipping",
+            'shipping_methods',
             "net_total",
         )

@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-
+import json
 # Create your views here.
 from oscar.apps.dashboard.communications.views import ListView
 from rest_framework.response import Response
@@ -14,6 +14,7 @@ from rest_framework.generics import get_object_or_404
 
 from apps.availability.models import PincodePartnerThroughModel
 from apps.availability.utils import load_all_postal_code_in_district
+from apps.availability.models import Zones
 
 Partner = get_model('partner', 'Partner')
 PinCode = get_model('availability', 'PinCode')
@@ -38,6 +39,7 @@ class PincodeSelector(ListView):
 
     def get_context_data(self, **kwargs):
         kwargs['partner_options'] = Partner.objects.values_list('id', 'name')
+        kwargs['zone_options'] = Zones.objects.values_list('id', 'name')
         kwargs['country_options'] = PinCode.get_root_nodes().values_list('id', 'name', 'code')
         return super(PincodeSelector, self).get_context_data(**kwargs)
 

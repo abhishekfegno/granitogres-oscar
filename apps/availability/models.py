@@ -19,7 +19,9 @@ class PinCode(MP_Node):
     POSTAL_CODE_DEPTH = 5
 
     def __str__(self):
-        return f"{self.code or self.name} "
+        if self.code:
+            return f"{self.name} - {self.code}"
+        return self.name
 
 
 class PincodePartnerThroughModel(models.Model):
@@ -31,6 +33,7 @@ class Zones(models.Model):
     name = models.CharField(max_length=128)
     zone = models.PolygonField()
     partner = models.ForeignKey('partner.Partner', related_name='zone', on_delete=models.CASCADE)
+    pincode = models.ManyToManyField('availability.PinCode', )
 
 
 

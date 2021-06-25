@@ -154,6 +154,13 @@ WSGI_APPLICATION = 'osc.wsgi.application'
 ASGI_APPLICATION = 'osc.asgi.application'
 
 
+"""
+LOCATION_FETCHING_MODE = 'geolocation'
+The Working mode is configured on osc.config.oscar.LOCATION_FETCHING_MODE
+so that we can manage oscar dashboard also from there.
+"""
+
+
 SITE_ID = 1
 
 AUTH_USER_MODEL = 'users.User'

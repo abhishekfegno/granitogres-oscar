@@ -2,7 +2,7 @@ import floppyforms
 from django import forms
 from django.conf import settings
 
-from apps.availability.models import Zones
+from apps.availability.models import Zones, PinCode
 
 
 # class PolyWidget(floppyforms.gis.PolygonWidget, floppyforms.gis.BaseGMapWidget):
@@ -21,10 +21,11 @@ class ZoneForm(forms.ModelForm):
 
     zone = floppyforms.gis.PolygonField(widget=PolyWidget)
     name = forms.CharField()
+    pincode = forms.ModelMultipleChoiceField(queryset=PinCode.objects.filter(code__isnull=False))
 
     class Meta:
         model = Zones
-        fields = ('name', 'zone', 'partner', )
+        fields = ('name', 'zone', 'partner', 'pincode')
 
 
 

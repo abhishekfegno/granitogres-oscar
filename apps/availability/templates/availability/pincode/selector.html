@@ -97,6 +97,7 @@
     }
     #vueApp { padding-bottom: 24px; }
     </style>
+    <style>.multi-select-link-select-all, multi-select-link-deselect-all{margin : 10px ;  display: inline-block}</style>
     {% verbatim %}
     <div id="vueApp">
         <div class="container">
@@ -118,9 +119,7 @@
                     </select>
                 </div>
                 <div class="col-md-3" >
-                    <style>
-                        .multi-select-link-select-all, multi-select-link-deselect-all{margin : 10px ;  display: inline-block}
-                    </style>
+
                     <div style="padding:20px" class="pull-right">
                         <span href='#' class='multi-select-link-select-all' st>
                             <button type="button"  class="btn btn-primary" > Select All </button>
@@ -128,7 +127,17 @@
                         <span href='#' class='multi-select-link-deselect-all' >
                             <button type="button" class="btn btn-primary" > Deselect All </button>
                         </span>
-                        <span><button type="button" @click="update_changes()" class="btn btn-primary" > Update </button></span>
+                        <span><button type="button" @click="update_changes()" class="btn btn-primary" > Mark as Deliverable! </button></span>
+                        <hr>
+                        <label for="id_zones">Add Selected Pincode to: </label>
+                        <select id="id_zones" name="zone" >
+                            {% endverbatim %}
+                            {% for id, name in zone_options %}
+                                <option value="{{ id }}"> {{ name }} </option>
+                            {% endfor %}
+                            {% verbatim %}
+                        </select>
+                        <span><button type="button" @click="update_zone()" class="btn btn-danger" > Add Selected Pincodes to Zone </button></span>
                     </div>
 
                 </div>
@@ -217,7 +226,7 @@
                         "communities": [],
                         "postal": [],
                         "partner_deliverable": [],
-                        "partner_non_deliverable" : []
+                        "partner_non_deliverable" : [],
                     },
                     updated: function(){
                         this.update_ui();
@@ -250,6 +259,9 @@
                         },
                         refresh_plugin(){
                             $('.multi-select-selector-class--js').multiSelect('refresh');
+                        },
+                        update_zone(){
+                            alert( $('#id_zones').val() );
                         },
                         update_ui(){
                             var self = this;
