@@ -16,6 +16,18 @@
     <div class="page-header">
         <a href="" class="btn btn-primary btn-lg pull-right"><i class="icon-plus"></i> {% trans "Create new Button" %}</a>
         <h1>{% trans "Pincodes" %}</h1>
+        <pre class="">
+<b>?? HOW TO USE</b>
+""""""""""""""
+All set of pincode of specific countries are available here! That doesn't means, all these locations are deliverable!
+
+You can select a partner from the choice, then select the Country, the corresponding States , the corresponding District and at last load the pincode to the database!
+If you have already added the location, the Pincode will be shown, else a popup will ask you to enter the text "CONFIRM EXPLORE" for the assurance, you want to load all new Pincode to your list!
+These will just load the pincode, this list will contains the whole pincode of a district! Once the Pincode of districts are loaded, You can relaxly, select the deliverable pincode from the list!
+
+There is also an independent provision to Add the Selected Pincode of a district directly to a deliverable zone!
+
+</pre>
     </div>
 {% endblock header %}
 
@@ -97,7 +109,7 @@
     }
     #vueApp { padding-bottom: 24px; }
     </style>
-    <style>.multi-select-link-select-all, multi-select-link-deselect-all{margin : 10px ;  display: inline-block}</style>
+    <style>.multi-select-link-select-all, .multi-select-link-deselect-all{ display: inline-block; width:45%}</style>
     {% verbatim %}
     <div id="vueApp">
         <div class="container">
@@ -120,24 +132,30 @@
                 </div>
                 <div class="col-md-3" >
 
-                    <div style="padding:20px" class="pull-right">
-                        <span href='#' class='multi-select-link-select-all' st>
-                            <button type="button"  class="btn btn-primary" > Select All </button>
-                        </span>
-                        <span href='#' class='multi-select-link-deselect-all' >
-                            <button type="button" class="btn btn-primary" > Deselect All </button>
-                        </span>
-                        <span><button type="button" @click="update_changes()" class="btn btn-primary" > Mark as Deliverable! </button></span>
+                    <div style="padding-top:20px" class="pull-right">
+                        <p>
+                            <span href='#' class='multi-select-link-select-all' >
+                                <button type="button"  class="btn btn-primary" > Select All </button>
+                            </span>
+                            <span href='#' class='multi-select-link-deselect-all float-right' >
+                                <button type="button" class="btn btn-primary" > Deselect All </button>
+                            </span>
+                        </p>
+                        <hr>
+                        <p class="text-muted">
+                            Mark these selected locations as Deliverable!
+                            <button type="button" @click="update_changes()" class="btn btn-primary" > Mark as Deliverable! </button>
+                        </p>
                         <hr>
                         <label for="id_zones">Add Selected Pincode to: </label>
-                        <select id="id_zones" name="zone" >
+                        <select id="id_zones" name="zone" class="form-control">
                             {% endverbatim %}
-                            {% for id, name in zone_options %}
-                                <option value="{{ id }}"> {{ name }} </option>
-                            {% endfor %}
+                                {% for id, name in zone_options %}
+                                    <option value="{{ id }}"> {{ name }} </option>
+                                {% endfor %}
                             {% verbatim %}
                         </select>
-                        <span><button type="button" @click="update_zone()" class="btn btn-danger" > Add Selected Pincodes to Zone </button></span>
+                        <span><button type="button" @click="update_zone()" class="btn btn-danger mt-2" > Add Selected Pincodes to Zone </button></span>
                     </div>
 
                 </div>
@@ -216,6 +234,7 @@
             $(document).ready(function(){
                 var ds = $('#availability_pincode__district_switcher');
                 $(".multi-select-selector-class--js").select2('destroy');
+                $("#id_zones").select2('destroy');
                 var BASE_REQ_URL = '{% url 'availability-api:pincode-load-page' district=9999999  partner=9999998 %}'
                 var BASE_UPDATE_URL = '{% url 'availability-api:pincode-update-pincode' district=9999999  partner=9999998 %}'
                 var PARTNER_POS_HOLDER = '9999998', DISTRICT_POS_HOLDER = '9999999';
