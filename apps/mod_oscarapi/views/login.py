@@ -66,16 +66,16 @@ class LoginView(CoreLoginView):
             user = ser.instance
             # refuse to login logged in users, to avoid attaching sessions to
             # multiple users at the same time.
-            if request.user.is_authenticated:
-                return Response(
-                    {"detail": "Session is in use, log out first"},
-                    status=status.HTTP_405_METHOD_NOT_ALLOWED,
-                )
+            # if request.user.is_authenticated:
+            #     return Response(
+            #         {"detail": "Session is in use, log out first"},
+            #         status=status.HTTP_405_METHOD_NOT_ALLOWED,
+            #     )
             request.user = user
             login_and_upgrade_session(request, user)
 
             # merge anonymous basket with authenticated basket.
-            basket = operations.get_user_basket(request)
+            basket = operations.get_basket(request, prepare=False)
             if anonymous_basket and not anonymous_basket.is_empty:
                 basket.merge(anonymous_basket)
             basket = operations.prepare_basket(basket, request)
