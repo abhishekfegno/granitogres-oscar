@@ -11,6 +11,8 @@ from rest_framework.response import Response
 from oscarapi.basket import operations
 from oscar.core.loading import get_model
 
+from apps.basket.models import Basket
+
 
 class LoginView(CoreLoginView):
     """
@@ -60,7 +62,7 @@ class LoginView(CoreLoginView):
         ctxt = {'context': {'request': request}}
 
         if ser.is_valid():
-            anonymous_basket = operations.get_anonymous_basket(request)
+            anonymous_basket: Basket = operations.get_anonymous_basket(request)
             user = ser.instance
             # refuse to login logged in users, to avoid attaching sessions to
             # multiple users at the same time.
@@ -73,7 +75,10 @@ class LoginView(CoreLoginView):
             login_and_upgrade_session(request, user)
 
             # merge anonymous basket with authenticated basket.
-            basket = get_basket(request)
+            basket = operations.get_user_basket(request)
+            if anonymous_basket and not anonymous_basket.is_empty:
+                basket.merge(anonymous_basket)
+            basket = operations.prepare_basket(basket, request)
 
             return Response({
                 'user': UserSerializer(instance=user, **ctxt).data,
