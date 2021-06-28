@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from treebeard.mp_tree import MP_Node, MP_NodeManager
 from django.contrib.gis.db import models
 
@@ -34,6 +35,14 @@ class Zones(models.Model):
     zone = models.PolygonField()
     partner = models.ForeignKey('partner.Partner', related_name='zone', on_delete=models.CASCADE)
     pincode = models.ManyToManyField('availability.PinCode', )
+
+    def clean(self):
+        qs = Zones.objects.all()
+        if self.pk:
+            qs = qs.exclude(pk=self.pk)
+        overlapping_zone = qs.exclude(pk=self.pk).filter(zone__bboverlaps=self.zone).first()
+        if overlapping_zone:
+            raise ValidationError(f'This Zone is overlapping with Zone: {overlapping_zone.name}!')
 
 
 
