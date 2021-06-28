@@ -1,4 +1,5 @@
 from django.conf import settings
+from oscarapi.basket.operations import get_basket
 from oscarapi.serializers.basket import BasketSerializer
 from oscarapi.serializers.login import UserSerializer
 from oscarapi.views.login import LoginView as CoreLoginView
@@ -72,7 +73,7 @@ class LoginView(CoreLoginView):
             login_and_upgrade_session(request._request, user)
 
             # merge anonymous basket with authenticated basket.
-            basket = operations.get_user_basket(user)
+            basket = get_basket(user)
             if anonymous_basket is not None:
                 self.merge_baskets(anonymous_basket, basket)
             operations.store_basket_in_session(basket, request.session)
