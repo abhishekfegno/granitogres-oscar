@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.conf.urls import url
+from django.http import JsonResponse
 from django.urls import path, include
 
 from allauth.account.views import confirm_email
@@ -20,7 +22,15 @@ from apps.api_set.views.auth import (
     SendOTP, resend_otp, LoginWithOTP, LoginWithOTPForDeliveryBoy,
 )
 
+
+def configuration(request):
+    return JsonResponse({
+        'LOCATION_FETCHING_MODE': settings.LOCATION_FETCHING_MODE
+    })
+
+
 v1__registration_apis = [
+    path('v1/configuration.json', configuration, name="api-v1--configuration"),
     path('v1/send-otp/', SendOTP.as_view(), name="api-v1--send-otp"),
     path('v1/resend-otp/', resend_otp, name="api-v1--resend-otp"),
     path('v1/login-with-otp/', LoginWithOTP.as_view(), name="api-v1--login-otp"),

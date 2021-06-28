@@ -1,13 +1,20 @@
 from django import forms
+from django.conf import settings
 from django.contrib.gis.gdal import GDALException
 from django.contrib.gis.geos import Point
 from rest_framework import serializers
 
-from apps.availability.zones.facade import ZoneFacade
+from apps.availability.facade import ZoneFacade
 from apps.users.models import Location
 
 
 class PointSerializer(serializers.Serializer):
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
+
     longitude = serializers.DecimalField(max_digits=24, decimal_places=16,)
     latitude = serializers.DecimalField(max_digits=24, decimal_places=16,)
 
@@ -20,22 +27,45 @@ class PointSerializer(serializers.Serializer):
         return attrs
 
 
-class DeliverabilityCheckSerializer(PointSerializer):
+class ZonalDataSerializer(PointSerializer):
+    pincode = serializers.CharField(max_length=8, min_length=6,
+                                    required=settings.LOCATION_FETCHING_MODE == settings.PINCODE)
+    longitude = serializers.DecimalField(max_digits=24, decimal_places=16,
+                                         required=settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION)
+    latitude = serializers.DecimalField(max_digits=24, decimal_places=16,
+                                        required=settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION)
+
+
+class DeliverabilityCheckSerializer(ZonalDataSerializer):
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        if settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION:
+            key = 'point'
+        elif settings.LOCATION_FETCHING_MODE == settings.PINCODE:
+            key = 'pincode'
 
     def validate(self, attrs):
-        attrs = super(DeliverabilityCheckSerializer, self).validate(attrs)
-        zone = ZoneFacade().check_deliverability(point=attrs['point'])
-        if not zone:
-            raise forms.ValidationError("Currently we are not delivering to this location.")
-        location_id = self.context['request'].session.get('location_id')
-        if location_id:
-            location = Location.objects.filter(id=location_id, is_active=True).last()
-            if location and location.location == attrs['point']:
-                forms.ValidationError("Location Already Updated!")
+        attrs = super().validate(attrs)
+        key = ''
+        if settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION:
+            key = 'point'
+        elif settings.LOCATION_FETCHING_MODE == settings.PINCODE:
+            key = 'pincode'
+        facade_object = ZoneFacade(attrs[key])
+        if not facade_object.is_valid():
+            raise forms.ValidationError("Sorry, We are unable to deliver to this location now!")
+        zone = facade_object.get_zone()
+        # location_id = self.context['request'].session.get('location')
+        # if location_id:
+        #     location = Location.objects.filter(id=location_id, is_active=True).last()
+        #     if location and location.location == attrs[key]:
+        #         forms.ValidationError("Location Already Updated!")
         attrs['zone'] = zone
+        attrs['facade_object'] = facade_object
         return attrs
-
-
 
 
 

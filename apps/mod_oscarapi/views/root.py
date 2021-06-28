@@ -10,6 +10,7 @@ from rest_framework.reverse import reverse
 
 def PUBLIC_APIS(r, f):
     return [
+        ("configuration", reverse('api-v2--configuration', request=r, format=f)),
         ("Authorization", collections.OrderedDict([
             ("Send OTP", reverse("api-v1--send-otp", request=r, format=f)),
             ("Resend OTP", reverse("api-v1--resend-otp", request=r, format=f)),

@@ -111,7 +111,7 @@ def pincode_required(value):
 
 class Location(models.Model):
     location = PointField(null=True, blank=True, validators=[location_required])
-    pincode = models.CharField(null=True, blank=True, validators=[pincode_required])
+    pincode = models.CharField(null=True, blank=True, validators=[pincode_required], max_length=8)
     location_name = models.CharField(max_length=90)
     is_active = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
@@ -128,10 +128,21 @@ class Location(models.Model):
             'latitude': self.location.x,
             'longitude': self.location.y,
             'location_name': self.location_name,
-            'pincode': self.pincode,
+            'pincode': self.get_pincode_data(),
             'zone': {
                 'name': self.zone and self.zone.name
             },
+        }
+
+    def get_geolocation_data(self):
+        return {
+            'latitude': self.location.x,
+            'longitude': self.location.y,
+        }
+
+    def get_pincode_data(self):
+        return {
+            'pincode': self.pincode
         }
 
 

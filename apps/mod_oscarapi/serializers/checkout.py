@@ -12,8 +12,8 @@ from oscarapicheckout.serializers import (
 )
 from rest_framework import serializers, exceptions
 
-from apps.availability.zones.facade import ZoneFacade
-from apps.availability.zones.serializers import DeliverabilityCheckSerializer, PointSerializer
+from apps.availability.facade import ZoneFacade
+from apps.availability.zones.serializers import PointSerializer
 from apps.mod_oscarapi.calculators import OrderTotalCalculator
 from apps.users.models import Location
 

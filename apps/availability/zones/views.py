@@ -6,9 +6,9 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .facade import ZoneFacade
 from .forms import ZoneForm
 from .serializers import DeliverabilityCheckSerializer
+from ..facade import ZoneFacade
 from ..models import Zones
 from .. import settings as app_settings
 
@@ -57,24 +57,18 @@ class SetZone(GenericAPIView):
         "latitude": "12.785238498732",
         "longitude": "77.94478155806023"
     }
-
     """
+
     permission_classes = [AllowAny, ]
-
-    def get_serializer_class(self):
-        if settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION:
-            return DeliverabilityCheckSerializer
-
+    serializer_class = DeliverabilityCheckSerializer
 
     def get(self, request, *args, **kwargs):
-        return Response(ZoneFacade().face(request))
+        return Response(ZoneFacade.face(request))
 
     def post(self, request, *args, **kwargs):
         sobj = self.get_serializer(data=request.data)
         if not sobj.is_valid():
             return Response(sobj.errors, status=status.HTTP_400_BAD_REQUEST)
-        point = sobj.validated_data['point']
-        zone = sobj.validated_data['zone']
-        _out = ZoneFacade().set_zone(request, zone=zone, point=point)
+        _out = sobj.validated_data['facade_object'].set_zone(request)
         return Response(_out)
 

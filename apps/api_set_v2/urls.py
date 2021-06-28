@@ -22,6 +22,7 @@ validate_checkout = never_cache(CheckoutValidationView.as_view())
 
 
 v1__registration_apis = [
+    path('configuration.json', configuration, name="api-v2--configuration"),
     path('send-otp/', SendOTP.as_view(), name="api-v1--send-otp"),
     path('resend-otp/', resend_otp, name="api-v1--resend-otp"),
     path('login-with-otp/', LoginWithOTP.as_view(), name="api-v1--login-otp"),
