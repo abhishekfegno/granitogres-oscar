@@ -70,13 +70,10 @@ class LoginView(CoreLoginView):
                     status=status.HTTP_405_METHOD_NOT_ALLOWED,
                 )
             request.user = user
-            login_and_upgrade_session(request._request, user)
+            login_and_upgrade_session(request, user)
 
             # merge anonymous basket with authenticated basket.
-            basket = get_basket(user)
-            if anonymous_basket is not None:
-                self.merge_baskets(anonymous_basket, basket)
-            operations.store_basket_in_session(basket, request.session)
+            basket = get_basket(request)
 
             return Response({
                 'user': UserSerializer(instance=user, **ctxt).data,
