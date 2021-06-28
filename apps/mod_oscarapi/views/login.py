@@ -1,4 +1,5 @@
 from django.conf import settings
+from oscarapi.basket.operations import get_basket
 from oscarapi.serializers.basket import BasketSerializer
 from oscarapi.serializers.login import UserSerializer
 from oscarapi.views.login import LoginView as CoreLoginView
@@ -9,6 +10,8 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 from oscarapi.basket import operations
 from oscar.core.loading import get_model
+
+from apps.basket.models import Basket
 
 
 class LoginView(CoreLoginView):
@@ -59,23 +62,23 @@ class LoginView(CoreLoginView):
         ctxt = {'context': {'request': request}}
 
         if ser.is_valid():
-            anonymous_basket = operations.get_anonymous_basket(request)
+            anonymous_basket: Basket = operations.get_anonymous_basket(request)
             user = ser.instance
             # refuse to login logged in users, to avoid attaching sessions to
             # multiple users at the same time.
-            if request.user.is_authenticated:
-                return Response(
-                    {"detail": "Session is in use, log out first"},
-                    status=status.HTTP_405_METHOD_NOT_ALLOWED,
-                )
+            # if request.user.is_authenticated:
+            #     return Response(
+            #         {"detail": "Session is in use, log out first"},
+            #         status=status.HTTP_405_METHOD_NOT_ALLOWED,
+            #     )
             request.user = user
-            login_and_upgrade_session(request._request, user)
+            login_and_upgrade_session(request, user)
 
             # merge anonymous basket with authenticated basket.
-            basket = operations.get_user_basket(user)
-            if anonymous_basket is not None:
-                self.merge_baskets(anonymous_basket, basket)
-            operations.store_basket_in_session(basket, request.session)
+            basket = operations.get_basket(request, prepare=False)
+            if anonymous_basket and not anonymous_basket.is_empty:
+                basket.merge(anonymous_basket)
+            basket = operations.prepare_basket(basket, request)
 
             return Response({
                 'user': UserSerializer(instance=user, **ctxt).data,
