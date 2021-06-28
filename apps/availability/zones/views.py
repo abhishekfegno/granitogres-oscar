@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, UpdateView, ListView, DeleteView
 from rest_framework import status
@@ -58,8 +59,12 @@ class SetZone(GenericAPIView):
     }
 
     """
-    serializer_class = DeliverabilityCheckSerializer
     permission_classes = [AllowAny, ]
+
+    def get_serializer_class(self):
+        if settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION:
+            return DeliverabilityCheckSerializer
+
 
     def get(self, request, *args, **kwargs):
         return Response(ZoneFacade().face(request))

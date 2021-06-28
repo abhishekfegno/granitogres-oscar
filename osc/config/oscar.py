@@ -1,10 +1,14 @@
 from django.urls import reverse_lazy
 from oscar.defaults import *
 
+PINCODE = 'pincode'
+GEOLOCATION = 'geolocation'
 
-LOCATION_FETCHING_MODE_SET = ['pincode', 'geolocation']
+LOCATION_FETCHING_MODE_SET = [PINCODE, GEOLOCATION]
 
-LOCATION_FETCHING_MODE = 'pincode'
+LOCATION_FETCHING_MODE = PINCODE
+
+DEFAULT_LOCATION_NAME = "Deliverable"
 
 OSCARAPI_OVERRIDE_MODULES = ["apps.mod_oscarapi"]
 

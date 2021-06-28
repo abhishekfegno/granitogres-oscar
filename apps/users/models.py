@@ -5,6 +5,7 @@ from datetime import timedelta, datetime
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db.models import PointField
+from django.core.exceptions import ValidationError
 from django.db import models
 from random import randint
 
@@ -90,8 +91,27 @@ class User(AbstractUser):
         return f"{self.first_name} {self.last_name} ({self.username}) "
 
 
+def location_required(value):
+    if settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION and not value:
+        raise ValidationError(
+            f"location is required for model <apps.users.Location> when LOCATION_FETCHING_MODE is "
+            f"{settings.LOCATION_FETCHING_MODE}"
+        )
+    return value
+
+
+def pincode_required(value):
+    if settings.LOCATION_FETCHING_MODE == settings.PINCODE and not value:
+        raise ValidationError(
+            f"pincode is required for model <apps.users.Location> when LOCATION_FETCHING_MODE is "
+            f"{settings.LOCATION_FETCHING_MODE}"
+        )
+    return value
+
+
 class Location(models.Model):
-    location = PointField()
+    location = PointField(null=True, blank=True, validators=[location_required])
+    pincode = models.CharField(null=True, blank=True, validators=[pincode_required])
     location_name = models.CharField(max_length=90)
     is_active = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
@@ -108,6 +128,7 @@ class Location(models.Model):
             'latitude': self.location.x,
             'longitude': self.location.y,
             'location_name': self.location_name,
+            'pincode': self.pincode,
             'zone': {
                 'name': self.zone and self.zone.name
             },
