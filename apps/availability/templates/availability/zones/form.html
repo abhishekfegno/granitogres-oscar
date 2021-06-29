@@ -29,7 +29,9 @@
 
         {% form form using "floppyforms/layouts/p.html" %}
 
-        <input type="submit">
+        <span class="text-muted">If you want to add pincode in bulk, Create a zone with at least one pincode, and go to <a href="{%  url 'availability:pincode-selector'%}">this </a> page</span>
+        <br>
+        <input type="submit" class="btn btn-primary">
     </form>
 </div>
 {% endblock dashboard_content %}

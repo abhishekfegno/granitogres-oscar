@@ -14,7 +14,7 @@ def get_optimized_product_dict(
         qs: Union[QuerySet, list] = None,
         offset: int = None,
         limit: int = None,
-        needs_stock: bool = True,
+        needs_stock: bool = False,
         product_serializer_class: type = ProductSimpleListSerializer) -> dict:
 
     assert qs is not None or qs_filter is not None, "Either one is required!"
@@ -103,12 +103,4 @@ def get_optimized_product_dict(
                                                                      context={'request': request}).data
                     product_data[product]['variants'] = []
     return product_data
-
-
-
-
-
-
-
-
 

@@ -296,9 +296,9 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'children': [
             {'label': _('Site Configuration'), 'url_name': 'dashboard-custom:site-config',
              'access_fn': admin_or_staff},
-            {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
-             'access_fn': admin_or_staff},
             {'label': _('Choose Pincodes with services'), 'url_name': 'availability:pincode-selector',
+             'access_fn': admin_or_staff},
+            {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
              'access_fn': admin_or_staff},
             # {'label': _('Shipping charges'), 'url_name': 'dashboard:shipping-method-list', },
 

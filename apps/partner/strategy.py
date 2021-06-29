@@ -1,6 +1,5 @@
 from apps.availability.models import Zones
 from apps.partner.strategy_set.strategies import ZoneBasedIndianPricingStrategy
-from apps.partner.strategy_set.strategies import MinimumValueStrategy
 
 
 class Selector(object):
@@ -25,8 +24,5 @@ class Selector(object):
                 zone = last_location.zone_id
                 request.session['zone'] = zone
 
-        if zone:
-            return ZoneBasedIndianPricingStrategy(zone, request=request, user=user, **kwargs)
-
-        return MinimumValueStrategy()
+        return ZoneBasedIndianPricingStrategy(zone, request=request, user=user, **kwargs)
 

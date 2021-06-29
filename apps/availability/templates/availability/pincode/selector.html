@@ -6,17 +6,17 @@
 
 {% block title %} Selector {{ block.super }}{% endblock %}
 {% block breadcrumbs %}
-    <ul class="breadcrumb">
-        <li><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
-        <li class="active">{% trans "Pincodes" %}</li>
-    </ul>
+<ul class="breadcrumb">
+    <li><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="active">{% trans "Pincodes" %}</li>
+</ul>
 {% endblock %}
 
 {% block header %}
-    <div class="page-header">
-        <a href="" class="btn btn-primary btn-lg pull-right"><i class="icon-plus"></i> {% trans "Create new Button" %}</a>
-        <h1>{% trans "Pincodes" %}</h1>
-        <pre class="">
+<div class="page-header">
+    <a href="" class="btn btn-primary btn-lg pull-right"><i class="icon-plus"></i> {% trans "Create new Button" %}</a>
+    <h1>{% trans "Pincodes" %}</h1>
+    <pre class="">
 <b>?? HOW TO USE</b>
 """"""""""""""
 All set of pincode of specific countries are available here! That doesn't means, all these locations are deliverable!
@@ -29,71 +29,71 @@ There is also an independent provision to Add the Selected Pincode of a district
 If you want to fine tone the zone, you can always goto "Configuration" > "Availability: Zones" > "(Select your zone)" and Update it!
 
 </pre>
-    </div>
+</div>
 {% endblock header %}
 
 
 {% block dashboard_content %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/promise-polyfill/8.1.3/polyfill.min.js" ></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/multi-select/0.9.12/css/multi-select.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@9.15.2/dist/sweetalert2.min.css" />
-    <style  > [v-cloak] {display:none;} </style>
-    <table class="table table-striped table-bordered table-responsive table-hover">
-        <caption><i class="icon-sitemap icon-large"></i>{% trans 'Select' %}</caption>
-        <thead>
-        <tr>
-            <th>
-                <label for="availability_pincode__partner_switcher">{% trans "Partner" %}</label>
-            </th>
-            <th>
-                <label for="availability_pincode__country_switcher">{% trans "Country" %}</label>
-                <a href=""  style="display:none" class="pull-right"><i class="icon-plus" hidden></i> {% trans "Load More Countries" %}</a>
-            </th>
-            <th>
-                <label for="availability_pincode__state_switcher">{% trans "State" %}</label>
-{#                <a href="" class="pull-right"><i class="icon-plus"></i> {% trans "Load More States" %}</a>#}
-            </th>
-            <th>
-                <label for="availability_pincode__district_switcher">{% trans "District" %}</label>
-{#                <a href="" class="pull-right"><i class="icon-plus"></i> {% trans "Unlock District" %}</a>#}
-            </th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>
-                <select id="availability_pincode__partner_switcher" class="select2 w-100" style="width:240px">
-                    {% for id, name in partner_options %}
-                        <option value="{{ id }}" selected> {{ name }} </option>
-                    {% endfor %}
-                </select>
-            </td>
-            <td>
-                <select id="availability_pincode__country_switcher" class="select2 w-100"  style="width:240px" >
-                    {% for id, name, code in country_options %}
-                        <option value="{{ id }}" > {{ name }} </option>
-                    {% endfor %}
-                </select>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/promise-polyfill/8.1.3/polyfill.min.js" ></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/multi-select/0.9.12/css/multi-select.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@9.15.2/dist/sweetalert2.min.css" />
+<style  > [v-cloak] {display:none;} </style>
+<table class="table table-striped table-bordered table-responsive table-hover">
+    <caption><i class="icon-sitemap icon-large"></i>{% trans 'Select' %}</caption>
+    <thead>
+    <tr>
+        <th>
+            <label for="availability_pincode__partner_switcher">{% trans "Zone" %}</label>
+        </th>
+        <th>
+            <label for="availability_pincode__country_switcher">{% trans "Country" %}</label>
+            <a href=""  style="display:none" class="pull-right"><i class="icon-plus" hidden></i> {% trans "Load More Countries" %}</a>
+        </th>
+        <th>
+            <label for="availability_pincode__state_switcher">{% trans "State" %}</label>
+            {#                <a href="" class="pull-right"><i class="icon-plus"></i> {% trans "Load More States" %}</a>#}
+        </th>
+        <th>
+            <label for="availability_pincode__district_switcher">{% trans "District" %}</label>
+            {#                <a href="" class="pull-right"><i class="icon-plus"></i> {% trans "Unlock District" %}</a>#}
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            <select id="availability_pincode__partner_switcher" class="select2 w-100" style="width:240px">
+                {% for id, name in zone_options %}
+                <option value="{{ id }}"> {{ name }} </option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <select id="availability_pincode__country_switcher" class="select2 w-100"  style="width:240px" >
+                {% for id, name, code in country_options %}
+                <option value="{{ id }}" > {{ name }} </option>
+                {% endfor %}
+            </select>
 
-            </td>
-            <td>
-                <select id="availability_pincode__state_switcher" class="select2 w-100"   style="width:240px">
+        </td>
+        <td>
+            <select id="availability_pincode__state_switcher" class="select2 w-100"   style="width:240px">
 
-                </select>
-            </td>
-            <td>
-                <select id="availability_pincode__district_switcher" class="select2 w-100"  style="width:240px">
-                </select>
-            </td>
-            <th>
-                <span class="btn btn-primary" id="load_pincode_body" onclick="window.vueApp.load_page()">Load</span>
-            </th>
-        </tr>
-        </tbody>
-    </table>
-    <style>
+            </select>
+        </td>
+        <td>
+            <select id="availability_pincode__district_switcher" class="select2 w-100"  style="width:240px">
+            </select>
+        </td>
+        <th>
+            <span class="btn btn-primary" id="load_pincode_body" onclick="window.vueApp.load_page()">Load</span>
+        </th>
+    </tr>
+    </tbody>
+</table>
+<style>
     .ms-container .ms-selectable .ms-list{height:520px}
     .ms-container .ms-selection .ms-list{height:520px}
     .ms-container  { width:100% }
@@ -110,55 +110,65 @@ If you want to fine tone the zone, you can always goto "Configuration" > "Availa
     }
     #vueApp { padding-bottom: 24px; }
     </style>
-    <style>.multi-select-link-select-all, .multi-select-link-deselect-all{ display: inline-block; width:45%}</style>
-    {% verbatim %}
-    <div id="vueApp">
-        <div class="container">
+<style>.multi-select-link-select-all, .multi-select-link-deselect-all{ display: inline-block; width:45%}</style>
+{% verbatim %}
+<div id="vueApp">
+    <div class="container">
+        <div class="row">
             <div class="col-md-12" v-cloak v-if="postal.length">
-                <div class="col-md-9" >
-                    <label for="multi-select-selector-id">
-                        <h3> Select Pincodes.. </h3>
-                    </label>
-                    <div>
-                        <code >Selected : {{ partner_deliverable.length }} Pincodes</code>
+                <div class="row">
+                    <div class="col-md-9">
+                        <label for="multi-select-selector-id">
+                            <h3> Select Pincodes.. </h3>
+                        </label>
+                        <div>
+                            <code >Selected : {{ partner_deliverable.length }} Pincodes</code>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <span class='multi-select-link-select-all' >
+                                    <button type="button"  class="btn btn-primary btn-sm  w-100" > Select All </button>
+                                    <br>
+                                </span>
+                            </div>
+                            <div class="col-md-6">
+                        <span  class='multi-select-link-deselect-all pull-right' >
+                            <button type="button" class="btn btn-primary btn-sm w-100" > Deselect All </button>
+                        </span>
+                            </div>
+                        </div>
                     </div>
-                    <select class="multi-select-selector-class--js" multiple id="multi-select-selector-id">
-                        <optgroup :label='dd.name' v-for="dd in communities" :key="dd.id" >
-                            <option v-for="p in postal"
-                                    v-if="p.path.startsWith(dd.path)"
-                                    :selected="partner_deliverable.indexOf(p.id) > -1"
-                                    :value="p.id"> {{ p.name }} ({{ p.code }}) </option>
-                        </optgroup>
-                    </select>
                 </div>
-                <div class="col-md-3" >
+                <div class="row">
+                    <div class="col-md-9">
+                        <select class="multi-select-selector-class--js" multiple id="multi-select-selector-id">
+                            <optgroup :label='dd.name' v-for="dd in communities" :key="dd.id" >
+                                <option v-for="p in postal"
+                                        v-if="p.path.startsWith(dd.path)"
+                                        :selected="partner_deliverable.indexOf(p.id) > -1"
+                                        :value="p.id"> {{ p.name }} ({{ p.code }}) </option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="col-md-3" >
 
-                    <div style="padding-top:20px" class="pull-right">
-                        <p>
+                        <div style="padding-top:20px" class="pull-right">
+                            <p>
                             <span href='#' class='multi-select-link-select-all' >
                                 <button type="button"  class="btn btn-primary" > Select All </button>
                             </span>
-                            <span href='#' class='multi-select-link-deselect-all float-right' >
+                                <span href='#' class='multi-select-link-deselect-all float-right' >
                                 <button type="button" class="btn btn-primary" > Deselect All </button>
                             </span>
-                        </p>
-                        <hr>
-                        <p class="text-muted">
-                            Mark these selected locations as Deliverable!
-                            <button type="button" @click="update_changes()" class="btn btn-primary" > Mark as Deliverable! </button>
-                        </p>
-                        <hr>
-                        <label for="id_zones">Add Selected Pincode to: </label>
-                        <select id="id_zones" name="zone" class="form-control">
-                            {% endverbatim %}
-                                {% for id, name in zone_options %}
-                                    <option value="{{ id }}"> {{ name }} </option>
-                                {% endfor %}
-                            {% verbatim %}
-                        </select>
-                        <span><button type="button" @click="update_zone()" class="btn btn-danger mt-2" > Add Selected Pincodes to Zone </button></span>
-                    </div>
+                            </p>
+                            <hr>
+                            <p class="text-muted">
+                                Mark these selected locations as Deliverable!
+                                <button type="button" @click="update_changes()" class="btn btn-primary btn-lg" > Save! </button>
+                            </p>
+                        </div>
 
+                    </div>
                 </div>
             </div>
             <div class="col-md-9" v-cloak v-if="postal.length === 0">
@@ -166,282 +176,283 @@ If you want to fine tone the zone, you can always goto "Configuration" > "Availa
             </div>
         </div>
     </div>
-    {% endverbatim %}
+</div>
+{% endverbatim %}
 
 {% endblock dashboard_content %}
 {% block extrascripts %}
-    {{ block.super }}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/multi-select/0.9.12/js/jquery.multi-select.min.js"></script>
-    <script src="{% static 'js/jquery.quicksearch.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+{{ block.super }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/multi-select/0.9.12/js/jquery.multi-select.min.js"></script>
+<script src="{% static 'js/jquery.quicksearch.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
 {% endblock %}
 
 {% block onbodyload %}
-    {{ block.super }}
-        /** Loading Selectors  */
-        (function(){
-            /** Loading Selectors  */
+{{ block.super }}
+/** Loading Selectors  */
+(function(){
+/** Loading Selectors  */
 
-            $(document).ready(function(){
-                var cs = $('#availability_pincode__country_switcher');
-                var ss = $('#availability_pincode__state_switcher');
-                var ds = $('#availability_pincode__district_switcher');
-                var ps = $('#availability_pincode__partner_switcher');
+$(document).ready(function(){
+var cs = $('#availability_pincode__country_switcher');
+var ss = $('#availability_pincode__state_switcher');
+var ds = $('#availability_pincode__district_switcher');
+var ps = $('#availability_pincode__partner_switcher');
 
-                $(document).on('click', '.multi-select-link-select-all', function(event){
-                      $('.multi-select-selector-class--js').multiSelect('select_all');
-                      return false;
-                })
-                $(document).on('click','.multi-select-link-deselect-all', function(event){
-                      $('.multi-select-selector-class--js').multiSelect('deselect_all');
-                      return false;
-                })
+$(document).on('click', '.multi-select-link-select-all', function(event){
+$('.multi-select-selector-class--js').multiSelect('select_all');
+return false;
+})
+$(document).on('click','.multi-select-link-deselect-all', function(event){
+$('.multi-select-selector-class--js').multiSelect('deselect_all');
+return false;
+})
 
 
-                var select2_updater = function(event){
-                    if (!event.target.value){
-                        return ;
-                    }
-                    var url = `{% url "availability-api:pincode-get-children" pk=999999999 %}`.replace('999999999', event.target.value );
-                    var target = event.target;
-                    fetch(url).then(function(r){
-                        return r.json()
-                    }).then(function(r){
-                        r = r.response;
-                        var next_body = null;
-                        console.log(target.id);
-                        switch(target.id){
-                            case 'availability_pincode__country_switcher':  next_body = 'availability_pincode__state_switcher'; break;
-                            case 'availability_pincode__state_switcher':   next_body = 'availability_pincode__district_switcher'; break;
-                        }
-                        console.log("Switching data for : ", next_body);
-                        var next_node = document.getElementById(next_body)
-                        var $selector = $(`#${next_body}`);
-                        $selector.val(null).trigger('change').empty();
-                        for (var i=0; i < r.length; i++ ){
-                            var newOption = new Option(r[i].name, r[i].id, false, false);
-                            $selector.append(newOption);
-                            if(i == 0){
-                                $selector.trigger('change')
-                            }
-                        }
-                    })
-                }
-                $(cs).on('change', select2_updater).trigger('change');
-                $(ss).on('change', select2_updater);
-            })
+var select2_updater = function(event){
+if (!event.target.value){
+return ;
+}
+var url = `{% url "availability-api:pincode-get-children" pk=999999999 %}`.replace('999999999', event.target.value );
+var target = event.target;
+fetch(url).then(function(r){
+return r.json()
+}).then(function(r){
+r = r.response;
+var next_body = null;
+console.log(target.id);
+switch(target.id){
+case 'availability_pincode__country_switcher':  next_body = 'availability_pincode__state_switcher'; break;
+case 'availability_pincode__state_switcher':   next_body = 'availability_pincode__district_switcher'; break;
+}
+console.log("Switching data for : ", next_body);
+var next_node = document.getElementById(next_body)
+var $selector = $(`#${next_body}`);
+$selector.val(null).trigger('change').empty();
+for (var i=0; i < r.length; i++ ){
+var newOption = new Option(r[i].name, r[i].id, false, false);
+$selector.append(newOption);
+if(i == 0){
+$selector.trigger('change')
+}
+}
+})
+}
+$(cs).on('change', select2_updater).trigger('change');
+$(ss).on('change', select2_updater);
+})
 
-            /** Loading Vue */
-            $(document).ready(function(){
-                var ds = $('#availability_pincode__district_switcher');
-                $(".multi-select-selector-class--js").select2('destroy');
-                $("#id_zones").select2('destroy');
-                var BASE_REQ_URL = '{% url 'availability-api:pincode-load-page' district=9999999  partner=9999998 %}'
-                var BASE_UPDATE_URL = '{% url 'availability-api:pincode-update-pincode' district=9999999  partner=9999998 %}'
-                var PARTNER_POS_HOLDER = '9999998', DISTRICT_POS_HOLDER = '9999999';
+/** Loading Vue */
+$(document).ready(function(){
+var ds = $('#availability_pincode__district_switcher');
+$(".multi-select-selector-class--js").select2('destroy');
+$("#id_zones").select2('destroy');
+var BASE_REQ_URL = '{% url 'availability-api:pincode-load-page' district=9999999  partner=9999998 %}'
+var BASE_UPDATE_URL = '{% url 'availability-api:pincode-update-pincode' district=9999999  partner=9999998 %}'
+var PARTNER_POS_HOLDER = '9999998', DISTRICT_POS_HOLDER = '9999999';
 
-                window.vueApp = new Vue({
-                    el: '#vueApp',
-                    data: {
-                        "communities": [],
-                        "postal": [],
-                        "partner_deliverable": [],
-                        "partner_non_deliverable" : [],
-                    },
-                    updated: function(){
-                        this.update_ui();
-                    },
-                    methods: {
-                        select(item) {
-                            for(var i =0; i <= this.partner_deliverable.length; i++){
-                                if( this.partner_deliverable[i] === item ) {
+window.vueApp = new Vue({
+el: '#vueApp',
+data: {
+"communities": [],
+"postal": [],
+"partner_deliverable": [],
+"partner_non_deliverable" : [],
+},
+updated: function(){
+this.update_ui();
+},
+methods: {
+select(item) {
+for(var i =0; i <= this.partner_deliverable.length; i++){
+if( this.partner_deliverable[i] === item ) {
 
-                                }
-                            }
-                        },
-                        select_all(){},
-                        unselect_all(){},
-                        update_vars(r){
-                            console.log(r, this);
-                            this.communities = r.communities;
-                            this.postal = r.postal;
-                            this.partner_deliverable = r.partner_deliverable;
+}
+}
+},
+select_all(){},
+unselect_all(){},
+update_vars(r){
+console.log(r, this);
+this.communities = r.communities;
+this.postal = r.postal;
+this.partner_deliverable = r.partner_deliverable;
 
-                            // this.update_ui()
-                            this.refresh_plugin()
+// this.update_ui()
+this.refresh_plugin()
 
-                        },
-                        get_non_deliverable(){
-                            var self = this;
-                            return self.postal.filter(function(f){
-                                    return self.partner_deliverable.indexOf(f.id) == -1;
-                                }).map(function(f){ return f.id })
-                        },
-                        refresh_plugin(){
-                            $('.multi-select-selector-class--js').multiSelect('refresh');
-                        },
-                        update_zone(){
-                            alert( $('#id_zones').val() );
-                        },
-                        update_ui(){
-                            var self = this;
-                            $('.multi-select-selector-class--js').multiSelect('destroy');
-                            $('.multi-select-selector-class--js').multiSelect({
-                                  selectableHeader: `<input type='text' class='search-input form-control' autocomplete='off' placeholder='Search...'>`,
-                                  selectionHeader: `<input type='text' class='search-input form-control' autocomplete='off' placeholder='Search...'>`,
-                                  afterInit: function(ms){
-                                    var that = this,
-                                        $selectableSearch = that.$selectableUl.prev(),
-                                        $selectionSearch = that.$selectionUl.prev(),
-                                        selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
-                                        selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+},
+get_non_deliverable(){
+var self = this;
+return self.postal.filter(function(f){
+return self.partner_deliverable.indexOf(f.id) == -1;
+}).map(function(f){ return f.id })
+},
+refresh_plugin(){
+$('.multi-select-selector-class--js').multiSelect('refresh');
+},
+update_zone(){
+alert( $('#id_zones').val() );
+},
+update_ui(){
+var self = this;
+$('.multi-select-selector-class--js').multiSelect('destroy');
+$('.multi-select-selector-class--js').multiSelect({
+selectableHeader: `<input type='text' class='search-input form-control' autocomplete='off' placeholder='Search...'>`,
+selectionHeader: `<input type='text' class='search-input form-control' autocomplete='off' placeholder='Search...'>`,
+afterInit: function(ms){
+var that = this,
+$selectableSearch = that.$selectableUl.prev(),
+$selectionSearch = that.$selectionUl.prev(),
+selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
 
-                                    that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
-                                    .on('keydown', function(e){
-                                      if (e.which === 40){
-                                        that.$selectableUl.focus();
-                                        return false;
-                                      }
-                                    });
+that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+.on('keydown', function(e){
+if (e.which === 40){
+that.$selectableUl.focus();
+return false;
+}
+});
 
-                                    that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
-                                    .on('keydown', function(e){
-                                      if (e.which == 40){
-                                        that.$selectionUl.focus();
-                                        return false;
-                                      }
-                                    });
-                                  },
-                                  afterSelect: function(){
-                                    this.qs1.cache();
-                                    this.qs2.cache();
-                                    self.partner_deliverable = $('.multi-select-selector-class--js').val().map(function(item) {return Number(item)});
-                                  },
-                                  afterDeselect: function(){
-                                    this.qs1.cache();
-                                    this.qs2.cache();
-                                    self.partner_deliverable = $('.multi-select-selector-class--js').val().map(function(item) {return Number(item)});
-                                  }
-                            });
-                        },
-                        update_changes: function() {
-                            var partner_name = $('#availability_pincode__partner_switcher option:selected').text()
-                            var ds = $('#availability_pincode__district_switcher');
-                            var ps = $('#availability_pincode__partner_switcher');
-                            var self = this ;
-                            Swal.fire({
-                                title: "Update?",
-                                html:`Are you sure to update these pincodes to ${partner_name}?`,
-                                icon: 'question',
-                                confirmButtonText: 'Update',
-                                showLoaderOnConfirm: true,
-                                preConfirm: function() {
-                                    var url = BASE_UPDATE_URL.replace(PARTNER_POS_HOLDER, ps.val()).replace(DISTRICT_POS_HOLDER, ds.val())
-                                    return fetch(url, {
-                                            method: 'POST',
-                                            body: JSON.stringify({
-                                                'deliverable': self.partner_deliverable ,
-                                                'nondeliverable': self.get_non_deliverable(),
-                                            }),
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'Accept': 'application/json',
-                                            },
-                                            credentials: 'include',
-                                        }).then( response => {
-                                            if (!response.ok) {throw new Error(response.statusText)}
-                                            return response.json()
-                                        }).catch(error => {
-                                            Swal.showValidationMessage(`Request failed: ${error}`)
-                                            return false;
-                                        })
-                                }
-                            }).then( function( response ) {
-                                if(response.value.status){
-                                    Swal.fire("Updated", "Pincodes have been updated! Now Your Customers ", 'success');
-                                }
-                            })
-                        },
-                        load_page: function() {
-                            var ds = $('#availability_pincode__district_switcher');
-                            var ps = $('#availability_pincode__partner_switcher');
-                            if(!ds.val() ){
-                                warning_no_district_selected();
-                                return ;
-                            }
-                            var self = this;
-                            fetch(
-                                BASE_REQ_URL.replace(PARTNER_POS_HOLDER, ps.val()).replace(DISTRICT_POS_HOLDER, ds.val())
-                            ).then(function(r){return r.json()}).then(function(r) {
-                                if (r.error_code == 'no_communities_unlocked') {
-                                    self.handle_no_communities_unlocked();
-                                } else {
-                                        self.update_vars(r);
-                                }
-                            })
-                        },
+that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+.on('keydown', function(e){
+if (e.which == 40){
+that.$selectionUl.focus();
+return false;
+}
+});
+},
+afterSelect: function(){
+this.qs1.cache();
+this.qs2.cache();
+self.partner_deliverable = $('.multi-select-selector-class--js').val().map(function(item) {return Number(item)});
+},
+afterDeselect: function(){
+this.qs1.cache();
+this.qs2.cache();
+self.partner_deliverable = $('.multi-select-selector-class--js').val().map(function(item) {return Number(item)});
+}
+});
+},
+update_changes: function() {
+var partner_name = $('#availability_pincode__partner_switcher option:selected').text()
+var ds = $('#availability_pincode__district_switcher');
+var ps = $('#availability_pincode__partner_switcher');
+var self = this ;
+Swal.fire({
+title: "Update?",
+html:`Are you sure to update these pincodes to ${partner_name}?`,
+icon: 'question',
+confirmButtonText: 'Update',
+showLoaderOnConfirm: true,
+preConfirm: function() {
+var url = BASE_UPDATE_URL.replace(PARTNER_POS_HOLDER, ps.val()).replace(DISTRICT_POS_HOLDER, ds.val())
+return fetch(url, {
+method: 'POST',
+body: JSON.stringify({
+'deliverable': self.partner_deliverable ,
+'nondeliverable': self.get_non_deliverable(),
+}),
+headers: {
+'Content-Type': 'application/json',
+'Accept': 'application/json',
+},
+credentials: 'include',
+}).then( response => {
+if (!response.ok) {throw new Error(response.statusText)}
+return response.json()
+}).catch(error => {
+Swal.showValidationMessage(`Request failed: ${error}`)
+return false;
+})
+}
+}).then( function( response ) {
+if(response.value.status){
+Swal.fire("Updated", "Pincodes have been updated! Now Your Customers ", 'success');
+}
+})
+},
+load_page: function() {
+var ds = $('#availability_pincode__district_switcher');
+var ps = $('#availability_pincode__partner_switcher');
+if(!ds.val() ){
+warning_no_district_selected();
+return ;
+}
+var self = this;
+fetch(
+BASE_REQ_URL.replace(PARTNER_POS_HOLDER, ps.val()).replace(DISTRICT_POS_HOLDER, ds.val())
+).then(function(r){return r.json()}).then(function(r) {
+if (r.error_code == 'no_communities_unlocked') {
+self.handle_no_communities_unlocked();
+} else {
+self.update_vars(r);
+}
+})
+},
 
-                        warning_no_district_selected() {
-                                Swal.fire({
-                                    title: 'Please Select a district!',
-                                    icon: 'error',
-                                    confirmButtonText: 'Okey'
-                                });
-                        },
-                        handle_no_communities_unlocked() {
-                            var state = $('#availability_pincode__state_switcher option:selected').text()
-                            var dist = $('#availability_pincode__district_switcher option:selected').text()
-                            var ds = $('#availability_pincode__district_switcher');
-                            var ps = $('#availability_pincode__partner_switcher');
+warning_no_district_selected() {
+Swal.fire({
+title: 'Please Select a district!',
+icon: 'error',
+confirmButtonText: 'Okey'
+});
+},
+handle_no_communities_unlocked() {
+var state = $('#availability_pincode__state_switcher option:selected').text()
+var dist = $('#availability_pincode__district_switcher option:selected').text()
+var ds = $('#availability_pincode__district_switcher');
+var ps = $('#availability_pincode__partner_switcher');
 
-                            Swal.fire({
-                                title: `You have not Explored "${dist}" district in ${state}!`,
-                                html: `<div>We have not fetched the data for this district! <br />
-                                        We recommend to explore this only if you are planning to Expand to this Region. <br />
-                                     Enter <code>CONFIRM EXPLORE</code> in input box to confirm. </div>`,
-                                icon: 'error',
-                                input: 'text',
-                                inputAttributes: {
-                                    autocapitalize: 'off'
-                                },
-                                showCancelButton: true,
-                                confirmButtonText: 'Look up',
-                                showLoaderOnConfirm: true,
-                                preConfirm: function(input) {
-                                    if(input === 'CONFIRM EXPLORE'){
-                                        var url = BASE_REQ_URL.replace(PARTNER_POS_HOLDER, ps.val()).replace(DISTRICT_POS_HOLDER, ds.val())
-                                        return fetch(url, {method: 'POST'}).then( response => {
-                                            if (!response.ok) {throw new Error(response.statusText)}
-                                            return response.json()
-                                        }).catch(error => {
-                                            Swal.showValidationMessage(`Request failed: ${error}`)
-                                            return false;
-                                        })
-                                    } else {
-                                        return false;
-                                    }
-                                },
-                                allowOutsideClick: () => !Swal.isLoading()
-                            }).then(function (result) {
-                                if(result.isDismissed){ return; }
-
-                                if ( result && result.communities && result.communities.length  ) {
-                                    self.update_vars(result);
-                                } else if (
-                                        result &&
-                                        result.communities && result.communities.length === 0 &&
-                                        result.postal && result.postal.length === 0
-                                    ) {
-                                        Swal.fire("No Data Available", "it seems that there is no data available corresponding to this region.", "info")
-                                    return ;
-                                } else {
-                                    return ;
-                                }
-                            })
-                        }
-                    }
-                });
-                $('.multi-select-selector-class--js').multiSelect();
-            })
-        })()
+Swal.fire({
+title: `You have not Explored "${dist}" district in ${state}!`,
+html: `<div>We have not fetched the data for this district! <br />
+    We recommend to explore this only if you are planning to Expand to this Region. <br />
+    Enter <code>CONFIRM EXPLORE</code> in input box to confirm. </div>`,
+icon: 'error',
+input: 'text',
+inputAttributes: {
+autocapitalize: 'off'
+},
+showCancelButton: true,
+confirmButtonText: 'Look up',
+showLoaderOnConfirm: true,
+preConfirm: function(input) {
+if(input.upper() === 'CONFIRM EXPLORE'){
+var url = BASE_REQ_URL.replace(PARTNER_POS_HOLDER, ps.val()).replace(DISTRICT_POS_HOLDER, ds.val())
+return fetch(url, {method: 'POST'}).then( response => {
+if (!response.ok) {throw new Error(response.statusText)}
+return response.json()
+}).catch(error => {
+Swal.showValidationMessage(`Request failed: ${error}`)
+return false;
+})
+} else {
+return false;
+}
+},
+allowOutsideClick: () => !Swal.isLoading()
+}).then(function (result) {
+if(result.isDismissed){ return; }
+if ( result && result.communities && result.communities.length  ) {
+self.update_vars(result);
+window.vueApp.load_page()
+} else if (
+result &&
+result.communities && result.communities.length === 0 &&
+result.postal && result.postal.length === 0
+) {
+Swal.fire("No Data Available", "it seems that there is no data available corresponding to this region.", "info")
+return ;
+} else {
+return ;
+}
+})
+}
+}
+});
+$('.multi-select-selector-class--js').multiSelect();
+})
+})()
 {% endblock %}

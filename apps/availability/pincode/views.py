@@ -21,7 +21,7 @@ PinCode = get_model('availability', 'PinCode')
 Product = get_model('catalogue', 'Product')
 
 NOT_DELIVERABLE = 'not_deliverable'
-PARTNER_NOT_FOUND = 'partner_not_found'
+ZONE_DOES_NOT_EXIST = 'zone_does_not_exits'
 PINCODE_REQUIRED = 'pincode_required'
 DISTRICT_NOT_FOUND = 'district_not_found'
 NO_COMMUNITIES_UNLOCKED = 'no_communities_unlocked'
@@ -56,19 +56,20 @@ def ajax_for_children(request, pk):
 
 @api_view(['GET', 'POST'])
 def load_page(request, partner, district):
+    zone_id = partner
     # pk of a district
     if not request.user.is_superuser:
         return Response({'access': 'denied'}, status=403)
 
     district_object = PinCode.objects.filter(pk=district).first()
-    partner_object = Partner.objects.filter(pk=partner).first()
+    zone_object = Zones.objects.filter(pk=zone_id).first()
     out = {}
     if not district_object:
         out['error_code'] = DISTRICT_NOT_FOUND
         out['error'] = 'District does not exists'
         return Response(out, status=400)
-    if not partner_object:
-        out['error_code'] = PARTNER_NOT_FOUND
+    if not zone_object:
+        out['error_code'] = ZONE_DOES_NOT_EXIST
         out['error'] = 'Partner does not exists'
         return Response(out, status=400)
 
@@ -86,7 +87,7 @@ def load_page(request, partner, district):
 
     out['communities'] = list(communities.values('id', 'name', 'path'))
     out['postal'] = list(postal.values('id', 'name', 'code', 'path'))
-    out['partner_deliverable'] = list(partner_object.pincodes.all().values_list('id', flat=True))
+    out['partner_deliverable'] = list(zone_object.pincode.all().values_list('id', flat=True))     # key:zone_deliverable
     return Response(out,  status=200)
 
 
@@ -102,19 +103,24 @@ def update_pincode(request, partner, **kwargs):
         return Response({'access': 'denied'}, status=403)
 
     out = {}
-    partner_object = Partner.objects.filter(pk=partner).first()
-    if not partner_object:
-        out['error_code'] = PARTNER_NOT_FOUND
-        out['error'] = 'Partner does not exists'
+    zone_object = Zones.objects.filter(pk=partner).first()
+    if not zone_object:
+        out['error_code'] = ZONE_DOES_NOT_EXIST
+        out['error'] = 'Zone does not exists'
         return Response(out, status=400)
-    PincodePartnerThroughModel.objects.filter(
-        partner_id=partner,
-        pincode__in=request.data['nondeliverable'] + request.data['deliverable']
-    ).delete()
-    # added = partner_object.pincodes.bulk_create(PinCode.objects.filter(request.data['deliverable']))
+    # import pdb; pdb.set_trace()
 
-    PincodePartnerThroughModel.objects.bulk_create(
-        [PincodePartnerThroughModel(partner_id=partner, pincode_id=pincode_id) for pincode_id in request.data['deliverable']]
+    # fetching model
+    Zones_pincode = Zones.pincode.through
+
+    # Removing all non deliverable pincode!
+    Zones_pincode.objects.filter(
+        pincode__id__in=request.data['nondeliverable']+request.data['deliverable'], zones_id=partner
+    ).delete()
+
+    # Adding all non deliverable pincode!
+    Zones_pincode.objects.bulk_create(
+        [Zones_pincode(zones_id=partner, pincode_id=pincode) for pincode in request.data['deliverable']]
     )
     out['status'] = True
     return Response(out, status=200)

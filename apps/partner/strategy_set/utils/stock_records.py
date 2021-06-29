@@ -23,12 +23,10 @@ class ZoneBasedStockRecord(object):
         if self.zone_id:
             key = self.key.format(product.id, self.zone_id)
             if key not in self._selected_stock_record or self._selected_stock_record.get('key'):
-                # return product.stockrecords.filter(
-                #     partner__zone__id=self.zone_id
-                # ).order_by('price_excl_tax').first()
-
-                self._selected_stock_record[key] = product.stockrecords.filter(partner__zone__id=self.zone_id
-                                                                               ).order_by('price_excl_tax').first()
+                self._selected_stock_record[key] = product.stockrecords.filter(
+                    partner__zone__id=self.zone_id).order_by('price_excl_tax').first()
             return self._selected_stock_record[key]
+        else:
+            return product.stockrecords.filter().order_by('price_excl_tax').first()
 
 

@@ -18,7 +18,6 @@ from oscar.core import prices
 from apps.dashboard.custom.models import SiteConfig
 
 
-
 class OwnDeliveryKerala(methods.FixedPrice):
     code = "free-shipping"
     name = _("Own Delivery")
