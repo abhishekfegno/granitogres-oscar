@@ -82,6 +82,8 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
         low_stock = sr.net_stock_level <= sr.low_stock_threshold
     if sr:
         net_stock_level = max(sr.net_stock_level or 0, 0)
+    if net_stock_level == 0:
+        low_stock = False
 
     return {
         'excl_tax': float(purchase_info.price.effective_price),
