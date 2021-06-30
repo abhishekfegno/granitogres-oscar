@@ -75,12 +75,20 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
     #         purchase_info.price.excl_tax,
     #         retail_rate
     #     )
+    low_stock = False
+    net_stock_level = 0
+    sr = purchase_info.stockrecord
+    if sr and sr.low_stock_threshold:
+        low_stock = sr.net_stock_level <= sr.low_stock_threshold
+    if sr:
+        net_stock_level = max(sr.net_stock_level or 0, 0)
+
     return {
         'excl_tax': float(purchase_info.price.effective_price),
         'effective_price': float(purchase_info.price.effective_price),
         'retail': int(retail_rate * 100) / 100,
-        'low_stock': purchase_info.stockrecord and purchase_info.stockrecord.low_stock_threshold and purchase_info.stockrecord.net_stock_level <= purchase_info.stockrecord.low_stock_threshold,
-        'net_stock_level': purchase_info.stockrecord and max(purchase_info.stockrecord.net_stock_level or 0, 0),
+        'low_stock': low_stock,
+        'net_stock_level': net_stock_level,
         'currency': purchase_info.price.currency,
         'symbol': get_symbol(purchase_info.price.currency),
         **kwargs
