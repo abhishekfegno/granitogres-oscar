@@ -88,7 +88,8 @@ def index(request, *a, **k):
 
     # return Response(_inner())
     zone = request.session.get('zone')
-    return Response(cache_library(cache_key(zone), cb=_inner, ttl=60 * 60 * 3))
+    key = cache_key(zone)
+    return Response(cache_library(cache_key(key), cb=_inner, ttl=60 * 60 * 3))
 
 
 def get_offer_content(request):
