@@ -52,7 +52,8 @@ def get_optimized_product_dict(
         product_set = product_set[offset:]
 
     st_set_01 = StockRecord.objects.filter(product__in=product_set, product__structure=Product.STANDALONE).values_list('id')
-    st_set_02 = StockRecord.objects.filter(product__in=Product.objects.filter(parent__in=product_set), product__structure=Product.CHILD).values_list('id')
+    st_set_02 = StockRecord.objects.filter(product__in=Product.objects.filter(parent__in=product_set),
+                                           product__structure=Product.CHILD).values_list('id')
 
     sr_set = StockRecord.objects.filter(
         id__in=(st_set_01 | st_set_02),

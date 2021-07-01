@@ -1,9 +1,12 @@
 import datetime
 
+from dateutil.utils import today
 from django.contrib.gis.db.models import PointField
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
+from django.db.models import Case
 from django.db.models.signals import post_save
-from django.utils.functional import cached_property
+from django.utils.functional import cached_property, lazy
 from oscar.apps.address.abstract_models import (
     AbstractBillingAddress, AbstractShippingAddress)
 from oscar.apps.order.abstract_models import *
@@ -16,8 +19,140 @@ from apps.users.models import Location
 from apps.utils.utils import get_statuses
 
 
+def length_in_weeks(value):
+    if 0 <= value <= 7:
+        return value
+    raise ValueError(f'day should be between 0 and 7')
+
+
+class TimeSlotConfiguration(models.Model):
+    start_time = models.TimeField(help_text="Delivery Time Starting of this slot")
+    end_time = models.TimeField(help_text="(Expected) Delivery Time Ending of this slot")
+    deliverable_no_of_orders = models.PositiveSmallIntegerField(help_text="No of Orders you can handle in this Slot! "
+                                                                          "Each order will be at each location and "
+                                                                          "will have diff size and no of items.")
+    orders_prepare_delay = models.PositiveSmallIntegerField(
+        help_text="This field specifies the time you want to prepare the orders! if your slot is 5PM-7PM, "
+                  "and orders_prepare_delay=180minutes, Any orders placed after 2PM will not show this slot!")
+    SUNDAY = 1
+    MONDAY = 2
+    TUESDAY = 3
+    WEDNESDAY = 4
+    THURSDAY = 5
+    FRIDAY = 6
+    SATURDAY = 7
+    week_day_code = models.PositiveSmallIntegerField(choices=[
+        (SUNDAY, "SUNDAY"),
+        (MONDAY, "MONDAY"),
+        (TUESDAY, "TUESDAY"),
+        (WEDNESDAY, "WEDNESDAY"),
+        (THURSDAY, "THURSDAY"),
+        (FRIDAY, "FRIDAY"),
+        (SATURDAY, "SATURDAY"),
+    ], default=1, validators=[length_in_weeks])
+
+    @property
+    def index(self):
+        h = self.start_time.hour
+        m = self.start_time.minute
+        s = self.start_time.second
+        return self.week_day_code * (h * 60 * 60 + m * 60 + s)
+
+    def clean(self):
+        qs = self.__class__.objects.filter(week_day_code=self.week_day_code)
+        if self.pk:
+            qs = qs.filter(exclude=self.pk)
+        for slot in qs:
+            if slot.start_time < self.start_time < slot.end_time:
+                raise ValidationError(f'start_time of this slot ({self.start_time}) conflicts with #{slot.id}. {slot}')
+            if slot.end_time < self.end_time < slot.end_time:
+                raise ValidationError(f'end_time of this slot ({self.end_time}) conflicts with #{slot.id}. {slot}')
+
+    @property
+    def week_day(self):
+        return ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][self.week_day_code]
+
+    def __str__(self):
+        return f"{self.start_time}-{self.end_time} {self.week_day}"
+
+    @classmethod
+    def indexed_config(cls):
+        arr = []
+        index = 1
+        for config in cls.objects.all().order_by('week_day_code', 'start_time'):
+            arr.append((index, config))
+        return arr
+
+
+class TimeSlot(models.Model):
+    config = models.ForeignKey(TimeSlotConfiguration, on_delete=models.SET_NULL, null=True)
+    slot = models.TextField(help_text="Text Representation of configuration")
+    start_date = models.DateField(help_text="Delivery Starting Date")
+    index = models.PositiveIntegerField(help_text="Slot Index")
+
+    def __str__(self):
+        return self.slot
+
+    def __init__(self, *args, **kwargs):
+        super(TimeSlot, self).__init__(*args, **kwargs)
+        self.__orders = None
+
+    @property
+    def orders_assigned(self):
+        if self.__orders is None:
+            self.__orders = self.orders.all().count()
+        return self.__orders
+
+    @classmethod
+    def free_slots(cls):
+        return cls.objects.filter(
+            start_date__gte=today(),
+            config__deliverable_no_of_orders__gt=models.Count('orders')
+        ).order_by('index')
+
+    @classmethod
+    def generate_next_n_slots(cls, n=5):
+        time_now = datetime.datetime.now()
+        slots_with_delivery_after_now = cls.objects.filter(
+            start_date__gte=time_now.date(),
+        ).annotate(
+            orders_count=models.Count('orders')
+        ).select_related('config').order_by('index')
+        available_slots = [slot for slot in slots_with_delivery_after_now if slot.orders_count <= slot.config.deliverable_no_of_orders]
+        latest_slot_date = available_slots[-1].start_date
+        needed_slots = n - len(available_slots)
+        configurations = TimeSlotConfiguration.indexed_config()
+        configuration_index = 0
+        out = []
+        config = configurations[configuration_index][1]
+        while needed_slots:
+            dt = datetime.datetime(
+                year=latest_slot_date.year, month=latest_slot_date.month, day=latest_slot_date.day,
+                hour=config.start_time.hour, minute=config.start_time.minute, second=config.start_time.second,
+            )
+            slot, created = cls.objects.get_or_create(
+                start_date=latest_slot_date,
+                config=config,
+                defaults={
+                    'slot': f"{latest_slot_date} - {config.slot or ''}",
+                    "index": int(datetime.datetime.timestamp(dt)) - 1625054000
+                    # subtracting with timestamp at time of development to make index simpler
+                }
+            )
+            if created:
+                needed_slots -= 1
+            configuration_index += 1
+            if configuration_index >= len(configurations):
+                configuration_index %= len(configurations)
+
+            # if config.week_day_code != configurations[configuration_index][1].week_day_code:
+            #     latest_slot_date =
+            out.append(slot)
+
+
 class Order(AbstractOrder):
     date_delivered = models.DateTimeField(null=True, blank=True, help_text="Date of Consignment Delivery")
+    slot = models.ForeignKey(TimeSlot, on_delete=models.SET_NULL, null=True, related_name='orders')
 
     @property
     def preferred_slot_text(self):

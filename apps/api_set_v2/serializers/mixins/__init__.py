@@ -79,8 +79,6 @@ class ProductPriceFieldMixin(object):
 class ProductPriceFieldMixinLite(object):
 
     def get_price(self, product):
-        key = 'ProductPriceFieldMixinLite__{0}__{1}_v1'
-
         def _inner():
             if product.is_parent:
                 return dummy_purchase_info_lite_as_dict(availability=True, availability_message='')

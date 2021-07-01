@@ -1,4 +1,6 @@
 # /home/jk/code/grocery/apps/dashboard/custom/models.py
+from datetime import timedelta
+
 from django.conf import settings
 from django.core import validators
 from django.db import models
@@ -196,8 +198,6 @@ class HomePageMegaBanner(AbstractCURDModel):
 
 class SiteConfig(SingletonModel):
     site_name = models.CharField(max_length=256, default="Grocery Store")
-    period_of_return = models.PositiveSmallIntegerField(default=settings.DEFAULT_PERIOD_OF_RETURN['minutes'],
-                                                        help_text="In minutes")
     MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY = models.PositiveSmallIntegerField(
         default=settings.MINIMUM_BASKET_AMOUNT_FOR_FREE_DELIVERY,
         help_text="MINIMUM BASKET AMOUNT FOR FREE DELIVERY")
@@ -207,23 +207,37 @@ class SiteConfig(SingletonModel):
     DELIVERY_CHARGE_FOR_EXPRESS_DELIVERY = models.PositiveSmallIntegerField(
         default=settings.EXPRESS_DELIVERY_CHARGE,
         help_text="EXPRESS DELIVERY CHARGE")
-    EXPECTED_OUT_FOR_DELIVERY_DELAY = models.DurationField(
-        default="03:00:00",
-        help_text="Expected delay between End Slot, and Delivery Boy moving out for free delivery!")
-    EXPECTED_OUT_FOR_DELIVERY_DELAY_IN_EXPRESS_DELIVERY = models.DurationField(
-        default="03:00:00",
+    EXPECTED_OUT_FOR_DELIVERY_DELAY = models.PositiveSmallIntegerField(
+        default=180,
+        help_text="Expected delay between End Slot, and Delivery Boy moving out for free delivery (in minutes)!")
+    EXPECTED_OUT_FOR_DELIVERY_DELAY_IN_EXPRESS_DELIVERY = models.PositiveIntegerField(
+        default=180,
         help_text="Expected delay between End Slot, and Delivery Boy moving out for express delivery"
-                  "([DD] [HH:[MM:]]SS[.uuuuuu] format)!")
-    DEFAULT_PERIOD_OF_RETURN = models.DurationField(
-        default="03:00:00",
-        help_text="Default Period of Return ([DD] [HH:[MM:]]SS[.uuuuuu] format)!")
-    DEFAULT_PERIOD_OF_PICKUP = models.DurationField(
-        default="01 00:00:00",
-        help_text="Default Period of Return ([DD] [HH:[MM:]]SS[.uuuuuu] format)!")
+                  "(in minutes)!")
+    DEFAULT_PERIOD_OF_RETURN = models.PositiveIntegerField(
+        default=settings.DEFAULT_PERIOD_OF_RETURN['minutes'],
+        help_text="Default Period of Return (in minutes)!")
+    DEFAULT_PERIOD_OF_PICKUP = models.PositiveIntegerField(
+        default=24*60,
+        help_text="Default Period of Return (in minutes)!")
 
     referrer = 'site-config'
 
+    @property
+    def expected_out_for_delivery_delay(self):
+        return timedelta(minutes=self.EXPECTED_OUT_FOR_DELIVERY_DELAY)
 
+    @property
+    def expected_out_for_delivery_delay_in_express_delivery(self):
+        return timedelta(minutes=self.EXPECTED_OUT_FOR_DELIVERY_DELAY_IN_EXPRESS_DELIVERY)
+
+    @property
+    def default_period_of_return(self):
+        return timedelta(minutes=self.DEFAULT_PERIOD_OF_RETURN)
+
+    @property
+    def default_period_of_pickup(self):
+        return timedelta(minutes=self.DEFAULT_PERIOD_OF_PICKUP)
 
 
 
