@@ -40,6 +40,7 @@ def clear_cache_stock_record(sender, instance, **kwargs):
     cache.delete_pattern("product_price_data_lite__key:*")
     cache.delete_pattern("stock-record-key--prod:{}*".format(instance.product_id))
     cache.delete_pattern("___custom_ProductListSerializer__cached__product:{}*".format(instance.product_id))
+    cache.delete_pattern("apps.api_set_v2.views.index*".format(instance.product_id))
     if instance.product and instance.product.is_child:
         cache.delete_pattern(f"stock-record-key--prod:{instance.product.id}*")
         cache.delete_pattern("___custom_ProductListSerializer__cached__product:{}*".format(instance.product.parent_id))
