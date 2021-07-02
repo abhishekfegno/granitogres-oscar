@@ -9,7 +9,6 @@ from django.urls import reverse
 from solo.models import SingletonModel
 from sorl.thumbnail import get_thumbnail
 
-from apps.utils import image_not_found
 from apps.utils.pushnotifications import NewOfferPushNotification
 
 
@@ -238,7 +237,6 @@ class SiteConfig(SingletonModel):
     @property
     def default_period_of_pickup(self):
         return timedelta(minutes=self.DEFAULT_PERIOD_OF_PICKUP)
-
 
 
 # class FAQ(AbstractCURDModel):

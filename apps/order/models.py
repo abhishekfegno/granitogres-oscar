@@ -32,8 +32,8 @@ class TimeSlotConfiguration(models.Model):
                                                                           "Each order will be at each location and "
                                                                           "will have diff size and no of items.")
     orders_prepare_delay = models.PositiveSmallIntegerField(
-        help_text="This field specifies the time you want to prepare the orders! if your slot is 5PM-7PM, "
-                  "and orders_prepare_delay=180minutes, Any orders placed after 2PM will not show this slot!")
+        help_text="In Minutes. This field specifies the time you want to prepare the orders! if your slot is 5PM-7PM, "
+                  "and orders_prepare_delay=180, (180 minutes) Any orders placed after 2PM will not show this slot!")
     SUNDAY = 1
     MONDAY = 2
     TUESDAY = 3
@@ -77,11 +77,7 @@ class TimeSlotConfiguration(models.Model):
 
     @classmethod
     def indexed_config(cls):
-        arr = []
-        index = 1
-        for config in cls.objects.all().order_by('week_day_code', 'start_time'):
-            arr.append((index, config))
-        return arr
+        return cls.objects.all().order_by('week_day_code', 'start_time')
 
 
 class TimeSlot(models.Model):
@@ -89,6 +85,7 @@ class TimeSlot(models.Model):
     slot = models.TextField(help_text="Text Representation of configuration")
     start_date = models.DateField(help_text="Delivery Starting Date")
     index = models.PositiveIntegerField(help_text="Slot Index")
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.slot
@@ -107,30 +104,94 @@ class TimeSlot(models.Model):
     def free_slots(cls):
         return cls.objects.filter(
             start_date__gte=today(),
+            config__is_active=True,
             config__deliverable_no_of_orders__gt=models.Count('orders')
         ).order_by('index')
+
+    @property
+    def max_datetime_to_order(self):
+        return self.order_starting_datetime() - datetime.timedelta(minutes=self.config.orders_prepare_delay)
+
+    @property
+    def order_starting_datetime(self):
+        return datetime.datetime(
+            year=self.start_date.year, month=self.start_date.month, day=self.start_date.day,
+            hour=self.config.start_time.hour, minute=self.config.start_time.minute, second=self.config.start_time.second,
+        )
 
     @classmethod
     def generate_next_n_slots(cls, n=5):
         time_now = datetime.datetime.now()
+
+        """
+        Fetching all already prepared slot!
+        """
+
         slots_with_delivery_after_now = cls.objects.filter(
-            start_date__gte=time_now.date(),
-        ).annotate(
+            models.Q(
+                start_date__gt=time_now.date()
+            ) | models.Q(
+                models.Q(start_date=time_now.date()) & models.Q(config__start_time=time_now.time())
+            ),
+            config__is_active=True,
+            ).annotate(
             orders_count=models.Count('orders')
         ).select_related('config').order_by('index')
-        available_slots = [slot for slot in slots_with_delivery_after_now if slot.orders_count <= slot.config.deliverable_no_of_orders]
-        latest_slot_date = available_slots[-1].start_date
+        available_slots = [
+            slot
+            for slot in slots_with_delivery_after_now
+            if (
+                    slot.orders_count <= slot.config.deliverable_no_of_orders
+                    and slot.max_datetime_to_order > time_now
+            )]
+
+        latest_slot = available_slots[-1]
+        latest_slot_date = latest_slot.start_date
+        """
+        We need 5 slots, in total, already have 2 on them in TimeSlot table we have to create 3 more!
+        """
         needed_slots = n - len(available_slots)
         configurations = TimeSlotConfiguration.indexed_config()
-        configuration_index = 0
+
+        qs_index = 0
+        while configurations[qs_index].index <= latest_slot.config.index:
+            """
+            Finding next possible index to create timeslot!
+            """
+            qs_index += 1
+            if len(configurations) >= qs_index:
+                qs_index %= len(configurations)
+                break
+
         out = []
-        config = configurations[configuration_index][1]
         while needed_slots:
+            """
+            now we have `configurations[qs_index]` as next preferable config, with which we have to create our new slot!
+            """
+            config: TimeSlotConfiguration = configurations[qs_index]
+            curr_date: datetime.date = latest_slot.start_date
+            # weekday starts with monday as zero, we need weekday sunday as 1, monday as 2 and so on..
+            curr_week_day: int = (curr_date.weekday() + 2) % 7
+            # find gap of next weekday of config!
+            # We assume that `config` will be of the same day or of next day from `latest_slot_date` not previous day!
+            days_to_next_slot: int = config.week_day_code - curr_week_day
+
+            """
+            We have `curr_date` with date of last config, we have `config` with next configuration!
+            So we will calculate the distance between the `current last config` and the new `preferred config` object
+            as `days_to_next_slot` 
+            Ee generate a new datetime dt as date from (curr_date + days_to_next_slot) and time from 
+            new preferred config.
+            
+            we will check in database weather this date-time is already present there at database,
+            if not we will create and reduce needed_slots by 1; So that we will iterate same procedure, until we create 
+            all the required slots!
+            """
             dt = datetime.datetime(
-                year=latest_slot_date.year, month=latest_slot_date.month, day=latest_slot_date.day,
+                year=curr_date.year, month=curr_date.month, day=curr_date.day,
                 hour=config.start_time.hour, minute=config.start_time.minute, second=config.start_time.second,
-            )
-            slot, created = cls.objects.get_or_create(
+            ) + datetime.timedelta(days=days_to_next_slot)
+            latest_slot, created = cls.objects.get_or_create(
                 start_date=latest_slot_date,
                 config=config,
                 defaults={
@@ -141,13 +202,18 @@ class TimeSlot(models.Model):
             )
             if created:
                 needed_slots -= 1
-            configuration_index += 1
-            if configuration_index >= len(configurations):
-                configuration_index %= len(configurations)
+            while configurations[qs_index].index <= latest_slot.config.index:
+                """
+                Finding next possible index to create timeslot!
+                """
+                qs_index += 1
+                if len(configurations) >= qs_index:
+                    qs_index %= len(configurations)
+                    break
 
             # if config.week_day_code != configurations[configuration_index][1].week_day_code:
             #     latest_slot_date =
-            out.append(slot)
+            out.append(latest_slot)
 
 
 class Order(AbstractOrder):

@@ -1,0 +1,49 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load i18n %}
+{% load render_table from django_tables2 %}
+
+{% block title %}
+    {{ title }} | {% trans "Create Attribute Option Group" %} | {{ block.super }}
+{% endblock %}
+{% block body_class %}{{ block.super }} Offer Banners{% endblock %}
+{% block navbar %}
+{% if not is_popup %}
+    {{ block.super }}
+{% endif %}
+{% endblock %}
+{% block dashboard_nav %}
+{% if not is_popup %}
+    {{ block.super }}
+{% endif %}
+{% endblock %}
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+        <li>
+            <a href="{{ list_url }}">{{ title }}</a>
+        </li>
+        <li class="active">{{ title }} - {% if object.id %} Update #{{ object.id }} {% else %} Add New {% endif %}</li>
+    </ul>
+{% endblock %}
+
+{% block header %}
+    <div class="page-header">
+        {% if object.pk %}
+        <a href="{% url 'dashboard-custom:dashboard-offer-banner-delete' pk=object.pk %}" class="btn btn-danger btn-lg pull-right">
+            <i class="icon-trash"></i> {% trans "Delete" %}</a>
+        {% endif %}
+        <h1> Time Slot Configuration - {% if object.id %} Update #{{ object.id }} {% else %} Add New {% endif %} </h1>
+
+    </div>
+{% endblock header %}
+
+{% block dashboard_content %}
+    <div class="table-header">
+        <h2>{{ title }}</h2>
+    </div>
+    <div class="well">
+        {% include 'oscar/dashboard/partials/form.html' with includes_files=1 class='wysiwyg' %}
+    </div>
+{% endblock dashboard_content %}

@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite
 from apps.api_set_v2.serializers.catalogue import CategorySerializer
 from apps.api_set_v2.utils.product import get_optimized_product_dict
+from apps.availability.models import PinCode
 from apps.catalogue.models import Category, Product
 from apps.dashboard.custom.models import HomePageMegaBanner, InAppBanner, OfferBanner
 from apps.utils import banner_not_found
@@ -90,6 +91,18 @@ def index(request, *a, **k):
     zone = request.session.get('zone')
     key = cache_key(zone)
     return Response(cache_library(cache_key(key), cb=_inner, ttl=60 * 60 * 3))
+
+
+@api_view(("GET",))
+def pincode_list(request, *a, **k):
+    cache_key = 'apps.api_set_v2.views.pincode?v=0.0.5'
+
+    def _inner():
+        return {
+            'pincodes': PinCode.objects.filter(
+                depth=PinCode.POSTAL_CODE_DEPTH).values_list('name', 'code')
+        }
+    return Response(cache_library(cache_key, cb=_inner, ttl=60 * 60 * 24))
 
 
 def get_offer_content(request):

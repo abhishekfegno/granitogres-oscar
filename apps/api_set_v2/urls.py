@@ -13,10 +13,11 @@ from apps.api_set.views.orders import order_cancel_request, order_return_request
 from apps.api_set.views.public import cancel_reasons_list
 from apps.api_set_v2.views.catalogue import product_detail_web
 
-from apps.api_set_v2.views.index import index, offers
+from apps.api_set_v2.views.index import index, offers, pincode_list
 from apps.api_set_v2.views.orders import orders_detail, reorder_to_current_basket, reorder_to_temporary_basket
 from apps.api_set_v2.views.orders import orders
 from apps.api_set_v2.views.product_listing_query_based import product_list
+from apps.availability import pincode
 from apps.mod_oscarapi.views.validate_checkout import CheckoutValidationView
 validate_checkout = never_cache(CheckoutValidationView.as_view())
 
@@ -33,6 +34,7 @@ v1__registration_apis = [
 home_urlpatterns = [
     path("home/", home, name="api-home-v2"),
     path("index/", index, name="api-index-v2"),
+    path("pincode/", pincode_list, name="api-pincode-v2"),
 
     path("offers/", offers, name="api-offers"),
     path("offers/<int:pk>/", offer_products, name="api-offer-products-v2"),       #! instead use product_list api!

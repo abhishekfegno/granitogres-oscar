@@ -300,6 +300,8 @@ OSCAR_DASHBOARD_NAVIGATION = [
              'access_fn': admin_or_staff},
             {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
              'access_fn': admin_or_staff},
+            {'label': _('Time Slots'), 'url_name': 'timeslotconfiguration-list',
+             'access_fn': admin_or_staff},
             # {'label': _('Shipping charges'), 'url_name': 'dashboard:shipping-method-list', },
 
         ]
