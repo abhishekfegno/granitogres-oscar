@@ -56,20 +56,23 @@ def home(request, *a, **k):
     if basket is None:
         basket = request.basket or None
     b_count = basket.num_lines if basket else 0
-    slot = TimeSlot.slots_available_for_delivery()
-
+    slots = TimeSlot.slots_available_for_delivery()
+    if slots:
+        slot = slots[0]
+    else:
+        slot = None
     return Response({
         "user": user,
         "cart_item_count": b_count,
         "zone_facade": ZoneFacade.face(request),
         'next_slot': {
-            'pk': slot.pk,
-            'start_time': slot.config.start_time,
-            'end_time': slot.config.end_time,
-            'start_date': slot.start_date,
-            'max_datetime_to_order': slot.max_datetime_to_order,
-            'is_next': True,
-            'index': slot.index,
+            'pk': slot and slot.pk,
+            'start_time':  slot and slot.config.start_time,
+            'end_time':  slot and slot.config.end_time,
+            'start_date':  slot and slot.start_date,
+            'max_datetime_to_order':  slot and slot.max_datetime_to_order,
+            'is_next':  bool(slot),
+            'index': slot and slot.index,
         },
         "environment": {
             'LOCATION_FETCHING_MODE': settings.LOCATION_FETCHING_MODE

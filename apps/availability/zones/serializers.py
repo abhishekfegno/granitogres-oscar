@@ -9,6 +9,7 @@ from apps.users.models import Location
 
 
 class PointSerializer(serializers.Serializer):
+
     def update(self, instance, validated_data):
         pass
 
