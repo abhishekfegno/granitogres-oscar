@@ -64,16 +64,22 @@ class OrderDetailView(OscarOrderDetailView):
         return OrderSlotForm(instance=self.object, data=data)
 
     def change_order_slot(self, request, order):
-        old_slot = order.slot.slot
+        old_slot = order.slot and order.slot.slot
         form = self.get_order_slot_form()
         if not form.is_valid():
             return self.reload_page(error=_("There are some errors in order slot form"))
         else:
             form.save()
-            success_msg = _(
-                "Order slot has been changed from '%(old_status)s' to "
-                "'%(new_status)s'") % {'old_status': old_slot,
-                                       'new_status': form.instance.slot.slot}
+            if not old_slot:
+                success_msg = _(
+                    "Order slot has been changed to '%(new_status)s'") % {
+                                  'new_status': form.instance.slot.slot
+                }
+            else:
+                success_msg = _(
+                    "Order slot has been changed from '%(old_status)s' to "
+                    "'%(new_status)s'") % {'old_status': old_slot,
+                                           'new_status': form.instance.slot.slot}
             messages.success(request, success_msg)
         return self.reload_page()
 

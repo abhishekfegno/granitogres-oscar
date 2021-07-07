@@ -1,5 +1,5 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load currency_filters %}
+{% load currency_filters ecommerce_additionals %}
 {% load sorting_tags %}
 {% load i18n static %}
 {% load widget_tweaks form_tags %}
@@ -128,14 +128,17 @@
                                     <select multiple="multiple" id="my-select" name="selected_orders">
                                         {% for con_ord in object.possible_delivery_orders %}
                                         <option value='{{ con_ord.pk }}' {% if con_ord.delivery_trip %}selected="selected"{% endif %}>
-                                            # ORD{{ con_ord.order.number }} - {{ con_ord.order.shipping_address }}
+                                            #{{ con_ord.order.number }} - {{ con_ord.order.slot.slot }} - {{ con_ord.order.shipping_address }}
                                         </option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div>
-                                    <a href='#' id='select-all'>select all</a>
+                                    <a href='#' id='select-all'>select all</a> *
                                     <a href='#' id='deselect-all'>deselect all</a>
+                                    {% for slot in object.possible_delivery_orders|get_slots_from_deliverable_consignments  %}
+                                        * <a href='#' class='delivery-slot-link'>{{ slot }}</a>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -151,7 +154,7 @@
                                 <optgroup label="#{{ orders.grouper }} - {{ orders.list.0.order_line.order.shipping_address }}">
                                     {% for con_ord in orders.list %}
                                     <option value='{{ con_ord.pk }}' {% if con_ord.delivery_trip %}selected="selected"{% endif %}>
-                                        #{{ con_ord.order_line.pk }} - {{ con_ord.order_line }} ({{ orders.grouper }})
+                                        #{{ con_ord.order_line.pk }} - {{ con_ord.order_line.order.slot.slot }} - {{ con_ord.order_line }} ({{ orders.grouper }})
                                     </option>
                                     {% endfor %}
                                 </optgroup>
@@ -159,8 +162,11 @@
                             </select>
                         </div>
                         <div>
-                            <a href='#' id='select-all-return'>select all</a>
+                            <a href='#' id='select-all-return'>select all</a> *
                             <a href='#' id='deselect-all-return'>deselect all</a>
+                            {% for slot in object.possible_delivery_orders|get_slots_from_deliverable_consignments  %}
+                                * <a href='#' class='return-slot-link'>{{ slot }}</a>
+                            {% endfor %}
                         </div>
                     </div>
                     <div class="col-md-12 ">
@@ -310,84 +316,96 @@ oscar.dashboard.search.init();
 $('#SearchModal').modal('show');
 {% endif %}
 
-(function(){
-let $select = $('#my-select');
-let $select_return = $('#my-select-return');
-let $msselect = $('#ms-my-select-return');
-let $msselect_return = $('#ms-my-select-return');
-let options = {
-animation:true, container:'body',
-'data-content':'Select the consignments to get shipped in this trip!',
-placement:'right', 'data-title':'Required!', trigger:'manual',
-}
-let main_options = {
-selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='try \"12\"'>",
-selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='try \"4\"'>",
-afterInit: function(ms){
-var that = this,
-$selectableSearch = that.$selectableUl.prev(),
-$selectionSearch = that.$selectionUl.prev(),
-selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
-selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+(function() {
+    let $select = $('#my-select');
+    let $select_return = $('#my-select-return');
+    let $msselect = $('#ms-my-select-return');
+    let $msselect_return = $('#ms-my-select-return');
+    let options = {
+        animation: true,
+        container: 'body',
+        'data-content': 'Select the consignments to get shipped in this trip!',
+        placement: 'right',
+        'data-title': 'Required!',
+        trigger: 'manual',
+    }
+    let main_options = {
+        selectableHeader: "<input type='text' class='search-input form-control' id='delivery-search-left' autocomplete='off' placeholder='try \"14\"'>",
+        selectionHeader: "<input type='text' class='search-input form-control' id='delivery-search-right' autocomplete='off' placeholder='try \"4\"'>",
+        afterInit: function(ms) {
+            var that = this,
+                $selectableSearch = that.$selectableUl.prev(),
+                $selectionSearch = that.$selectionUl.prev(),
+                selectableSearchString = '#' + that.$container.attr('id') + ' .ms-elem-selectable:not(.ms-selected)',
+                selectionSearchString = '#' + that.$container.attr('id') + ' .ms-elem-selection.ms-selected';
 
-that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
-.on('keydown', function(e){
-if (e.which === 40){
-that.$selectableUl.focus();
-return false;
-}
-});
+            that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+                .on('keydown', function(e) {
+                    if (e.which === 40) {
+                        that.$selectableUl.focus();
+                        return false;
+                    }
+                });
 
-that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
-.on('keydown', function(e){
-if (e.which == 40){
-that.$selectionUl.focus();
-return false;
-}
-});
-},
-afterSelect: function(){
-this.qs1.cache();
-this.qs2.cache();
-},
-afterDeselect: function(){
-this.qs1.cache();
-this.qs2.cache();
-}
-};
-$select.select2('destroy');
-$select.multiSelect(main_options);  /*  http://loudev.com/  */
-$msselect.popover(options);
+            that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+                .on('keydown', function(e) {
+                    if (e.which == 40) {
+                        that.$selectionUl.focus();
+                        return false;
+                    }
+                });
+        },
+        afterSelect: function() {
+            this.qs1.cache();
+            this.qs2.cache();
+        },
+        afterDeselect: function() {
+            this.qs1.cache();
+            this.qs2.cache();
+        }
+    };
+    $select.select2('destroy');
+    $select.multiSelect(main_options); /*  http://loudev.com/  */
+    $msselect.popover(options);
+    var return_options = Object.assign({}, main_options)
+    return_options.selectableHeader = `<input type='text' class='search-input form-control' id="return-search-left" autocomplete='off' placeholder='try \"12\"'>`
+    return_options.selectionHeader = `<input type='text' class='search-input form-control' id="return-search-right" autocomplete='off' placeholder='try \"4\"'>`
 
-$select_return.select2('destroy');
-$select_return.multiSelect(main_options);  /*  http://loudev.com/  */
-$msselect_return.popover(options);
+    $select_return.select2('destroy');
+    $select_return.multiSelect(return_options); /*  http://loudev.com/  */
+    $msselect_return.popover(options);
 
-$('#select-all').click(function(){
-$('#my-select').multiSelect('select_all');
-return false;
-});
-$('#deselect-all').click(function(){
-$('#my-select').multiSelect('deselect_all');
-return false;
-});
-$('#refresh').on('click', function(){
-$('#my-select').multiSelect('refresh');
-return  false;
-});
-$('#select-all-return').click(function(){
-$('#my-select-return').multiSelect('select_all');
-return false;
-});
-$('#deselect-all-return').click(function(){
-$('#my-select-return').multiSelect('deselect_all');
-return false;
-});
-$('#refresh-return').on('click', function(){
-$('#my-select-return').multiSelect('refresh');
-return  false;
-});
+    $('#select-all').click(function() {
+        $('#my-select').multiSelect('select_all');
+        return false;
+    });
+    $('#deselect-all').click(function() {
+        $('#my-select').multiSelect('deselect_all');
+        return false;
+    });
+    $('#refresh').on('click', function() {
+        $('#my-select').multiSelect('refresh');
+        return false;
+    });
+    $('#select-all-return').click(function() {
+        $('#my-select-return').multiSelect('select_all');
+        return false;
+    });
+    $('#deselect-all-return').click(function() {
+        $('#my-select-return').multiSelect('deselect_all');
+        return false;
+    });
+    $('#refresh-return').on('click', function() {
+        $('#my-select-return').multiSelect('refresh');
+        return false;
+    });
+    $('.delivery-slot-link').on('click', function(){
+        $('#delivery-search-left').val(this.innerHTML);
+        return false;
+    })
+    $('.return-slot-link').on('click', function(){
+        $('#return-search-left').val(this.innerHTML);
+        return false;
+    })
 })()
-
 {% endblock onbodyload %}
-1
