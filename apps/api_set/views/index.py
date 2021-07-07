@@ -1,6 +1,7 @@
 # /home/jk/code/grocery/apps/api_set/views/index.py
 import random
 from collections import defaultdict, OrderedDict
+from datetime import timedelta
 
 from allauth.account.models import EmailAddress
 from django.conf import settings
@@ -9,6 +10,7 @@ from django.db import models
 from django.db.models import Count
 from django.template.defaulttags import regroup
 from django.templatetags.static import static
+from django.utils import timezone
 from django.utils.timezone import now
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -28,6 +30,7 @@ from apps.availability.facade import ZoneFacade
 from apps.basket.models import Basket
 from apps.catalogue.models import ProductImage
 from apps.dashboard.custom.models import OfferBanner
+from apps.order.models import TimeSlot, TimeSlotConfiguration
 from apps.utils.urls import list_api_formatter
 from lib.cache import get_featured_path
 
@@ -42,8 +45,10 @@ def home(request, *a, **k):
     basket = None
     b_count = 0
     if request.user.is_authenticated:
-        user_fields = ['id', 'mobile', 'username', 'email', 'first_name', 'last_name', 'is_active',
-                       'status',  'status_text',  'is_delivery_request_pending', 'emp_id']
+        user_fields = [
+            'id', 'mobile', 'username', 'email', 'first_name', 'last_name', 'is_active',
+            'status',  'status_text',  'is_delivery_request_pending', 'emp_id'
+        ]
         user = {field: getattr(request.user, field) for field in user_fields}
         user['image'] = request.build_absolute_uri(request.user.image.url) if request.user.image else None
         user['id_proof'] = request.build_absolute_uri(request.user.id_proof.url) if request.user.id_proof else None
@@ -51,11 +56,21 @@ def home(request, *a, **k):
     if basket is None:
         basket = request.basket or None
     b_count = basket.num_lines if basket else 0
+    slot = TimeSlot.slots_available_for_delivery()[0]
 
     return Response({
         "user": user,
         "cart_item_count": b_count,
         "zone_facade": ZoneFacade.face(request),
+        'next_slot': {
+            'pk': slot.pk,
+            'start_time': slot.config.start_time,
+            'end_time': slot.config.end_time,
+            'start_date': slot.start_date,
+            'max_datetime_to_order': slot.max_datetime_to_order,
+            'is_next': True,
+            'index': slot.index,
+        },
         "environment": {
             'LOCATION_FETCHING_MODE': settings.LOCATION_FETCHING_MODE
         },
@@ -84,7 +99,6 @@ def index(request, *a, **k):
             'bottom': categories[index + 3:index + 5],
         })
         index += 5
-
     return Response(out)
 
 

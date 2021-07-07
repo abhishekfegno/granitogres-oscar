@@ -161,6 +161,7 @@ class TimeSlot(models.Model):
         """
         Slots that are free for delivery
         """
+
         return cls.objects.annotate(ord_count=models.Count('orders')).filter(
             start_date__gte=today(),
             config__is_active=True,
@@ -193,37 +194,23 @@ class TimeSlot(models.Model):
         ), timezone.get_default_timezone())
 
     @classmethod
-    def slots_with_delivery_after_now(cls):
-        """
-        Deliverable slots after now! this can be free or packed!
-        """
-        time_now = timezone.localtime(timezone.now())
-        return cls.objects.filter(
-            models.Q(
-                start_date__gt=time_now.date()
-            ) | models.Q(
-                models.Q(start_date=time_now.date()) & models.Q(config__start_time=time_now.time())
-            ),
-            config__is_active=True,
-        ).annotate(
-            orders_count=models.Count('orders')
-        ).select_related('config').order_by('index')
-
-    @classmethod
     def slots_available_for_delivery(cls):
         """
         Deliverable slots which are capable to hold more orders after now!
         """
         time_now = timezone.localtime(timezone.now())
-        return [slot for slot in cls.free_slots() if (slot.max_datetime_to_order > time_now)]
+        slots = [slot for slot in cls.free_slots() if (slot.max_datetime_to_order > time_now)]
+        return slots
 
     @classmethod
-    def generate_next_n_slots(cls, n=5):
+    def get_upcoming_slots(cls, n=settings.MINIMUM_TIMESLOT_TO_BE_PROVIDED):
         """
         Fetching all already prepared slot!
         """
         available_slots = cls.slots_available_for_delivery()
         needed_slots = n - len(available_slots)
+        if needed_slots <= 0:
+            return available_slots
         all_slots = list(cls.free_slots())
         latest_slot = all_slots[-1] if all_slots else None
         if latest_slot:

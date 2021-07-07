@@ -78,26 +78,26 @@ class TimeSlotConfigurationTest(TestCase):
         for dt in TimeSlotConfiguration.objects.all():
             dt.save()
 
-    def test_generate_next_n_slots(self):
+    def test_get_upcoming_slots(self):
         conf = TimeSlotConfiguration.get_very_next_moment_slot()
         self.assertEqual(conf.start_time.hour, 11, "Hour Mismatch")     # 2:30
         self.assertEqual(conf.week_day_code, 4, "Day Mismatch")     # tuesday
 
-        slots = TimeSlot.generate_next_n_slots(n=3)
+        slots = TimeSlot.get_upcoming_slots(n=3)
         self.assertGreaterEqual(len(slots), 3, msg="Could not Create required Slots for first time.")
         for slot in slots:
             self.assertLess(slot.orders_assigned, slot.config.deliverable_no_of_orders, "Found some slots without")
-        slots = TimeSlot.generate_next_n_slots(n=5)
+        slots = TimeSlot.get_upcoming_slots(n=5)
         self.assertGreaterEqual(len(slots), 5, msg="Could not Create required Slots for first time.")
         for slot in slots:
             self.assertLess(slot.orders_assigned, slot.config.deliverable_no_of_orders, "Found some slots without")
 
-        slots = TimeSlot.generate_next_n_slots(n=8)
+        slots = TimeSlot.get_upcoming_slots(n=8)
         self.assertGreaterEqual(len(slots), 5, msg="Could not Create required Slots for first time.")
         for slot in slots:
             self.assertLess(slot.orders_assigned, slot.config.deliverable_no_of_orders, "Found some slots without")
 
-        slots = TimeSlot.generate_next_n_slots(n=25)
+        slots = TimeSlot.get_upcoming_slots(n=25)
         self.assertGreaterEqual(len(slots), 5, msg="Could not Create required Slots for first time.")
         for slot in slots:
             self.assertLess(slot.orders_assigned, slot.config.deliverable_no_of_orders, "Found some slots without")
