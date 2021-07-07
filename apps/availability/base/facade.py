@@ -61,9 +61,7 @@ class BaseZoneFacade(object):
         if location is None:
             if request.session.get('location'):
                 location = Location.objects.filter(pk=request.session.get('location')).select_related('zone').last()
-            else:
-                if not request.user.is_authenticated:
-                    return
+            elif request.user.is_authenticated:
                 location = Location.objects.filter(user=request.user).order_by('-is_active', '-id').first()
         return location
 
@@ -72,21 +70,22 @@ class BaseZoneFacade(object):
         location = BaseZoneFacade.get_location_util(request, location)
         if zone is None and location is not None:
             zone = location.zone
-        request.session['location'] = location.pk
-        request.session['location_name'] = location.location_name or settings.DEFAULT_LOCATION_NAME
+        request.session['location'] = location and location.pk
+        request.session['location_name'] = location and (location.location_name or settings.DEFAULT_LOCATION_NAME)
         if zone:
-            request.session['zone'] = zone.pk
-            request.session['zone_name'] = zone.name
+            request.session['zone'] = zone and zone.pk
+            request.session['zone_name'] = zone and zone.name
         elif request.session.get('zone'):
             zone = Zones.objects.filter(id=request.session.get('zone')).first()
-            request.session['zone_name'] = zone.name
+            request.session['zone_name'] = zone and zone.name
         for MODE in settings.LOCATION_FETCHING_MODE_SET:
             attr_name = f'get_{MODE}_data'
-            if hasattr(location, attr_name) and callable(getattr(location, attr_name)):
-                request.session[MODE] = getattr(location, attr_name)()
-            else:
-                raise NotImplementedError(f'You have to implement {attr_name} at {Location} as "def {attr_name}(self) '
-                                          f'-> dict:"')
+            if location:
+                if hasattr(location, attr_name) and callable(getattr(location, attr_name)):
+                    request.session[MODE] = getattr(location, attr_name)()
+                else:
+                    raise NotImplementedError(f'You have to implement {attr_name} at {Location} as "def {attr_name}(self) '
+                                              f'-> dict:"')
 
     @staticmethod
     def face(request, location: Optional[Location] = None):
