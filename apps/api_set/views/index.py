@@ -42,7 +42,7 @@ def home(request, *a, **k):
     basket = None
     b_count = 0
     if request.user.is_authenticated:
-        user_fields = ['id', 'mobile', 'email', 'first_name', 'last_name', 'is_active',
+        user_fields = ['id', 'mobile', 'username', 'email', 'first_name', 'last_name', 'is_active',
                        'status',  'status_text',  'is_delivery_request_pending', 'emp_id']
         user = {field: getattr(request.user, field) for field in user_fields}
         user['image'] = request.build_absolute_uri(request.user.image.url) if request.user.image else None
