@@ -1,7 +1,7 @@
 from django.urls import path
 
 from apps.availability.pincode.views import PincodeSelector, ajax_for_children, load_page, update_pincode, check_availability, set_pincode
-from apps.availability.zones.views import SetZone
+from apps.availability.zones.views import SetZone, UnsetZone
 
 app_name = 'availability-api'
 
@@ -20,5 +20,6 @@ urlpatterns += [
     # Zone Based Availability
     # path('check/', check_availability, name='check-availability'),
     path('manage-zone/', SetZone.as_view(), name='set-zone'),
+    path('unset-session/', UnsetZone.as_view(), name='unset-zone'),
 
 ]

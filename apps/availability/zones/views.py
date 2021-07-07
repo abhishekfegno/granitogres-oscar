@@ -8,6 +8,7 @@ from rest_framework.response import Response
 
 from .forms import ZoneForm
 from .serializers import DeliverabilityCheckSerializer
+from ..base.facade import BaseZoneFacade
 from ..facade import ZoneFacade
 from ..models import Zones
 from .. import settings as app_settings
@@ -59,7 +60,7 @@ class SetZone(GenericAPIView):
         "pincode": null
     }
     """
-
+    http_method_names = ['get', 'post']
     permission_classes = [AllowAny, ]
     serializer_class = DeliverabilityCheckSerializer
 
@@ -72,4 +73,25 @@ class SetZone(GenericAPIView):
             return Response(sobj.errors, status=status.HTTP_400_BAD_REQUEST)
         _out = sobj.validated_data['facade_object'].set_zone(request)
         return Response(_out)
+
+
+class UnsetZone(GenericAPIView):
+    permission_classes = [AllowAny, ]
+
+    def get(self, request, *args, **kwargs):
+        for key in ['zone', 'zone_name', 'location', 'location_name', 'pincode']:
+            if key in request.session:
+                del request.session[key]
+
+        location = BaseZoneFacade.get_location_util(request)
+        if location:
+            for MODE in settings.LOCATION_FETCHING_MODE_SET:
+                attr_name = f'get_{MODE}_data'
+                if hasattr(location, attr_name) and callable(getattr(location, attr_name)):
+                    keys = getattr(location, attr_name)().keys()
+                    for key in keys:
+                        if key in request.session:
+                            del request.session[key]
+
+        return Response(ZoneFacade.face(request))
 
