@@ -56,7 +56,7 @@ def home(request, *a, **k):
     if basket is None:
         basket = request.basket or None
     b_count = basket.num_lines if basket else 0
-    slot = TimeSlot.slots_available_for_delivery()[0]
+    slot = TimeSlot.slots_available_for_delivery()
 
     return Response({
         "user": user,
