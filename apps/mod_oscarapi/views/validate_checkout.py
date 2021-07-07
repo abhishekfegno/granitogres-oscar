@@ -13,6 +13,7 @@ from ..serializers.checkout import (
 from ...basket.models import Basket
 from ...payment import refunds
 
+
 class CheckoutValidationSerializer(serializers.Serializer):
     basket_id = serializers.PrimaryKeyRelatedField(queryset=Basket.open.all()|Basket.buy_now.all())
 

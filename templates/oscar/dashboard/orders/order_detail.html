@@ -421,5 +421,14 @@
 {% endblock extra_tabs %}
 
 
+{% block order_status_changes %}
+<div class="well">
+    <h3><i class="icon-time"></i> {% trans "Change Order Slot" %}:</h3>
+    {% include "oscar/dashboard/partials/form_fields.html" with form=order_slot_form %}
+    <input type="hidden" value="change_order_slot" name="order_action" />
+    <input type="submit" value="Change Slot" class="btn btn-primary" />
+</div>
 
+{{ block.super }}
+{% endblock %}
 

@@ -147,7 +147,7 @@ class TimeSlot(models.Model):
     def save(self, **kwargs):
         if ((self.start_date.toordinal() % 7) + 1) != self.config.week_day_code:
             raise ValidationError('Timeslot Date does not match with Config Weekday')
-        self.slot = str(self.config)
+        self.slot = f'{str(self.config)} {self.start_date}'
         super(TimeSlot, self).save(**kwargs)
 
     @property
@@ -257,7 +257,7 @@ class Order(AbstractOrder):
 
     @property
     def preferred_slot_text(self):
-        return '10:00AM - 1:00PM'
+        return self.slot and self.slot.slot
 
     @property
     def is_cancelable(self):

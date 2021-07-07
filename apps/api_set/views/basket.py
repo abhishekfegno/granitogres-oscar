@@ -22,7 +22,7 @@ def get_basket(request):
     } for slot in TimeSlot.get_upcoming_slots()]
     upcoming_slots[0]['is_next'] = True
     out["available_deliveries"] = upcoming_slots
-    return Response(ser.data)
+    return Response(out)
 
 
 

@@ -24,6 +24,7 @@ from ..serializers.checkout import (
     CheckoutSerializer, UserAddressSerializer,
 )
 from ...basket.models import Basket
+from ...order.models import TimeSlot
 from ...payment import refunds
 from ...shipping.repository import Repository
 from ...api_set.serializers.basket import WncBasketSerializer
@@ -58,6 +59,7 @@ class CheckoutView(OscarAPICheckoutView):
         "shipping_address": (User Address ID),
         "billing_address": (User Address ID),
         "payment": cash,
+        "slot": slot.id,
     }
     # Prepaid
     {
@@ -71,6 +73,7 @@ class CheckoutView(OscarAPICheckoutView):
         "billing_address": (User Address ID),
         "payment": "razor_pay",
         "razorpay_payment_id": "pay_A2IJ20983u498hR"
+        "slot": slot.id,
     }
 
     OLD DEPRICATED FORMAT
@@ -282,6 +285,16 @@ class CheckoutView(OscarAPICheckoutView):
 
         # Save Order
         order = c_ser.save()
+        slots = TimeSlot.get_upcoming_slots()
+        if data.get('slot'):
+            for slot in slots:
+                if slot.id == data.get('slot'):
+                    order.slot = slot
+                    order.save()
+        if order.slot is None and slots:
+            order.slot = slots[0]
+            order.save()
+
         self.order_object = order
         request.session[CHECKOUT_ORDER_ID] = order.id
 

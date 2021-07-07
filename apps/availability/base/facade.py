@@ -61,8 +61,8 @@ class BaseZoneFacade(object):
         if location is None:
             if request.session.get('location'):
                 location = Location.objects.filter(pk=request.session.get('location')).select_related('zone').last()
-            # elif request.user.is_authenticated:
-            #     location = Location.objects.filter(user=request.user).order_by('-is_active', '-id').first()
+            elif request.user.is_authenticated:
+                location = Location.objects.filter(user=request.user).order_by('-is_active', '-id').first()
         return location
 
     @staticmethod

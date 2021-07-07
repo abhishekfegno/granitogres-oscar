@@ -1,15 +1,20 @@
 from django.conf import settings
 from django.contrib import messages
+from django.forms import modelform_factory
 from oscar.apps.dashboard.orders.views import OrderDetailView as OscarOrderDetailView
 from django.utils.translation import gettext_lazy as _
 
-from apps.order.models import OrderNote
+from apps.order.models import OrderNote, Order
 from apps.order.processing import EventHandler
 from apps.payment.refunds import RefundFacade
 from lib.exceptions import AlertException
 
+OrderSlotForm = modelform_factory(model=Order, fields=['slot'])
+
 
 class OrderDetailView(OscarOrderDetailView):
+    order_actions = ('save_note', 'delete_note', 'change_order_status', 'change_order_slot',
+                     'create_order_payment_event')
 
     def change_line_statuses(self, request, order, lines, quantities):
         new_status = request.POST['new_status'].strip()
@@ -51,3 +56,31 @@ class OrderDetailView(OscarOrderDetailView):
         message = "\n".join(msgs)
         order.notes.create(user=request.user, message=message, note_type=OrderNote.SYSTEM)
         return self.reload_page()
+
+    def get_order_slot_form(self):
+        data = None
+        if self.request.method == 'POST':
+            data = self.request.POST
+        return OrderSlotForm(instance=self.object, data=data)
+
+    def change_order_slot(self, request, order):
+        old_slot = order.slot.slot
+        form = self.get_order_slot_form()
+        if not form.is_valid():
+            return self.reload_page(error=_("There are some errors in order slot form"))
+        else:
+            form.save()
+            success_msg = _(
+                "Order slot has been changed from '%(old_status)s' to "
+                "'%(new_status)s'") % {'old_status': old_slot,
+                                       'new_status': form.instance.slot.slot}
+            messages.success(request, success_msg)
+        return self.reload_page()
+
+    def get_context_data(self, **kwargs):
+        kwargs = super(OrderDetailView, self).get_context_data(**kwargs)
+        kwargs['order_slot_form'] = self.get_order_slot_form()
+        return kwargs
+
+
+
