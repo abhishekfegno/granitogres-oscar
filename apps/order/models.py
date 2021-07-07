@@ -1,10 +1,11 @@
 import datetime
+import pdb
 
 from dateutil.utils import today
 from django.contrib.gis.db.models import PointField
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.db.models import Case
+from django.db.models import Case, PositiveSmallIntegerField
 from django.db.models.signals import post_save
 from django.utils.functional import cached_property, lazy
 from oscar.apps.address.abstract_models import (
@@ -17,6 +18,7 @@ from oscar.models.fields import UppercaseCharField
 
 from apps.users.models import Location
 from apps.utils.utils import get_statuses
+from lib.exceptions import AlertException
 
 
 def length_in_weeks(value):
@@ -34,6 +36,9 @@ class TimeSlotConfiguration(models.Model):
     orders_prepare_delay = models.PositiveSmallIntegerField(
         help_text="In Minutes. This field specifies the time you want to prepare the orders! if your slot is 5PM-7PM, "
                   "and orders_prepare_delay=180, (180 minutes) Any orders placed after 2PM will not show this slot!")
+    is_active = models.BooleanField(default=True)
+    index = models.PositiveIntegerField(default=0)
+
     SUNDAY = 1
     MONDAY = 2
     TUESDAY = 3
@@ -41,7 +46,7 @@ class TimeSlotConfiguration(models.Model):
     THURSDAY = 5
     FRIDAY = 6
     SATURDAY = 7
-    week_day_code = models.PositiveSmallIntegerField(choices=[
+    week_day_code: int = models.PositiveSmallIntegerField(choices=[
         (SUNDAY, "SUNDAY"),
         (MONDAY, "MONDAY"),
         (TUESDAY, "TUESDAY"),
@@ -51,17 +56,35 @@ class TimeSlotConfiguration(models.Model):
         (SATURDAY, "SATURDAY"),
     ], default=1, validators=[length_in_weeks])
 
-    @property
-    def index(self):
-        h = self.start_time.hour
-        m = self.start_time.minute
-        s = self.start_time.second
-        return self.week_day_code * (h * 60 * 60 + m * 60 + s)
+    def calc_index(self):
+        return self.__class__._date_to_index(
+            week=self.week_day_code, h=self.start_time.hour,
+            m=self.start_time.minute, s=self.start_time.second
+        )
+
+    @classmethod
+    def last_index(cls):
+        return cls._date_to_index(week=cls.SATURDAY, h=23, m=59, s=59)
+
+    @classmethod
+    def _date_to_index(cls, week, h, m, s):
+        return (week - 1) * 86400 + (h * 3600) + (m * 60) + s
+
+    @classmethod
+    def date_to_index(cls, dt):
+        return cls._date_to_index(week=(dt.toordinal() % 7) + 1, h=dt.hour, m=dt.minute, s=dt.second)
+
+    @classmethod
+    def get_very_next_moment_slot(cls):
+        """
+        Next config slot
+        """
+        return cls.picked_index_config().first()
 
     def clean(self):
         qs = self.__class__.objects.filter(week_day_code=self.week_day_code)
         if self.pk:
-            qs = qs.filter(exclude=self.pk)
+            qs = qs.exclude(pk=self.pk)
         for slot in qs:
             if slot.start_time < self.start_time < slot.end_time:
                 raise ValidationError(f'start_time of this slot ({self.start_time}) conflicts with #{slot.id}. {slot}')
@@ -70,14 +93,36 @@ class TimeSlotConfiguration(models.Model):
 
     @property
     def week_day(self):
-        return ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][self.week_day_code]
+        return ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][self.week_day_code - 1]
 
     def __str__(self):
         return f"{self.start_time}-{self.end_time} {self.week_day}"
 
     @classmethod
     def indexed_config(cls):
-        return cls.objects.all().order_by('week_day_code', 'start_time')
+        """
+        Return Config QS In the order of Happening
+        """
+        return cls.objects.all().order_by('index')
+
+    @classmethod
+    def picked_index_config(cls, dt=None):
+        """
+        Will take a date as input, return an index config queryset in the order of very next Happening config first.
+        ie: if dt is wednesday, 10:35 AM, qs will be sorted with the very next config on top. may be Wednesday 11:00 AM
+        """
+        if dt is None:
+            dt = timezone.localtime(timezone.now())
+        ind = cls.date_to_index(dt)
+        filter_case = Case(
+            models.When(index__gt=ind, then=models.Value(1)),
+            default=models.Value(2),
+            output_field=models.PositiveSmallIntegerField())
+        return cls.objects.annotate(primary=filter_case).order_by('primary', 'index')
+
+    def save(self, **kwargs):
+        self.index = self.calc_index()
+        return super(TimeSlotConfiguration, self).save(**kwargs)
 
 
 class TimeSlot(models.Model):
@@ -85,7 +130,6 @@ class TimeSlot(models.Model):
     slot = models.TextField(help_text="Text Representation of configuration")
     start_date = models.DateField(help_text="Delivery Starting Date")
     index = models.PositiveIntegerField(help_text="Slot Index")
-    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.slot
@@ -93,6 +137,18 @@ class TimeSlot(models.Model):
     def __init__(self, *args, **kwargs):
         super(TimeSlot, self).__init__(*args, **kwargs)
         self.__orders = None
+
+    def clean(self):
+        if not self.config:
+            raise ValidationError('Config is Required')
+        if ((self.start_date.toordinal() % 7) + 1) != self.config.week_day_code:
+            raise ValidationError('Timeslot Date does not match with Config Weekday')
+
+    def save(self, **kwargs):
+        if ((self.start_date.toordinal() % 7) + 1) != self.config.week_day_code:
+            raise ValidationError('Timeslot Date does not match with Config Weekday')
+        self.slot = str(self.config)
+        super(TimeSlot, self).save(**kwargs)
 
     @property
     def orders_assigned(self):
@@ -102,118 +158,110 @@ class TimeSlot(models.Model):
 
     @classmethod
     def free_slots(cls):
-        return cls.objects.filter(
+        """
+        Slots that are free for delivery
+        """
+        return cls.objects.annotate(ord_count=models.Count('orders')).filter(
             start_date__gte=today(),
             config__is_active=True,
-            config__deliverable_no_of_orders__gt=models.Count('orders')
-        ).order_by('index')
+            config__deliverable_no_of_orders__gt=models.F('ord_count'),
+        ).select_related('config').order_by('index')
 
     @property
     def max_datetime_to_order(self):
-        return self.order_starting_datetime() - datetime.timedelta(minutes=self.config.orders_prepare_delay)
+        """
+        Maximum datetime before which one can order to this
+        """
+        starting_dt = self.order_starting_datetime
+
+        return starting_dt - datetime.timedelta(minutes=self.config.orders_prepare_delay + 1)
+
+    def next_slot(self):
+        next_conf = TimeSlotConfiguration.indexed_config().filter(index__gt=self.config.index).first()
+        if next_conf is None:
+            next_conf = TimeSlotConfiguration.indexed_config().first()
+        # if next_conf is None:
+        #     raise AlertException("You haven't added any TimeSlotConfiguration!")
+        return next_conf
 
     @property
     def order_starting_datetime(self):
-        return datetime.datetime(
+        return timezone.make_aware(datetime.datetime(
             year=self.start_date.year, month=self.start_date.month, day=self.start_date.day,
-            hour=self.config.start_time.hour, minute=self.config.start_time.minute, second=self.config.start_time.second,
-        )
+            hour=self.config.start_time.hour, minute=self.config.start_time.minute,
+            second=self.config.start_time.second,
+        ), timezone.get_default_timezone())
 
     @classmethod
-    def generate_next_n_slots(cls, n=5):
-        time_now = datetime.datetime.now()
-
+    def slots_with_delivery_after_now(cls):
         """
-        Fetching all already prepared slot!
+        Deliverable slots after now! this can be free or packed!
         """
-
-        slots_with_delivery_after_now = cls.objects.filter(
+        time_now = timezone.localtime(timezone.now())
+        return cls.objects.filter(
             models.Q(
                 start_date__gt=time_now.date()
             ) | models.Q(
                 models.Q(start_date=time_now.date()) & models.Q(config__start_time=time_now.time())
             ),
             config__is_active=True,
-            ).annotate(
+        ).annotate(
             orders_count=models.Count('orders')
         ).select_related('config').order_by('index')
-        available_slots = [
-            slot
-            for slot in slots_with_delivery_after_now
-            if (
-                    slot.orders_count <= slot.config.deliverable_no_of_orders
-                    and slot.max_datetime_to_order > time_now
-            )]
 
-        latest_slot = available_slots[-1]
-        latest_slot_date = latest_slot.start_date
+    @classmethod
+    def slots_available_for_delivery(cls):
         """
-        We need 5 slots, in total, already have 2 on them in TimeSlot table we have to create 3 more!
+        Deliverable slots which are capable to hold more orders after now!
         """
+        time_now = timezone.localtime(timezone.now())
+        return [slot for slot in cls.free_slots() if (slot.max_datetime_to_order > time_now)]
+
+    @classmethod
+    def generate_next_n_slots(cls, n=5):
+        """
+        Fetching all already prepared slot!
+        """
+        available_slots = cls.slots_available_for_delivery()
         needed_slots = n - len(available_slots)
-        configurations = TimeSlotConfiguration.indexed_config()
+        all_slots = list(cls.free_slots())
+        latest_slot = all_slots[-1] if all_slots else None
+        if latest_slot:
+            curr_date = latest_slot.start_date
+        else:
+            curr_date = today()
+        config_index = 0
+        configurations = list(TimeSlotConfiguration.picked_index_config())
+        while needed_slots > 0:
+            config = configurations[config_index % len(configurations)]
+            config_index += 1
+            has_config = lambda slot: slot.config == config and slot.start_date >= curr_date
 
-        qs_index = 0
-        while configurations[qs_index].index <= latest_slot.config.index:
-            """
-            Finding next possible index to create timeslot!
-            """
-            qs_index += 1
-            if len(configurations) >= qs_index:
-                qs_index %= len(configurations)
-                break
+            if not any(filter(has_config, all_slots)):
+                curr_week_day: int = (curr_date.toordinal() % 7) + 1
+                week_sum = int(config_index // len(configurations)) * 7
+                days_to_next_slot: int = config.week_day_code - curr_week_day + week_sum
 
-        out = []
-        while needed_slots:
-            """
-            now we have `configurations[qs_index]` as next preferable config, with which we have to create our new slot!
-            """
-            config: TimeSlotConfiguration = configurations[qs_index]
-            curr_date: datetime.date = latest_slot.start_date
-            # weekday starts with monday as zero, we need weekday sunday as 1, monday as 2 and so on..
-            curr_week_day: int = (curr_date.weekday() + 2) % 7
-            # find gap of next weekday of config!
-            # We assume that `config` will be of the same day or of next day from `latest_slot_date` not previous day!
-            days_to_next_slot: int = config.week_day_code - curr_week_day
+                dt = datetime.datetime(
+                    year=curr_date.year, month=curr_date.month, day=curr_date.day,
+                    hour=config.start_time.hour, minute=config.start_time.minute, second=config.start_time.second,
+                ) + datetime.timedelta(days=days_to_next_slot)
+                latest_slot, created = cls.objects.get_or_create(
+                    start_date=dt.date(),
+                    config=config,
+                    defaults={
+                        'slot': f"{dt} - {str(config)}",
+                        "index": int(datetime.datetime.timestamp(dt)) - 1625054000
+                        # subtracting with timestamp at time of development to make index simpler
+                    }
+                )
+                if created:
+                    needed_slots -= 1
+                    if needed_slots <= 0:
+                        return cls.slots_available_for_delivery()
+                curr_date = latest_slot.start_date
 
-            """
-            We have `curr_date` with date of last config, we have `config` with next configuration!
-            So we will calculate the distance between the `current last config` and the new `preferred config` object
-            as `days_to_next_slot` 
-            Ee generate a new datetime dt as date from (curr_date + days_to_next_slot) and time from 
-            new preferred config.
-            
-            we will check in database weather this date-time is already present there at database,
-            if not we will create and reduce needed_slots by 1; So that we will iterate same procedure, until we create 
-            all the required slots!
-            """
-            dt = datetime.datetime(
-                year=curr_date.year, month=curr_date.month, day=curr_date.day,
-                hour=config.start_time.hour, minute=config.start_time.minute, second=config.start_time.second,
-            ) + datetime.timedelta(days=days_to_next_slot)
-            latest_slot, created = cls.objects.get_or_create(
-                start_date=latest_slot_date,
-                config=config,
-                defaults={
-                    'slot': f"{latest_slot_date} - {config.slot or ''}",
-                    "index": int(datetime.datetime.timestamp(dt)) - 1625054000
-                    # subtracting with timestamp at time of development to make index simpler
-                }
-            )
-            if created:
-                needed_slots -= 1
-            while configurations[qs_index].index <= latest_slot.config.index:
-                """
-                Finding next possible index to create timeslot!
-                """
-                qs_index += 1
-                if len(configurations) >= qs_index:
-                    qs_index %= len(configurations)
-                    break
-
-            # if config.week_day_code != configurations[configuration_index][1].week_day_code:
-            #     latest_slot_date =
-            out.append(latest_slot)
+        return cls.slots_available_for_delivery()
 
 
 class Order(AbstractOrder):
@@ -235,14 +283,16 @@ class Order(AbstractOrder):
 
     @property
     def is_return_time_expired(self):
-        return not self.delivery_time or (self.max_time_to__return and bool(self.max_time_to__return < timezone.now()))
+        return not self.delivery_time or (
+                self.max_time_to__return and bool(self.max_time_to__return < timezone.localtime(timezone.now())))
 
     @cached_property
     def delivery_time(self):
         if self.status in get_statuses(775):
-            return None     # as the package is not delivered
+            return None  # as the package is not delivered
         if not self.date_delivered:
-            date_delivered = self.status_changes.filter(new_status=settings.ORDER_STATUS_DELIVERED).order_by('date_created').first()
+            date_delivered = self.status_changes.filter(new_status=settings.ORDER_STATUS_DELIVERED).order_by(
+                'date_created').first()
             self.date_delivered = date_delivered and date_delivered.date_created
             self.date_delivered and self.save()
         return self.date_delivered
@@ -263,7 +313,6 @@ class Order(AbstractOrder):
         for line in self.cancelled_order_lines:
             amount += line.line_price_excl_tax
         return amount
-
 
     @property
     def cancelled_order_amount_incl_tax(self):
@@ -350,7 +399,6 @@ class ShippingAddress(AbstractShippingAddress):
         return ", ".join(self.get_field_values(fields))
 
     def get_full_name(self):
-
         fields = ['salutation', 'first_name', 'last_name']
         return ", ".join(self.get_field_values(fields))
 
@@ -427,7 +475,7 @@ class Line(AbstractLine):
 
     @property
     def is_return_date_expired(self):
-        return bool(self.last_date_to__return >= timezone.now())
+        return bool(self.last_date_to__return >= timezone.localtime(timezone.now()))
 
     @property
     def active_quantity(self):
@@ -497,4 +545,3 @@ def clear_cache_order(sender, instance, **kwargs):
 
 
 post_save.connect(clear_cache_order, sender=Order)
-

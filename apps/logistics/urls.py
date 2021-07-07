@@ -51,6 +51,7 @@ urlpatterns = [
         path('cancelled/', CancalledTripsListView.as_view(), name="cancelled-trips"),
 
     ])),
+    path('scheduled-time-slots/', ScheduledTimeSlotList.as_view(), name="scheduledtimeslot-list"),
     path('test-push/', test_push, name="test_push"),
     path('slot/', include([
         # path('', SlotListView.as_view(), name="slot-list"),

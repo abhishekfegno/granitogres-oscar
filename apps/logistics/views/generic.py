@@ -13,6 +13,7 @@ from rest_framework.response import Response
 # from rest_framework.generics import ListAPIView
 
 from apps.logistics.models import DeliveryTrip, ConsignmentDelivery, ConsignmentReturn
+from apps.order.models import TimeSlot
 from apps.users.models import User
 
 
@@ -160,6 +161,21 @@ class PlannedTripsListView(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         return super().get_context_data(object_list=object_list,
                                         TITLE="Planned Trips",
+                                        **kwargs)
+
+
+@method_decorator(login_required, name="dispatch")
+@method_decorator(user_passes_test(lambda user: user.is_superuser), name="dispatch")
+class ScheduledTimeSlotList(ListView):
+    template_name = 'logistics/timeslot_list.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return TimeSlot.free_slots()
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        return super().get_context_data(object_list=object_list,
+                                        TITLE="Time Slots",
                                         **kwargs)
 
 

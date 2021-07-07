@@ -24,27 +24,28 @@
         <li>
             <a href="{{ list_url }}">Time Slot Configuration</a>
         </li>
-        <li class="active">Time Slot Configuration - {% if object.id %} Update #{{ object.id }} {% else %} Add New {% endif %}</li>
+        <li class="active">Time Slot Configuration - {% if object.id %} Delete? {% endif %}</li>
     </ul>
 {% endblock %}
 
 {% block header %}
     <div class="page-header">
-        {% if object.pk %}
-        <a href="{% url 'timeslotconfiguration-delete' pk=object.pk %}" class="btn btn-danger btn-lg pull-right">
-            <i class="icon-trash"></i> {% trans "Delete ?" %}</a>
-        {% endif %}
-        <h1> Time Slot Configuration - {% if object.id %} Update #{{ object.id }} {% else %} Add New {% endif %} </h1>
-
+        <h1> Time Slot Configuration - {% if object.id %} Delete #{{ object.id }}  {% endif %} </h1>
     </div>
 {% endblock header %}
 
 {% block dashboard_content %}
     <div class="table-header">
-        <h2>Time Slot Configuration</h2>
+        <h2>Time Slot Configuration - Delete ?</h2>
     </div>
     <div class="well">
-        {% include 'oscar/dashboard/partials/form.html' with includes_files=1 class='wysiwyg' %}
+        <form action="" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" >
+                <i class="icon-trash"></i> {% trans "Delete" %}
+            </button> or <a href="{% url 'timeslotconfiguration-update' pk=object.pk %}">Cancel</a>
+
+        </form>
     </div>
 {% endblock dashboard_content %}
 {% block extrascripts %}

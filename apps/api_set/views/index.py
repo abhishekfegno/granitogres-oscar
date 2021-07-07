@@ -24,6 +24,7 @@ from apps.api_set.serializers.catalogue import (
     CategorySerializer, Category, Product,
     ProductListSerializer, SimpleOfferBannerSerializer
 )
+from apps.availability.facade import ZoneFacade
 from apps.basket.models import Basket
 from apps.catalogue.models import ProductImage
 from apps.dashboard.custom.models import OfferBanner
@@ -54,6 +55,10 @@ def home(request, *a, **k):
     return Response({
         "user": user,
         "cart_item_count": b_count,
+        "zone_facade": ZoneFacade.face(request),
+        "environment": {
+            'LOCATION_FETCHING_MODE': settings.LOCATION_FETCHING_MODE
+        },
     })
 
 

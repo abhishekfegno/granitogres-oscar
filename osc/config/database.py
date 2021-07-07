@@ -25,5 +25,6 @@ DATABASES = {
         'HOST': os.environ.get('DB_HOST'),
         'PORT': 5432,
         'ATOMIC_REQUESTS': True,
+        # 'TEST_RUNNER': 'apps.order.timeslot.tests.TestRunner',
     }
 }

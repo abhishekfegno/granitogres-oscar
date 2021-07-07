@@ -14,6 +14,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL('create extension IF NOT EXISTS hstore;'),
         migrations.CreateModel(
             name='PinCode',
             fields=[

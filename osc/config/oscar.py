@@ -309,6 +309,9 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'label': _('Logistics'),
         'icon': 'icon-double-angle-down',
         'children': [
+            {'label': _('Upcomming Time Slots'), 'url_name': 'logistics:scheduledtimeslot-list',
+             'access_fn': admin_or_staff},
+
             {'label': _('Delivery Agents'), 'url_name': 'logistics:dashboard-delivery-boy-list',
              'access_fn': admin_or_staff},
 
@@ -324,7 +327,6 @@ OSCAR_DASHBOARD_NAVIGATION = [
             {'label': _('Delivered Trips'), 'url_name': 'logistics:delivered-trips',
              'access_fn': admin_or_staff,
              },
-
             {'label': _('Cancelled Trips'), 'url_name': 'logistics:cancelled-trips',
              'access_fn': admin_or_staff,
              },

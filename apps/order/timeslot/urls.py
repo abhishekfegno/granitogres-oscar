@@ -8,5 +8,6 @@ urlpatterns = [
         path('generated', TimeSlotListView.as_view(), name="timeslot-list"),
         path('create/', TimeSlotConfigurationCreateView.as_view(), name="timeslotconfiguration-create"),
         path('<int:pk>/', TimeSlotConfigurationUpdateView.as_view(), name="timeslotconfiguration-update"),
+        path('<int:pk>/delete/', TimeSlotConfigurationDeleteView.as_view(), name="timeslotconfiguration-delete"),
     ]))
 ]

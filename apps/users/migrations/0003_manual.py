@@ -16,11 +16,11 @@ class Migration(migrations.Migration):
             name='is_delivery_boy',
             field=models.NullBooleanField(default=False),
         ),
-        migrations.AddField(
-            model_name='otp',
-            name='is_active',
-            field=models.BooleanField(default=True),
-        ),
+        # migrations.AddField(
+        #     model_name='otp',
+        #     name='is_active',
+        #     field=models.BooleanField(default=True),
+        # ),
 
     ]
 

@@ -118,8 +118,6 @@ INSTALLED_APPS = [
 
 ]
 
-
-
 MIDDLEWARE = [
     # BUILTINS
     'django.middleware.security.SecurityMiddleware',
@@ -165,22 +163,22 @@ SITE_ID = 1
 
 AUTH_USER_MODEL = 'users.User'
 
-from .config.cache import *
-from .config.database import *
-from .config.default import *
-from .config.development import *
-from .config.drf import *
-# from .config.elastic import *
-from .config.oscar import *
-from .config.payments import *
-from .config.push_notifications import *
-from .config.production import *
-from .config.project import *
-from .config.route import *
-from .config.search import *
-from .config.sms import *
-from .config.static import *
-from .config.templates import *
+from .config.cache import *                 # noqa: F401,F404
+from .config.database import *              # noqa: F401,F404
+from .config.default import *               # noqa: F401,F404
+from .config.development import *           # noqa: F401,F404
+from .config.drf import *                   # noqa: F401,F404
+# from .config.elastic import *             # noqa: F401,F404
+from .config.oscar import *                 # noqa: F401,F404
+from .config.payments import *              # noqa: F401,F404
+from .config.push_notifications import *    # noqa: F401,F404
+from .config.production import *            # noqa: F401,F404
+from .config.project import *               # noqa: F401,F404
+from .config.route import *                 # noqa: F401,F404
+from .config.search import *                # noqa: F401,F404
+from .config.sms import *                   # noqa: F401,F404
+from .config.static import *                # noqa: F401,F404
+from .config.templates import *             # noqa: F401,F404
 
 
 """
