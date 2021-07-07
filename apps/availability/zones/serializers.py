@@ -16,8 +16,14 @@ class PointSerializer(serializers.Serializer):
     def create(self, validated_data):
         pass
 
-    longitude = serializers.DecimalField(max_digits=24, decimal_places=16,)
-    latitude = serializers.DecimalField(max_digits=24, decimal_places=16,)
+    longitude = serializers.DecimalField(
+        max_digits=24, decimal_places=16,
+        allow_null=settings.LOCATION_FETCHING_MODE != settings.GEOLOCATION,
+    )
+    latitude = serializers.DecimalField(
+        max_digits=24, decimal_places=16,
+        allow_null=settings.LOCATION_FETCHING_MODE != settings.GEOLOCATION,
+    )
 
     def validate(self, attrs):
         try:
@@ -29,12 +35,19 @@ class PointSerializer(serializers.Serializer):
 
 
 class ZonalDataSerializer(PointSerializer):
-    pincode = serializers.CharField(max_length=8, min_length=6,
-                                    required=settings.LOCATION_FETCHING_MODE == settings.PINCODE)
-    longitude = serializers.DecimalField(max_digits=24, decimal_places=16,
-                                         required=settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION)
-    latitude = serializers.DecimalField(max_digits=24, decimal_places=16,
-                                        required=settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION)
+    pincode = serializers.CharField(
+        max_length=8, min_length=6,
+        required=settings.LOCATION_FETCHING_MODE == settings.PINCODE,
+        allow_null=settings.LOCATION_FETCHING_MODE != settings.PINCODE,
+    )
+    longitude = serializers.DecimalField(
+        max_digits=24, decimal_places=16,
+        allow_null=settings.LOCATION_FETCHING_MODE != settings.GEOLOCATION,
+        required=settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION)
+    latitude = serializers.DecimalField(
+        max_digits=24, decimal_places=16,
+        allow_null=settings.LOCATION_FETCHING_MODE != settings.GEOLOCATION,
+        required=settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION)
 
 
 class DeliverabilityCheckSerializer(ZonalDataSerializer):
@@ -47,11 +60,12 @@ class DeliverabilityCheckSerializer(ZonalDataSerializer):
             key = 'point'
         elif settings.LOCATION_FETCHING_MODE == settings.PINCODE:
             key = 'pincode'
+        validated_data['facade_object'].set_zone(self.context['request'])
 
     def validate(self, attrs):
-        attrs = super().validate(attrs)
         key = ''
         if settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION:
+            attrs = super().validate(attrs)
             key = 'point'
         elif settings.LOCATION_FETCHING_MODE == settings.PINCODE:
             key = 'pincode'

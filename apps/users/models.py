@@ -136,8 +136,8 @@ class Location(models.Model):
 
     def get_geolocation_data(self):
         return {
-            'latitude': self.location.x,
-            'longitude': self.location.y,
+            'latitude': self.location and self.location.x,
+            'longitude': self.location and self.location.y,
         }
 
     def get_pincode_data(self):
