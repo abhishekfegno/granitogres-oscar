@@ -8,8 +8,9 @@ class OrdersDashboardConfig(apps.OrdersDashboardConfig):
 
     def ready(self):
         super(OrdersDashboardConfig, self).ready()
-        from apps.dashboard.orders.views import OrderDetailView
+        from apps.dashboard.orders.views import OrderDetailView, OrderListView
         self.order_detail_view = OrderDetailView
+        self.order_list_view = OrderListView
 
 
 

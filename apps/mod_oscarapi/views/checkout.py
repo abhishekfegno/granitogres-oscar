@@ -294,7 +294,7 @@ class CheckoutView(OscarAPICheckoutView):
         if order.slot is None and slots:
             order.slot = slots[0]
             order.save()
-
+        slot_changed = data.get('slot') == order.slot_id
         self.order_object = order
         request.session[CHECKOUT_ORDER_ID] = order.id
 
@@ -328,6 +328,17 @@ class CheckoutView(OscarAPICheckoutView):
         # Return order data
         data = o_ser.data
         data['errors'] = None
+        data['slot_changed'] = slot_changed
+        slot = order.slot
+        data['slot'] = {
+            'pk': slot and slot.pk,
+            'start_time':  slot and slot.config.start_time,
+            'end_time':  slot and slot.config.end_time,
+            'start_date':  slot and slot.start_date,
+            'max_datetime_to_order':  slot and slot.max_datetime_to_order,
+            'is_next':  bool(slot),
+            'index': slot and slot.index,
+        }
         return Response(o_ser.data)
 
     def post(self, request, format=None):

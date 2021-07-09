@@ -1,15 +1,28 @@
 from django.conf import settings
 from django.contrib import messages
 from django.forms import modelform_factory
-from oscar.apps.dashboard.orders.views import OrderDetailView as OscarOrderDetailView
+from oscar.apps.dashboard.orders.views import OrderDetailView as OscarOrderDetailView, OrderListView as OscarOrderListView
 from django.utils.translation import gettext_lazy as _
 
+from apps.dashboard.orders.forms import OrderSearchForm
 from apps.order.models import OrderNote, Order
 from apps.order.processing import EventHandler
 from apps.payment.refunds import RefundFacade
 from lib.exceptions import AlertException
 
 OrderSlotForm = modelform_factory(model=Order, fields=['slot'])
+
+
+class OrderListView(OscarOrderListView):
+    form_class = OrderSearchForm
+
+    def get_queryset(self):  # noqa (too complex (19))
+        qs = super(OrderListView, self).get_queryset()
+        data = self.form.cleaned_data
+        if data['slot']:
+            qs = qs.filter(slot_id=data['slot'])
+        return qs
+
 
 
 class OrderDetailView(OscarOrderDetailView):
