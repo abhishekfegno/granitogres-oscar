@@ -401,6 +401,14 @@ class CheckoutView(OscarAPICheckoutView):
         return new_states
 
 
+class UserAddressList(generics.ListCreateAPIView):
+    serializer_class = UserAddressSerializer
+    permission_classes = (IsOwner,)
+
+    def get_queryset(self):
+        return UserAddress.objects.filter(user=self.request.user)
+
+
 class UserAddressDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserAddressSerializer
     permission_classes = (IsOwner,)

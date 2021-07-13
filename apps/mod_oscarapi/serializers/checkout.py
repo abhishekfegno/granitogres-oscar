@@ -112,7 +112,7 @@ class UserAddressSerializer(CoreUserAddressSerializer):
             is_in_zone = loc_obj and loc_obj.zone and loc_obj.zone.zone and loc_obj.zone.zone.contains(instance.location)
             return loc_obj and {
                 **instance.location_data,
-                'distance': loc_obj.location.distance(instance.location),
+                'distance': loc_obj.location and loc_obj.location.distance(instance.location),
                 'is_in_zone': is_in_zone,
             }
         return None

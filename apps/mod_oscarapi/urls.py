@@ -131,6 +131,7 @@ LoginView = get_api_class("views.login", "LoginView")
     ],
 )
 
+
 (
     OrderAdminList,
     OrderAdminDetail,
