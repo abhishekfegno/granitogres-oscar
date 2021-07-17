@@ -1,5 +1,4 @@
 import datetime
-import pdb
 
 from dateutil.utils import today
 from django.contrib.gis.db.models import PointField

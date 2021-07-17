@@ -108,7 +108,6 @@ def update_pincode(request, partner, **kwargs):
         out['error_code'] = ZONE_DOES_NOT_EXIST
         out['error'] = 'Zone does not exists'
         return Response(out, status=400)
-    # import pdb; pdb.set_trace()
 
     # fetching model
     Zones_pincode = Zones.pincode.through

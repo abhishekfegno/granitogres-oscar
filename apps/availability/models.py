@@ -37,13 +37,13 @@ class Zones(models.Model):
     pincode = models.ManyToManyField('availability.PinCode', )
 
     def clean(self):
-        qs = Zones.objects.all()
-        if self.pk:
-            qs = qs.exclude(pk=self.pk)
-        overlapping_zone = qs.exclude(pk=self.pk).filter(zone__bboverlaps=self.zone).first()
-        if overlapping_zone:
-            raise ValidationError(f'This Zone is overlapping with Zone: {overlapping_zone.name}!')
-
+        # qs = Zones.objects.all()
+        # if self.pk:
+        #     qs = qs.exclude(pk=self.pk)
+        # overlapping_zone = qs.exclude(pk=self.pk).filter(zone__bboverlaps=self.zone).first()
+        # if overlapping_zone:
+        #     raise ValidationError(f'This Zone is overlapping with Zone: {overlapping_zone.name}!')
+        pass
 
 
 
