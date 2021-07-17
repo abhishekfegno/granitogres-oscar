@@ -406,49 +406,41 @@ var ds = $('#availability_pincode__district_switcher');
 var ps = $('#availability_pincode__partner_switcher');
 
 Swal.fire({
-title: `You have not Explored "${dist}" district in ${state}!`,
-html: `<div>We have not fetched the data for this district! <br />
-    We recommend to explore this only if you are planning to Expand to this Region. <br />
-    Enter <code>CONFIRM EXPLORE</code> in input box to confirm. </div>`,
-icon: 'error',
-input: 'text',
-inputAttributes: {
-autocapitalize: 'off'
-},
-showCancelButton: true,
-confirmButtonText: 'Look up',
-showLoaderOnConfirm: true,
-preConfirm: function(input) {
-if(input.upper() === 'CONFIRM EXPLORE'){
-var url = BASE_REQ_URL.replace(PARTNER_POS_HOLDER, ps.val()).replace(DISTRICT_POS_HOLDER, ds.val())
-return fetch(url, {method: 'POST'}).then( response => {
-if (!response.ok) {throw new Error(response.statusText)}
-return response.json()
-}).catch(error => {
-Swal.showValidationMessage(`Request failed: ${error}`)
-return false;
-})
-} else {
-return false;
-}
-},
-allowOutsideClick: () => !Swal.isLoading()
+    title: `You have not Explored "${dist}" district in ${state}!`,
+    html: `<div>We have not fetched the data for this district! <br />
+        We recommend to explore this only if you are planning to Expand to this Region. </div>`,
+    icon: 'error',
+    showCancelButton: true,
+    confirmButtonText: 'Look up',
+    showLoaderOnConfirm: true,
+    preConfirm: function(input) {
+            var url = BASE_REQ_URL.replace(PARTNER_POS_HOLDER, ps.val()).replace(DISTRICT_POS_HOLDER, ds.val())
+            return fetch(url, {method: 'POST'}).then( response => {
+                if (!response.ok) {throw new Error(response.statusText)}
+                    return response.json()
+                }).catch(error => {
+                Swal.showValidationMessage(`Request failed: ${error}`)
+                return {};
+            })
+    },
+    allowOutsideClick: () => !Swal.isLoading()
 }).then(function (result) {
-if(result.isDismissed){ return; }
-if ( result && result.communities && result.communities.length  ) {
-self.update_vars(result);
-window.vueApp.load_page()
-} else if (
-result &&
-result.communities && result.communities.length === 0 &&
-result.postal && result.postal.length === 0
-) {
-Swal.fire("No Data Available", "it seems that there is no data available corresponding to this region.", "info")
-return ;
-} else {
-return ;
-}
-})
+    if(result.isDismissed){ return; }
+        if ( result && result.communities && result.communities.length  ) {
+            self.update_vars(result);
+            window.vueApp.load_page()
+        } else if (
+        result &&
+        result.communities && result.communities.length === 0 &&
+        result.postal && result.postal.length === 0
+        ) {
+            Swal.fire("No Data Available", "it seems that there is no data available corresponding to this region.", "info")
+            return ;
+        } else {
+            return ;
+        }
+        window.vueApp.load_page()
+    })
 }
 }
 });
