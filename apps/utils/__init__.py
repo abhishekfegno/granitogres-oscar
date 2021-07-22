@@ -86,8 +86,8 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
         low_stock = False
 
     return {
-        'excl_tax': float(purchase_info.price.effective_price),
-        'effective_price': float(purchase_info.price.effective_price),
+        'excl_tax': purchase_info.price.effective_price and float(purchase_info.price.effective_price),
+        'effective_price': purchase_info.price.effective_price and float(purchase_info.price.effective_price),
         'retail': int(retail_rate * 100) / 100,
         'low_stock': low_stock,
         'net_stock_level': net_stock_level,
