@@ -38,7 +38,7 @@ def get_purchase_info(product, request=None, user=None):
 
 
 def purchase_info_as_dict(purchase_info, **kwargs):
-    if not purchase_info:
+    if not purchase_info or not purchase_info.stockrecord:
         return {}
     retail_rate = hasattr(purchase_info.stockrecord, 'price_retail') and purchase_info.stockrecord.price_retail or None
     if retail_rate:
@@ -66,7 +66,7 @@ def purchase_info_as_dict(purchase_info, **kwargs):
 
 
 def purchase_info_lite_as_dict(purchase_info, **kwargs):
-    if not purchase_info:
+    if not purchase_info or not purchase_info.stockrecord:
         return kwargs
     retail_rate = hasattr(purchase_info.stockrecord, 'price_retail') and purchase_info.stockrecord.price_retail or None
     # if retail_rate:
@@ -84,17 +84,19 @@ def purchase_info_lite_as_dict(purchase_info, **kwargs):
         net_stock_level = max(sr.net_stock_level or 0, 0)
     if net_stock_level == 0:
         low_stock = False
-
-    return {
-        'excl_tax': purchase_info.price.effective_price and float(purchase_info.price.effective_price),
-        'effective_price': purchase_info.price.effective_price and float(purchase_info.price.effective_price),
-        'retail': int(retail_rate * 100) / 100,
-        'low_stock': low_stock,
-        'net_stock_level': net_stock_level,
-        'currency': purchase_info.price.currency,
-        'symbol': get_symbol(purchase_info.price.currency),
-        **kwargs
-    }
+    try:
+        return {
+            'excl_tax': purchase_info.price.effective_price and float(purchase_info.price.effective_price),
+            'effective_price': purchase_info.price.effective_price and float(purchase_info.price.effective_price),
+            'retail': int(retail_rate * 100) / 100,
+            'low_stock': low_stock,
+            'net_stock_level': net_stock_level,
+            'currency': purchase_info.price.currency,
+            'symbol': get_symbol(purchase_info.price.currency),
+            **kwargs
+        }
+    except Exception as e:
+        return dummy_purchase_info_lite_as_dict(**kwargs)
 
 
 def dummy_purchase_info_lite_as_dict(**kwargs):

@@ -16,21 +16,21 @@ User = get_user_model()
 
 
 class SendOTP(APIView):
+    """
+    This API is used to send otp.
+    on getting a mobile number, first it is checked across a User Records, Send an otp if found.
+    Else Return response as mobile number not registered.
+
+    Mobile number must be starting with "+91" Without spaces in it.
+
+    When Request is forwarded from Delivery App, 'is_delivery_boy_request': true  must be added with it.
+
+    """
 
     permission_classes = [permissions.AllowAny, ]
     serializer_class = MobileNumberSerializer
 
     def post(self, request):
-        """
-        This API is used to send otp.
-        on getting a mobile number, first it is checked across a User Records, Send an otp if found.
-        Else Return response as mobile number not registered.
-
-        Mobile number must be starting with "+91" Without spaces in it.
-
-        When Request is forwarded from Delivery App, 'is_delivery_boy_request': true  must be added with it.
-
-        """
         out = {'id': None, 'otp_send': False, 'error': None}
         mns = self.serializer_class(data=request.data, context={'request': request})
         if not mns.is_valid():
