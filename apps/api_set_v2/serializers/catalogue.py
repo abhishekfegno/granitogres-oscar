@@ -35,7 +35,9 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFie
     def get_weight(self, instance):
         if instance.is_parent:
             return None
-        return getattr(instance.attr, 'weight')
+        if hasattr(instance.attr, 'weight'):
+            return getattr(instance.attr, 'weight')
+        return 'N/A'
 
     class Meta:
         model = Product

@@ -68,23 +68,17 @@ def purchase_info_as_dict(purchase_info, **kwargs):
 def purchase_info_lite_as_dict(purchase_info, **kwargs):
     if not purchase_info or not purchase_info.stockrecord:
         return kwargs
-    retail_rate = hasattr(purchase_info.stockrecord, 'price_retail') and purchase_info.stockrecord.price_retail or None
-    # if retail_rate:
-    #     price_retail = get_approximate_tax_for_retail(
-    #         purchase_info.price.incl_tax,
-    #         purchase_info.price.excl_tax,
-    #         retail_rate
-    #     )
-    low_stock = False
-    net_stock_level = 0
-    sr = purchase_info.stockrecord
-    if sr and sr.low_stock_threshold:
-        low_stock = sr.net_stock_level <= sr.low_stock_threshold
-    if sr:
-        net_stock_level = max(sr.net_stock_level or 0, 0)
-    if net_stock_level == 0:
-        low_stock = False
     try:
+        retail_rate = hasattr(purchase_info.stockrecord, 'price_retail') and purchase_info.stockrecord.price_retail or None
+        low_stock = False
+        net_stock_level = 0
+        sr = purchase_info.stockrecordapps/api_set_v2/serializers/catalogue.py
+        if sr and sr.low_stock_threshold:
+            low_stock = sr.net_stock_level <= sr.low_stock_threshold
+        if sr:
+            net_stock_level = max(sr.net_stock_level or 0, 0)
+        if net_stock_level == 0:
+            low_stock = False
         return {
             'excl_tax': purchase_info.price.effective_price and float(purchase_info.price.effective_price),
             'effective_price': purchase_info.price.effective_price and float(purchase_info.price.effective_price),
