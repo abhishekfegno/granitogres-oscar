@@ -67,12 +67,12 @@ def purchase_info_as_dict(purchase_info, **kwargs):
 
 def purchase_info_lite_as_dict(purchase_info, **kwargs):
     if not purchase_info or not purchase_info.stockrecord:
-        return kwargs
+        return dummy_purchase_info_lite_as_dict(**kwargs)
     try:
         retail_rate = hasattr(purchase_info.stockrecord, 'price_retail') and purchase_info.stockrecord.price_retail or None
         low_stock = False
         net_stock_level = 0
-        sr = purchase_info.stockrecordapps/api_set_v2/serializers/catalogue.py
+        sr = purchase_info.stockrecord
         if sr and sr.low_stock_threshold:
             low_stock = sr.net_stock_level <= sr.low_stock_threshold
         if sr:

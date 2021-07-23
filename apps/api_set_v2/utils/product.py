@@ -60,7 +60,7 @@ def get_optimized_product_dict(
     sr_set = StockRecord.objects.filter(
         id__in=(st_set_01 | st_set_02),
         product__structure__in=[Product.CHILD, Product.STANDALONE],
-        num_in_stock__gt=0 if needs_stock else -1,
+        num_in_stock__gte=1 if needs_stock else 0,
     ).annotate(to_first=Case(
         When(num_in_stock=0, then=Value(0)), default=Value(1), output_field=IntegerField()
     )).select_related(
@@ -82,14 +82,12 @@ def get_optimized_product_dict(
         sr.product.selected_stock_record = sr
         if sr.product.is_child:
             if sr.product.parent not in product_data.keys():
-                product_data[sr.product.parent] = product_serializer_class(instance=sr.product.parent,
-                                                                           context=cxt).data
+                product_data[sr.product.parent] = product_serializer_class(instance=sr.product.parent, context=cxt).data
                 product_data[sr.product.parent]['variants'] = []
             product_data[sr.product.parent]['variants'].append(
                 product_serializer_class(instance=sr.product, context={'request': request}).data)
         elif sr.product.is_standalone:  # parent or standalone
-            product_data[sr.product] = product_serializer_class(instance=sr.product,
-                                                                context=cxt).data
+            product_data[sr.product] = product_serializer_class(instance=sr.product, context=cxt).data
             product_data[sr.product]['variants'] = []
     if not needs_stock:
         for product in product_set:
