@@ -70,7 +70,8 @@ class SetZone(GenericAPIView):
     def post(self, request, *args, **kwargs):
         sobj = self.get_serializer(data=request.data)
         if not sobj.is_valid():
-            return Response(sobj.errors, status=status.HTTP_400_BAD_REQUEST)
+            out = {'error_message': "Sorry, We are unable to deliver to this location now!"}
+            return Response(out, status=status.HTTP_400_BAD_REQUEST)
         _out = sobj.validated_data['facade_object'].set_zone(request)
         return Response(_out)
 

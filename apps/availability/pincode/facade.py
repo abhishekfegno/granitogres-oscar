@@ -19,7 +19,7 @@ class PincodeFacade(BaseZoneFacade):
         return self._zone
 
     def is_valid(self) -> bool:
-        return self.pin_object is not None
+        return self.get_zone() and self.pin_object is not None
 
     def get_params_for_location(self) -> dict:
 
