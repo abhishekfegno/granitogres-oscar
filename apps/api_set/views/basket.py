@@ -11,15 +11,7 @@ def get_basket(request):
     basket = operations.get_basket(request)
     ser = serializer_class(basket, context={"request": request})
     out = ser.data
-    upcoming_slots = [{
-        'pk': slot.pk,
-        'start_time': slot.config.start_time,
-        'end_time': slot.config.end_time,
-        'start_date': slot.start_date,
-        'max_datetime_to_order': slot.max_datetime_to_order,
-        'is_next': False,
-        'index': slot.index,
-    } for slot in TimeSlot.get_upcoming_slots()]
+    upcoming_slots = [slot.to_dict() for slot in TimeSlot.get_upcoming_slots()]
     upcoming_slots[0]['is_next'] = True
     out["available_deliveries"] = upcoming_slots
     return Response(out)

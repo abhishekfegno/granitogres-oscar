@@ -137,6 +137,18 @@ class TimeSlot(models.Model):
         super(TimeSlot, self).__init__(*args, **kwargs)
         self.__orders = None
 
+    def to_dict(self, is_next=False):
+        return {
+                'pk': self.pk,
+                'start_time': self.config.start_time.strftime("%-I:%M %p"),
+                'end_time': self.config.end_time.strftime("%-I:%M %p"),
+                'start_date': self.start_date.strftime("%-d %b, %Y"),
+                'day': self.start_date.strftime('%A'),
+                'max_datetime_to_order': self.max_datetime_to_order,
+                'is_next': is_next,
+                'index': self.index,
+            }
+
     def clean(self):
         if not self.config:
             raise ValidationError('Config is Required')

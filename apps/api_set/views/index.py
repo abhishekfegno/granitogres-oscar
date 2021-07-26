@@ -65,15 +65,7 @@ def home(request, *a, **k):
         "user": user,
         "cart_item_count": b_count,
         "zone_facade": ZoneFacade.face(request),
-        'next_slot': {
-            'pk': slot and slot.pk,
-            'start_time':  slot and slot.config.start_time,
-            'end_time':  slot and slot.config.end_time,
-            'start_date':  slot and slot.start_date,
-            'max_datetime_to_order':  slot and slot.max_datetime_to_order,
-            'is_next':  bool(slot),
-            'index': slot and slot.index,
-        },
+        'next_slot': slot and slot.to_dict(is_next=True),
         "environment": {
             'LOCATION_FETCHING_MODE': settings.LOCATION_FETCHING_MODE
         },
