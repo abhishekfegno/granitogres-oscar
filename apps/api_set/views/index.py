@@ -56,16 +56,12 @@ def home(request, *a, **k):
     if basket is None:
         basket = request.basket or None
     b_count = basket.num_lines if basket else 0
-    slots = TimeSlot.slots_available_for_delivery()
-    if slots:
-        slot = slots[0]
-    else:
-        slot = None
+    slots = TimeSlot.get_upcoming_slots()
     return Response({
         "user": user,
         "cart_item_count": b_count,
         "zone_facade": ZoneFacade.face(request),
-        'next_slot': slot and slot.to_dict(is_next=True),
+        'slots': [slot.to_dict(is_next=index == 0) for index, slot in enumerate(slots)],
         "environment": {
             'LOCATION_FETCHING_MODE': settings.LOCATION_FETCHING_MODE
         },
