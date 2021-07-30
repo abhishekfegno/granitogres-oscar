@@ -1,4 +1,3 @@
-from django.urls import reverse_lazy
 from oscar.defaults import *
 
 PINCODE = 'pincode'
