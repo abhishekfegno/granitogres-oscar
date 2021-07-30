@@ -42,60 +42,6 @@ def orders(request, *a, **k):
     return _inner()
 
 
-# def clone_order_to_basket(basket: Basket, order_to_get_copied: Order, clear_current_basket: bool = True, ):
-#     copy_of_basket_lines = list(basket.lines.all())
-#     error_messages = []
-#     at_least_one_is_success = False
-#     if clear_current_basket:
-#         basket.lines.all().delete()
-#         basket._lines = None
-#         basket.refresh_from_db()
-#     for line in order_to_get_copied.lines.all():
-#         if line.product is None:
-#             error_messages.append({
-#                 'id': None,
-#                 'title': line.title,
-#                 'error': "This Product is not selling Right Now",
-#                 'is_a_bug': False,
-#             })
-#             continue
-#         try:
-#             basket_line, created = basket.add_product(line.product, quantity=line.quantity)
-#             if not created:
-#                 basket_line.quantity = line.quantity
-#                 basket_line.save()
-#             at_least_one_is_success = True
-#         except ValueError as e:
-#             error_messages.append({
-#                 'id': line.product.id,
-#                 'title': line.product.title,
-#                 'error': str(e),
-#                 'is_a_bug': False,
-#             })
-#         except Exception as e:
-#             error_messages.append({
-#                 'id': line.product.id,
-#                 'title': line.product.title,
-#                 'error': str(e),
-#                 'is_a_bug': True,
-#             })
-#
-#     # if not at_least_one_is_success:
-#     #     # restoring
-#     #     for item in copy_of_basket_lines:
-#     #         basket_line, created = basket.add_product(product=line.product, quantity=line.quantity)
-#     #         if not created:
-#     #             basket_line.quantity = line.quantity
-#     #             basket_line.save()
-#     #
-#     #     # basket.lines.filter(id__in=[item.id for item in copy_of_basket_lines]).delete()
-#     #     basket.reset_offer_applications()
-#     basket._lines = None
-#     basket.refresh_from_db()
-#
-#     return basket, error_messages
-
-
 def do_reorder(basket: Basket, order: Order, request, clear_current_basket: bool=True):  # noqa (too complex (10))
     """
     'Re-order' a previous order.

@@ -110,5 +110,7 @@ class BaseZoneFacade(object):
                     )
             else:
                 out[MODE] = None
+        if out.get(settings.GEOLOCATION) is None:
+            out[settings.GEOLOCATION] = Location().get_geolocation_data()
         return out
 
