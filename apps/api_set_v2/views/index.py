@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Optional
 from django.db.models import Sum, Q
 from django.templatetags.static import static
 from django.views.decorators.cache import cache_page
+from oscar.apps.offer.models import Range
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite
@@ -12,7 +13,8 @@ from apps.api_set_v2.serializers.catalogue import CategorySerializer
 from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.availability.models import PinCode
 from apps.catalogue.models import Category, Product
-from apps.dashboard.custom.models import HomePageMegaBanner, InAppBanner, OfferBanner
+from apps.dashboard.custom.models import HomePageMegaBanner, InAppBanner, OfferBanner, TopCategory, OfferBox, \
+    InAppFullScreenBanner
 from apps.utils import banner_not_found
 from lib.cache import cache_library
 
@@ -71,26 +73,158 @@ def get_home_content(request):
 
 @api_view(("GET",))
 def index(request, *a, **k):
-    cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.5'.format
+    cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.8'.format
 
     def _inner():
         out = {'categories': []}
         cxt = {'context': {'request': request}}
-        category_set = Category.get_root_nodes().exclude(slug="featured").annotate(c=Sum('product__basket_lines'))[:10]
-        out['categories'] = CategorySerializer(category_set, **cxt, many=True).data
+        # category_set = Category.get_root_nodes().exclude(Q(exclude_in_listing=True)|Q(slug="featured")).annotate(c=Sum('product__basket_lines'))[:10]
+        # out['categories'] = CategorySerializer(category_set, **cxt, many=True).data
 
         out['offer_banners'] = [{
             'title': banner.title,
             'banner': banner.home_banner_wide_image(request) if banner.banner else banner_not_found(request),
             'product_range': banner.product_range_id
         } for banner in HomePageMegaBanner.objects.filter(product_range__isnull=False).order_by('-position')]
-        out['content'] = get_home_content(request)
+        # out['content'] = get_home_content(request)
+        exclusive_products_slug = 'exclusive-products'
+        exclusive_products, _created = Range.objects.get_or_create(
+            slug=exclusive_products_slug,
+            defaults={
+                'name': 'Exclusive Products',
+                'is_public': True,
+            }
+        )
+        furniture_for_your_home_slug = 'furnitures-for-your-home'
+        furniture_for_your_home, _created = Range.objects.get_or_create(
+            slug=furniture_for_your_home_slug,
+            defaults={
+                'name': 'Furnitures for your home',
+                'is_public': True,
+            }
+        )
+        jambo_offer_slug = 'furnitures-for-your-home'
+        jambo_offer, _created = Range.objects.get_or_create(
+            slug=jambo_offer_slug,
+            defaults={
+                'name': 'Jumbo Offers',
+                'is_public': True,
+            }
+        )
+        offer_banner_3_slug = 'offer-banner-x3'
+        offer_banner_3, _created = Range.objects.get_or_create(
+            slug=offer_banner_3_slug,
+            defaults={
+                'name': '',
+                'is_public': True,
+            }
+        )
+        picked_for_you_slug = 'picked-for-you'
+        picked_for_you, _created = Range.objects.get_or_create(
+            slug=picked_for_you_slug,
+            defaults={
+                'name': 'Picked for you',
+                'is_public': True,
+            }
+        )
+        customer_favorites_slug = 'customer-favorites'
+        customer_favorites, _created = Range.objects.get_or_create(
+            slug=customer_favorites_slug,
+            defaults={
+                'name': 'Customer Favorites',
+                'is_public': True,
+            }
+        )
+        out['content'] = [
+            {
+                'model': 'image_gallery_x6',
+                'title': 'TOP CATEGORIES',
+                'slug': 'top-category',
+                'content': [tc.serialize(request) for tc in TopCategory.objects.all().order_by('-position')],
+                'view_all': None,
+                'bg': '#fff',
+                'color': '#333',
+            },
+            {
+                'model': 'slider',
+                'id': exclusive_products.id,
+                'title': exclusive_products.name,
+                'slug': exclusive_products.slug,
+                'content': get_optimized_product_dict(request, qs=exclusive_products.all_products(), limit=8, ),
+                'view_all': exclusive_products.slug,
+                'bg': '#f5f6fa',
+                'color': '#555',
+            },
+            {
+                'model': 'slider',
+                'title': furniture_for_your_home.name,
+                'slug': furniture_for_your_home.slug,
+                'content': get_optimized_product_dict(request, qs=furniture_for_your_home.all_products(), limit=8, ),
+                'view_all': exclusive_products.slug,
+                'bg': '#f5f6fa',
+                'color': '#555',
+            },
+            {
+                'model': 'offer_boxes',
+                'title': 'EXPLORE OUR LATEST COLLECTIONS',
+                'slug': 'explore-our-latest-collections',
+                'content': [tc.serialize(request) for tc in OfferBox.objects.all().order_by('-position')],
+                'view_all': '/shop/',
+                'bg': '#fff1da',
+                'color': '#555555',
+            },
+            {
+                'model': 'slider',
+                'title': jambo_offer.name,
+                'slug': jambo_offer.slug,
+                'content': get_optimized_product_dict(request, qs=jambo_offer.all_products(), limit=8, ),
+                'view_all': jambo_offer.slug,
+                'bg': '#f5f6fa',
+                'color': '#333',
+            },
+            {
+                'model': 'image_gallery_x3',
+                'title': '',
+                'slug': offer_banner_3.slug,
+                'content': get_optimized_product_dict(request, qs=offer_banner_3.all_products(), limit=8, ),
+                'view_all': None,
+                'bg': '#fff',
+                'color': '#333'
+            },
+            {
+                'model': 'full_width_banner',
+                'title': '',
+                'slug': 'full_width_banner',
+                'content': [ban.serialize(request) for ban in InAppFullScreenBanner.objects.all()],
+                'view_all': None,
+                'bg': '#fff',
+                'color': '#333'
+            },
+            {
+                'model': 'slider',
+                'title': picked_for_you.name,
+                'slug': picked_for_you.slug,
+                'content': get_optimized_product_dict(request, qs=picked_for_you.all_products(), limit=8, ),
+                'view_all': picked_for_you.slug,
+                'bg': '#f5f6fa',
+                'color': '#555',
+            },
+            {
+                'model': 'slider',
+                'title': customer_favorites.name,
+                'slug': customer_favorites.slug,
+                'content': get_optimized_product_dict(request, qs=customer_favorites.all_products(), limit=8, ),
+                'view_all': customer_favorites.slug,
+                'bg': '#f5f6fa',
+                'color': '#555',
+            },
+        ]
         return out
 
     # return Response(_inner())
     zone = request.session.get('zone')
     key = cache_key(zone)
-    return Response(cache_library(cache_key(key), cb=_inner, ttl=60 * 60 * 3))
+    return Response(cache_library(cache_key(key), cb=_inner, ttl=60 * 60 * 24))
 
 
 @api_view(("GET",))

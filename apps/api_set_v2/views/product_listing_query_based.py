@@ -81,6 +81,7 @@ def product_list(request, category='all', **kwargs):
     _product_range = request.GET.get('product_range')
     page_number = int(request.GET.get('page', '1'))
     page_size = int(request.GET.get('page_size', str(settings.DEFAULT_PAGE_SIZE)))
+    only_favorite = bool(request.GET.get('only_favorite', False))
     out = {}
     # search_handler = get_product_search_handler_class()(request.GET, request.get_full_path(), [])
     title = 'All'
@@ -97,6 +98,8 @@ def product_list(request, category='all', **kwargs):
     elif category != 'all':
         queryset, cat = category_filter(queryset=queryset, category_slug=category, return_as_tuple=True)
         title = cat.name
+    if only_favorite and request.user.is_authenticated:
+        queryset = queryset.browsable.filter(id__in=request.user.product.all().values_list('id'))
     if _filter:
         """
         input = weight__in:25,30,35|price__gte:25|price__lte:45

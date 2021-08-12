@@ -23,6 +23,12 @@ from lib.cache import cache_library
 from sorl.thumbnail import ImageField
 
 
+class FavoriteProduct(models.Model):
+    product_id = models.ForeignKey('catalogue.Product', on_delete=models.CASCADE)
+    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, auto_created=True)
+
+
 class Product(AbstractProduct):
     search = SearchVectorField(null=True)
     selected_stock_record = None
@@ -45,6 +51,7 @@ class Product(AbstractProduct):
     ])
     is_vegetarian = models.BooleanField(default=False)
     is_meet = models.BooleanField(default=False)
+    favorite = models.ManyToManyField(settings.AUTH_USER_MODEL, through=FavoriteProduct)
 
     @property
     def tax_value(self) -> Decimal:
@@ -149,6 +156,7 @@ class Category(AbstractCategory):
     icon = ImageField(_('Icon Image'), upload_to='categories', blank=False,
                       help_text="Used to display in Homepage Icon. Suggested svg images or img less than 255X255px",
                       null=True, max_length=255)
+    exclude_in_listing = models.BooleanField(default=False)
 
     @property
     def thumbnail_web_listing(self):

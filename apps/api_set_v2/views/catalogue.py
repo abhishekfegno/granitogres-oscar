@@ -7,6 +7,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from apps.api_set.views.orders import _login_required
 from apps.api_set_v2.serializers.catalogue import ProductDetailWebSerializer
 from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin
 from apps.api_set_v2.utils.product import get_optimized_product_dict
@@ -15,6 +16,20 @@ from apps.catalogue.models import Product
 # API_V2
 from apps.utils import image_not_found
 
+
+@api_view()
+@_login_required
+def mark_as_fav(request, product: Product):     # needs parent product
+    queryset = Product.browsable.all().select_related('parent', ).prefetch_related('images', 'parent__images')
+    product = get_object_or_404(queryset, pk=product)
+    status = ""
+    if product.favorite.all().filter(id=request.user.id).exists():
+        product.favorite.remove(request.user)
+        status = "removed"
+    else:
+        product.favorite.add(request.user)
+        status = "added"
+    return Response({'status': status})
 
 @api_view()
 def product_detail_web(request, product: Product): # needs parent product

@@ -6,6 +6,8 @@ from django.core import validators
 from django.db import models
 from django.db.models.signals import post_save
 from django.urls import reverse
+from oscar.apps.offer.models import Range
+from oscar.models.fields import AutoSlugField
 from solo.models import SingletonModel
 from sorl.thumbnail import get_thumbnail
 
@@ -115,6 +117,47 @@ class ReturnReason(AbstractCURDModel):
         return reverse(self.rev_name, kwargs={'pk': self.pk})
 
 
+class TopCategory(AbstractCURDModel):
+
+    image = models.ImageField(upload_to='top-category')
+    product_range = models.ForeignKey('offer.Range', on_delete=models.CASCADE)
+    slug = AutoSlugField(populate_from=('title', ))
+    subtitle = ''
+    referrer = 'top-category'
+
+    def get_absolute_url(self):
+        return reverse(self.rev_name, kwargs={'pk': self.pk})
+
+    def serialize(self, request=empty()):
+        return {
+            'id': self.pk,
+            'image': request.build_absolute_uri(self.image.url),
+            'slug': self.slug,
+            'title': self.title,
+            'range': self.product_range_id
+        }
+
+
+class OfferBox(AbstractCURDModel):
+    image = models.ImageField(upload_to='top-category')
+    product_range = models.ForeignKey('offer.Range', on_delete=models.CASCADE)
+    slug = AutoSlugField(populate_from=('title', ))
+    subtitle = ''
+    referrer = 'offer-box'
+
+    def get_absolute_url(self):
+        return reverse(self.rev_name, kwargs={'pk': self.pk})
+
+    def serialize(self, request=empty()):
+        return {
+            'id': self.pk,
+            'image': request.build_absolute_uri(self.image.url),
+            'slug': self.slug,
+            'title': self.title,
+            'range': self.product_range_id
+        }
+
+
 class InAppBanner(AbstractCURDModel):
     referrer = 'in-app-banner'
     SLIDER_BANNER = "Slider"
@@ -172,6 +215,15 @@ class InAppFullScreenBanner(AbstractInAppBanner):
 
     class Meta:
         proxy = True
+
+    def serialize(self, request=empty()):
+        return {
+            'id': self.pk,
+            'image': request.build_absolute_uri(self.banner.url),
+            'slug': self.pk,
+            'title': self.title,
+            'range': self.product_range_id
+        }
 
 
 class InAppSliderBanner(AbstractInAppBanner):
@@ -313,7 +365,8 @@ class SiteConfig(SingletonModel):
 
 # models_list = (FAQ, HomePageMegaBanner, OfferBanner, ContactUsEnquiry, BlogTag, BlogInsight)
 
-models_list = (ReturnReason, HomePageMegaBanner, InAppFullScreenBanner, InAppSliderBanner, InAppBanner)
+models_list = (ReturnReason, HomePageMegaBanner, InAppFullScreenBanner,
+               InAppSliderBanner, InAppBanner, TopCategory, OfferBox)
 
 
 def notify_users_on_create(sender, instance, created, **kwargs):

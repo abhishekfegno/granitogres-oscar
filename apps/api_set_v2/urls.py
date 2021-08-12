@@ -11,7 +11,7 @@ from apps.api_set.views.index import (
 #  End loading v1 apis
 from apps.api_set.views.orders import order_cancel_request, order_return_request
 from apps.api_set.views.public import cancel_reasons_list
-from apps.api_set_v2.views.catalogue import product_detail_web
+from apps.api_set_v2.views.catalogue import product_detail_web, mark_as_fav
 
 from apps.api_set_v2.views.index import index, offers, pincode_list
 from apps.api_set_v2.views.orders import orders_detail, reorder_to_current_basket, reorder_to_temporary_basket
@@ -69,6 +69,7 @@ catalogue_urlpatterns = [
             # path("c/all/new/", product_list_new, name="wnc-all-product-list-new"),                        # category
         path("c/<slug:category>/", product_list, name="wnc-category-product-list-v2"),                      # category
         path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),           # detail
+        path("d/<slug:product>/mark_as_fav/", mark_as_fav, name="wnc-category-product-mark_as_fav-v2"),           # detail
         path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),                                  # filter
         path("suggestions/", product_suggestions, name="wnc-product-suggestions"),                          # category
     ]))

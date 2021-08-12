@@ -233,6 +233,14 @@ OSCAR_DASHBOARD_NAVIGATION = [
              'url_name': 'dashboard-custom:dashboard-home-page-mega-banner-list',
              'access_fn': admin_or_staff
              },
+            {'label': _('Top Categories'),
+             'url_name': 'dashboard-custom:dashboard-top-category-list',
+             'access_fn': admin_or_staff
+             },
+            {'label': _('Offer Boxes'),
+             'url_name': 'dashboard-custom:dashboard-offer-box-list',
+             'access_fn': admin_or_staff
+             },
             {'label': _('In app Full Screen Banners'),
              'url_name': 'dashboard-custom:dashboard-in-app-full-screen-banner-list',
              'access_fn': admin_or_staff
