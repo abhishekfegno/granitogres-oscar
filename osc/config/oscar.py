@@ -241,6 +241,10 @@ OSCAR_DASHBOARD_NAVIGATION = [
              'url_name': 'dashboard-custom:dashboard-offer-box-list',
              'access_fn': admin_or_staff
              },
+            {'label': _('Social Media Posts'),
+             'url_name': 'dashboard-custom:dashboard-social-media-list',
+             'access_fn': admin_or_staff
+             },
             {'label': _('In app Full Screen Banners'),
              'url_name': 'dashboard-custom:dashboard-in-app-full-screen-banner-list',
              'access_fn': admin_or_staff

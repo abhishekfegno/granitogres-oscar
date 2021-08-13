@@ -258,6 +258,12 @@ class HomePageMegaBanner(AbstractCURDModel):
         )
 
 
+class SocialMediaPost(AbstractCURDModel):
+    referrer = 'social-media'
+    banner = models.ImageField(upload_to='home-banner-images', help_text="Recommended : '1920x690'")
+    social_media_url = models.URLField()
+
+
 class SiteConfig(SingletonModel):
     site_name = models.CharField(max_length=256, default="Grocery Store")
     MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY = models.PositiveSmallIntegerField(
@@ -377,7 +383,7 @@ class SiteConfig(SingletonModel):
 # models_list = (FAQ, HomePageMegaBanner, OfferBanner, ContactUsEnquiry, BlogTag, BlogInsight)
 
 models_list = (ReturnReason, HomePageMegaBanner, InAppFullScreenBanner,
-               InAppSliderBanner, InAppBanner, TopCategory, OfferBox)
+               InAppSliderBanner, InAppBanner, TopCategory, OfferBox, SocialMediaPost)
 
 
 def notify_users_on_create(sender, instance, created, **kwargs):
