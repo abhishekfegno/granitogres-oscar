@@ -244,8 +244,6 @@ class InAppSliderBanner(AbstractInAppBanner):
         }
 
 
-
-
 class HomePageMegaBanner(AbstractCURDModel):
     referrer = 'home-page-mega-banner'
     banner = models.ImageField(upload_to='home-banner-images', help_text="Recommended : '1920x690'")
@@ -262,6 +260,16 @@ class SocialMediaPost(AbstractCURDModel):
     referrer = 'social-media'
     banner = models.ImageField(upload_to='home-banner-images', help_text="Recommended : '1920x690'")
     social_media_url = models.URLField()
+
+    def serialize(self, request=empty()):
+        return {
+            'id': self.pk,
+            'image': request.build_absolute_uri(self.banner.url),
+            'slug': self.pk,
+            'title': self.title,
+            'range': None,
+            'url': self.social_media_url
+        }
 
 
 class SiteConfig(SingletonModel):

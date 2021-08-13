@@ -14,7 +14,7 @@ from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.availability.models import PinCode
 from apps.catalogue.models import Category, Product
 from apps.dashboard.custom.models import HomePageMegaBanner, InAppBanner, OfferBanner, TopCategory, OfferBox, \
-    InAppFullScreenBanner, InAppSliderBanner
+    InAppFullScreenBanner, InAppSliderBanner, SocialMediaPost
 from apps.utils import banner_not_found
 from lib.cache import cache_library
 
@@ -73,7 +73,7 @@ def get_home_content(request):
 
 @api_view(("GET",))
 def index(request, *a, **k):
-    cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.8'.format
+    cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.9'.format
 
     def _inner():
         out = {'categories': []}
@@ -150,7 +150,7 @@ def index(request, *a, **k):
                 'id': exclusive_products.id,
                 'title': exclusive_products.name,
                 'slug': exclusive_products.slug,
-                'content': get_optimized_product_dict(request, qs=exclusive_products.all_products(), limit=8, ),
+                'content': get_optimized_product_dict(request, qs=exclusive_products.all_products(), limit=8, ).values(),
                 'view_all': exclusive_products.slug,
                 'bg': '#f5f6fa',
                 'color': '#555',
@@ -159,7 +159,7 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': furniture_for_your_home.name,
                 'slug': furniture_for_your_home.slug,
-                'content': get_optimized_product_dict(request, qs=furniture_for_your_home.all_products(), limit=8, ),
+                'content': get_optimized_product_dict(request, qs=furniture_for_your_home.all_products(), limit=8, ).values(),
                 'view_all': exclusive_products.slug,
                 'bg': '#f5f6fa',
                 'color': '#555',
@@ -177,7 +177,7 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': jambo_offer.name,
                 'slug': jambo_offer.slug,
-                'content': get_optimized_product_dict(request, qs=jambo_offer.all_products(), limit=8, ),
+                'content': get_optimized_product_dict(request, qs=jambo_offer.all_products(), limit=8, ).values(),
                 'view_all': jambo_offer.slug,
                 'bg': '#f5f6fa',
                 'color': '#333',
@@ -204,7 +204,7 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': picked_for_you.name,
                 'slug': picked_for_you.slug,
-                'content': get_optimized_product_dict(request, qs=picked_for_you.all_products(), limit=8, ),
+                'content': get_optimized_product_dict(request, qs=picked_for_you.all_products(), limit=8, ).values(),
                 'view_all': picked_for_you.slug,
                 'bg': '#f5f6fa',
                 'color': '#555',
@@ -213,8 +213,17 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': customer_favorites.name,
                 'slug': customer_favorites.slug,
-                'content': get_optimized_product_dict(request, qs=customer_favorites.all_products(), limit=8, ),
+                'content': get_optimized_product_dict(request, qs=customer_favorites.all_products(), limit=8, ).values(),
                 'view_all': customer_favorites.slug,
+                'bg': '#fff',
+                'color': '#c4942f',
+            },
+            {
+                'model': 'social_media_posts',
+                'title': '#letyourhauzevolve',
+                'slug': 'letyourhauzevolve',
+                'content': [smp.serialise() for smp in SocialMediaPost.objects.all()],
+                'view_all': None,
                 'bg': '#f5f6fa',
                 'color': '#555',
             },
