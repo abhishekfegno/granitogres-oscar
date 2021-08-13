@@ -31,7 +31,7 @@
 {% block header %}
     <div class="page-header">
         {% if object.pk %}
-        <a href="{% url 'dashboard-custom:dashboard-offer-banner-delete' pk=object.pk %}" class="btn btn-danger btn-lg pull-right">
+        <a href="{% url delete_url_name pk=object.pk %}" class="btn btn-danger btn-lg pull-right">
             <i class="icon-trash"></i> {% trans "Delete" %}</a>
         {% endif %}
         <h1> {{ title }} - {% if object.id %} Update #{{ object.id }} {% else %} Add New {% endif %} </h1>
