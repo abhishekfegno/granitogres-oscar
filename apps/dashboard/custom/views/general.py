@@ -50,6 +50,7 @@ class ModelSelectorMixin(object):
             list_url=reverse('dashboard-custom:dashboard-' + self.selected['slug'] + '-list'),
             create_new_url=reverse('dashboard-custom:dashboard-' + self.selected['slug'] + '-create'),
             update_url_name='dashboard-custom:dashboard-' + self.selected['slug'] + '-update',
+            delete_url_name='dashboard-custom:dashboard-' + self.selected['slug'] + '-delete',
             **kwargs)
 
 
