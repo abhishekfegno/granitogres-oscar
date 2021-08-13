@@ -135,6 +135,7 @@ def index(request, *a, **k):
                 'is_public': True,
             }
         )
+        pd = lambda *args, **kwargs: list(get_optimized_product_dict(*args, **kwargs).values())
         out['content'] = [
             {
                 'model': 'image_gallery_x6',
@@ -150,7 +151,7 @@ def index(request, *a, **k):
                 'id': exclusive_products.id,
                 'title': exclusive_products.name,
                 'slug': exclusive_products.slug,
-                'content': get_optimized_product_dict(request, qs=exclusive_products.all_products(), limit=8, ).values(),
+                'content': pd(request, qs=exclusive_products.all_products(), limit=8, ),
                 'view_all': exclusive_products.slug,
                 'bg': '#f5f6fa',
                 'color': '#555',
@@ -159,7 +160,7 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': furniture_for_your_home.name,
                 'slug': furniture_for_your_home.slug,
-                'content': get_optimized_product_dict(request, qs=furniture_for_your_home.all_products(), limit=8, ).values(),
+                'content': pd(request, qs=furniture_for_your_home.all_products(), limit=8, ),
                 'view_all': exclusive_products.slug,
                 'bg': '#f5f6fa',
                 'color': '#555',
@@ -177,7 +178,7 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': jambo_offer.name,
                 'slug': jambo_offer.slug,
-                'content': get_optimized_product_dict(request, qs=jambo_offer.all_products(), limit=8, ).values(),
+                'content': pd(request, qs=jambo_offer.all_products(), limit=8, ),
                 'view_all': jambo_offer.slug,
                 'bg': '#f5f6fa',
                 'color': '#333',
@@ -204,7 +205,7 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': picked_for_you.name,
                 'slug': picked_for_you.slug,
-                'content': get_optimized_product_dict(request, qs=picked_for_you.all_products(), limit=8, ).values(),
+                'content': pd(request, qs=picked_for_you.all_products(), limit=8, ),
                 'view_all': picked_for_you.slug,
                 'bg': '#f5f6fa',
                 'color': '#555',
@@ -213,7 +214,7 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': customer_favorites.name,
                 'slug': customer_favorites.slug,
-                'content': get_optimized_product_dict(request, qs=customer_favorites.all_products(), limit=8, ).values(),
+                'content': pd(request, qs=customer_favorites.all_products(), limit=8, ),
                 'view_all': customer_favorites.slug,
                 'bg': '#fff',
                 'color': '#c4942f',
@@ -222,7 +223,7 @@ def index(request, *a, **k):
                 'model': 'social_media_posts',
                 'title': '#letyourhauzevolve',
                 'slug': 'letyourhauzevolve',
-                'content': [smp.serialise() for smp in SocialMediaPost.objects.all()],
+                'content': [smp.serialize() for smp in SocialMediaPost.objects.all()],
                 'view_all': None,
                 'bg': '#f5f6fa',
                 'color': '#555',
