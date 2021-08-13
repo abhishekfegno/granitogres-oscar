@@ -14,7 +14,7 @@ from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.availability.models import PinCode
 from apps.catalogue.models import Category, Product
 from apps.dashboard.custom.models import HomePageMegaBanner, InAppBanner, OfferBanner, TopCategory, OfferBox, \
-    InAppFullScreenBanner
+    InAppFullScreenBanner, InAppSliderBanner
 from apps.utils import banner_not_found
 from lib.cache import cache_library
 
@@ -186,7 +186,7 @@ def index(request, *a, **k):
                 'model': 'image_gallery_x3',
                 'title': '',
                 'slug': offer_banner_3.slug,
-                'content': get_optimized_product_dict(request, qs=offer_banner_3.all_products(), limit=8, ),
+                'content': [tc.serialize(request) for tc in InAppSliderBanner.objects.all().order_by('-position')],
                 'view_all': None,
                 'bg': '#fff',
                 'color': '#333'

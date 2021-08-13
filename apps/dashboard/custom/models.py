@@ -234,6 +234,17 @@ class InAppSliderBanner(AbstractInAppBanner):
     class Meta:
         proxy = True
 
+    def serialize(self, request=empty()):
+        return {
+            'id': self.pk,
+            'image': request.build_absolute_uri(self.banner.url),
+            'slug': self.pk,
+            'title': self.title,
+            'range': self.product_range_id
+        }
+
+
+
 
 class HomePageMegaBanner(AbstractCURDModel):
     referrer = 'home-page-mega-banner'
