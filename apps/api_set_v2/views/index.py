@@ -223,7 +223,7 @@ def index(request, *a, **k):
                 'model': 'social_media_posts',
                 'title': '#letyourhauzevolve',
                 'slug': 'letyourhauzevolve',
-                'content': [smp.serialize() for smp in SocialMediaPost.objects.all()],
+                'content': [smp.serialize(request) for smp in SocialMediaPost.objects.all()],
                 'view_all': None,
                 'bg': '#f5f6fa',
                 'color': '#555',
