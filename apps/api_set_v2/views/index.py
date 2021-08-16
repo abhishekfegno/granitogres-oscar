@@ -80,10 +80,10 @@ def index(request, *a, **k):
         cxt = {'context': {'request': request}}
         # category_set = Category.get_root_nodes().exclude(Q(exclude_in_listing=True)|Q(slug="featured")).annotate(c=Sum('product__basket_lines'))[:10]
         # out['categories'] = CategorySerializer(category_set, **cxt, many=True).data
-
         out['offer_banners'] = [{
             'title': banner.title,
             'banner': banner.home_banner_wide_image(request) if banner.banner else banner_not_found(request),
+            'thumbnail': banner.home_banner_wide_image_thumbnail(request) if banner.banner else banner_not_found(request),
             'product_range': banner.product_range_id
         } for banner in HomePageMegaBanner.objects.filter(product_range__isnull=False).order_by('-position')]
         # out['content'] = get_home_content(request)
