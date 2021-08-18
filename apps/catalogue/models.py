@@ -52,6 +52,23 @@ class Product(AbstractProduct):
     is_vegetarian = models.BooleanField(default=False)
     is_meet = models.BooleanField(default=False)
     favorite = models.ManyToManyField(settings.AUTH_USER_MODEL, through=FavoriteProduct)
+    weight = models.FloatField(null=True, blank=True, help_text="Weight of packed box in (kg). Used for Delivery")
+    length = models.FloatField(null=True, blank=True, help_text="Length of packed box in (mm). Used for Delivery")
+    width = models.FloatField(null=True, blank=True, help_text="Width of packed box in (mm). Used for Delivery")
+    height = models.FloatField(null=True, blank=True, help_text="Height of packed box in (mm). Used for Delivery")
+
+    upselling = models.ManyToManyField(
+        'catalogue.Product', blank=True,
+        related_name='upsell_with',
+        verbose_name=_("Upselling products"),
+        help_text=_("These are products that are recommended to accompany the "
+                    "main product."))
+    crossselling = models.ManyToManyField(
+        'catalogue.Product', blank=True,
+        related_name='crosssell_with',
+        verbose_name=_("Upselling products"),
+        help_text=_("These are products that are recommended to accompany the "
+                    "main product."))
 
     @property
     def tax_value(self) -> Decimal:
