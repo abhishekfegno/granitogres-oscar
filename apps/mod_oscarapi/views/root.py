@@ -27,7 +27,7 @@ def PUBLIC_APIS(r, f):
                 ("v1", reverse("api-index", request=r, format=f)),
                 ("v2", reverse("api-index-v2", request=r, format=f)),
             ])),
-            ("product-mark_as_fav", reverse("wnc-category-product-mark_as_fav-v2", kwargs={"k": 12}, request=r, format=f)),
+            ("product-mark_as_fav", reverse("wnc-category-product-mark_as_fav-v2", kwargs={"product": 12}, request=r, format=f)),
             ("Pincode List", reverse("api-pincode-v2", request=r, format=f)),
             ("Budget Bag", reverse("wnc-budget_bag", request=r, format=f)),
             ("Offers", reverse("api-offers", request=r, format=f)),
