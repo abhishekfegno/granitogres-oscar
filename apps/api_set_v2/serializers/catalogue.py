@@ -53,7 +53,15 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     recommended_products = serializers.SerializerMethodField()
     attributes = serializers.SerializerMethodField()
     variants = serializers.SerializerMethodField()
+    product_class = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
+
+    def get_product_class(self, instance):
+        return {
+            "id": instance.product_class.id,
+            "name": instance.product_class.name,
+            "slug": instance.product_class.slug,
+        }
 
     class Meta:
         model = Product
