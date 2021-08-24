@@ -70,11 +70,9 @@ Weight
 Wieght
 Waste Coupling Type
 Other Features"""
-filename = 'public/dataset/abchauz_wp/wc-product-export-16-8-2021-1629114021490.csv'
+filename = 'public/dataset/abchauz_wp/wc-product-export-24-8-2021-1629795340224.csv'
 
 fields = [f'Attribute {i} name' for i in range(1, 9)]
-
-
 
 phrase = {
     'Material': 'Material',
@@ -139,20 +137,27 @@ phrase = {
     'Weight': 'Weight',
     'Wieght': 'Weight',
     'Waste Coupling Type': 'Waste Coupling Type',
-    'Other Features': 'Other Features'
+    'Other Features': 'Other Features',
+    'Group': 'Group',
 }
 
 with open(filename, 'r') as _fp:
     contents = csv.DictReader(_fp)
     dataset_container = []
-    matrix = [
-        set([phrase.get(line[f], line[f]) for f in fields if line[f]])
-        for line in contents]
-    for line in matrix:
-        if line and line not in dataset_container:
-            dataset_container.append(line)
-    for p in dataset_container:
-        print(p)
-
-
+    matrix = {}
+    for line in contents:
+        grp_name = None
+        grp_fields = []
+        for f in fields:
+            if line[f] == 'Group':
+                grp_name = line[f.replace('name', 'value(s)')]
+            elif line[f]:
+                grp_fields.append(phrase.get(line[f], line[f]))
+        if grp_name:
+            matrix[grp_name] = list(set(matrix.get(grp_name, [])).union(set(grp_fields)))
+            grp_name = None
+        else:
+            print("Failed to find Group name in :", line['Name'], [line[f] for f in fields])
+    for k, v in matrix.items():
+        print(k, str(v))
 

@@ -48,7 +48,7 @@ def digit(val):
 
 class Command(BaseCommand):
     """
-    ./manage.py load_from_wordpress public/dataset/abchauz_wp/wc-product-export-16-8-2021-1629114021490.csv
+    ./manage.py load_from_wordpress public/dataset/abchauz_wp/wc-product-export-24-8-2021-1629795340224.csv
     HEADER:
     ID,
     Type,
@@ -198,7 +198,8 @@ class Command(BaseCommand):
         'Weight': 'Weight',
         'Wieght': 'Weight',
         'Waste Coupling Type': 'Waste Coupling Type',
-        'Other Features': 'Other Features'
+        'Other Features': 'Other Features',
+        'Group': 'Group',
     }
 
     def add_arguments(self, parser):
