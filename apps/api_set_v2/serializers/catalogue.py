@@ -3,7 +3,8 @@ from rest_framework.reverse import reverse
 
 from apps.api_set.serializers.catalogue import custom_ProductListSerializer
 from apps.api_set.serializers.mixins import ProductDetailSerializerMixin
-from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite
+from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite, \
+    ProductAttributeFieldMixin
 from apps.catalogue.models import Category, Product
 
 
@@ -44,7 +45,7 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFie
         fields = ('id', 'title', 'primary_image', 'price', 'weight', 'url')
 
 
-class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductDetailSerializerMixin, serializers.ModelSerializer):
+class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldMixin, ProductDetailSerializerMixin, serializers.ModelSerializer):
     price = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()

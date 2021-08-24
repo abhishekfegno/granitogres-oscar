@@ -19,7 +19,7 @@ class ProductPrimaryImageFieldMixin(object):
         img = instance.primary_image()
         img_mob = image_not_found() if type(img) is dict else img.thumbnail_mobile_listing
         return {
-            # 'web': req.build_absolute_uri(img_web),
+            'web': self.original and req(self.original.url),
             'mobile': req(img_mob),
         }
 
@@ -43,8 +43,7 @@ class ProductAttributeFieldMixin(object):
                 'value': attr.value_as_text,
                 'code': attr.att_code,
             } for attr in attrs_value]
-        # cache.delete(cache_key.product_attribute__key(instance.id))
-        return cache_library(cache_key.product_attribute__key(instance.id), cb=_inner)
+        return _inner()
 
 
 class SibblingProductAttributeFieldMixin(ProductAttributeFieldMixin):
