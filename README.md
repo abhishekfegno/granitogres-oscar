@@ -1,15 +1,15 @@
-# Shopprix
-###### Grossery Based E-Commerce Project By Fegno Technologies.
+# ABCHAUZ OSCAR
+###### ABCHAUZ - An OSCAR Based E-Commerce Project By Fegno Technologies.
 
 ### Features 
 
 
 ### DEVELOEPRS
-1. github::jerinisready
-
+1. github::jerin-fegno
+2. github::abhishek-fegno
 
 ### API Docs 
-Api Docs is available on `/api/v1/`     
+Api Docs is available on `/api/v2/`     
 {updated from `apps.mod_oscarapi.views.root`}
 
 
