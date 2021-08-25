@@ -19,7 +19,7 @@ class ProductPrimaryImageFieldMixin(object):
         img = instance.primary_image()
         img_mob = image_not_found() if type(img) is dict else img.thumbnail_mobile_listing
         return {
-            'web': self.original and req(self.original.url),
+            'web': instance.original and req(instance.original.url),
             'mobile': req(img_mob),
         }
 
