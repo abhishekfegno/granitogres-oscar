@@ -5,7 +5,7 @@ GEOLOCATION = 'geolocation'
 
 LOCATION_FETCHING_MODE_SET = [PINCODE, GEOLOCATION]
 
-LOCATION_FETCHING_MODE = GEOLOCATION
+LOCATION_FETCHING_MODE = PINCODE
 
 DEFAULT_LOCATION_NAME = "Deliverable"
 
@@ -15,8 +15,8 @@ OSCARAPI_BLOCK_ADMIN_API_ACCESS = True
 OSCAR_MAX_PER_LINE_QUANTITY = 12
 
 OSCAR_DEFAULT_CURRENCY = 'INR'
-OSCAR_SHOP_NAME = 'Shopprix'
-OSCAR_SHOP_TAGLINE = "Super Center"
+OSCAR_SHOP_NAME = 'ABCHAUZ'
+OSCAR_SHOP_TAGLINE = "House of Homes"
 OSCAR_HOMEPAGE = reverse_lazy('catalogue:index')
 OSCAR_ACCOUNTS_REDIRECT_URL = 'customer:profile-view'
 OSCAR_RECENTLY_VIEWED_PRODUCTS = 20
@@ -231,6 +231,18 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'children': [
             {'label': _('Home Page Mega Banners'),
              'url_name': 'dashboard-custom:dashboard-home-page-mega-banner-list',
+             'access_fn': admin_or_staff
+             },
+            {'label': _('Top Categories'),
+             'url_name': 'dashboard-custom:dashboard-top-category-list',
+             'access_fn': admin_or_staff
+             },
+            {'label': _('Offer Boxes'),
+             'url_name': 'dashboard-custom:dashboard-offer-box-list',
+             'access_fn': admin_or_staff
+             },
+            {'label': _('Social Media Posts'),
+             'url_name': 'dashboard-custom:dashboard-social-media-list',
              'access_fn': admin_or_staff
              },
             {'label': _('In app Full Screen Banners'),

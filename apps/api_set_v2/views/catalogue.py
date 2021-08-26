@@ -1,15 +1,10 @@
-from pprint import pprint
-
-from django.db.models import Q
-from django.utils.html import strip_tags
+from django.core.cache import cache
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 
+from apps.api_set.views.orders import _login_required
 from apps.api_set_v2.serializers.catalogue import ProductDetailWebSerializer
-from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin
-from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.catalogue.models import Product
 
 # API_V2
@@ -17,54 +12,50 @@ from apps.utils import image_not_found
 
 
 @api_view()
-def product_detail_web(request, product: Product): # needs parent product
+@_login_required
+def mark_as_fav(request, product: Product):     # needs parent product
     queryset = Product.browsable.all().select_related('parent', ).prefetch_related('images', 'parent__images')
-    serializer_class = ProductDetailWebSerializer       # v2
     product = get_object_or_404(queryset, pk=product)
-    if product.is_child:
-        product = product.parent
-    img_mixin = ProductPrimaryImageFieldMixin()
-    price_mixin = ProductPrimaryImageFieldMixin()
-    img_mixin.context = {'request': request}
-    price_mixin.context = {'request': request}
-    response = get_optimized_product_dict(
-        request=request,
-        qs=[product, ],
-        needs_stock=False,
-    ).values()
-    sol = request.basket.sorted_recommended_products + product.sorted_recommended_products
+    status = ""
+    if product.favorite.all().filter(id=request.user.id).exists():
+        product.favorite.remove(request.user)
+        status = "removed"
+    else:
+        product.favorite.add(request.user)
+        status = "added"
+    return Response({'status': status})
 
-    for r in response:
-        response = r
-        break
 
-    def get_primary_image(instance):
-        if instance.is_child:
-            return None
-        request = (self.context or {}).get('request', empty())  # noqa: mixin assured
-        req = request.build_absolute_uri
-        img = instance.primary_image()
-        img_mob = img['original'] if type(img) is dict else img.thumbnail_mobile_listing
-        return {
-            # 'web': req.build_absolute_uri(img_web),
-            'mobile': req(img_mob or image_not_found()),
-        }
+@api_view()
+def product_detail_web(request, product):
 
-    response = {
-        **response,
-        "url": reverse('product-detail', request=request, kwargs={'pk': product.id}),
-        "description": strip_tags(product.description),
-        'images': [request.build_absolute_uri(u.thumbnail_mobile_listing or image_not_found()) for u in product.get_all_images()],
-        "recommended_products": [a for a in get_optimized_product_dict(
-            request=request,
-            qs=sol,
-        ).values()],
-    }
-
+    key = f"product_detail::{product}"
+    data = cache.get(key)
+    if not data:
+        queryset = Product.objects.base_queryset()
+        serializer_class = ProductDetailWebSerializer
+        product = get_object_or_404(queryset, pk=product)
+        if product.is_parent:
+            focused_product = product.get_apt_child(order='-price_excl_tax')
+        elif product.is_child:
+            focused_product = product
+            product = product.parent
+        else:
+            focused_product = product
+        data = serializer_class(instance=focused_product, context={'request': request, 'product': product}).data
+        cache.set(key, data)
     if request.session.get('location'):
         out = {
             'message': None,
             'status': True,
+            'data': {
+                'location': {
+                    "zone_id": request.session.get('zone'),
+                    "zone_name": request.session.get('zone_name'),
+                    "location_id": request.session.get('location'),
+                    "location_name": request.session.get('location_name')
+                }
+            }
         }
     else:
         out = {
@@ -73,6 +64,6 @@ def product_detail_web(request, product: Product): # needs parent product
         }
 
     return Response({
-        'results': response,
+        'results': data,
         'deliverable': out
     })

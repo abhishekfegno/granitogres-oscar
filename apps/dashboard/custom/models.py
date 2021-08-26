@@ -6,6 +6,8 @@ from django.core import validators
 from django.db import models
 from django.db.models.signals import post_save
 from django.urls import reverse
+from oscar.apps.offer.models import Range
+from oscar.models.fields import AutoSlugField
 from solo.models import SingletonModel
 from sorl.thumbnail import get_thumbnail
 
@@ -20,6 +22,10 @@ class empty:
 
     def build_absolute_uri(self, path):
         return path
+
+
+THUMB_QUALITY = 30
+USE_ORIGINAL = False
 
 
 class OfferBanner(models.Model):
@@ -115,6 +121,66 @@ class ReturnReason(AbstractCURDModel):
         return reverse(self.rev_name, kwargs={'pk': self.pk})
 
 
+class TopCategory(AbstractCURDModel):
+
+    image = models.ImageField(upload_to='top-category')
+    product_range = models.ForeignKey('offer.Range', on_delete=models.CASCADE)
+    slug = AutoSlugField(populate_from=('title', ))
+    subtitle = ''
+    referrer = 'top-category'
+    original_resolution = "491x306"
+    thumbnail_resolution = "49x30"
+    
+    def get_absolute_url(self):
+        return reverse(self.rev_name, kwargs={'pk': self.pk})
+
+    def serialize(self, request=empty()):
+        if USE_ORIGINAL:
+            abs_img = request.build_absolute_uri(self.image.url)
+        else:
+            abs_img = request.build_absolute_uri(get_thumbnail(self.image, self.original_resolution, quality=100, progressive=True).url)
+        tmp_img = request.build_absolute_uri(get_thumbnail(self.image, self.thumbnail_resolution, quality=THUMB_QUALITY).url)
+        return {
+            'id': self.pk,
+            'image': abs_img,
+            'thumbnail': tmp_img,
+            'slug': self.slug,
+            'title': self.title,
+            'range': self.product_range_id
+        }
+
+
+class OfferBox(AbstractCURDModel):
+    image = models.ImageField(upload_to='top-category')
+    product_range = models.ForeignKey('offer.Range', on_delete=models.CASCADE)
+    slug = AutoSlugField(populate_from=('title', ))
+    subtitle = ''
+    referrer = 'offer-box'
+
+    def get_absolute_url(self):
+        return reverse(self.rev_name, kwargs={'pk': self.pk})
+
+    original_resolution = "220x220"
+    thumbnail_resolution = "22x22"
+
+    def serialize(self, request=empty()):
+        if USE_ORIGINAL:
+            abs_img = request.build_absolute_uri(self.image.url)
+        else:
+            abs_img = request.build_absolute_uri(get_thumbnail(self.image, self.original_resolution, quality=100).url)
+
+        tmp_img = request.build_absolute_uri(get_thumbnail(self.image, self.thumbnail_resolution, quality=THUMB_QUALITY).url)
+
+        return {
+            'id': self.pk,
+            'image': abs_img,
+            'thumbnail': tmp_img,
+            'slug': self.slug,
+            'title': self.title,
+            'range': self.product_range_id
+        }
+
+
 class InAppBanner(AbstractCURDModel):
     referrer = 'in-app-banner'
     SLIDER_BANNER = "Slider"
@@ -173,6 +239,25 @@ class InAppFullScreenBanner(AbstractInAppBanner):
     class Meta:
         proxy = True
 
+    original_resolution = "1920x442"
+    thumbnail_resolution = "58x11"
+
+    def serialize(self, request=empty()):
+        if USE_ORIGINAL:
+            abs_img = request.build_absolute_uri(self.banner.url)
+        else:
+            abs_img = request.build_absolute_uri(get_thumbnail(self.banner, self.original_resolution, quality=100).url)
+        tmp_img = request.build_absolute_uri(get_thumbnail(self.banner, self.thumbnail_resolution, quality=THUMB_QUALITY).url)
+
+        return {
+            'id': self.pk,
+            'image': abs_img,
+            'thumbnail': tmp_img,
+            'slug': self.pk,
+            'title': self.title,
+            'range': self.product_range_id
+        }
+
 
 class InAppSliderBanner(AbstractInAppBanner):
     referrer = 'in-app-slider-banner'
@@ -182,6 +267,25 @@ class InAppSliderBanner(AbstractInAppBanner):
     class Meta:
         proxy = True
 
+    original_resolution = '348x348'
+    thumbnail_resolution = '34x34'
+
+    def serialize(self, request=empty()):
+        if USE_ORIGINAL:
+            abs_img = request.build_absolute_uri(self.banner.url)
+        else:
+            abs_img = request.build_absolute_uri(get_thumbnail(self.banner, self.original_resolution, quality=100).url)
+        tmp_img = request.build_absolute_uri(get_thumbnail(self.banner, self.thumbnail_resolution, quality=THUMB_QUALITY).url)
+
+        return {
+            'id': self.pk,
+            'image': abs_img,
+            'thumbnail': tmp_img,
+            'slug': self.pk,
+            'title': self.title,
+            'range': self.product_range_id
+        }
+
 
 class HomePageMegaBanner(AbstractCURDModel):
     referrer = 'home-page-mega-banner'
@@ -190,9 +294,40 @@ class HomePageMegaBanner(AbstractCURDModel):
                                       related_name='home_banners_included_this')
 
     def home_banner_wide_image(self, request=empty()):
+        return request.build_absolute_uri(self.banner.url)
+        # return request.build_absolute_uri(
+        #     get_thumbnail(self.banner, settings.WIDE_SCREEN_BANNER_IMAGE_SIZE, crop='center', quality=100).url
+        # )
+
+    def home_banner_wide_image_thumbnail(self, request=empty()):
         return request.build_absolute_uri(
-            get_thumbnail(self.banner, settings.WIDE_SCREEN_BANNER_IMAGE_SIZE, crop='center', quality=100).url
+            get_thumbnail(self.banner, settings.WIDE_SCREEN_BANNER_THUMBNAIL_SIZE, crop='center', quality=100).url
         )
+
+
+class SocialMediaPost(AbstractCURDModel):
+    referrer = 'social-media'
+    banner = models.ImageField(upload_to='home-banner-images', help_text="Recommended : '1920x690'")
+    social_media_url = models.URLField()
+    original_resolution = '440x440'
+    thumbnail_resolution = '44x44'
+
+    def serialize(self, request=empty()):
+        if USE_ORIGINAL:
+            abs_img = request.build_absolute_uri(self.banner.url)
+        else:
+            abs_img = request.build_absolute_uri(get_thumbnail(self.banner, self.original_resolution, quality=100).url)
+        tmp_img = request.build_absolute_uri(get_thumbnail(self.banner, self.thumbnail_resolution, quality=THUMB_QUALITY).url)
+
+        return {
+            'id': self.pk,
+            'image': abs_img,
+            'thumbnail': tmp_img,
+            'slug': self.pk,
+            'title': self.title,
+            'range': None,
+            'url': self.social_media_url
+        }
 
 
 class SiteConfig(SingletonModel):
@@ -313,7 +448,8 @@ class SiteConfig(SingletonModel):
 
 # models_list = (FAQ, HomePageMegaBanner, OfferBanner, ContactUsEnquiry, BlogTag, BlogInsight)
 
-models_list = (ReturnReason, HomePageMegaBanner, InAppFullScreenBanner, InAppSliderBanner, InAppBanner)
+models_list = (ReturnReason, HomePageMegaBanner, InAppFullScreenBanner,
+               InAppSliderBanner, InAppBanner, TopCategory, OfferBox, SocialMediaPost)
 
 
 def notify_users_on_create(sender, instance, created, **kwargs):

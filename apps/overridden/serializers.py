@@ -11,5 +11,5 @@ class UserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = ('pk', 'username', 'email', 'first_name', 'last_name', 'status', 'is_delivery_request_pending')
-        read_only_fields = ('email', 'username', 'status', 'is_delivery_request_pending')
+        read_only_fields = ( 'username', 'status', 'is_delivery_request_pending')
 

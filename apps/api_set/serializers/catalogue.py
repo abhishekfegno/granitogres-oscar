@@ -2,7 +2,7 @@ import math
 from decimal import Decimal
 
 from django.core.cache import cache
-from django.db.models import Max, F, ExpressionWrapper, IntegerField, Q
+from django.db.models import Max, F, ExpressionWrapper, IntegerField, Q, Case, When
 from django.utils.html import strip_tags
 from oscar.apps.offer.models import ConditionalOffer
 from oscar.apps.shipping.scales import Scale
@@ -41,14 +41,14 @@ class CategorySerializer(serializers.ModelSerializer):
             'name',
             'slug',
             'img_thumb_mob',
-            'offers_upto',
+            # 'offers_upto',
             'description',
             'children',
         )
 
     children = serializers.SerializerMethodField()
     img_thumb_mob = serializers.SerializerMethodField()
-    offers_upto = serializers.SerializerMethodField()
+    # offers_upto = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
 
     def get_description(self, instance):
@@ -80,10 +80,15 @@ class CategorySerializer(serializers.ModelSerializer):
             sr = StockRecord.objects.filter(qs_filter).only('id')  # get queryset
             sr2 = sr.annotate(
                 diff_percentage=ExpressionWrapper(  # wrap expression : (field_1 - field_2) * 100 / field_1
-                    (F(field_1) - F(field_2)) * Decimal('100.0') / (F(field_1)),
-                    output_field=IntegerField()))
+                    Case(
+                        When(**{f'{field_1}__gt': 0}, then=(F(field_1) - F(field_2)) * Decimal('100.0') / (F(field_1))), default=0
+                    ),
+                    output_field=IntegerField())
+            )
+
             percent = sr2.aggregate(Max('diff_percentage'))['diff_percentage__max'] or 0
-            return round_off_base * math.ceil(percent/round_off_base)     # to round 43 to 45 and 46 to 50
+            if percent:
+                return round_off_base * math.ceil(percent/round_off_base)     # to round 43 to 45 and 46 to 50
         return 0
 
 

@@ -15,7 +15,7 @@ from apps.api_set.serializers.catalogue import (
 )
 from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.dashboard.custom.models import OfferBanner
-from lib.product_utils import category_filter, apply_filter, apply_search, apply_sort
+from lib.product_utils import category_filter, apply_filter, apply_search, apply_sort, recommended_class
 from apps.catalogue.models import Product
 from apps.utils.urls import list_api_formatter
 from lib import cache_key
@@ -71,7 +71,7 @@ def product_list(request, category='all', **kwargs):
         Where minprice, maxprice and  available_only are common for all.
         other dynamic parameters are available at  reverse('wnc-filter-options', kwarg={'pk': '<ProductClass: id>'})
     """
-    cache.clear()
+    # cache.clear()
     queryset = Product.browsable.browsable()
     serializer_class = custom_ProductListSerializer
     _search = request.GET.get('q')
@@ -81,6 +81,7 @@ def product_list(request, category='all', **kwargs):
     _product_range = request.GET.get('product_range')
     page_number = int(request.GET.get('page', '1'))
     page_size = int(request.GET.get('page_size', str(settings.DEFAULT_PAGE_SIZE)))
+    only_favorite = bool(request.GET.get('only_favorite', False))
     out = {}
     # search_handler = get_product_search_handler_class()(request.GET, request.get_full_path(), [])
     title = 'All'
@@ -97,6 +98,8 @@ def product_list(request, category='all', **kwargs):
     elif category != 'all':
         queryset, cat = category_filter(queryset=queryset, category_slug=category, return_as_tuple=True)
         title = cat.name
+    if only_favorite and request.user.is_authenticated:
+        queryset = queryset.browsable.filter(id__in=request.user.product.all().values_list('id'))
     if _filter:
         """
         input = weight__in:25,30,35|price__gte:25|price__lte:45
@@ -133,7 +136,7 @@ def product_list(request, category='all', **kwargs):
 
         else:
             product_data = []
-        rc = None
+        rc = recommended_class(queryset)
         return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc, title=title)
     if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not any([_search, _filter, _sort, _offer_category, _product_range, ]):
         c_key = cache_key.product_list__key.format(page_number, page_size, category)
