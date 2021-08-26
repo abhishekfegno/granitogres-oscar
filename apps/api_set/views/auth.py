@@ -38,10 +38,12 @@ class SendOTP(APIView):
             return Response(out, status=400)
         else:
             otp = OTP.generate(mns.validated_data['mobile'], )
-            status = otp.send_message()
+            status = otp.send_message()       # FOR LOCAL DEVELOPMENT.
+            # status = False
             out['id'] = otp.id
             out['mobile_number'] = otp.mobile_number
             out['otp_send'] = status
+            out['otp'] = otp.code
             out['user'] = bool(otp.user)
             out['user_name'] = (bool(otp.user) and otp.user.get_short_name()) or None
         return Response(out)
@@ -91,6 +93,7 @@ class LoginWithOTP(APIView):
 
         # Generating User or Respond with error
         otp_object = otp_serializer.validated_data['object']
+        # import pdb;pdb.set_trace()
         if not otp_object.user:  # signup 
             try:
                 otp_object.generate_user()

@@ -1,0 +1,19 @@
+{% load i18n %}
+
+{% if store.has_contact_details %}
+    <h3>{% trans "Contact" %}</h3>
+{% endif %}
+{% if store.manager_name %}
+    {{ store.manager_name }}<br />
+{% endif %}
+{% if store.phone %}
+<div>
+    <i class="icon-phone"></i> {{ store.phone }}<br />
+</div>
+{% endif %}
+{% if store.email %}
+<div>
+    <i class="icon-envelope-alt"></i>
+    <a class="email" href="mailto:{{ store.email }}">{{ store.email }}</a><br />
+</div>
+{% endif %}
