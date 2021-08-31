@@ -1,0 +1,39 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load i18n %}
+
+{% block title %}
+{% trans "Delete store group?" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li>
+        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+    </li>
+    <li>
+        <a href="{% url 'stores-dashboard:store-list' %}">{% trans "Store groups" %}</a>
+    </li>
+    <li>
+        {{ object.name }}
+    </li>
+    <li class="active">{% trans "Delete?" %}</li>
+</ul>
+{% endblock %}
+
+{% block headertext %}
+    {% trans "Delete store group?" %}
+{% endblock headertext %}
+
+{% block dashboard_content %}
+<form action="." method="post">
+    {% csrf_token %}
+    {% blocktrans with group_name=object.name %}
+    <p>Delete store group <strong>{{ group_name }}</strong> - are you sure?</p>
+    {% endblocktrans %}
+    <div class="form-actions">
+        <button type="submit" class="btn btn-large btn-danger">{% trans "Delete" %}</button>
+        {% trans "or" %}
+        <a href="{% url 'stores-dashboard:store-group-list' %}">{% trans "cancel" %}</a>.
+    </div>
+</form>
+{% endblock %}

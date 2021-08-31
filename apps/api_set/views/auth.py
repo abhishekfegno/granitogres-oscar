@@ -38,7 +38,8 @@ class SendOTP(APIView):
             return Response(out, status=400)
         else:
             otp = OTP.generate(mns.validated_data['mobile'], )
-            status = otp.send_message()
+            status = otp.send_message()       # FOR LOCAL DEVELOPMENT.
+            # status = False
             out['id'] = otp.id
             out['mobile_number'] = otp.mobile_number
             out['otp_send'] = status
@@ -82,7 +83,7 @@ class LoginWithOTP(APIView):
     serializer_class = OtpSerializer
 
     def post(self, request, *args, **kwargs):
-        out = {'error': None, 'user': None, 'basket': None, 'cart_item_count': 0}
+        out = {'error': None, 'user': None, 'basket': None, 'cart_item_count': 0, 'new_user': None}
 
         # Validating Data
         otp_serializer = self.serializer_class(data=request.data, context={'request': request})
@@ -92,9 +93,11 @@ class LoginWithOTP(APIView):
 
         # Generating User or Respond with error
         otp_object = otp_serializer.validated_data['object']
-        if not otp_object.user:  # signup 
+        out['new_user'] = False
+        if not otp_object.user:  # signup
             try:
                 otp_object.generate_user()
+                out['new_user'] = True #new user flag
             except Exception as e:
                 out['error'] = {
                     'non_field_errors': [str(e)]

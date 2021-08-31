@@ -7,6 +7,7 @@ from django.templatetags.static import static
 from django.views.decorators.cache import cache_page
 from oscar.apps.offer.models import Range
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from apps.api_set.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite
 from apps.api_set_v2.serializers.catalogue import CategorySerializer
