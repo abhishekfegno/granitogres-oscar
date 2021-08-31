@@ -97,7 +97,7 @@ class LoginWithOTP(APIView):
         if not otp_object.user:  # signup
             try:
                 otp_object.generate_user()
-                out['new_user'] = True
+                out['new_user'] = True #new user flag
             except Exception as e:
                 out['error'] = {
                     'non_field_errors': [str(e)]
