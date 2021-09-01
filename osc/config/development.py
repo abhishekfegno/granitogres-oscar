@@ -46,7 +46,7 @@ ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/email-verification/don
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Grocery] "
 
 SITE_ID = 1
-SESSION_COOKIE_SAME_SITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_HOST = 'smtp.sendgrid.net'
 # EMAIL_PORT = 587
