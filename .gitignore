@@ -12,4 +12,4 @@ whoosh-index-file
 whoosh-index
 *.swp
 *.tar.bz2
-abchauz/
+abchauz/*
