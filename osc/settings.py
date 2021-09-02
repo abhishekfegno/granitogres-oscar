@@ -138,6 +138,9 @@ MIDDLEWARE = [
     # 'oscarapi.middleware.HeaderSessionMiddleware',
     # 'oscarapi.middleware.ApiGatewayMiddleWare',
 
+    # Custom session middleware
+    'apps.api_set_v2.middleware.CustomSessionMiddleware',
+
     # Enforced Response Modifiers
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
