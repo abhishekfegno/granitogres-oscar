@@ -126,7 +126,10 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
 
-    #cors middleware
+    # Custom session middleware
+    'apps.api_set_v2.middleware.CustomSessionMiddleware',
+
+    # #cors middleware
     # 'corsheaders.middleware.CorsMiddleware',
 
     'django.middleware.common.CommonMiddleware',
@@ -145,8 +148,7 @@ MIDDLEWARE = [
     # 'oscarapi.middleware.HeaderSessionMiddleware',
     # 'oscarapi.middleware.ApiGatewayMiddleWare',
 
-    # Custom session middleware
-    # 'apps.api_set_v2.middleware.CustomSessionMiddleware',
+
 
     # Enforced Response Modifiers
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',

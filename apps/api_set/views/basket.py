@@ -11,7 +11,13 @@ def get_basket(request):
     basket = operations.get_basket(request)
     ser = serializer_class(basket, context={"request": request})
     out = ser.data
+    # import pdb;pdb.set_trace()
+    try:
+        TimeSlot.get_upcoming_slots()
+    except ZeroDivisionError:
+        return Response(out)
     upcoming_slots = [slot.to_dict() for slot in TimeSlot.get_upcoming_slots()]
+
     upcoming_slots[0]['is_next'] = True
     out["available_deliveries"] = upcoming_slots
     return Response(out)
