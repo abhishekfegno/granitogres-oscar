@@ -104,6 +104,9 @@ INSTALLED_APPS = [
     'floppyforms',
     # 'cashondelivery',
 
+    #CORS
+    'corsheaders',
+
     # 3rd-party apps that oscar depends on
     'widget_tweaks',
     'haystack',
@@ -122,6 +125,10 @@ MIDDLEWARE = [
     # BUILTINS
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+
+    #cors middleware
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -139,7 +146,7 @@ MIDDLEWARE = [
     # 'oscarapi.middleware.ApiGatewayMiddleWare',
 
     # Custom session middleware
-    'apps.api_set_v2.middleware.CustomSessionMiddleware',
+    # 'apps.api_set_v2.middleware.CustomSessionMiddleware',
 
     # Enforced Response Modifiers
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
@@ -148,7 +155,10 @@ MIDDLEWARE = [
     # 'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
 
 ]
-
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+]
+CORS_ORIGIN_ALLOW = True
 
 ROOT_URLCONF = 'osc.urls'
 WSGI_APPLICATION = 'osc.wsgi.application'

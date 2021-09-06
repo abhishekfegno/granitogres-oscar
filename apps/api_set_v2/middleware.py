@@ -115,5 +115,5 @@ class CustomSessionMiddleware(SessionMiddleware):
              'x-requested-with',
              ])
         response["Access-Control-Allow-Credentials"] = "true"
-
+        # import pdb;pdb.set_trace()
         return response
