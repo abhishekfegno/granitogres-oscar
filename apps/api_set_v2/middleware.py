@@ -101,7 +101,8 @@ class CustomSessionMiddleware(SessionMiddleware):
         if settings.SESSION_COOKIE_NAME in response.cookies:
             response.cookies[settings.SESSION_COOKIE_NAME]['samesite'] = settings.SESSION_COOKIE_SAMESITE
 
-        response["Access-Control-Allow-Origin"] = "http://dev.fegno.com:8080"
+        # response["Access-Control-Allow-Origin"] = "http://dev.fegno.com:8080"
+        response["Access-Control-Allow-Origin"] = "http://localhost:3000"
         response["Access-Control-Allow-Headers"] = ','.join(
             ['accept',
              'accept-encoding',
