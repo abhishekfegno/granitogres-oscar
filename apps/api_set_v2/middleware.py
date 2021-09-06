@@ -96,7 +96,7 @@ class CustomSessionMiddleware(SessionMiddleware):
                             path=settings.SESSION_COOKIE_PATH,
                             # secure=settings.SESSION_COOKIE_SECURE or True,
                             # httponly=settings.SESSION_COOKIE_HTTPONLY,
-                            # samesite=settings.SESSION_COOKIE_SAMESITE,
+                            samesite=None
                         )
         if settings.SESSION_COOKIE_NAME in response.cookies:
             response.cookies[settings.SESSION_COOKIE_NAME]['samesite'] = settings.SESSION_COOKIE_SAMESITE
