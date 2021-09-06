@@ -126,8 +126,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
 
-    # Custom session middleware
-    'apps.api_set_v2.middleware.CustomSessionMiddleware',
+    # #Custom session middleware
+    # 'apps.api_set_v2.middleware.CustomSessionMiddleware',
 
     # #cors middleware
     # 'corsheaders.middleware.CorsMiddleware',
