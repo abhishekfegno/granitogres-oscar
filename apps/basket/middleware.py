@@ -91,7 +91,8 @@ class BasketMiddleware:
             response.set_cookie(
                 cookie_key, cookie,
                 max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
-                secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True)
+                secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True,
+                samesite="None")
         return response
 
     def get_cookie_key(self, request):
