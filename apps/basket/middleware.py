@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.core.signing import BadSignature, Signer
 from django.utils.functional import SimpleLazyObject, empty
 from django.utils.translation import gettext_lazy as _
+from django.utils.cache import patch_vary_headers
 
 from oscar.core.loading import get_class, get_model
 
@@ -68,8 +69,42 @@ class BasketMiddleware:
         for cookie_key in cookies_to_delete:
             response.delete_cookie(cookie_key)
 
+        # import pdb;pdb.set_trace()
+        # cookie_key = self.get_cookie_key(request)
+        # print(request.basket.id)
+        # print(Basket.objects.filter(owner=None).delete())
+
+
+        if not request.basket.id and not request.user.is_authenticated:
+            response["x-basket"] = "basket_id"
+            ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin"
+            ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers"
+            ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials"
+            ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers"
+            ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods"
+            ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age"
+
+            # origin = request.META.get('HTTP_ORIGIN')
+            # patch_vary_headers(response, ["Origin"])
+            # if not origin or request.host.name != 'api':
+            #     return response
+            response[ACCESS_CONTROL_ALLOW_ORIGIN] = "http://localhost:3000"
+            response[ACCESS_CONTROL_ALLOW_CREDENTIALS] = "true"
+            # if settings.CORS_ALLOW_CREDENTIALS:
+            #     response[ACCESS_CONTROL_ALLOW_CREDENTIALS] = "true"
+            # if request.method == "OPTIONS":
+            #     # response[ACCESS_CONTROL_ALLOW_HEADERS] = ", ".join(settings.CORS_ALLOW_HEADERS)
+            #     response[ACCESS_CONTROL_ALLOW_HEADERS] = "Content-Type"
+            #     print(response[ACCESS_CONTROL_ALLOW_HEADERS] )
+            #     response[ACCESS_CONTROL_ALLOW_METHODS] = ", ".join(settings.CORS_ALLOW_METHODS)
+            #
+            #     if settings.CORS_PREFLIGHT_MAX_AGE:
+            #         response[ACCESS_CONTROL_MAX_AGE] = settings.CORS_PREFLIGHT_MAX_AGE
+        return response
+
         if not hasattr(request, 'basket'):
             return response
+
 
         # If the basket was never initialized we can safely return
         if (isinstance(request.basket, SimpleLazyObject)
@@ -77,6 +112,7 @@ class BasketMiddleware:
             return response
 
         cookie_key = self.get_cookie_key(request)
+
         # Check if we need to set a cookie. If the cookies is already available
         # but is set in the cookies_to_delete list then we need to re-set it.
         has_basket_cookie = (
