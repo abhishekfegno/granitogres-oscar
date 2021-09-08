@@ -69,27 +69,13 @@ class BasketMiddleware:
         for cookie_key in cookies_to_delete:
             response.delete_cookie(cookie_key)
 
-        # import pdb;pdb.set_trace()
         # cookie_key = self.get_cookie_key(request)
-        # print(request.basket.id)
-        # print(Basket.objects.filter(owner=None).delete())
-
 
         if not request.basket.id and not request.user.is_authenticated:
             response["x-basket"] = "basket_id"
-            ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin"
-            ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers"
-            ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials"
-            ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers"
-            ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods"
-            ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age"
 
-            # origin = request.META.get('HTTP_ORIGIN')
-            # patch_vary_headers(response, ["Origin"])
-            # if not origin or request.host.name != 'api':
-            #     return response
-            response[ACCESS_CONTROL_ALLOW_ORIGIN] = "http://localhost:3000"
-            response[ACCESS_CONTROL_ALLOW_CREDENTIALS] = "true"
+            # response[ACCESS_CONTROL_ALLOW_ORIGIN] = "http://localhost:3000"
+            response["Access-Control-Allow-Origin"] = "true"
             # if settings.CORS_ALLOW_CREDENTIALS:
             #     response[ACCESS_CONTROL_ALLOW_CREDENTIALS] = "true"
             # if request.method == "OPTIONS":
@@ -100,6 +86,7 @@ class BasketMiddleware:
             #
             #     if settings.CORS_PREFLIGHT_MAX_AGE:
             #         response[ACCESS_CONTROL_MAX_AGE] = settings.CORS_PREFLIGHT_MAX_AGE
+
         return response
 
         if not hasattr(request, 'basket'):
