@@ -1,4 +1,5 @@
 import random
+import string
 from collections import defaultdict
 from typing import List, Dict, Any, Optional
 
@@ -18,6 +19,16 @@ from apps.dashboard.custom.models import HomePageMegaBanner, InAppBanner, OfferB
     InAppFullScreenBanner, InAppSliderBanner, SocialMediaPost
 from apps.utils import banner_not_found
 from lib.cache import cache_library
+
+
+@api_view(['GET'])
+def get_session_id(request):
+    # import pdb;pdb.set_trace()
+    # print(request.META)
+    print(request.META['REMOTE_ADDR'])
+    value = ''.join(random.choices(string.ascii_lowercase+string.digits, k=50))
+
+    return Response({"session-id": value})
 
 
 def get_home_content(request):

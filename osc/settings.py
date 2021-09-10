@@ -105,7 +105,7 @@ INSTALLED_APPS = [
     # 'cashondelivery',
 
     #CORS
-    # 'corsheaders',
+    'corsheaders',
 
     # 3rd-party apps that oscar depends on
     'widget_tweaks',
@@ -127,7 +127,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
 
     # #Custom session middleware
-    # 'apps.api_set_v2.middleware.CustomSessionMiddleware',
+    'apps.api_set_v2.middleware.CustomSessionMiddleware',
 
     # #cors middleware
     # 'corsheaders.middleware.CorsMiddleware',
@@ -139,7 +139,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # HANDS_ON
-    'apps.availability.middleware.AvailabilityZoneMiddleware',      # mist be before basket middleware
+    'apps.availability.middleware.AvailabilityZoneMiddleware',      # must be before basket middleware
     'lib.middlewares.BypassCSRF',
 
     # THIRD PARTY
@@ -158,9 +158,36 @@ MIDDLEWARE = [
 
 ]
 # CORS_ORIGIN_WHITELIST = [
-#     'http://localhost:3000',
+#     'http://127.0.0.1:3000',
 # ]
-# CORS_ORIGIN_ALLOW = True
+# CORS_ALLOWED_ORIGIN = [
+#
+#     'http://127.0.0.1:3000/',
+#
+#
+# ]
+# CORS_ORIGIN_ALLOW_ALL = True
+#
+# CORS_ALLOW_METHODS = [
+# 'DELETE',
+# 'GET',
+# 'OPTIONS',
+# 'PATCH',
+# 'POST',
+# 'PUT',
+# ]
+#
+# CORS_ALLOW_HEADERS = [
+# 'accept',
+# 'accept-encoding',
+# 'authorization',
+# 'content-type',
+# 'dnt',
+# 'origin',
+# 'user-agent',
+# 'x-csrftoken',
+# 'x-requested-with',
+# ]
 
 ROOT_URLCONF = 'osc.urls'
 WSGI_APPLICATION = 'osc.wsgi.application'
