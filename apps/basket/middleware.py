@@ -69,13 +69,17 @@ class BasketMiddleware:
         for cookie_key in cookies_to_delete:
             response.delete_cookie(cookie_key)
 
-        # cookie_key = self.get_cookie_key(request)
-
+        cookie_key = self.get_cookie_key(request)
+        cookie = self.get_basket_hash(request.basket.id)
+        response["Access-Control-Allow-Origin"] = "http://localhost:3000"
+        response["Access-Control-Allow-Credentials"] = 'True'
+        response["Access-Control-Allow-Headers"] = "Content-Type"
         if not request.basket.id and not request.user.is_authenticated:
             response["x-basket"] = "basket_id"
 
-            # response[ACCESS_CONTROL_ALLOW_ORIGIN] = "http://localhost:3000"
-            response["Access-Control-Allow-Origin"] = "true"
+
+            # print(hasattr(request, 'basket'))
+            print(request.basket)
             # if settings.CORS_ALLOW_CREDENTIALS:
             #     response[ACCESS_CONTROL_ALLOW_CREDENTIALS] = "true"
             # if request.method == "OPTIONS":
@@ -86,9 +90,12 @@ class BasketMiddleware:
             #
             #     if settings.CORS_PREFLIGHT_MAX_AGE:
             #         response[ACCESS_CONTROL_MAX_AGE] = settings.CORS_PREFLIGHT_MAX_AGE
-
+            # response.set_cookie(cookie_key, cookie,
+            #                     max_age=55555,
+            #                     secure=True,
+            #                     httponly=True, samesite='None')
         return response
-
+        # import pdb;pdb.set_trace()
         if not hasattr(request, 'basket'):
             return response
 
@@ -99,7 +106,6 @@ class BasketMiddleware:
             return response
 
         cookie_key = self.get_cookie_key(request)
-
         # Check if we need to set a cookie. If the cookies is already available
         # but is set in the cookies_to_delete list then we need to re-set it.
         has_basket_cookie = (
