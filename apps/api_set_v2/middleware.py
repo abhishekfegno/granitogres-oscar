@@ -1,110 +1,109 @@
 # import time
-#
+import re
+
 # from django.contrib.sessions.backends.base import UpdateError
 # from django.contrib.sessions.middleware import SessionMiddleware
 # from django.conf import settings
 # from django.core.exceptions import SuspiciousOperation
 # from django.utils.cache import patch_vary_headers
 # from django.utils.http import http_date
+from django.http.response import HttpResponse
+from oscarapi.middleware import HeaderSessionMiddleware
+from oscarapi.utils.session import session_id_from_parsed_session_uri, get_session
+from rest_framework import exceptions
+from oscarapi.utils.request import get_domain
+from django.utils.translation import ugettext as _
+from oscarapi.utils.loading import get_api_class
+HTTP_SESSION_ID_REGEX = re.compile(
+    r"^SID:(?P<type>(?:ANON|AUTH)):(?P<realm>.*?):(?P<session_id>.+?)(?:[-:][0-9a-fA-F]+){0,2}$"
+)
+
+def parse_session_id(request):
+    """Parse a session id from the request"""
+    unparsed_session_id = request.META.get("HTTP_SESSION_ID", None)
+    if unparsed_session_id is not None:
+        parsed_session_id = HTTP_SESSION_ID_REGEX.match(unparsed_session_id)
+        if parsed_session_id is not None:
+            return parsed_session_id.groupdict()
+
+    return None
 
 
-# class CustomSessionMiddleware(SessionMiddleware):
-    # def __init__(self, get_response):
-    #     self.get_response = get_response
-    #
-    # def __call__(self, request):
-    #     response = self.get_response(request)
-    #     if response.cookies:
-    #         host = request.get_host()
-    #         # check if it's a different domain
-    #         if host not in settings.SESSION_COOKIE_DOMAIN:
-    #             domain = ".{domain}".format(domain=host)
-    #             for cookie in response.cookies:
-    #                 if 'domain' in response.cookies[cookie]:
-    #                     response.cookies[cookie]['domain'] = domain
+def start_or_resume(session_id, session_type):
+    if session_type == "ANON":
+        return get_session(session_id, raise_on_create=False)
+
+    return get_session(session_id, raise_on_create=True)
 
 
-    # def process_response(self, request, response):
-    #     """
-    #     If request.session was modified, or if the configuration is to save the
-    #     session every time, save the changes and set a session cookie or delete
-    #     the session cookie if the session has been emptied.
-    #     """
-    #     try:
-    #         accessed = request.session.accessed
-    #         modified = request.session.modified
-    #         empty = request.session.is_empty()
-    #     except AttributeError:
-    #         pass
-    #     else:
-    #         # First check if we need to delete this cookie.
-    #         # The session should be deleted only if the session is entirely empty
-    #         if settings.SESSION_COOKIE_NAME in request.COOKIES and empty:
-    #             response.delete_cookie(
-    #                 settings.SESSION_COOKIE_NAME,
-    #                 path=settings.SESSION_COOKIE_PATH,
-    #                 domain=settings.SESSION_COOKIE_DOMAIN,
-    #             )
-    #         else:
-    #             if accessed:
-    #                 patch_vary_headers(response, ('Cookie',))
-    #
-    #             if (modified or settings.SESSION_SAVE_EVERY_REQUEST) and not empty:
-    #                 if request.session.get_expire_at_browser_close():
-    #                     max_age = None
-    #                     expires = None
-    #                 else:
-    #                     max_age = request.session.get_expiry_age()
-    #                     expires_time = time.time() + max_age
-    #                     expires = http_date(expires_time)
-    #                 # Save the session data and refresh the client cookie.
-    #                 # Skip session save for 500 responses, refs #3881.
-    #                 if response.status_code != 500:
-    #                     try:
-    #                         request.session.save()
-    #                     except UpdateError:
-    #                         raise SuspiciousOperation(
-    #                             "The request's session was deleted before the "
-    #                             "request completed. The user may have logged "
-    #                             "out in a concurrent request, for example."
-    #                         )
-    #                     # import pdb;
-    #                     # pdb.set_trace()
-    #
-    #                     host = None
-    #                     # if request.META.get('HTTP_REFERER'):
-    #                     #     host = str(request.META['HTTP_REFERER']).split('/')[-2].split(':')[0]
-    #                     # elif request.get_host():
-    #                     if request.get_host():
-    #                         host = f'{request.get_host()}'
-    #                     print(settings.SESSION_COOKIE_DOMAIN)
-    #                     response.set_cookie(
-    #                         settings.SESSION_COOKIE_NAME,
-    #                         request.session.session_key,
-    #                         # max_age=max_age,
-    #                         # expires=expires,
-    #                         domain=host or settings.SESSION_COOKIE_DOMAIN,
-    #                         path=settings.SESSION_COOKIE_PATH,
-    #                         # secure=settings.SESSION_COOKIE_SECURE or True,
-    #                         # httponly=settings.SESSION_COOKIE_HTTPONLY,
-    #                         samesite=None
-    #                     )
-    #     if settings.SESSION_COOKIE_NAME in response.cookies:
-    #         response.cookies[settings.SESSION_COOKIE_NAME]['samesite'] = settings.SESSION_COOKIE_SAMESITE
-    #
-    #     # response["Access-Control-Allow-Origin"] = "http://dev.fegno.com:8080"
-    #     response["Access-Control-Allow-Headers"] = ','.join(
-    #         ['accept',
-    #          'accept-encoding',
-    #          'authorization',
-    #          'content-type',
-    #          'dnt',
-    #          'mode',
-    #          'origin',
-    #          'user-agent',
-    #          'x-csrftoken',
-    #          'x-requested-with',
-    #          ])
-    #     response["Access-Control-Allow-Credentials"] = "true"
-    #     # import pdb;pdb.set_trace()
-    #     return response
+class CustomSessionMiddleware(HeaderSessionMiddleware):
+    """
+    Implement session through headers:
+
+    http://www.w3.org/TR/WD-session-id
+
+    TODO:
+    Implement gateway protection, with permission options for usage of
+    header sessions. With that in place the api can be used for both trusted
+    and non trusted clients, see README.rst.
+    """
+
+    def process_request(self, request):
+        """
+        Parse the session id from the 'Session-Id: ' header when using the api.
+        """
+        print(self.is_api_request(request))
+        print(parse_session_id(request))
+        if self.is_api_request(request):
+            try:
+                parsed_session_uri = parse_session_id(request)
+                if parsed_session_uri is not None:
+                    domain = get_domain(request)
+                    if parsed_session_uri["realm"] != domain:
+                        raise exceptions.PermissionDenied(
+                            _("Can not accept cookie with realm %s on realm %s")
+                            % (parsed_session_uri["realm"], domain)
+                        )
+                    session_id = session_id_from_parsed_session_uri(parsed_session_uri)
+                    request.session = start_or_resume(
+                        session_id, session_type=parsed_session_uri["type"]
+                    )
+                    request.parsed_session_uri = parsed_session_uri
+
+                    # since the session id is assigned by the CLIENT, there is
+                    # no point in having csrf_protection. Session id's read
+                    # from cookies, still need csrf!
+                    request.csrf_processing_done = True
+                    return None
+            except exceptions.APIException as e:
+                response = HttpResponse(
+                    '{"reason": "%s"}' % e.detail, content_type="application/json"
+                )
+                response.status_code = e.status_code
+                return response
+
+        return super(CustomSessionMiddleware, self).process_request(request)
+
+    def process_response(self, request, response):
+        """
+        Add the 'Session-Id: ' header when using the api.
+        """
+        if (
+                self.is_api_request(request)
+                and getattr(request, "session", None) is not None
+                and hasattr(request, "parsed_session_uri")
+        ):
+            session_key = request.session.session_key
+            parsed_session_key = session_id_from_parsed_session_uri(
+                request.parsed_session_uri
+            )
+            assert session_key == parsed_session_key, "%s is not equal to %s" % (
+                session_key,
+                parsed_session_key,
+            )
+            response["Session-Id"] = "SID:%(type)s:%(realm)s:%(session_id)s" % (
+                request.parsed_session_uri
+            )
+        # import pdb;pdb.set_trace()
+
+        return super(CustomSessionMiddleware, self).process_response(request, response)
