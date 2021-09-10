@@ -105,7 +105,7 @@ INSTALLED_APPS = [
     # 'cashondelivery',
 
     #CORS
-    'corsheaders',
+    # 'corsheaders',
 
     # 3rd-party apps that oscar depends on
     'widget_tweaks',
