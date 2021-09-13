@@ -43,6 +43,7 @@ class CustomSessionMiddleware(SessionMiddleware):
     def process_response(self, request, response):
         response = super(CustomSessionMiddleware, self).process_response(request, response)
         if response.cookies:
+            response.set_cookie(settings.SESSION_COOKIE_NAME, request.session.session_key, max_age=360)
             response.cookies[settings.SESSION_COOKIE_NAME]['secure'] = True
             response.cookies[settings.SESSION_COOKIE_NAME]['samesite'] = 'None'
         return response
