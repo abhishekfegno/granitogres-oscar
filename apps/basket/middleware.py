@@ -74,7 +74,10 @@ class BasketMiddleware:
         if settings.DEBUG:
             response["Access-Control-Allow-Origin"] = request.build_absolute_uri('/').strip('/')
             response["Access-Control-Allow-Credentials"] = 'true'
-            response["Access-Control-Allow-Headers"] = "Content-Type"
+            response["Access-Control-Allow-Headers"] = 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With,Set-Cookie,Credentials'
+            response["Access-Control-Expose-Headers"] = 'Content-Type,Set-Cookie,Credentials,X-basket'
+            if request.method == 'OPTIONS':
+                response["Access-Control-Allow-Headers"] = 'DNT,Keep-Alive,User-Agent,X-Requested-With,Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With,Set-Cookie,Credentials'
         if not request.basket.id and not request.user.is_authenticated:
             response["X-Basket"] = "basket_id"
 
