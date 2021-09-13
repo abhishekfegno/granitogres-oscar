@@ -69,21 +69,34 @@ class BasketMiddleware:
         for cookie_key in cookies_to_delete:
             response.delete_cookie(cookie_key)
 
-        cookie_key = self.get_cookie_key(request)
-        cookie = self.get_basket_hash(request.basket.id)
         if settings.DEBUG:
-            response["Access-Control-Allow-Origin"] = request.build_absolute_uri('/').strip('/')
-            response["Access-Control-Allow-Credentials"] = 'true'
-            response["Access-Control-Allow-Headers"] = 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With,Set-Cookie,Credentials'
-            response["Access-Control-Expose-Headers"] = 'Content-Type,Set-Cookie,Credentials,X-basket'
-            if request.method == 'OPTIONS':
-                response["Access-Control-Allow-Headers"] = 'DNT,Keep-Alive,User-Agent,X-Requested-With,Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With,Set-Cookie,Credentials'
+            host = None
+            if request.META.get('HTTP_REFERER'):
+                host = request.META['HTTP_REFERER']
+            else:
+                host = f'%s://%s:%s' % ('http', request.META['SERVER_NAME'], request.META['SERVER_PORT'])
+            if host:
+                response["Access-Control-Allow-Origin"] = host.strip('/')
+                response["Access-Control-Allow-Credentials"] = 'true'
+                response["Access-Control-Allow-Headers"] = 'Accept,Authorization,Cache-Control,Content-Type,DNT,' \
+                                                           'If-Modified-Since,Keep-Alive,Origin,User-Agent,' \
+                                                           'X-Requested-With,Set-Cookie,Credentials'
+                response["Access-Control-Expose-Headers"] = 'Content-Type,Set-Cookie,Credentials,X-basket'
+                if request.method == 'OPTIONS':
+                    response["Access-Control-Allow-Headers"] = 'DNT,Keep-Alive,User-Agent,X-Requested-With,Accept,' \
+                                                               'Authorization,Cache-Control,Content-Type,DNT,' \
+                                                               'If-Modified-Since,Keep-Alive,Origin,User-Agent,' \
+                                                               'X-Requested-With,Set-Cookie,Credentials'
+        if not hasattr(request, 'basket'):
+            return response
+
         if not request.basket.id and not request.user.is_authenticated:
             response["X-Basket"] = "basket_id"
 
             # print(hasattr(request, 'basket'))
             print(request.basket)
             # if settings.CORS_ALLOW_CREDENTIALS:
+
             #     response[ACCESS_CONTROL_ALLOW_CREDENTIALS] = "true"
             # if request.method == "OPTIONS":
             #     # response[ACCESS_CONTROL_ALLOW_HEADERS] = ", ".join(settings.CORS_ALLOW_HEADERS)
@@ -99,8 +112,8 @@ class BasketMiddleware:
             #                     httponly=True, samesite='None')
         # return response
         # import pdb;pdb.set_trace()
-        if not hasattr(request, 'basket'):
-            return response
+        cookie_key = self.get_cookie_key(request)
+        cookie = self.get_basket_hash(request.basket.id)
 
         # If the basket was never initialized we can safely return
         if (isinstance(request.basket, SimpleLazyObject)
