@@ -204,6 +204,7 @@ so that we can manage oscar dashboard also from there.
 """
 
 
+
 SITE_ID = 1
 
 AUTH_USER_MODEL = 'users.User'
