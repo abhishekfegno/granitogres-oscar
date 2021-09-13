@@ -124,7 +124,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # BUILTINS
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.contrib.sessions.middleware.SessionMiddleware',
 
     # #Custom session middleware
     'apps.api_set_v2.middleware.CustomSessionMiddleware',
