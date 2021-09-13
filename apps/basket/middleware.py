@@ -71,9 +71,10 @@ class BasketMiddleware:
 
         cookie_key = self.get_cookie_key(request)
         cookie = self.get_basket_hash(request.basket.id)
-        response["Access-Control-Allow-Origin"] = "http://localhost:3000"
-        response["Access-Control-Allow-Credentials"] = 'true'
-        response["Access-Control-Allow-Headers"] = "Content-Type"
+        if settings.DEBUG:
+            response["Access-Control-Allow-Origin"] = request.build_absolute_uri('/').strip('/')
+            response["Access-Control-Allow-Credentials"] = 'true'
+            response["Access-Control-Allow-Headers"] = "Content-Type"
         if not request.basket.id and not request.user.is_authenticated:
             response["X-Basket"] = "basket_id"
 
