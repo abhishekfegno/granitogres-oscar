@@ -7,6 +7,8 @@ import re
 # from django.core.exceptions import SuspiciousOperation
 # from django.utils.cache import patch_vary_headers
 # from django.utils.http import http_date
+from django.conf import settings
+from django.contrib.sessions.middleware import SessionMiddleware
 from django.http.response import HttpResponse
 from oscarapi.middleware import HeaderSessionMiddleware
 from oscarapi.utils.session import session_id_from_parsed_session_uri, get_session
@@ -36,7 +38,16 @@ def start_or_resume(session_id, session_type):
     return get_session(session_id, raise_on_create=True)
 
 
-class CustomSessionMiddleware(HeaderSessionMiddleware):
+class CustomSessionMiddleware(SessionMiddleware):
+
+    def process_response(self, request, response):
+        response = super(CustomSessionMiddleware, self).process_response(request, response)
+        response.cookies[settings.SESSION_COOKIE_NAME]['secure'] = True
+        response.cookies[settings.SESSION_COOKIE_NAME]['samesite'] = 'None'
+        return response
+
+
+class CustomHeaderSessionMiddleware(HeaderSessionMiddleware):
     """
     Implement session through headers:
 
