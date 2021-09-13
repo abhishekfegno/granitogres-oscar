@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.core.signing import BadSignature, Signer
+from django.http import HttpResponse
 from django.utils.functional import SimpleLazyObject, empty
 from django.utils.translation import gettext_lazy as _
 from django.utils.cache import patch_vary_headers
@@ -63,21 +64,29 @@ class BasketMiddleware:
         response = self.get_response(request)
         return self.process_response(request, response)
 
-    def process_response(self, request, response):
+    def process_response(self, request, response: HttpResponse):
         # Delete any surplus cookies
+        if request.is_ajax():
+            response.set_cookie('foo', 'bar', max_age=360)
+            response.cookies['foo']['secure'] = True
+            response.cookies['foo']['samesite'] = 'None'
+
         cookies_to_delete = getattr(request, 'cookies_to_delete', [])
         for cookie_key in cookies_to_delete:
             response.delete_cookie(cookie_key)
-
+        """ HEADERS """
         if settings.DEBUG:
             host = None
             if request.META.get('HTTP_REFERER'):
                 host = request.META['HTTP_REFERER']
+                print(host)
             else:
                 host = f'%s://%s:%s' % ('http', request.META['SERVER_NAME'], request.META['SERVER_PORT'])
+            print(">>>>>>>>> ", host)
+            if settings.CORS_ALLOW_CREDENTIALS:
+                response["Access-Control-Allow-Credentials"] = "true"
             if host:
                 response["Access-Control-Allow-Origin"] = host.strip('/')
-                response["Access-Control-Allow-Credentials"] = 'true'
                 response["Access-Control-Allow-Headers"] = 'Accept,Authorization,Cache-Control,Content-Type,DNT,' \
                                                            'If-Modified-Since,Keep-Alive,Origin,User-Agent,' \
                                                            'X-Requested-With,Set-Cookie,Credentials'
@@ -87,40 +96,33 @@ class BasketMiddleware:
                                                                'Authorization,Cache-Control,Content-Type,DNT,' \
                                                                'If-Modified-Since,Keep-Alive,Origin,User-Agent,' \
                                                                'X-Requested-With,Set-Cookie,Credentials'
+                    response['Access-Control-Allow-Methods'] = ", ".join(settings.CORS_ALLOW_METHODS)
+
+        # TODO:REMOVE
+        if request.method == "OPTIONS":
+            if settings.CORS_PREFLIGHT_MAX_AGE:
+                response['Access-Control-Max-Age'] = settings.CORS_PREFLIGHT_MAX_AGE
+
         if not hasattr(request, 'basket'):
             return response
 
-        if not request.basket.id and not request.user.is_authenticated:
-            response["X-Basket"] = "basket_id"
-
-            # print(hasattr(request, 'basket'))
-            print(request.basket)
-            # if settings.CORS_ALLOW_CREDENTIALS:
-
-            #     response[ACCESS_CONTROL_ALLOW_CREDENTIALS] = "true"
-            # if request.method == "OPTIONS":
-            #     # response[ACCESS_CONTROL_ALLOW_HEADERS] = ", ".join(settings.CORS_ALLOW_HEADERS)
-            #     response[ACCESS_CONTROL_ALLOW_HEADERS] = "Content-Type"
-            #     print(response[ACCESS_CONTROL_ALLOW_HEADERS] )
-            #     response[ACCESS_CONTROL_ALLOW_METHODS] = ", ".join(settings.CORS_ALLOW_METHODS)
-            #
-            #     if settings.CORS_PREFLIGHT_MAX_AGE:
-            #         response[ACCESS_CONTROL_MAX_AGE] = settings.CORS_PREFLIGHT_MAX_AGE
-            # response.set_cookie(cookie_key, cookie,
-            #                     max_age=55555,
-            #                     secure=True,
-            #                     httponly=True, samesite='None')
-        # return response
-        # import pdb;pdb.set_trace()
-        cookie_key = self.get_cookie_key(request)
-        cookie = self.get_basket_hash(request.basket.id)
+        basket_id = self.get_basket_id(request)
+        if not basket_id and not request.user.is_authenticated:
+            response["X-Basket"] = basket_id
 
         # If the basket was never initialized we can safely return
-        if (isinstance(request.basket, SimpleLazyObject)
-                and request.basket._wrapped is empty):
+        if isinstance(request.basket, SimpleLazyObject) and request.basket._wrapped is empty:
+            return response
+
+        if not request.basket.id:
             return response
 
         cookie_key = self.get_cookie_key(request)
+
+        cookie = self.get_basket_hash(request.basket.id)
+        response.set_cookie(cookie_key, cookie, max_age=55555)
+        response.cookies[cookie_key]['secure'] = True
+        response.cookies[cookie_key]['samesite'] = 'None'
         # Check if we need to set a cookie. If the cookies is already available
         # but is set in the cookies_to_delete list then we need to re-set it.
         has_basket_cookie = (
@@ -129,14 +131,16 @@ class BasketMiddleware:
 
         # If a basket has had products added to it, but the user is anonymous
         # then we need to assign it to a cookie
-        if (request.basket.id and not request.user.is_authenticated
-                and not has_basket_cookie):
+        if not has_basket_cookie and not request.user.is_authenticated and request.basket.id:
             cookie = self.get_basket_hash(request.basket.id)
             response.set_cookie(
                 cookie_key, cookie,
                 max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
-                secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True,
-                samesite="None")
+                # secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True,
+                # samesite="None"
+            )
+            response.cookies[cookie_key]['secure'] = True
+            response.cookies[cookie_key]['samesite'] = 'None'
         return response
 
     def get_cookie_key(self, request):
@@ -229,6 +233,15 @@ class BasketMiddleware:
         This is its own method to allow it to be overridden
         """
         master.merge(slave, add_quantities=False)
+    
+    def get_basket_id(self, request):
+        cookie_key = self.get_cookie_key(request)
+        if cookie_key in request.COOKIES:
+            basket_hash = request.COOKIES[cookie_key]
+            try:
+                return Signer().unsign(basket_hash)
+            except BadSignature as e:
+                pass
 
     def get_cookie_basket(self, cookie_key, request, manager):
         """
@@ -242,8 +255,9 @@ class BasketMiddleware:
             basket_hash = request.COOKIES[cookie_key]
             try:
                 basket_id = Signer().unsign(basket_hash)
-                basket = Basket.objects.get(pk=basket_id, owner=None,
-                                            status=Basket.OPEN)
+                if not basket_id or basket_id == 'None':
+                    return basket
+                basket = Basket.objects.get(pk=basket_id, owner=None, status=Basket.OPEN)
             except (BadSignature, Basket.DoesNotExist):
                 request.cookies_to_delete.append(cookie_key)
         return basket
