@@ -79,10 +79,8 @@ class BasketMiddleware:
             host = None
             if request.META.get('HTTP_REFERER'):
                 host = request.META['HTTP_REFERER']
-                print(host)
             else:
                 host = f'%s://%s:%s' % ('http', request.META['SERVER_NAME'], request.META['SERVER_PORT'])
-            print(">>>>>>>>> ", host)
             if settings.CORS_ALLOW_CREDENTIALS:
                 response["Access-Control-Allow-Credentials"] = "true"
             if host:
