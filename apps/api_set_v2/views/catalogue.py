@@ -28,7 +28,7 @@ def mark_as_fav(request, product: Product):     # needs parent product
 
 @api_view()
 def product_detail_web(request, product):
-
+    # cache.clear()
     key = f"product_detail::{product}"
     data = cache.get(key)
     if not data:

@@ -82,7 +82,8 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
         )
 
     def get_recommended_products(self, instance):
-        inst = instance.parent if instance.is_child else instance
+        # inst = instance.parent if instance.is_child else instance
+        inst = instance
         from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
         return ProductSimpleListSerializer(
             inst.sorted_recommended_products,
