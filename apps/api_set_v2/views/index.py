@@ -241,6 +241,10 @@ def index(request, *a, **k):
                 'color': '#555',
             },
         ]
+        out['user'] = {"message": "Not Authenticated"}
+        if request.user.is_active and request.user.is_authenticated:
+            out['user'] = {"username": request.user}
+
         return out
 
     # return Response(_inner())
