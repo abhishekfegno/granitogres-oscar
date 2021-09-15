@@ -5,13 +5,18 @@ from oscar.core.loading import get_model
 from lib import cache_key
 
 
-def cache_library(key, cb=None, default=None, ttl=settings.DEFAULT_CACHE_TTL):
+def cache_library(key, user, cb=None, default=None, ttl=settings.DEFAULT_CACHE_TTL):
     """
     Cache Manager for Project.
     :key: = key of cache.
     :cb: = callback function to generate data if key fails to find.
     :default: = alternative to callback to get default data to set in cache and return.
     """
+    if user:
+        cache.clear()
+        value = cb()
+        value['user'] = user
+        cache.set(key, value)
     if key in cache:
         c = cache.get(key)
         if c or not (cb and default):

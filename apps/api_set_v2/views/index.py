@@ -241,16 +241,14 @@ def index(request, *a, **k):
                 'color': '#555',
             },
         ]
-        out['user'] = {"message": "Not Authenticated"}
-        if request.user.is_active and request.user.is_authenticated:
-            out['user'] = {"username": request.user}
-
         return out
 
     # return Response(_inner())
+    user = request.user.username
+    print(user)
     zone = request.session.get('zone')
     key = cache_key(zone)
-    return Response(cache_library(cache_key(key), cb=_inner, ttl=60 * 60 * 24))
+    return Response(cache_library(cache_key(key), user,  cb=_inner, ttl=60 * 60 * 24))
 
 
 @api_view(("GET",))
