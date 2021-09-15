@@ -13,7 +13,7 @@ from apps.api_set.views.orders import order_cancel_request, order_return_request
 from apps.api_set.views.public import cancel_reasons_list
 from apps.api_set_v2.views.catalogue import product_detail_web, mark_as_fav
 
-from apps.api_set_v2.views.index import index, offers, pincode_list , get_session_id
+from apps.api_set_v2.views.index import index, offers, pincode_list
 from apps.api_set_v2.views.orders import orders_detail, reorder_to_current_basket, reorder_to_temporary_basket
 from apps.api_set_v2.views.orders import orders
 from apps.api_set_v2.views.product_listing_query_based import product_list
@@ -36,7 +36,6 @@ home_urlpatterns = [
     path("index/", index, name="api-index-v2"),
     path("pincode/", pincode_list, name="api-pincode-v2"),
 
-    path('session-id/', get_session_id, name="session_id"),     # random session-id
     path("offers/", offers, name="api-offers"),
     path("offers/<int:pk>/", offer_products, name="api-offer-products-v2"),       #! instead use product_list api!
 
