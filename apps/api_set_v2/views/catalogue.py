@@ -67,3 +67,4 @@ def product_detail_web(request, product):
         'results': data,
         'deliverable': out
     })
+

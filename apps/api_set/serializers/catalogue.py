@@ -124,6 +124,7 @@ def custom_ProductListSerializer(queryset, context,
         return {
             "id": product.id,
             "title": product.title,
+            "feature": product.title.split("-")[-1],
             "primary_image": primary_image_serializer_mixin.get_primary_image(product),
             "url": request.build_absolute_uri(
                 reverse('product-detail', kwargs={'pk': product.id})
