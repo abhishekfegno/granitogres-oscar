@@ -1,3 +1,6 @@
+# /home/jk/code/grocery/lib/algorithms/product.py
+
+
 import re
 from collections import OrderedDict
 
@@ -25,19 +28,20 @@ def get_list_of_objects_as_dict(attr_list, key_field='code', value_field='value'
 
 
 def extract_field(attr_list, field_to_extract='code'):
-    return [attr[field_to_extract] for attr in attr_list]   # KEEPING ORDER
+    return [attr[field_to_extract] for attr in attr_list]  # KEEPING ORDER
 
 
 def extract_field_restricted(attr_list, field_to_extract='code', permitted_fields=None, filter_field='code'):
     if permitted_fields is None:
         permitted_codes = []
-    return [attr[field_to_extract] for attr in attr_list if attr[filter_field] in permitted_fields]   # KEEPING ORDER
+    return [attr[field_to_extract] for attr in attr_list if attr[filter_field] in permitted_fields]  # KEEPING ORDER
 
 
 def extract_field_restricted_dict(attr_list, field_to_extract='code', permitted_fields=None, filter_field='code'):
     if permitted_fields is None:
         permitted_codes = []
-    return {attr['code']: str(attr[field_to_extract]) for attr in attr_list if attr[filter_field] in permitted_fields}   # KEEPING ORDER
+    return {attr['code']: str(attr[field_to_extract]) for attr in attr_list if
+            attr[filter_field] in permitted_fields}  # KEEPING ORDER
 
 
 def val_generalize(text):
@@ -100,10 +104,10 @@ def map_product(product_data, permitted_fields=None):
         for index, key in enumerate(_key_set):
             if index < len(_key_set):
                 pointer[key] = {}
-                pointer = pointer[key]          # thanks to Python's "Pass By Object" property
+                pointer = pointer[key]  # thanks to Python's "Pass By Object" property
             else:
-                pointer[key] = _slug        # if final key.
-        pointer['slug'] = _slug    # noqa
+                pointer[key] = _slug  # if final key.
+        pointer['slug'] = _slug  # noqa
         # return _mapper    # automatically resolved with
 
     for slug, key_set in data:
@@ -112,7 +116,6 @@ def map_product(product_data, permitted_fields=None):
 
 
 def get_product_data(parent_product, request):
-
     if not parent_product.is_parent:
         return
 
@@ -141,7 +144,7 @@ def get_product_data(parent_product, request):
     return cache_library(cache_key.parent_product_sibling_data__key(parent_product.id), cb=_inner)
 
 
-def siblings_pointer(parent_product,  request=empty_request()):
+def siblings_pointer(parent_product, request=empty_request()):
     """
     This method accepts a product, fetch its child,
     Sampling attributes and create a format to apply a filter.
@@ -178,7 +181,7 @@ def siblings_pointer(parent_product,  request=empty_request()):
             color : ['RED', 'BLUE', 'BLACK'],
             storage : ['128 GB', '256 GB',],
         }
-        
+
         # processpr and camera wont be available because 
         they are not mared as 'is_varying' in ProductClass --> Attribute.  
         # processor : ['Snapdragon 625',],
@@ -197,7 +200,7 @@ def siblings_pointer(parent_product,  request=empty_request()):
 
         # out['attribute_field_codes'] = extract_field(product_data[0]['attributes'], field_to_extract='code')
         out['attribute_field_names'] = attribute_field_names
-        out['attribute_field_names_as_list'] = attribute_field_names.values()
+        out['attribute_field_names_as_list'] = list(attribute_field_names.values())
 
         # initializing each key value as empty list
         for field in attribute_field_names:
@@ -222,7 +225,7 @@ def siblings_pointer(parent_product,  request=empty_request()):
             for key, value in attribute_fields.items()
             if len(set(
                 [val_generalize(v) for v in value]  # list comprehension
-            )) > 1}     # dict comprehension
+            )) > 1}  # dict comprehension
 
         out['attribute_values'] = optimized_attribute_field_set
         out['map'], trace = map_product(product_data, permitted_fields=optimized_attribute_field_set.keys())
@@ -236,7 +239,7 @@ def siblings_pointer(parent_product,  request=empty_request()):
             )]
             for product in product_data
         ]
-        out['trace'] = OrderedDict(_data)
+        out['trace'] = dict(_data)
 
         op_mapper = {}
         for index, attr_code in enumerate(optimized_attribute_field_set.keys()):
@@ -249,7 +252,7 @@ def siblings_pointer(parent_product,  request=empty_request()):
                     else:
                         op_mapper[attr_code][key].append(slug)
                 except Exception as e:
-                    print("[X] slug, variant_property = ", slug, " , ",  variant_property)
+                    print("[X] slug, variant_property = ", slug, " , ", variant_property)
                     print("[X] Got issue over : variant_property[index]", e)
         out['op_mapper'] = op_mapper
     return out
