@@ -1,8 +1,10 @@
+# /home/jk/code/grocery/apps/api_set_v2/serializers/catalogue.py
+
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
 from apps.api_set.serializers.catalogue import custom_ProductListSerializer
-from apps.api_set.serializers.mixins import ProductDetailSerializerMixin
+from apps.api_set.serializers.mixins import ProductDetailSerializerMixin, OptionSerializer
 from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite, \
     ProductAttributeFieldMixin
 from apps.catalogue.models import Category, Product
@@ -53,14 +55,23 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     recommended_products = serializers.SerializerMethodField()
     attributes = serializers.SerializerMethodField()
     variants = serializers.SerializerMethodField()
+    options = OptionSerializer(many=True)
     product_class = serializers.SerializerMethodField()
+    siblings = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
 
     def get_product_class(self, instance):
+        pc = None
+        if instance.structure == Product.CHILD:
+            pc = instance.parent.product_class
+        else:
+            pc = instance.product_class
+        if not pc:
+            return {}
         return {
-            "id": instance.product_class.id,
-            "name": instance.product_class.name,
-            "slug": instance.product_class.slug,
+            "id": pc.id,
+            "name": pc.name,
+            "slug": pc.slug,
         }
 
     class Meta:
@@ -79,6 +90,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             "price",
             "options",
             "variants",
+            "siblings",
         )
 
     def get_recommended_products(self, instance):
