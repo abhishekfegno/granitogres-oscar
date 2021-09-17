@@ -1,11 +1,14 @@
 import rest_auth.views
 from django.contrib.auth import get_user_model
+from django.utils.decorators import method_decorator
 from oscar.core.loading import get_model
 from oscarapi.basket import operations
 from oscarapi.utils.session import login_and_upgrade_session
 from rest_framework import permissions, authentication
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view
 from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.renderers import JSONRenderer, BaseRenderer
 from rest_framework.response import Response
 # REGISTRATION URLS
 from rest_framework.views import APIView
@@ -13,6 +16,7 @@ from rest_framework import status
 
 from apps.api_set.serializers.auth import MobileNumberSerializer, OTP, OtpSerializer, UserSerializer
 from apps.api_set.serializers.basket import WncBasketSerializer
+from apps.api_set.views.orders import _login_required
 
 AWAITING_LENGTH = 8
 User = get_user_model()
@@ -157,16 +161,34 @@ class LoginWithOTPForDeliveryBoy(LoginWithOTP):
         basket = operations.get_user_basket(user)
         return Response(out, status=200)
 
+from rest_framework.exceptions import NotAuthenticated
 
-class ProfileView(RetrieveUpdateAPIView):
-    serializer_class = UserSerializer
 
-    def get(self, request, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            return self.get_queryset()
-        else:
+class AuthValidatorMixin(object):
+
+    def _check_login(self):
+        if not self.request.user.is_authenticated:
             data = {"detail": "Authentication credentials were not provided"}
             return Response(data, status.HTTP_401_UNAUTHORIZED)
+
+    def get(self, request, *args, **kwargs):
+        return self._check_login() or super(AuthValidatorMixin, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self._check_login() or super(AuthValidatorMixin, self).post(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self._check_login() or super(AuthValidatorMixin, self).patch(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self._check_login() or super(AuthValidatorMixin, self).put(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self._check_login() or super(AuthValidatorMixin, self).delete(request, *args, **kwargs)
+
+
+class ProfileView(AuthValidatorMixin, RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
 
     def get_object(self):
         return self.request.user
@@ -177,5 +199,5 @@ class ProfileView(RetrieveUpdateAPIView):
         django-rest-swagger
         https://github.com/Tivix/django-rest-auth/issues/275
         """
-        return get_user_model().objects.none()
+        return User.objects.none()
 
