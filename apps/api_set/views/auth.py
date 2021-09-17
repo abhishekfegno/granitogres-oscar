@@ -1,9 +1,11 @@
+import rest_auth.views
 from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model
 from oscarapi.basket import operations
 from oscarapi.utils.session import login_and_upgrade_session
 from rest_framework import permissions, authentication
 from rest_framework.decorators import api_view
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
 # REGISTRATION URLS
 from rest_framework.views import APIView
@@ -155,4 +157,16 @@ class LoginWithOTPForDeliveryBoy(LoginWithOTP):
         return Response(out, status=200)
 
 
+class ProfileView(RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
 
+    def get_object(self):
+        return self.request.user
+
+    def get_queryset(self):
+        """
+        Adding this method since it is sometimes called when using
+        django-rest-swagger
+        https://github.com/Tivix/django-rest-auth/issues/275
+        """
+        return get_user_model().objects.none()
