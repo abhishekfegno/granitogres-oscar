@@ -9,6 +9,7 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
 # REGISTRATION URLS
 from rest_framework.views import APIView
+from rest_framework import status
 
 from apps.api_set.serializers.auth import MobileNumberSerializer, OTP, OtpSerializer, UserSerializer
 from apps.api_set.serializers.basket import WncBasketSerializer
@@ -160,6 +161,13 @@ class LoginWithOTPForDeliveryBoy(LoginWithOTP):
 class ProfileView(RetrieveUpdateAPIView):
     serializer_class = UserSerializer
 
+    def get(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            return self.get_queryset()
+        else:
+            data = {"detail": "Authentication credentials were not provided"}
+            return Response(data, status.HTTP_401_UNAUTHORIZED)
+
     def get_object(self):
         return self.request.user
 
@@ -170,3 +178,4 @@ class ProfileView(RetrieveUpdateAPIView):
         https://github.com/Tivix/django-rest-auth/issues/275
         """
         return get_user_model().objects.none()
+
