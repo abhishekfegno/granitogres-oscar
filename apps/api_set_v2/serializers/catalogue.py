@@ -7,7 +7,7 @@ from apps.api_set.serializers.catalogue import custom_ProductListSerializer
 from apps.api_set.serializers.mixins import ProductDetailSerializerMixin, OptionSerializer
 from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite, \
     ProductAttributeFieldMixin
-from apps.catalogue.models import Category, Product
+from apps.catalogue.models import Category, Product, ProductReview
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -117,3 +117,40 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             print("QUERIES CALLED : ", end - start)
             return data
         return
+
+
+class ProductReviewListSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    body = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    date = serializers.SerializerMethodField()
+
+    def get_product(self, instance):
+        return instance.product.name
+
+    def get_user(self, instance):
+        return instance.user.first_name
+
+    def get_status(self, instance):
+        return instance.status
+
+    def get_title(self, instance):
+        return instance.title
+
+    def get_body(self, instance):
+        return instance.body
+
+    def get_date(self, instance):
+        return instance.date
+
+    class Meta:
+        model = ProductReview
+        fields = ('id', 'title', 'body', 'score', 'product', 'user', 'status', 'date')
+
+
+class ProductReviewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductReview
+        fields = ('product', 'score', 'title', 'body', 'user') # image field to be added
