@@ -1,11 +1,14 @@
 from django.core.cache import cache
+from django.db import IntegrityError
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404, CreateAPIView
 from rest_framework.response import Response
 
 from apps.api_set.views.orders import _login_required
 from apps.api_set_v2.serializers.catalogue import ProductDetailWebSerializer, ProductReviewListSerializer, ProductReviewCreateSerializer
-from apps.catalogue.models import Product, ProductReview
+from apps.catalogue.models import Product
+# from apps.catalogue.models import ProductReview
+from apps.catalogue.catalogue.reviews.models import ProductReview
 
 # API_V2
 from apps.utils import image_not_found
@@ -85,9 +88,17 @@ class ProductReviewCreateView(CreateAPIView):
     serializer_class = ProductReviewCreateSerializer
 
     def post(self, *args, **kwargs):
-        # import pdb;pdb.set_trace()
+        errors = ""
         serializer = self.get_serializer(data=self.request.data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
-
-        return Response({"message": "Review has been added"})
+            try:
+                serializer.save(user=self.request.user)
+            except IntegrityError:
+                errors = {'errors': "Duplicate data is found"}
+        else:
+            errors = serializer.errors
+        data = serializer.data
+        return Response({
+            "errors": errors,
+            "data": data
+        })

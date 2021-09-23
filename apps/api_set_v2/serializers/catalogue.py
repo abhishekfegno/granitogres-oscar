@@ -1,5 +1,4 @@
 # /home/jk/code/grocery/apps/api_set_v2/serializers/catalogue.py
-
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
@@ -7,7 +6,9 @@ from apps.api_set.serializers.catalogue import custom_ProductListSerializer
 from apps.api_set.serializers.mixins import ProductDetailSerializerMixin, OptionSerializer
 from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite, \
     ProductAttributeFieldMixin
-from apps.catalogue.models import Category, Product, ProductReview
+from apps.catalogue.models import Category, Product
+# from apps.catalogue.models import ProductReview
+from apps.catalogue.catalogue.reviews.models import ProductReview
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -131,7 +132,9 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
         return instance.product.name
 
     def get_user(self, instance):
-        return instance.user.first_name
+        if instance.user:
+            return instance.user.first_name
+        return None
 
     def get_status(self, instance):
         return instance.status
@@ -151,6 +154,8 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
 
 
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
+
+
     class Meta:
         model = ProductReview
         fields = ('product', 'score', 'title', 'body', 'user') # image field to be added

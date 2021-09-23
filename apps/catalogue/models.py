@@ -167,13 +167,13 @@ class Product(AbstractProduct):
                 cache.delete(c_key)
 
 
-class ProductReview(AbstractProductReview):
-    # images = models.ManyToManyField(AbstractProductImage, null=True, blank=True)
-    pass
-
-    @property
-    def date(self):
-        return self.date_created.strftime("%Y-%M-%d")
+# class ProductReview(AbstractProductReview):
+#     # images = models.ManyToManyField(AbstractProductImage, null=True, blank=True)
+#     pass
+#
+#     @property
+#     def date(self):
+#         return self.date_created.strftime("%Y-%M-%d")
 
 
 # class ProductReviewImage(models.Model):

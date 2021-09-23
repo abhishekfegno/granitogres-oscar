@@ -70,7 +70,7 @@ INSTALLED_APPS = [
     'oscar.apps.offer.apps.OfferConfig',
     'oscar.apps.voucher.apps.VoucherConfig',
     'oscar.apps.wishlists.apps.WishlistsConfig',
-    'oscar.apps.catalogue.reviews.apps.CatalogueReviewsConfig',
+    'apps.catalogue.catalogue.reviews.apps.CatalogueReviewsConfig',
 
     'oscar.apps.dashboard.apps.DashboardConfig',
     'oscar.apps.dashboard.reports.apps.ReportsDashboardConfig',
