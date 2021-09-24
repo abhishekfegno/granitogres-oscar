@@ -1,14 +1,9 @@
-# from oscar.apps.catalogue.reviews.models import *  # noqa isort:skip
 from django.db import models
 from oscar.apps.catalogue.reviews.abstract_models import (
     AbstractProductReview, AbstractVote)
 from oscar.core.loading import is_model_registered
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
-# if not is_model_registered('reviews', 'ProductReview'):
-#     class ProductReview(AbstractProductReview):
-#         pass
-#
 
 if not is_model_registered('reviews', 'Vote'):
     class Vote(AbstractVote):
@@ -16,17 +11,18 @@ if not is_model_registered('reviews', 'Vote'):
 
 
 class ProductReview(AbstractProductReview):
-    # images = models.ManyToManyField(AbstractProductImage, null=True, blank=True)
-    pass
 
     @property
     def date(self):
         return self.date_created.strftime("%Y-%m-%d")
 
+    def __str__(self):
+        return f"{self.product.name} | {self.title}"
+
 
 class ProductReviewImage(models.Model):
     product = models.ForeignKey(
-        'catalogue.ProductReview',
+        ProductReview,
         on_delete=models.CASCADE,
         related_name='images',
         verbose_name=_("Product"))
@@ -42,13 +38,12 @@ class ProductReviewImage(models.Model):
     date_created = models.DateTimeField(_("Date created"), auto_now_add=True)
 
     class Meta:
-        abstract = True
-        app_label = 'catalogue'
+        app_label = 'reviews'
         # Any custom models should ensure that this ordering is unchanged, or
         # your query count will explode. See AbstractProduct.primary_image.
         ordering = ["display_order"]
-        verbose_name = _('Product image')
-        verbose_name_plural = _('Product images')
+        verbose_name = _('Product review image')
+        verbose_name_plural = _('Product reviewimages')
 
     def __str__(self):
         return "Image of '%s'" % self.product
@@ -68,3 +63,6 @@ class ProductReviewImage(models.Model):
         for idx, image in enumerate(self.product.images.all()):
             image.display_order = idx
             image.save()
+
+
+from oscar.apps.catalogue.reviews.models import *  # noqa isort:skip

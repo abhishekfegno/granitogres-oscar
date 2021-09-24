@@ -8,10 +8,10 @@ from apps.api_set.views.orders import _login_required
 from apps.api_set_v2.serializers.catalogue import ProductDetailWebSerializer, ProductReviewListSerializer, ProductReviewCreateSerializer
 from apps.catalogue.models import Product
 # from apps.catalogue.models import ProductReview
-from apps.catalogue.catalogue.reviews.models import ProductReview
+from apps.catalogue.reviews.models import ProductReview, ProductReviewImage
+
 
 # API_V2
-from apps.utils import image_not_found
 
 
 @api_view()
@@ -76,7 +76,9 @@ def product_detail_web(request, product):
 def product_review(request, product):
     queryset = ProductReview.objects.filter(product_id=product)
     serializer_class = ProductReviewListSerializer
-    data = serializer_class(queryset, many=True).data
+    data = serializer_class(queryset, many=True, context={'request': request}).data
+    # for i in ProductReviewImage.objects.all():
+    #     print(i.product.id,i.id,i.product.title)
     # import pdb;pdb.set_trace()
     return Response({
         'results': data,
@@ -89,7 +91,8 @@ class ProductReviewCreateView(CreateAPIView):
 
     def post(self, *args, **kwargs):
         errors = ""
-        serializer = self.get_serializer(data=self.request.data)
+        serializer = self.get_serializer(data=self.request.data, files=self.request.FILES)
+        import pdb;pdb.set_trace()
         if serializer.is_valid(raise_exception=True):
             try:
                 serializer.save(user=self.request.user)

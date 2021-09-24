@@ -1,5 +1,6 @@
 # /home/jk/code/grocery/apps/api_set_v2/serializers/catalogue.py
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
 from rest_framework.reverse import reverse
 
 from apps.api_set.serializers.catalogue import custom_ProductListSerializer
@@ -8,7 +9,7 @@ from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin, Pr
     ProductAttributeFieldMixin
 from apps.catalogue.models import Category, Product
 # from apps.catalogue.models import ProductReview
-from apps.catalogue.catalogue.reviews.models import ProductReview
+from apps.catalogue.reviews.models import ProductReview, ProductReviewImage
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -120,6 +121,19 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
         return
 
 
+class ProductReviewImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, instance):
+        request = self.context['request']
+        image = instance.original.url
+        return request.build_absolute_uri(image)
+
+    class Meta:
+        model = ProductReviewImage
+        fields = ('image', )
+
+
 class ProductReviewListSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
@@ -127,6 +141,8 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
     body = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
+    # image = ProductReviewImageListSerializer(many=True, read_only=True)
+    image = serializers.SerializerMethodField()
 
     def get_product(self, instance):
         return instance.product.name
@@ -148,14 +164,26 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
     def get_date(self, instance):
         return instance.date
 
+    def get_image(self, instance):
+        queryset = ProductReviewImage.objects.filter(product_id=instance.product.id)
+        print(instance.product.id, instance.id)
+        return ProductReviewImageSerializer(queryset, many=True, read_only=True, context={'request': self.context['request']}).data
+
     class Meta:
         model = ProductReview
-        fields = ('id', 'title', 'body', 'score', 'product', 'user', 'status', 'date')
+        fields = ('id', 'title', 'body', 'score', 'product', 'user', 'status', 'date', 'image')
 
 
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
+    image = ProductReviewImageSerializer(many=True)
 
+    def create(self, validated_data):
+        images = validated_data.pop['images']
+        product = ProductReview.objetcs.create(**validated_data)
+        for image in images:
+            ProductReviewImage.objetcs.create(product=product, **image)
+        return product
 
     class Meta:
         model = ProductReview
-        fields = ('product', 'score', 'title', 'body', 'user') # image field to be added
+        fields = ('product', 'score', 'title', 'body', 'user', 'image') # image field to be added

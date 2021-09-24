@@ -167,61 +167,6 @@ class Product(AbstractProduct):
                 cache.delete(c_key)
 
 
-# class ProductReview(AbstractProductReview):
-#     # images = models.ManyToManyField(AbstractProductImage, null=True, blank=True)
-#     pass
-#
-#     @property
-#     def date(self):
-#         return self.date_created.strftime("%Y-%M-%d")
-
-
-# class ProductReviewImage(models.Model):
-#     product = models.ForeignKey(
-#         'catalogue.ProductReview',
-#         on_delete=models.CASCADE,
-#         related_name='images',
-#         verbose_name=_("Product"))
-#     original = models.ImageField(
-#         _("Original"), upload_to=settings.OSCAR_IMAGE_FOLDER, max_length=255)
-#     caption = models.CharField(_("Caption"), max_length=200, blank=True)
-#
-#     #: Use display_order to determine which is the "primary" image
-#     display_order = models.PositiveIntegerField(
-#         _("Display order"), default=0, db_index=True,
-#         help_text=_("An image with a display order of zero will be the primary"
-#                     " image for a product"))
-#     date_created = models.DateTimeField(_("Date created"), auto_now_add=True)
-#
-#     class Meta:
-#         abstract = True
-#         app_label = 'catalogue'
-#         # Any custom models should ensure that this ordering is unchanged, or
-#         # your query count will explode. See AbstractProduct.primary_image.
-#         ordering = ["display_order"]
-#         verbose_name = _('Product image')
-#         verbose_name_plural = _('Product images')
-#
-#     def __str__(self):
-#         return "Image of '%s'" % self.product
-#
-#     def is_primary(self):
-#         """
-#         Return bool if image display order is 0
-#         """
-#         return self.display_order == 0
-#
-#     def delete(self, *args, **kwargs):
-#         """
-#         Always keep the display_order as consecutive integers. This avoids
-#         issue #855.
-#         """
-#         super().delete(*args, **kwargs)
-#         for idx, image in enumerate(self.product.images.all()):
-#             image.display_order = idx
-#             image.save()
-
-
 class Category(AbstractCategory):
 
     image = ImageField(_('Image'), upload_to='categories', blank=False,
