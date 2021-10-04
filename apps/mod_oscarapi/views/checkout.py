@@ -35,10 +35,12 @@ from ...basket.utils import order_to_basket
 def _login_and_location_required(func):
     def _wrapper(request, *args, **kwargs):
         if request.user.is_anonymous:
-            return JsonResponse({'detail': 'You have to be logged-in to create Order.'}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({'detail': 'You have to be logged-in to create Order.'},
+                                status=status.HTTP_400_BAD_REQUEST)
         if not request.session.get('location'):
             return JsonResponse({'detail': 'Geolocation not provided'}, status=status.HTTP_400_BAD_REQUEST)
         return func(request, *args, **kwargs)
+
     return _wrapper
 
 
@@ -126,7 +128,7 @@ class CheckoutView(OscarAPICheckoutView):
             }
         }
     }
-       
+
     OR ANOTHER PAYMENT OBJECT (Pay 10000.0 With razorpay and pay balance with cash.)
     "payment":{
         "cash":{
@@ -149,10 +151,10 @@ class CheckoutView(OscarAPICheckoutView):
             "enabled": false,
         }
     }
-    
+
     API Supports multiple payments integration, though our system doesnot' well support this feature. (futurestic one.)
     returns the order object.
-    
+
     """
     serializer_class = CheckoutSerializer
     order_object = None
@@ -173,24 +175,30 @@ class CheckoutView(OscarAPICheckoutView):
 
         shipping_address = UserAddress.objects.filter(user=user, pk=data.get('shipping_address')).first()
         if shipping_address is None:
-            return Response({'errors': "User Address for shipping does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "User Address for shipping does not exists"},
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
 
         billing_address = UserAddress.objects.filter(user=user, pk=data.get('billing_address')).first()
         if billing_address is None:
-            return Response({'errors': "User Address for billing does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "User Address for billing does not exists"},
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
 
         try:
             ship = None
             shippingcode = data.get('shippingcode', 'free-shipping')
-            for repo in Repository().get_available_shipping_methods(basket, user=user, shipping_addr=shipping_address, request=request,):
+            for repo in Repository().get_available_shipping_methods(basket, user=user, shipping_addr=shipping_address,
+                                                                    request=request, ):
                 if repo.code == shippingcode:
                     ship = repo
                 break
             if ship is None:
                 methods_are = ", ".join([r.code for r in Repository().get_available_shipping_methods(basket)])
-                return Response({'errors': f"Please Choose a valid Shipping Method! (Allowed methods are: {methods_are})"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+                return Response(
+                    {'errors': f"Please Choose a valid Shipping Method! (Allowed methods are: {methods_are})"},
+                    status=status.HTTP_406_NOT_ACCEPTABLE)
         except serializers.ValidationError:
-            return Response({'errors': "User Address for billing does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "User Address for billing does not exists"},
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
         basket_errors = []
         for line in basket.all_lines():
             result = basket.strategy.fetch_for_line(line)
@@ -278,13 +286,15 @@ class CheckoutView(OscarAPICheckoutView):
                 if type(data) is dict:
                     for new_key, error_text in data.items():
                         key_str += '.' + new_key
-                        _error = str(error_text[0]) if error_text and isinstance(error_text, Iterable) else str(error_text)
+                        _error = str(error_text[0]) if error_text and isinstance(error_text, Iterable) else str(
+                            error_text)
                 string += f"{key_str}:{_error}\n"
 
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
         location = shipping_address.location
         if not location:
-            return Response({'errors': "You have not provided your location yet."}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'errors': "You have not provided your location yet."},
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
         # Freeze basket
         basket = c_ser.validated_data.get('basket')
         basket.freeze()
@@ -338,11 +348,11 @@ class CheckoutView(OscarAPICheckoutView):
         slot = order.slot
         data['slot'] = {
             'pk': slot and slot.pk,
-            'start_time':  slot and slot.config.start_time,
-            'end_time':  slot and slot.config.end_time,
-            'start_date':  slot and slot.start_date,
-            'max_datetime_to_order':  slot and slot.max_datetime_to_order,
-            'is_next':  bool(slot),
+            'start_time': slot and slot.config.start_time,
+            'end_time': slot and slot.config.end_time,
+            'start_date': slot and slot.start_date,
+            'max_datetime_to_order': slot and slot.max_datetime_to_order,
+            'is_next': bool(slot),
             'index': slot and slot.index,
         }
         return Response(o_ser.data)
@@ -388,7 +398,7 @@ class CheckoutView(OscarAPICheckoutView):
             # Previous payment method doesn't exist or can't be reused. Create it now.
             if not state:
                 method_data.update()
-                state = method.record_payment(request, order, method_key,  **method_data)
+                state = method.record_payment(request, order, method_key, **method_data)
             # Subtract amount from pending order balance.
             order_balance[0] = order_balance[0] - state.amount
             return state
