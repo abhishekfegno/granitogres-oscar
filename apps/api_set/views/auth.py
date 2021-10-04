@@ -90,7 +90,7 @@ class LoginWithOTP(APIView):
     serializer_class = OtpSerializer
 
     def post(self, request, *args, **kwargs):
-        out = {'error': None, 'user': None, 'basket': None, 'cart_item_count': 0, 'new_user': None}
+        out = {'error': None, 'user': None, 'basket': None, 'cart_item_count': 0}
 
         # Validating Data
         otp_serializer = self.serializer_class(data=request.data, context={'request': request})
@@ -100,7 +100,6 @@ class LoginWithOTP(APIView):
 
         # Generating User or Respond with error
         otp_object = otp_serializer.validated_data['object']
-        out['new_user'] = False
         if not otp_object.user:  # signup
             try:
                 otp_object.generate_user()

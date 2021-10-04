@@ -60,20 +60,18 @@ account_urlpatterns = [
         name='account_confirm_email'),
 ]
 
-
 catalogue_urlpatterns = [
     path("v1/catalogue/", include([
-        path("c/", categories_list_cached, name="wnc-categories-list"),                             # category
-        path("c/all/", product_list, name="wnc-all-product-list"),                                  # category
+        path("c/", categories_list_cached, name="wnc-categories-list"),  # category
+        path("c/all/", product_list, name="wnc-all-product-list"),  # category
         # path("c/all/new/", product_list_new, name="wnc-all-product-list-new"),                    # category
-        path("c/<slug:category>/", product_list, name="wnc-category-product-list"),                 # category
-        path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web"),      # detail
-        path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),                            # filter
-        path("suggestions/", product_suggestions, name="wnc-product-suggestions"),                  # category
+        path("c/<slug:category>/", product_list, name="wnc-category-product-list"),  # category
+        path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web"),  # detail
+        path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),  # filter
+        path("suggestions/", product_suggestions, name="wnc-product-suggestions"),  # category
         # path("mob/", include([]))
     ]))
 ]
-
 
 basket_urlpatterns = [
     path("v1/_basket/", include([
@@ -98,6 +96,5 @@ public_apis = [
 
 ]
 
-
 urlpatterns = home_urlpatterns + account_urlpatterns + catalogue_urlpatterns \
-            + basket_urlpatterns + wish_list_urlpatterns + public_apis
+              + basket_urlpatterns + wish_list_urlpatterns + public_apis

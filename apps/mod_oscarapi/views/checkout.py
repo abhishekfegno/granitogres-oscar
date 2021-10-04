@@ -1,4 +1,5 @@
 import pprint
+from collections import Iterable
 
 from django.db.models import F
 from django.http import JsonResponse
@@ -190,7 +191,6 @@ class CheckoutView(OscarAPICheckoutView):
                 return Response({'errors': f"Please Choose a valid Shipping Method! (Allowed methods are: {methods_are})"}, status=status.HTTP_406_NOT_ACCEPTABLE)
         except serializers.ValidationError:
             return Response({'errors': "User Address for billing does not exists"}, status=status.HTTP_406_NOT_ACCEPTABLE)
-
         basket_errors = []
         for line in basket.all_lines():
             result = basket.strategy.fetch_for_line(line)
@@ -272,10 +272,16 @@ class CheckoutView(OscarAPICheckoutView):
         c_ser = self.get_serializer(data=sample_data)
         if not c_ser.is_valid():
             string = ""
-            for error, data in c_ser.errors:
-                string += f"{error}:{data}\n"
-                break
-            return Response({"errors": string}, status.HTTP_406_NOT_ACCEPTABLE)
+            for key, data in c_ser.errors.items():
+                key_str = key
+                _error = str(data)
+                if type(data) is dict:
+                    for new_key, error_text in data.items():
+                        key_str += '.' + new_key
+                        _error = str(error_text[0]) if error_text and isinstance(error_text, Iterable) else str(error_text)
+                string += f"{key_str}:{_error}\n"
+
+            return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
         location = shipping_address.location
         if not location:
             return Response({'errors': "You have not provided your location yet."}, status=status.HTTP_406_NOT_ACCEPTABLE)
