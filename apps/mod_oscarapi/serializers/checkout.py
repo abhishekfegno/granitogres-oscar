@@ -120,7 +120,7 @@ class UserAddressSerializer(CoreUserAddressSerializer):
     def validate(self, attrs):
         attrs = super(UserAddressSerializer, self).validate(attrs)
         attrs['location'] = attrs['location']['point']
-        zone = ZoneFacade().check_deliverability(point=attrs['location'])
+        zone = ZoneFacade(attrs['location']).check_deliverability()
         if not zone:
             raise forms.ValidationError("Currently we are not delivering to this location.")
         return attrs
