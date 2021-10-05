@@ -2,6 +2,7 @@ from sqlite3 import IntegrityError
 
 from django import forms
 from django.conf import settings
+from django.contrib.gis.gdal.geometries import Point
 from oscar.apps.address.models import Country
 from oscar.core import prices
 from oscarapi.basket.operations import assign_basket_strategy
@@ -102,6 +103,22 @@ class UserAddressSerializer(CoreUserAddressSerializer):
     location_data = serializers.SerializerMethodField()
     country = serializers.SerializerMethodField()
 
+    def create(self, validated_data):
+        point = validated_data.pop('location') if 'location' in validated_data else None
+        instance = super(UserAddressSerializer, self).create(validated_data)
+        if point:
+            instance.location = Point(**point)
+            instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        point = validated_data.pop('location') if 'location' in validated_data else None
+        instance = super(UserAddressSerializer, self).update(instance, validated_data)
+        if point:
+            instance.location = Point(**point)
+            instance.save()
+        return instance
+
     def get_country(self, instance):
         return settings.USER_ADDRESS['COUNTRY']
 
@@ -127,7 +144,7 @@ class UserAddressSerializer(CoreUserAddressSerializer):
         return attrs
     
     def save(self, **kwargs):
-        country = {'country': Country.objects.filter(iso_3166_1_a2=settings.USER_ADDRESS['COUNTRY']).first()}
+        country = {'country': Country.objects.filter(iso_3166_1_a2=settings.USER_ADDRESS['COUNTRY']).first(), }
         return super(UserAddressSerializer, self).save(**(country if country['country'] else {}), **kwargs)
 
     class Meta:

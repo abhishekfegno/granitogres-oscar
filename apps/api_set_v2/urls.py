@@ -66,9 +66,9 @@ account_urlpatterns = [
 
 catalogue_urlpatterns = [
     path("catalogue/", include([
-            path("c/", categories_list_cached, name="wnc-categories-list"),                               # category
-            path("c/all/", product_list, name="wnc-all-product-list-v2"),                                   # category
-            # path("c/all/new/", product_list_new, name="wnc-all-product-list-new"),                        # category
+        path("c/", categories_list_cached, name="wnc-categories-list"),                               # category
+        path("c/all/", product_list, name="wnc-all-product-list-v2"),                                   # category
+        # path("c/all/new/", product_list_new, name="wnc-all-product-list-new"),                        # category
         path("c/<slug:category>/", product_list, name="wnc-category-product-list-v2"),                      # category
         path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),           # detail
         path("d/<slug:product>/mark_as_fav/", mark_as_fav, name="wnc-category-product-mark_as_fav-v2"),           # detail
@@ -104,10 +104,10 @@ public_apis = [
 
 
 urlpatterns = (
-        home_urlpatterns 
-        + account_urlpatterns 
+        home_urlpatterns
+        + account_urlpatterns
         + catalogue_urlpatterns
-        + basket_urlpatterns 
-        + wish_list_urlpatterns 
+        + basket_urlpatterns
+        + wish_list_urlpatterns
         + public_apis
 )
