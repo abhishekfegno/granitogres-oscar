@@ -98,7 +98,7 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
 
 
 class UserAddressSerializer(CoreUserAddressSerializer):
-    location = PointSerializer(required=True, write_only=True)
+    location = PointSerializer(required=settings.NEED_LOCATION_ON_ADDRESS_SAVING, write_only=True)
     location_data = serializers.SerializerMethodField()
     country = serializers.SerializerMethodField()
 
@@ -119,10 +119,11 @@ class UserAddressSerializer(CoreUserAddressSerializer):
 
     def validate(self, attrs):
         attrs = super(UserAddressSerializer, self).validate(attrs)
-        attrs['location'] = attrs['location']['point']
-        zone = ZoneFacade(attrs['location']).check_deliverability()
-        if not zone:
-            raise forms.ValidationError("Currently we are not delivering to this location.")
+        if settings.NEED_LOCATION_ON_ADDRESS_SAVING:
+            attrs['location'] = attrs['location']['point']
+            zone = ZoneFacade(attrs['location']).check_deliverability()
+            if not zone:
+                raise forms.ValidationError("Currently we are not delivering to this location.")
         return attrs
     
     def save(self, **kwargs):

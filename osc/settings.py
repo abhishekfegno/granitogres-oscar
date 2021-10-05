@@ -227,6 +227,7 @@ from .config.static import *                # noqa: F401,F404
 from .config.templates import *             # noqa: F401,F404
 
 
+
 """
 Email : grocery@gmail.com
 Password : globalfurnimart@456
