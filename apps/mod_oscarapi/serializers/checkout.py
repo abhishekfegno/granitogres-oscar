@@ -99,15 +99,15 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
 
 
 class UserAddressSerializer(CoreUserAddressSerializer):
-    location = PointSerializer(required=settings.NEED_LOCATION_ON_ADDRESS_SAVING, write_only=True)
+    location = PointSerializer(required=settings.NEED_LOCATION_ON_ADDRESS_SAVING, write_only=True, allow_null=not settings.NEED_LOCATION_ON_ADDRESS_SAVING)
     location_data = serializers.SerializerMethodField()
     country = serializers.SerializerMethodField()
 
     def create(self, validated_data):
         point = validated_data.pop('location') if 'location' in validated_data else None
         instance = super(UserAddressSerializer, self).create(validated_data)
-        if point:
-            instance.location = Point(**point)
+        if point and 'point' in point:
+            instance.location = point['point']
             instance.save()
         return instance
 
