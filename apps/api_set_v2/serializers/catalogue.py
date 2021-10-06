@@ -1,6 +1,6 @@
 # /home/jk/code/grocery/apps/api_set_v2/serializers/catalogue.py
-
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
 from rest_framework.reverse import reverse
 
 from apps.api_set.serializers.catalogue import custom_ProductListSerializer
@@ -8,6 +8,8 @@ from apps.api_set.serializers.mixins import ProductDetailSerializerMixin, Option
 from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite, \
     ProductAttributeFieldMixin
 from apps.catalogue.models import Category, Product
+# from apps.catalogue.models import ProductReview
+from apps.catalogue.reviews.models import ProductReview, ProductReviewImage
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -117,3 +119,81 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             print("QUERIES CALLED : ", end - start)
             return data
         return
+
+
+class ProductReviewImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, instance):
+        request = self.context['request']
+        image = instance.original.url
+        return request.build_absolute_uri(image)
+
+    class Meta:
+        model = ProductReviewImage
+        fields = ('image', 'id')
+
+
+class ProductReviewListSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    body = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    date = serializers.SerializerMethodField()
+    # image = ProductReviewImageListSerializer(many=True, read_only=True)
+    image = serializers.SerializerMethodField()
+
+    def get_product(self, instance):
+        return instance.product.name
+
+    def get_user(self, instance):
+        if instance.user:
+            return instance.user.first_name
+        return None
+
+    def get_status(self, instance):
+        return instance.status
+
+    def get_title(self, instance):
+        return instance.title
+
+    def get_body(self, instance):
+        return instance.body
+
+    def get_date(self, instance):
+        return instance.date
+
+    def get_image(self, instance):
+        queryset = ProductReviewImage.objects.filter(review_id=instance.product.id)
+        print(instance.product.id, instance.id, instance.images)
+        return ProductReviewImageSerializer(queryset, many=True, read_only=True, context={'request': self.context['request']}).data
+
+    class Meta:
+        model = ProductReview
+        fields = ('id', 'title', 'body', 'score', 'product', 'user', 'status', 'date', 'image')
+
+
+class ProductReviewCreateSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
+
+    def create(self, validated_data):
+        # import pdb;pdb.set_trace()
+
+        images = validated_data['image']
+        product = ProductReview.objects.create(**validated_data)
+        for image in images:
+            ProductReviewImage.objects.create(review=product, **image)
+        return product
+
+    class Meta:
+        model = ProductReview
+        fields = ('product', 'score', 'title', 'body', 'user', "image") # image field to be added
+        # extra_kwargs = {
+        #
+        #     "product": {"required": False},
+        #     "score": {"required": False},
+        #     "title": {"required": False},
+        #     "body": {"required": False},
+        #     "user": {"required": False},
+        # }

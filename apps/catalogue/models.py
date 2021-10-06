@@ -12,6 +12,7 @@ from oscar.apps.catalogue.abstract_models import (
     AbstractProduct, AbstractCategory, AbstractProductImage,
     AbstractProductAttribute, AbstractProductRecommendation
 )
+from oscar.apps.catalogue.reviews.abstract_models import AbstractProductReview
 from sorl.thumbnail import get_thumbnail
 
 from apps.partner.models import StockRecord
