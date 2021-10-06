@@ -131,7 +131,7 @@ class ProductReviewImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductReviewImage
-        fields = ('image', )
+        fields = ('image', 'id')
 
 
 class ProductReviewListSerializer(serializers.ModelSerializer):
@@ -165,8 +165,8 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
         return instance.date
 
     def get_image(self, instance):
-        queryset = ProductReviewImage.objects.filter(product_id=instance.product.id)
-        print(instance.product.id, instance.id)
+        queryset = ProductReviewImage.objects.filter(review_id=instance.product.id)
+        print(instance.product.id, instance.id, instance.images)
         return ProductReviewImageSerializer(queryset, many=True, read_only=True, context={'request': self.context['request']}).data
 
     class Meta:
@@ -175,15 +175,25 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
 
 
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
-    image = ProductReviewImageSerializer(many=True)
+    image = serializers.ImageField()
 
     def create(self, validated_data):
-        images = validated_data.pop['images']
-        product = ProductReview.objetcs.create(**validated_data)
+        # import pdb;pdb.set_trace()
+
+        images = validated_data['image']
+        product = ProductReview.objects.create(**validated_data)
         for image in images:
-            ProductReviewImage.objetcs.create(product=product, **image)
+            ProductReviewImage.objects.create(review=product, **image)
         return product
 
     class Meta:
         model = ProductReview
-        fields = ('product', 'score', 'title', 'body', 'user', 'image') # image field to be added
+        fields = ('product', 'score', 'title', 'body', 'user', "image") # image field to be added
+        # extra_kwargs = {
+        #
+        #     "product": {"required": False},
+        #     "score": {"required": False},
+        #     "title": {"required": False},
+        #     "body": {"required": False},
+        #     "user": {"required": False},
+        # }

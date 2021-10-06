@@ -2,6 +2,7 @@ from django.core.cache import cache
 from django.db import IntegrityError
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404, CreateAPIView
+from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 from rest_framework.response import Response
 
 from apps.api_set.views.orders import _login_required
@@ -82,17 +83,17 @@ def product_review(request, product):
     # import pdb;pdb.set_trace()
     return Response({
         'results': data,
-        # 'deliverable': out
     })
 
 
 class ProductReviewCreateView(CreateAPIView):
     serializer_class = ProductReviewCreateSerializer
+    parser_classes = (MultiPartParser, FormParser, )
 
-    def post(self, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         errors = ""
-        serializer = self.get_serializer(data=self.request.data, files=self.request.FILES)
-        import pdb;pdb.set_trace()
+        serializer = self.get_serializer(data=self.request.data)
+        # import pdb;pdb.set_trace()
         if serializer.is_valid(raise_exception=True):
             try:
                 serializer.save(user=self.request.user)

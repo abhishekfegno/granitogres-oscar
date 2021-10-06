@@ -21,7 +21,7 @@ class ProductReview(AbstractProductReview):
 
 
 class ProductReviewImage(models.Model):
-    product = models.ForeignKey(
+    review = models.ForeignKey(
         ProductReview,
         on_delete=models.CASCADE,
         related_name='images',
@@ -46,7 +46,7 @@ class ProductReviewImage(models.Model):
         verbose_name_plural = _('Product reviewimages')
 
     def __str__(self):
-        return "Image of '%s'" % self.product
+        return "Image of '%s'" % self.review
 
     def is_primary(self):
         """
@@ -60,7 +60,7 @@ class ProductReviewImage(models.Model):
         issue #855.
         """
         super().delete(*args, **kwargs)
-        for idx, image in enumerate(self.product.images.all()):
+        for idx, image in enumerate(self.review.images.all()):
             image.display_order = idx
             image.save()
 
