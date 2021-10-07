@@ -101,6 +101,7 @@ class ProductReviewCreateView(CreateAPIView):
 class ProductReviewUpdateView(UpdateAPIView):
     serializer_class = ProductReviewCreateSerializer
     queryset = ProductReview.objects.all()
+    lookup_url_kwarg = 'review_pk'
 
     def check_object_permissions(self, request, obj):
         if request.user.is_anonymous or obj.user != request.user:
@@ -112,6 +113,7 @@ class ProductReviewUpdateView(UpdateAPIView):
 class ProductReviewDeleteView(DestroyAPIView):
     serializer_class = ProductReviewCreateSerializer
     queryset = ProductReview.objects.all()
+    lookup_url_kwarg = 'review_pk'
 
     def check_object_permissions(self, request, obj):
         if request.user.is_anonymous or obj.user != request.user:
@@ -123,6 +125,7 @@ class ProductReviewDeleteView(DestroyAPIView):
 class ProductReviewImageDeleteView(DestroyAPIView):
     serializer_class = ProductReviewImageSerializer
     queryset = ProductReviewImage.objects.all()
+    lookup_url_kwarg = 'image_id'
 
     def check_object_permissions(self, request, obj):
         if not obj.review:
