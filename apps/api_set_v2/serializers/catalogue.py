@@ -134,16 +134,10 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
 
 
 class ProductReviewImageSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-
-    def get_image(self, instance):
-        request = self.context['request']
-        image = instance.original.url
-        return request.build_absolute_uri(image)
 
     class Meta:
         model = ProductReviewImage
-        fields = ('image', 'id')
+        fields = ('id', 'image')
 
 
 class ProductReviewListSerializer(serializers.ModelSerializer):
