@@ -98,7 +98,7 @@ class Product(AbstractProduct):
         """
         result = self.reviews.filter(
             status=self.reviews.model.APPROVED
-        ).annotate(text_len=Length('text_field_name')).aggregate(
+        ).annotate(text_len=Length('title')).aggregate(
             sum=models.Sum('score'), count=models.Count('id'),
             review_cnt=models.Count('id', filter=models.Q(text_len__gt=0)),
         )
