@@ -46,7 +46,7 @@ class Command(BaseCommand):
                 review = ProductReview(order_line=line, product=line.stockrecord.product, score=random.randint(0, 6),
                                        title=f.text()[:60], body=f.text(), user=line.order.user, status=ProductReview.APPROVED)
 
-                image_url_list = [__(image.original.url) for image in line.stockrecord.product.images.all().values_list('original', flat=True)]
+                image_url_list = [__(image.original.url) for image in line.stockrecord.product.images.all()]
                 for j in image_url_list:
                     self.get_remote_image(review, j)
                 ol.append(review)
