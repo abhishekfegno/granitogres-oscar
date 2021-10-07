@@ -6,6 +6,7 @@ from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.db import models
 from django.db.models import F
+from django.db.models.functions import Length
 from django.db.models.signals import post_save
 from django.db.transaction import atomic
 from oscar.apps.catalogue.abstract_models import (
@@ -97,9 +98,9 @@ class Product(AbstractProduct):
         """
         result = self.reviews.filter(
             status=self.reviews.model.APPROVED
-        ).aggregate(
+        ).annotate(text_len=Length('text_field_name')).aggregate(
             sum=models.Sum('score'), count=models.Count('id'),
-            review_cnt=models.Count('id', filter=models.Q(title__isnull=False)),
+            review_cnt=models.Count('id', filter=models.Q(text_len__gt=0)),
         )
         rating_sum = result['sum'] or 0
         rating_count = result['count'] or 0
@@ -108,7 +109,6 @@ class Product(AbstractProduct):
         if rating_count > 0:
             rating = float(rating_sum) / rating_count
         return rating, rating_count, review_count
-
 
     @property
     def tax_value(self) -> Decimal:
