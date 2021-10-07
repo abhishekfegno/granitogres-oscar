@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models import F, Count
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from oscar.apps.catalogue.reviews.abstract_models import (
     AbstractProductReview, AbstractVote)
 from oscar.core.loading import is_model_registered
@@ -11,6 +14,7 @@ if not is_model_registered('reviews', 'Vote'):
 
 
 class ProductReview(AbstractProductReview):
+    order_line = models.ForeignKey('order.Line', related_name='review_set', null=True, on_delete=models.CASCADE)
 
     @property
     def date(self):
@@ -26,8 +30,8 @@ class ProductReviewImage(models.Model):
         on_delete=models.CASCADE,
         related_name='images',
         verbose_name=_("Product"))
-    original = models.ImageField(
-        _("Original"), upload_to=settings.OSCAR_IMAGE_FOLDER, max_length=255)
+    original = models.FileField(
+        _("Original"), upload_to='review-media/', max_length=255)
     caption = models.CharField(_("Caption"), max_length=200, blank=True)
 
     #: Use display_order to determine which is the "primary" image
@@ -65,4 +69,8 @@ class ProductReviewImage(models.Model):
             image.save()
 
 
+
+
 from oscar.apps.catalogue.reviews.models import *  # noqa isort:skip
+
+

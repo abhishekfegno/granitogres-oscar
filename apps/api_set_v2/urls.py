@@ -11,7 +11,7 @@ from apps.api_set.views.index import (
 #  End loading v1 apis
 from apps.api_set.views.orders import order_cancel_request, order_return_request
 from apps.api_set.views.public import cancel_reasons_list
-from apps.api_set_v2.views.catalogue import product_detail_web, mark_as_fav, product_review, ProductReviewCreateView
+from apps.api_set_v2.views.catalogue import *
 
 from apps.api_set_v2.views.index import index, offers, pincode_list
 from apps.api_set_v2.views.orders import orders_detail, reorder_to_current_basket, reorder_to_temporary_basket
@@ -66,16 +66,18 @@ account_urlpatterns = [
 
 catalogue_urlpatterns = [
     path("catalogue/", include([
-        path("c/", categories_list_cached, name="wnc-categories-list"),                               # category
-        path("c/all/", product_list, name="wnc-all-product-list-v2"),                                   # category
-        # path("c/all/new/", product_list_new, name="wnc-all-product-list-new"),                        # category
-        path("c/<slug:category>/", product_list, name="wnc-category-product-list-v2"),                      # category
-        path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),           # detail
-        path("d/review/<slug:product>/", product_review, name="wnc-category-product-review-web-v2"),           # review
-        path("d/create/review/", ProductReviewCreateView.as_view(), name="wnc-category-product-review-create-web-v2"),           # review
-        path("d/<slug:product>/mark_as_fav/", mark_as_fav, name="wnc-category-product-mark_as_fav-v2"),           # detail
-        path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),                                  # filter
-        path("suggestions/", product_suggestions, name="wnc-product-suggestions"),                          # category
+        path("c/", categories_list_cached, name="wnc-categories-list"),                                  # category
+        path("c/all/", product_list, name="wnc-all-product-list-v2"),                                    # category
+        path("c/<slug:category>/", product_list, name="wnc-category-product-list-v2"),                   # category
+        path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),        # detail
+        path("d/<slug:product>/reviews/", ProductReviewListView.as_view(), name="wnc-category-product-review-web-v2"),
+        path("review/create/", ProductReviewCreateView.as_view(), name="wnc-category-product-review-create-web-v2"),
+        path("review/<int:review_pk>/update/", ProductReviewUpdateView.as_view(), name="wnc-category-product-review-update-web-v2"),
+        path("review/<int:review_pk>/delete/", vote_review, name="product-review-voting-v2"),
+        path("review/<int:review_pk>/vote/", vote_review, name="product-review-voting-v2"),
+        path("d/<slug:product>/mark_as_fav/", mark_as_fav, name="wnc-category-product-mark_as_fav-v2"),  # detail
+        path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),                                 # filter
+        path("suggestions/", product_suggestions, name="wnc-product-suggestions"),                       # category
     ]))
 ]
 

@@ -53,7 +53,9 @@ def PUBLIC_APIS(r, f):
              ),
             ("Product Review Web", collections.OrderedDict([
                 ("Product Review List", reverse("wnc-category-product-review-web-v2", request=r, format=f, kwargs={"product": '138'})),
-                ("Product Review Create", reverse("wnc-category-product-review-create-web-v2", request=r, format=f))
+                ("Product Review Create", reverse("wnc-category-product-review-create-web-v2", request=r, format=f)),
+                ("Vote Review", reverse("wnc-category-product-review-create-web-v2", request=r, format=f)),
+
             ]),)
         ])),
         ("Basket", collections.OrderedDict([

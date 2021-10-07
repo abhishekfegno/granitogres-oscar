@@ -1,13 +1,19 @@
+from django.contrib import messages
+from django.urls import reverse
+from django_tables2 import SingleTableView
 from oscar.apps.dashboard.catalogue.views import (
     ProductCreateUpdateView as CoreProductCreateUpdateView,
     ProductClassCreateView as CoreProductClassCreateView,
     ProductClassUpdateView as CoreProductClassUpdateView,
     CategoryUpdateView as CoreCategoryUpdateView,
-    CategoryCreateView as CoreCategoryCreateView,
+    CategoryCreateView as CoreCategoryCreateView, CategoryListMixin,
 )
+from django.views import generic
 
+from apps.catalogue.models import Brand
 from apps.dashboard.catalogue.forms import ProductForm, CategoryForm
 from apps.dashboard.catalogue.formset import ProductAttributesFormSet
+from apps.dashboard.catalogue.tables import BrandTable
 
 
 class ProductCreateUpdateView(CoreProductCreateUpdateView):
@@ -30,3 +36,47 @@ class CategoryCreateView(CoreCategoryCreateView):
     form_class = CategoryForm
 
 
+class BrandListView(SingleTableView):
+    template_name = 'oscar/dashboard/catalogue/brand_list.html'
+    table_class = BrandTable
+    context_table_name = 'brands'
+    queryset = Brand.objects.all()
+
+
+class BrandCreateView(generic.CreateView):
+    template_name = 'oscar/dashboard/catalogue/brand_form.html'
+    model = Brand
+    fields = ('name', )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['title'] = "Add a new brand"
+        return ctx
+
+    def get_success_url(self):
+        messages.info(self.request, "Brand created successfully")
+        return reverse('dashboard:catalogue-brand-list')
+
+
+class BrandUpdateView(generic.UpdateView):
+    template_name = 'oscar/dashboard/catalogue/brand_form.html'
+    model = Brand
+    fields = ('name', )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['title'] = "Update brand '%s'" % self.object.name
+        return ctx
+
+    def get_success_url(self):
+        messages.info(self.request, "Brand updated successfully")
+        return reverse('dashboard:catalogue-brand-list')
+
+
+class BrandDeleteView(generic.DeleteView):
+    template_name = 'oscar/dashboard/catalogue/brand_delete.html'
+    model = Brand
+
+    def get_success_url(self):
+        messages.info(self.request, "Brand deleted successfully")
+        return reverse('dashboard:catalogue-brand-list')

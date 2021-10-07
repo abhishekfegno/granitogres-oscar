@@ -1,5 +1,12 @@
 from django.utils.functional import lazy
 
+"""
+LIST_PRODUCT_CHILD_ONLY = True displays only 'standalone' and 'child' products in 
+                        product listing and will show child directly in detailed view
+"""
+LIST_PRODUCT_CHILD_ONLY = True
+
+
 DEBUG_TOOLBAR_PANELS = (
     # Defaults
     'debug_toolbar.panels.versions.VersionsPanel',

@@ -15,6 +15,7 @@ from oscar.apps.catalogue.abstract_models import (
 from oscar.apps.catalogue.reviews.abstract_models import AbstractProductReview
 from sorl.thumbnail import get_thumbnail
 
+from apps.catalogue.managers import ProductManagerSelector
 from apps.partner.models import StockRecord
 from apps.utils import image_not_found, get_purchase_info, purchase_info_lite_as_dict, purchase_info_as_dict
 from django.utils.translation import gettext_lazy as _
@@ -22,6 +23,10 @@ from django.utils.translation import gettext_lazy as _
 from lib import cache_key
 from lib.cache import cache_library
 from sorl.thumbnail import ImageField
+
+
+class Brand(models.Model):
+    name = models.CharField(max_length=48)
 
 
 class FavoriteProduct(models.Model):
@@ -33,6 +38,8 @@ class FavoriteProduct(models.Model):
 class Product(AbstractProduct):
     search = SearchVectorField(null=True)
     selected_stock_record = None
+
+    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True)
 
     # just cached pricing
     effective_price = models.FloatField(_('Effective Retail Price.'), null=True, blank=True)
@@ -57,6 +64,7 @@ class Product(AbstractProduct):
     length = models.FloatField(null=True, blank=True, help_text="Length of packed box in (mm). Used for Delivery")
     width = models.FloatField(null=True, blank=True, help_text="Width of packed box in (mm). Used for Delivery")
     height = models.FloatField(null=True, blank=True, help_text="Height of packed box in (mm). Used for Delivery")
+    review_count = models.IntegerField(default=0, help_text="Count of Review")
 
     upselling = models.ManyToManyField(
         'catalogue.Product', blank=True,
@@ -70,6 +78,7 @@ class Product(AbstractProduct):
         verbose_name=_("Upselling products"),
         help_text=_("These are products that are recommended to accompany the "
                     "main product."))
+    browsable = ProductManagerSelector().strategy()
 
     @property
     def tax_value(self) -> Decimal:

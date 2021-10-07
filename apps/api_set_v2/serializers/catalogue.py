@@ -46,7 +46,7 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFie
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'primary_image', 'price', 'weight', 'url')
+        fields = ('id', 'title', 'primary_image', 'price', 'weight', 'url', 'rating', 'review_count')
 
 
 class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldMixin, ProductDetailSerializerMixin, serializers.ModelSerializer):
@@ -61,7 +61,14 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     product_class = serializers.SerializerMethodField()
     siblings = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
-
+    reviews = serializers.SerializerMethodField()
+    brand = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    
+    def get_reviews(self, instance):
+        return ProductReviewListSerializer(
+            queryset=instance.productreview_set.all().order_by('-total_votes').prefetch_related('images')
+        ).data
+    
     def get_product_class(self, instance):
         pc = None
         if instance.structure == Product.CHILD:
@@ -93,6 +100,9 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             "options",
             "variants",
             "siblings",
+            'rating',
+            'brand',
+            'review_count',
         )
 
     def get_recommended_products(self, instance):
@@ -135,65 +145,111 @@ class ProductReviewImageSerializer(serializers.ModelSerializer):
 
 
 class ProductReviewListSerializer(serializers.ModelSerializer):
-    product = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
-    title = serializers.SerializerMethodField()
-    body = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
-    date = serializers.SerializerMethodField()
-    # image = ProductReviewImageListSerializer(many=True, read_only=True)
-    image = serializers.SerializerMethodField()
-
-    def get_product(self, instance):
-        return instance.product.name
+    image = ProductReviewImageSerializer(many=True)
 
     def get_user(self, instance):
         if instance.user:
-            return instance.user.first_name
-        return None
-
-    def get_status(self, instance):
-        return instance.status
-
-    def get_title(self, instance):
-        return instance.title
-
-    def get_body(self, instance):
-        return instance.body
-
-    def get_date(self, instance):
-        return instance.date
-
-    def get_image(self, instance):
-        queryset = ProductReviewImage.objects.filter(review_id=instance.product.id)
-        print(instance.product.id, instance.id, instance.images)
-        return ProductReviewImageSerializer(queryset, many=True, read_only=True, context={'request': self.context['request']}).data
+            return {
+                'full_name': instance.user.get_full_name(),
+                'image': self.context['request'].build_absolute_uri(instance.user.image.url),
+                'is_author': instance.user_id == self.context['request'].user.id,
+            }
+        return {
+            'full_name': 'Anonymous',
+            'image': None,
+            'is_author': False,
+        }
 
     class Meta:
         model = ProductReview
-        fields = ('id', 'title', 'body', 'score', 'product', 'user', 'status', 'date', 'image')
+        fields = (
+            'id', 'title', 'body', 'score', 'product', 'user', 
+            'status', 'date', 'image', 'num_down_votes', 'num_up_votes', 'delta_votes', 'total_votes')
 
 
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField()
+    image_01 = serializers.ImageField(allow_null=True, required=False)
+    image_02 = serializers.ImageField(allow_null=True, required=False)
+    image_03 = serializers.ImageField(allow_null=True, required=False)
+    image_04 = serializers.ImageField(allow_null=True, required=False)
+    image_05 = serializers.ImageField(allow_null=True, required=False)
+    image_06 = serializers.ImageField(allow_null=True, required=False)
+    image_07 = serializers.ImageField(allow_null=True, required=False)
+    image_08 = serializers.ImageField(allow_null=True, required=False)
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    product = serializers.HiddenField(allow_null=True, default=None)
 
     def create(self, validated_data):
-        # import pdb;pdb.set_trace()
-
-        images = validated_data['image']
-        product = ProductReview.objects.create(**validated_data)
-        for image in images:
-            ProductReviewImage.objects.create(review=product, **image)
+        image_01 = validated_data.pop('image_01')
+        image_02 = validated_data.pop('image_02')
+        image_03 = validated_data.pop('image_03')
+        image_04 = validated_data.pop('image_04')
+        image_05 = validated_data.pop('image_05')
+        image_06 = validated_data.pop('image_06')
+        image_07 = validated_data.pop('image_07')
+        image_08 = validated_data.pop('image_08')
+        product = super(ProductReviewCreateSerializer, self).create(validated_data)
+        review_images = []
+        if image_01:
+            review_images.append(ProductReviewImage(review=product, original=image_01, display_order=0))
+        if image_02:
+            review_images.append(ProductReviewImage(review=product, original=image_02, display_order=1))
+        if image_03:
+            review_images.append(ProductReviewImage(review=product, original=image_03, display_order=2))
+        if image_04:
+            review_images.append(ProductReviewImage(review=product, original=image_04, display_order=3))
+        if image_05:
+            review_images.append(ProductReviewImage(review=product, original=image_05, display_order=4))
+        if image_06:
+            review_images.append(ProductReviewImage(review=product, original=image_06, display_order=5))
+        if image_07:
+            review_images.append(ProductReviewImage(review=product, original=image_07, display_order=6))
+        if image_08:
+            review_images.append(ProductReviewImage(review=product, original=image_08, display_order=7))
+        ProductReviewImage.objects.bulk_create(review_images, ignore_conflicts=True)
         return product
+
+    def update(self, instance, validated_data):
+        image_01 = validated_data.pop('image_01')
+        image_02 = validated_data.pop('image_02')
+        image_03 = validated_data.pop('image_03')
+        image_04 = validated_data.pop('image_04')
+        image_05 = validated_data.pop('image_05')
+        image_06 = validated_data.pop('image_06')
+        image_07 = validated_data.pop('image_07')
+        image_08 = validated_data.pop('image_08')
+        product = super().update(instance, validated_data)
+        review_images = []
+        if image_01:
+            review_images.append(ProductReviewImage(review=product, original=image_01, display_order=8))
+        if image_02:
+            review_images.append(ProductReviewImage(review=product, original=image_02, display_order=8))
+        if image_03:
+            review_images.append(ProductReviewImage(review=product, original=image_03, display_order=8))
+        if image_04:
+            review_images.append(ProductReviewImage(review=product, original=image_04, display_order=8))
+        if image_05:
+            review_images.append(ProductReviewImage(review=product, original=image_05, display_order=8))
+        if image_06:
+            review_images.append(ProductReviewImage(review=product, original=image_06, display_order=8))
+        if image_07:
+            review_images.append(ProductReviewImage(review=product, original=image_07, display_order=8))
+        if image_08:
+            review_images.append(ProductReviewImage(review=product, original=image_08, display_order=8))
+        ProductReviewImage.objects.bulk_create(review_images, ignore_conflicts=True)
+        return product
+
+    def validate(self, attrs):
+        if attrs['order_line'].order.user != attrs['user']:
+            raise serializers.ValidationError('You do not have permission to write review on to this order item.')
+        if not attrs['order_line'].product:
+            raise serializers.ValidationError('Since this product is removed by the store, You cannot review this '
+                                              'order.')
+        attrs['product'] = attrs['order_line'].product
+        return attrs
 
     class Meta:
         model = ProductReview
-        fields = ('product', 'score', 'title', 'body', 'user', "image") # image field to be added
-        # extra_kwargs = {
-        #
-        #     "product": {"required": False},
-        #     "score": {"required": False},
-        #     "title": {"required": False},
-        #     "body": {"required": False},
-        #     "user": {"required": False},
-        # }
+        fields = ('score', 'title', 'body', 'user', 'order_line', 'product',
+                  "image_01", 'image_02', 'image_03', 'image_04', 'image_05', 'image_06', 'image_07', 'image_08', )
