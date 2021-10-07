@@ -26,7 +26,6 @@ class ProductReview(AbstractProductReview):
     class Meta:
         ordering = ('-total_votes', '-delta_votes')
 
-ProductReview.objects.first()
 
 class ProductReviewImage(models.Model):
     review = models.ForeignKey(
