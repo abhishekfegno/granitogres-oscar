@@ -4,8 +4,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from oscar.apps.catalogue.reviews.abstract_models import (
     AbstractProductReview, AbstractVote)
+from oscar.core import validators
 from oscar.core.loading import is_model_registered
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 from django.conf import settings
 
 if not is_model_registered('reviews', 'Vote'):
@@ -14,6 +15,12 @@ if not is_model_registered('reviews', 'Vote'):
 
 
 class ProductReview(AbstractProductReview):
+    title = models.CharField(
+        verbose_name=pgettext_lazy("Product review title", "Title"),
+        max_length=255, validators=[validators.non_whitespace], null=True, blank=True)
+
+    body = models.TextField(_("Body"), null=True, blank=True)
+
     order_line = models.ForeignKey('order.Line', related_name='review_set', null=True, on_delete=models.CASCADE)
 
     @property

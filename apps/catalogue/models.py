@@ -64,7 +64,10 @@ class Product(AbstractProduct):
     length = models.FloatField(null=True, blank=True, help_text="Length of packed box in (mm). Used for Delivery")
     width = models.FloatField(null=True, blank=True, help_text="Width of packed box in (mm). Used for Delivery")
     height = models.FloatField(null=True, blank=True, help_text="Height of packed box in (mm). Used for Delivery")
-    review_count = models.IntegerField(default=0, help_text="Count of Review")
+    # Product has no ratings if rating is None
+    rating = models.FloatField(_('Rating'), null=True, editable=False)
+    rating_count = models.IntegerField(default=0, help_text="Count of Ratings")
+    review_count = models.IntegerField(default=0, help_text="Count of Reviews")
 
     upselling = models.ManyToManyField(
         'catalogue.Product', blank=True,
@@ -79,6 +82,33 @@ class Product(AbstractProduct):
         help_text=_("These are products that are recommended to accompany the "
                     "main product."))
     browsable = ProductManagerSelector().strategy()
+
+    def update_rating(self):
+        """
+        Recalculate rating field
+        """
+        self.rating, self.rating_count, self.review_count = self.calculate_rating()
+        self.save()
+    update_rating.alters_data = True
+
+    def calculate_rating(self):
+        """
+        Calculate rating value
+        """
+        result = self.reviews.filter(
+            status=self.reviews.model.APPROVED
+        ).aggregate(
+            sum=models.Sum('score'), count=models.Count('id'),
+            review_cnt=models.Count('id', filter=models.Q(title__isnull=False)),
+        )
+        rating_sum = result['sum'] or 0
+        rating_count = result['count'] or 0
+        review_count = result['review_cnt'] or 0
+        rating = None
+        if rating_count > 0:
+            rating = float(rating_sum) / rating_count
+        return rating, rating_count, review_count
+
 
     @property
     def tax_value(self) -> Decimal:
