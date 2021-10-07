@@ -3,6 +3,8 @@ from collections import OrderedDict
 from django.conf import settings
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
+from oscarapi.serializers.checkout import ShippingAddressSerializer, BillingAddressSerializer, \
+    InlineShippingAddressSerializer, InlineBillingAddressSerializer
 from rest_framework import serializers
 from rest_framework.relations import HyperlinkedIdentityField
 
@@ -22,6 +24,11 @@ class ProductListSerializerForLine(ProductListSerializer):
 class LineDetailSerializer(serializers.ModelSerializer):
     product = ProductListSerializerForLine()
     # product = serializers.SerializerMethodField()
+    has_reviewed = serializers.SerializerMethodField()
+
+    def get_has_reviewed(self, instance):
+        from apps.catalogue.reviews.models import ProductReview
+        return ProductReview.objects.filter(product_id=instance.product_id, user=self.context['request'].user).exists()
 
     def get_product(self, instance):
         return custom_ProductListSerializer([instance.product], context=self.context, ignore_child_image=False).data
@@ -30,7 +37,7 @@ class LineDetailSerializer(serializers.ModelSerializer):
         model = Line
         fields = (
             'id', 'product', 'quantity',
-            'line_price_incl_tax',
+            'line_price_incl_tax', 'has_reviewed',
             'status', 'description', 'product', 'title'
         )
 
@@ -91,7 +98,15 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     source = serializers.SerializerMethodField()
     info = serializers.SerializerMethodField()
     should_show_line_status = serializers.SerializerMethodField()
+    billing_address = serializers.SerializerMethodField()
+    shipping_address = serializers.SerializerMethodField()
 
+    def get_shipping_address(self, instance):
+        return InlineShippingAddressSerializer(instance.shipping_address, context=self.context).data
+
+    def get_billing_address(self, instance):
+        return InlineBillingAddressSerializer(instance.billing_address, context=self.context).data
+    
     def get_info(self, instance) -> dict:
         is_cancelled = instance.status == settings.ORDER_STATUS_CANCELED
         has_cancelled_items = any([
@@ -237,6 +252,8 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             'total_incl_tax',
             'shipping_status',
             'source',
+            "shipping_address",
+            "billing_address",
             'should_show_line_status',
             'num_lines', 'status', 'date_placed', 'lines', 'info',
         )
