@@ -98,9 +98,9 @@ class Product(AbstractProduct):
         """
         result = self.reviews.filter(
             status=self.reviews.model.APPROVED
-        ).annotate(text_len=Length('title')).aggregate(
+        ).aggregate(
             sum=models.Sum('score'), count=models.Count('id'),
-            review_cnt=models.Count('id', filter=models.Q(text_len__gt=0)),
+            review_cnt=models.Count('id', filter=models.Q(title__length__gt=0)),
         )
         rating_sum = result['sum'] or 0
         rating_count = result['count'] or 0
