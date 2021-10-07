@@ -148,7 +148,7 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
         if instance.user:
             return {
                 'full_name': instance.user.get_full_name(),
-                'image': self.context['request'].build_absolute_uri(instance.user.image.url),
+                'image': self.context['request'].build_absolute_uri(instance.user.image.url) if instance.user.image else None,
                 'is_author': instance.user_id == self.context['request'].user.id,
             }
         return {
