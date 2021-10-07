@@ -1,6 +1,7 @@
 from django.core.cache import cache
 from django.db import IntegrityError
 from django.db.models import Prefetch
+from django.http import Http404
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404, CreateAPIView, ListAPIView, UpdateAPIView
@@ -39,12 +40,17 @@ def product_detail_web(request, product):
     data = cache.get(key)
     if not data:
         queryset = Product.objects.base_queryset().prefetch_related(
-            Product.objects.base_queryset().prefetch_related(
-                Prefetch('reviews', queryset=ProductReview.objects.all().order_by('-total_votes'))
-            )
+            Prefetch('reviews')
         )
         serializer_class = ProductDetailWebSerializer
-        product = get_object_or_404(queryset, pk=product)
+        # product = get_object_or_404(queryset, pk=product)
+        try:
+            product = queryset.get(pk=product)
+        except queryset.model.DoesNotExist:
+            return Response({
+                "response": "Product Doesn't exist."
+            }, status=status.HTTP_404_NOT_FOUND)
+
         if product.is_parent:
             focused_product = product.get_apt_child(order='-price_excl_tax')
         elif product.is_child:

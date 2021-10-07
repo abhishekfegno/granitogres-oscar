@@ -23,6 +23,9 @@ class ProductReview(AbstractProductReview):
     def __str__(self):
         return f"{self.product.name} | {self.title}"
 
+    class Meta:
+        ordering = ('-total_votes', '-delta_votes')
+
 
 class ProductReviewImage(models.Model):
     review = models.ForeignKey(

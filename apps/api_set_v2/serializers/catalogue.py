@@ -66,7 +66,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     
     def get_reviews(self, instance):
         return ProductReviewListSerializer(
-            queryset=instance.productreview_set.all().order_by('-total_votes').prefetch_related('images')
+            instance.reviews.all().order_by('-total_votes').prefetch_related('images'), many=True
         ).data
     
     def get_product_class(self, instance):
@@ -103,6 +103,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             'rating',
             'brand',
             'review_count',
+            'reviews',
         )
 
     def get_recommended_products(self, instance):
