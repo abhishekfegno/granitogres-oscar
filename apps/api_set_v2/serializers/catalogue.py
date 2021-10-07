@@ -142,7 +142,7 @@ class ProductReviewImageSerializer(serializers.ModelSerializer):
 
 class ProductReviewListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
-    image = ProductReviewImageSerializer(many=True)
+    images = ProductReviewImageSerializer(many=True)
 
     def get_user(self, instance):
         if instance.user:
@@ -161,7 +161,7 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
         model = ProductReview
         fields = (
             'id', 'title', 'body', 'score', 'product', 'user', 
-            'status', 'date', 'image', 'num_down_votes', 'num_up_votes', 'delta_votes', 'total_votes')
+            'status', 'date', 'images', 'num_down_votes', 'num_up_votes', 'delta_votes', 'total_votes')
 
 
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
