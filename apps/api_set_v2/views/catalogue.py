@@ -39,8 +39,10 @@ def product_detail_web(request, product):
     data = cache.get(key)
     if not data:
         queryset = Product.objects.base_queryset().prefetch_related(
-            'productreview',
-            Prefetch('productreview', queryset=ProductReview.objects.all().order_by('-total_votes')))
+            Product.objects.base_queryset().prefetch_related(
+                Prefetch('reviews', queryset=ProductReview.objects.all().order_by('-total_votes'))
+            )
+        )
         serializer_class = ProductDetailWebSerializer
         product = get_object_or_404(queryset, pk=product)
         if product.is_parent:
@@ -118,8 +120,8 @@ def vote_review(request, review_pk):
         review.vote_up(request.user)
         reason = "Up Voted!"
     return Response({
-            'status': 'success',
-            'response': reason
-        }, status.HTTP_200_OK)
+        'status': 'success',
+        'response': reason
+    }, status.HTTP_200_OK)
 
 
