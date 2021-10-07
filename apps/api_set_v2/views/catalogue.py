@@ -4,12 +4,13 @@ from django.db.models import Prefetch
 from django.http import Http404
 from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.generics import get_object_or_404, CreateAPIView, ListAPIView, UpdateAPIView
+from rest_framework.generics import get_object_or_404, CreateAPIView, ListAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 from rest_framework.response import Response
 
 from apps.api_set.views.orders import _login_required
-from apps.api_set_v2.serializers.catalogue import ProductDetailWebSerializer, ProductReviewListSerializer, ProductReviewCreateSerializer
+from apps.api_set_v2.serializers.catalogue import ProductDetailWebSerializer, ProductReviewListSerializer, \
+    ProductReviewCreateSerializer, ProductReviewImageSerializer
 from apps.catalogue.models import Product
 # from apps.catalogue.models import ProductReview
 from apps.catalogue.reviews.models import ProductReview, ProductReviewImage, Vote
@@ -103,6 +104,30 @@ class ProductReviewUpdateView(UpdateAPIView):
 
     def check_object_permissions(self, request, obj):
         if request.user.is_anonymous or obj.user != request.user:
+            self.permission_denied(
+                request, message="You do not have permission to update this review.!"
+            )
+
+
+class ProductReviewDeleteView(DestroyAPIView):
+    serializer_class = ProductReviewCreateSerializer
+    queryset = ProductReview.objects.all()
+
+    def check_object_permissions(self, request, obj):
+        if request.user.is_anonymous or obj.user != request.user:
+            self.permission_denied(
+                request, message="You do not have permission to update this review.!"
+            )
+
+
+class ProductReviewImageDeleteView(DestroyAPIView):
+    serializer_class = ProductReviewImageSerializer
+    queryset = ProductReviewImage.objects.all()
+
+    def check_object_permissions(self, request, obj):
+        if not obj.review:
+            return
+        if request.user.is_anonymous or obj.review.user != request.user:
             self.permission_denied(
                 request, message="You do not have permission to update this review.!"
             )

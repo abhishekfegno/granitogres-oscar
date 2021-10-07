@@ -185,6 +185,7 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
         image_06 = validated_data.pop('image_06')
         image_07 = validated_data.pop('image_07')
         image_08 = validated_data.pop('image_08')
+
         product = super(ProductReviewCreateSerializer, self).create(validated_data)
         review_images = []
         if image_01:
