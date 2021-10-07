@@ -44,7 +44,7 @@ class Command(BaseCommand):
                 continue
             for i in range(15):
                 review = ProductReview(order_line=line, product=line.stockrecord.product, score=random.randint(0, 6),
-                                       title=f.text()[:60], body=f.text(), user=line.user, status=ProductReview.APPROVED)
+                                       title=f.text()[:60], body=f.text(), user=line.order.user, status=ProductReview.APPROVED)
 
                 image_url_list = [__(image.original.url) for image in line.stockrecord.product.images.all().values_list('original', flat=True)]
                 for j in image_url_list:
