@@ -47,10 +47,11 @@ class Command(BaseCommand):
                                        title=f.text()[:60], body=f.text(), user=line.order.user, status=ProductReview.APPROVED)
 
                 image_url_list = [__(image.original.url) for image in line.stockrecord.product.images.all()]
+                review.save()
                 for j in image_url_list:
                     self.get_remote_image(review, j)
-                ol.append(review)
-
-        ProductReview.objects.bulk_create(ol)
+                # ol.append(review)
+        #
+        # ProductReview.objects.bulk_create(ol)
 
 
