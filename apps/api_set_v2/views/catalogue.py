@@ -4,8 +4,9 @@ from django.db.models import Prefetch
 from django.http import Http404
 from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.generics import get_object_or_404, CreateAPIView, ListAPIView, UpdateAPIView, DestroyAPIView
-from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
+from rest_framework.generics import get_object_or_404, CreateAPIView, ListAPIView, UpdateAPIView, DestroyAPIView, \
+    RetrieveUpdateAPIView
+from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 
 from apps.api_set.views.orders import _login_required
@@ -96,18 +97,34 @@ class ProductReviewListView(ListAPIView):
 class ProductReviewCreateView(CreateAPIView):
     serializer_class = ProductReviewCreateSerializer
     queryset = ProductReview.objects.all()
+    parser_classes = [JSONParser, FormParser, MultiPartParser, FileUploadParser]
 
 
-class ProductReviewUpdateView(UpdateAPIView):
+class ProductReviewUpdateView(RetrieveUpdateAPIView):
     serializer_class = ProductReviewCreateSerializer
     queryset = ProductReview.objects.all()
     lookup_url_kwarg = 'review_pk'
+    parser_classes = [JSONParser, FormParser, MultiPartParser, FileUploadParser]
 
-    def check_object_permissions(self, request, obj):
-        if request.user.is_anonymous or obj.user != request.user:
-            self.permission_denied(
-                request, message="You do not have permission to update this review.!"
-            )
+    # def check_object_permissions(self, request, obj):
+    #     if request.user.is_anonymous or obj.user != request.user:
+    #         self.permission_denied(
+    #             request, message="You do not have permission to update this review.!"
+    #         )
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+        return Response(serializer.data)
 
 
 class ProductReviewDeleteView(DestroyAPIView):
