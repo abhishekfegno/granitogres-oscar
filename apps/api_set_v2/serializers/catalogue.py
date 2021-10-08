@@ -68,7 +68,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     def get_breadcrumb(self, instance):
         return [
             "Home",
-            *[c.name for c in instance.categories.first().get_ancestors_and_self()]
+            *[c.name for c in instance.categories.order_by('-depth').first().get_ancestors_and_self()]
         ]
     
     def get_reviews(self, instance):
