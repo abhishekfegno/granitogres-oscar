@@ -50,7 +50,8 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFie
         fields = ('id', 'title', 'primary_image', 'price', 'weight', 'url', 'rating', 'review_count')
 
 
-class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldMixin, ProductDetailSerializerMixin, serializers.ModelSerializer):
+class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldMixin, ProductDetailSerializerMixin,
+                                 serializers.ModelSerializer):
     price = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
@@ -72,7 +73,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             "Home",
             *[c.name for c in instance.categories.order_by('-depth').first().get_ancestors_and_self()]
         ]
-    
+
     def get_reviews(self, instance):
         return ProductReviewListSerializer(
             instance.reviews.filter(status=ProductReview.APPROVED).order_by('-total_votes').prefetch_related('images')[:4], many=True,
@@ -165,13 +166,14 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
 
     def get_images(self, instance):
-        return ProductReviewImageSerializer(instance.images.all(), many=True).data
+        return ProductReviewImageSerializer(instance.images.all(), many=True, context=self.context).data
 
     def get_user(self, instance):
         if instance.user:
             return {
                 'full_name': instance.user.get_full_name(),
-                'image': self.context['request'].build_absolute_uri(instance.user.image.url) if instance.user.image else None,
+                'image': self.context['request'].build_absolute_uri(
+                    instance.user.image.url) if instance.user.image else None,
                 'is_author': instance.user_id == self.context['request'].user.id,
             }
         return {
@@ -183,7 +185,7 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
         fields = (
-            'id', 'title', 'body', 'score', 'product', 'user', 
+            'id', 'title', 'body', 'score', 'product', 'user',
             'status', 'date', 'images', 'num_down_votes', 'num_up_votes', 'delta_votes', 'total_votes')
 
 
@@ -197,6 +199,7 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
     image_07 = serializers.ImageField(allow_null=True, required=False)
     image_08 = serializers.ImageField(allow_null=True, required=False)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     # product = serializers.HiddenField(allow_null=True, default=None)
 
     def take_images(self, validated_data):
@@ -211,7 +214,6 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
         return validated_data
 
     def create(self, validated_data):
-        import pdb; pdb.set_trace()
         self.take_images(validated_data)
         if validated_data['product'] is None:
             validated_data['product'] = validated_data['order_line'].product
@@ -249,11 +251,11 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
             print("reviewing_images")
 
     def validate(self, attrs):
-    #     if attrs['order_line'].order.user != attrs['user']:
-    #         raise serializers.ValidationError('You do not have permission to write review on to this order item.')
-    #     if not attrs['order_line'].product:
-    #         raise serializers.ValidationError('Since this product is removed by the store, You cannot review this '
-    #                                           'order.')
+        if attrs['order_line'].order.user != attrs['user']:
+            raise serializers.ValidationError('You do not have permission to write review on to this order item.')
+        if not attrs['order_line'].product:
+            raise serializers.ValidationError('Since this product is removed by the store, You cannot review this '
+                                              'order.')
         if attrs['product'] is None:
             attrs['product'] = attrs['order_line'].product
         return attrs
@@ -261,5 +263,4 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
         fields = ('score', 'title', 'body', 'user', 'order_line', 'product',
-                  "image_01", 'image_02', 'image_03', 'image_04', 'image_05', 'image_06', 'image_07', 'image_08', )
-
+                  "image_01", 'image_02', 'image_03', 'image_04', 'image_05', 'image_06', 'image_07', 'image_08',)
