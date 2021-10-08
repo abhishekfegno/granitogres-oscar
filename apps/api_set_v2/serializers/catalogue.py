@@ -1,4 +1,5 @@
 # /home/jk/code/grocery/apps/api_set_v2/serializers/catalogue.py
+from django.db.models import Count, Q
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.reverse import reverse
@@ -62,6 +63,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     siblings = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
     reviews = serializers.SerializerMethodField()
+    rating_split = serializers.SerializerMethodField()
     brand = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
     breadcrumb = serializers.SerializerMethodField()
 
@@ -73,9 +75,18 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     
     def get_reviews(self, instance):
         return ProductReviewListSerializer(
-            instance.reviews.all().order_by('-total_votes').prefetch_related('images')[:4], many=True,
+            instance.reviews.filter(status=ProductReview.APPROVED).order_by('-total_votes').prefetch_related('images')[:4], many=True,
             context=self.context
         ).data
+
+    def get_rating_split(self, instance):
+        return dict(instance.reviews.filter(status=ProductReview.APPROVED).aggregate(
+            score_1_count=Count('score', filter=Q(score=1)),
+            score_2_count=Count('score', filter=Q(score=2)),
+            score_3_count=Count('score', filter=Q(score=3)),
+            score_4_count=Count('score', filter=Q(score=4)),
+            score_5_count=Count('score', filter=Q(score=5)),
+        ))
 
     def get_product_class(self, instance):
         pc = None
@@ -109,6 +120,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             "variants",
             "siblings",
             'rating',
+            'rating_split',
             'brand',
             'review_count',
             'reviews',
