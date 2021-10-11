@@ -1,17 +1,21 @@
+import re
 from decimal import Decimal
 
+from colorfield.fields import ColorField
 from django.conf import settings
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F
 from django.db.models.functions import Length
 from django.db.models.signals import post_save
 from django.db.transaction import atomic
+from django.utils.safestring import mark_safe
 from oscar.apps.catalogue.abstract_models import (
     AbstractProduct, AbstractCategory, AbstractProductImage,
-    AbstractProductAttribute, AbstractProductRecommendation
+    AbstractProductAttribute, AbstractProductRecommendation, AbstractOption, AbstractProductAttributeValue
 )
 from oscar.apps.catalogue.reviews.abstract_models import AbstractProductReview
 from sorl.thumbnail import get_thumbnail
@@ -24,6 +28,50 @@ from django.utils.translation import gettext_lazy as _
 from lib import cache_key
 from lib.cache import cache_library
 from sorl.thumbnail import ImageField
+
+
+class ProductAttribute(AbstractProductAttribute):
+    COLOR = "color"
+    TYPE_CHOICES = (
+        (AbstractProductAttribute.TEXT, _("Text")),
+        (AbstractProductAttribute.INTEGER, _("Integer")),
+        (AbstractProductAttribute.BOOLEAN, _("True / False")),
+        (AbstractProductAttribute.FLOAT, _("Float")),
+        (AbstractProductAttribute.RICHTEXT, _("Rich Text")),
+        (AbstractProductAttribute.DATE, _("Date")),
+        (AbstractProductAttribute.DATETIME, _("Datetime")),
+        (AbstractProductAttribute.OPTION, _("Option")),
+        (AbstractProductAttribute.MULTI_OPTION, _("Multi Option")),
+        (AbstractProductAttribute.ENTITY, _("Entity")),
+        (AbstractProductAttribute.FILE, _("File")),
+        (AbstractProductAttribute.IMAGE, _("Image")),
+        (COLOR, _("Color")),
+    )
+    is_varying = models.BooleanField(_('Is Varying For Child'), default=False)
+    type = models.CharField(
+        choices=TYPE_CHOICES, default=TYPE_CHOICES[0][0],
+        max_length=20, verbose_name=_("Type"))
+
+    def _validate_color(self, value):
+        value = value.upper()
+        valid = re.search(r'^#(?:[0-9A-F]{3}){1,2}$', value)
+        if not valid:
+            raise ValidationError(_("Must be a hex value (like #fff or #C0C0C0)"))
+        return valid
+
+
+class ProductAttributeValue(AbstractProductAttributeValue):
+    value_color = ColorField(_('Color'), blank=True, null=True)
+
+    @property
+    def _color_as_text(self):
+        return self.value
+
+    @property
+    def _color_as_html(self):
+        basic_styles = "height:1.75rem; width:1.75rem;border-radius:1rem;1px 1px 3px 1px #c0c0c0; display:inline-block"
+        bg_color = self.value_color
+        return mark_safe(f"""<span style="{basic_styles}; background-color:{bg_color}">&nbsp;</span>""")
 
 
 class Brand(models.Model):
@@ -278,10 +326,6 @@ class ProductImage(AbstractProductImage):
         return image_not_found()
 
 
-class ProductAttribute(AbstractProductAttribute):
-    is_varying = models.BooleanField(_('Is Varying For Child'), default=False)
-
-
 class SearchResponses(models.Model):
     """
     Not Using. Generated to use with Autosuggestion and mappng search with a type.
@@ -335,6 +379,9 @@ class CartSpecificProductRecommendation(AbstractProductRecommendation):
         verbose_name_plural = _('Basket Based recomendations')
 
 
+from oscar.apps.catalogue.models import *  # noqa isort:skip
+
+
 def clear_cache_product(sender, instance, **kwargs):
     cache.delete_pattern("product_list__page:*")
 
@@ -347,5 +394,3 @@ def clear_cache_category(sender, instance, **kwargs):
 post_save.connect(clear_cache_category, sender=Category)
 post_save.connect(clear_cache_product, sender=Product)
 
-
-from oscar.apps.catalogue.models import *  # noqa isort:skip

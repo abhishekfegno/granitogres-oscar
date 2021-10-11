@@ -97,14 +97,14 @@ class ProductReviewListView(ListAPIView):
 class ProductReviewCreateView(CreateAPIView):
     serializer_class = ProductReviewCreateSerializer
     queryset = ProductReview.objects.all()
-    parser_classes = [JSONParser, FormParser, MultiPartParser, FileUploadParser]
+    parser_classes = [MultiPartParser, FileUploadParser, JSONParser, FormParser, ]
 
 
 class ProductReviewUpdateView(RetrieveUpdateAPIView):
     serializer_class = ProductReviewCreateSerializer
     queryset = ProductReview.objects.all()
     lookup_url_kwarg = 'review_pk'
-    parser_classes = [JSONParser, FormParser, MultiPartParser, FileUploadParser]
+    parser_classes = [MultiPartParser, FileUploadParser, JSONParser, FormParser, ]
 
     # def check_object_permissions(self, request, obj):
     #     if request.user.is_anonymous or obj.user != request.user:

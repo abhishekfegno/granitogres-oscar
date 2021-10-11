@@ -136,3 +136,8 @@ def recommended_class(queryset):
                 min_price=Min('effective_price'),
             )
         }
+
+
+
+
+

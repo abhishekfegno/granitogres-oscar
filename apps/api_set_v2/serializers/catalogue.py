@@ -173,7 +173,7 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
     def get_user(self, instance):
         if instance.user:
             return {
-                'full_name': instance.user.get_full_name(),
+                'full_name': instance.reviewer_name(),
                 'image': self.context['request'].build_absolute_uri(
                     instance.user.image.url) if instance.user.image else None,
                 'is_author': instance.user_id == self.context['request'].user.id,
@@ -264,5 +264,5 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductReview
-        fields = ('score', 'title', 'body', 'user', 'order_line', 'product',
+        fields = ('id', 'score', 'title', 'body', 'user', 'order_line', 'product',
                   "image_01", 'image_02', 'image_03', 'image_04', 'image_05', 'image_06', 'image_07', 'image_08',)

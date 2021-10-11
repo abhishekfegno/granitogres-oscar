@@ -1,8 +1,41 @@
-from oscar.apps.partner.strategy import UK
+from oscar.apps.partner.availability import Unavailable, Available
+from oscar.apps.partner.strategy import UK, UseFirstStockRecord, StockRequired, FixedRateTax, Structured, \
+    StockRequiredAvailability
 
 from apps.availability.models import Zones
 from apps.partner.strategy_set.strategies import ZoneBasedIndianPricingStrategy
 from decimal import Decimal as D
+
+
+class ABCHauzPricing(UseFirstStockRecord, StockRequired, FixedRateTax, Structured):
+    """
+    Sample strategy for the UK that:
+
+    - uses the first stockrecord for each product (effectively assuming
+        there is only one).
+    - requires that a product has stock available to be bought
+    - applies a fixed rate of tax on all products
+
+    This is just a sample strategy used for internal development.  It is not
+    recommended to be used in production, especially as the tax rate is
+    hard-coded.
+    """
+
+    def __init__(self, request=None, user=None, **kwargs):
+        super().__init__(request)
+        self.user = user or self.user
+        self.kwargs = kwargs
+
+    def get_rate(self, product, stockrecord=None):
+        return D(str(product.tax))
+
+    def availability_policy(self, product, stockrecord):
+        if not stockrecord:
+            return Unavailable()
+        if not product.get_product_class().track_stock:
+            return Available()
+        else:
+            return StockRequiredAvailability(stockrecord.net_stock_level)
 
 
 class Selector(object):
@@ -11,9 +44,7 @@ class Selector(object):
     """
 
     def strategy(self, request=None, user=None, **kwargs):
-        strat = UK(request=None)
-        strat.rate = D('0.20')
-        return strat
+        return ABCHauzPricing(request=request, user=user, **kwargs)
 
         # zone = kwargs.get('zone') or (request and request.session.get('zone'))
         #

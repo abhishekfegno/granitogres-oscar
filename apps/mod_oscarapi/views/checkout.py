@@ -24,6 +24,7 @@ from ..calculators import OrderTotalCalculator
 from ..serializers.checkout import (
     CheckoutSerializer, UserAddressSerializer,
 )
+from ...api_set.views.orders import _login_required
 from ...basket.models import Basket
 from ...order.models import TimeSlot
 from ...payment import refunds
@@ -44,7 +45,7 @@ def _login_and_location_required(func):
     return _wrapper
 
 
-@method_decorator(_login_and_location_required, name="dispatch")
+@method_decorator(_login_required, name="dispatch")
 class CheckoutView(OscarAPICheckoutView):
     __doc__ = """
     Prepare an order for checkout.
@@ -291,10 +292,10 @@ class CheckoutView(OscarAPICheckoutView):
                 string += f"{key_str}:{_error}\n"
 
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
-        location = shipping_address.location
-        if not location:
-            return Response({'errors': "You have not provided your location yet."},
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
+        # location = shipping_address.location
+        # if not location:
+        #     return Response({'errors': "You have not provided your location yet."},
+        #                     status=status.HTTP_406_NOT_ACCEPTABLE)
         # Freeze basket
         basket = c_ser.validated_data.get('basket')
         basket.freeze()
@@ -315,8 +316,8 @@ class CheckoutView(OscarAPICheckoutView):
         request.session[CHECKOUT_ORDER_ID] = order.id
 
         # adding location from user request to
-        order.shipping_address.location = location
-        order.shipping_address.save()
+        # order.shipping_address.location = location
+        # order.shipping_address.save()
         # Send order_placed signal
         order_placed.send(sender=self, order=order, user=request.user, request=request)
 

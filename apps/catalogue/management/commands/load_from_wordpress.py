@@ -11,7 +11,7 @@ from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
 from oscar.apps.catalogue.models import ProductClass
 
-from apps.catalogue.models import Product, Category, ProductImage, ProductAttribute
+from apps.catalogue.models import Product, Category, ProductImage, ProductAttribute, Brand
 from apps.partner.models import Partner, StockRecord
 
 
@@ -238,7 +238,7 @@ class Command(BaseCommand):
     pc = None
     attr_hash = dict()
 
-    def get_product_class(self):
+    def get_product_class(self, **kwargs):
         if self.pc is None:
             self.pc, _ = ProductClass.objects.get_or_create(name="Generic", slug="generic")
         return self.pc
@@ -309,6 +309,7 @@ class Command(BaseCommand):
                     height=digit(line['Height (mm)']),
                     retail_price=digit(line['Regular price'] or 0),
                     effective_price=digit(line['Sale price'] or 0),
+                    # brand=Brand.objects.get_or_create(name=line['Sale price'] or 0),
                 )
                 p.categories.add(cat_parent)
                 for img in line['Images'].split(','):
@@ -333,9 +334,6 @@ class Command(BaseCommand):
                         num_in_stock=1000,
                         partner_sku=p.upc
                     )
-                # if line['children']:
-                #     import pdb; pdb.set_trace()
-                #     break
         return
 
 
