@@ -38,30 +38,30 @@ def mark_as_fav(request, product: Product):     # needs parent product
 @api_view()
 def product_detail_web(request, product):
     # cache.clear()
-    key = f"product_detail::{product}"
-    data = cache.get(key)
-    if not data:
-        queryset = Product.objects.base_queryset().prefetch_related(
-            Prefetch('reviews')
-        )
-        serializer_class = ProductDetailWebSerializer
-        # product = get_object_or_404(queryset, pk=product)
-        try:
-            product = queryset.get(pk=product)
-        except queryset.model.DoesNotExist:
-            return Response({
-                "response": "Product Doesn't exist."
-            }, status=status.HTTP_404_NOT_FOUND)
+    # key = f"product_detail::{product}"
+    # data = cache.get(key)
+    # if not data:
+    queryset = Product.objects.base_queryset().prefetch_related(
+        Prefetch('reviews')
+    )
+    serializer_class = ProductDetailWebSerializer
+    # product = get_object_or_404(queryset, pk=product)
+    try:
+        product = queryset.get(pk=product)
+    except queryset.model.DoesNotExist:
+        return Response({
+            "response": "Product Doesn't exist."
+        }, status=status.HTTP_404_NOT_FOUND)
 
-        if product.is_parent:
-            focused_product = product.get_apt_child(order='-price_excl_tax')
-        elif product.is_child:
-            focused_product = product
-            product = product.parent
-        else:
-            focused_product = product
-        data = serializer_class(instance=focused_product, context={'request': request, 'product': product}).data
-        cache.set(key, data)
+    if product.is_parent:
+        focused_product = product.get_apt_child(order='-price_excl_tax')
+    elif product.is_child:
+        focused_product = product
+        product = product.parent
+    else:
+        focused_product = product
+    data = serializer_class(instance=focused_product, context={'request': request, 'product': product}).data
+    # cache.set(key, data)
     if request.session.get('location'):
         out = {
             'message': None,

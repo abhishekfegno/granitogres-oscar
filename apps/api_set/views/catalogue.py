@@ -114,9 +114,10 @@ def product_suggestions(request, **kwargs):
     _max_size = 10
     out = {'results': [],  'class': None, }
     if _search:
+        Category.objects.filter()
         queryset = apply_search(queryset=queryset, search=_search)
         rc = recommended_class(queryset)
-        queryset = queryset.values('title', 'slug')
+        queryset = queryset.values('title', 'slug', 'product_class_id')
         out['results'] = queryset[:_max_size]
         out['class'] = rc
 
