@@ -391,10 +391,9 @@ class Command(BaseCommand):
                     field_type=self.get_suggested_field_type("HexColor"),
                     product_class_instance=product_class_instance)
                 out[color_attr_field] = {
-                    'value': value,
+                    'value': '#FFFFFF',
                     'is_visible': False,
                     'is_global': is_global,
-                    'default': default,
                 }
         return out, brand_name
 
