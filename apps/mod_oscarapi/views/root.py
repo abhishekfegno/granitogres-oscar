@@ -67,7 +67,13 @@ def PUBLIC_APIS(r, f):
                 ("basket", reverse("api-basket", request=r, format=f)),
                 ("basket-add-product", reverse("api-basket-add-product", request=r, format=f)),
                 ("basket-add-voucher", reverse("api-basket-add-voucher", request=r, format=f)),
-            ]))
+            ])),
+
+            ("Buy Now", collections.OrderedDict([
+                ("basket", reverse("buynow:get-basket", request=r, format=f)),
+                ("basket-add-product", reverse("buynow:checkout", request=r, format=f, kwargs={'basket': 1})),
+            ])),
+
         ])),
         ("Checkout", collections.OrderedDict([
             # ("Payment Methods", reverse("api-checkout-payment-methods", request=r, format=f)),

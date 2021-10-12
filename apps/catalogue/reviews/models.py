@@ -15,6 +15,9 @@ if not is_model_registered('reviews', 'Vote'):
 
 
 class ProductReview(AbstractProductReview):
+    SCORE_CHOICES = tuple([(x, x) for x in range(0, 6)])
+    score = models.SmallIntegerField(_("Score"), choices=SCORE_CHOICES)
+
     title = models.CharField(
         verbose_name=pgettext_lazy("Product review title", "Title"),
         max_length=255, validators=[validators.non_whitespace], null=True, blank=True)

@@ -238,15 +238,17 @@ class Command(BaseCommand):
     pc = None
     attr_hash = dict()
 
-    def get_product_class(self, **kwargs):
+    def get_product_class(self, line):
         if self.pc is None:
             self.pc, _ = ProductClass.objects.get_or_create(name="Generic", slug="generic")
         return self.pc
 
-    def get_attribute_field(self, field, field_type=ProductAttribute.TEXT):
+    def get_attribute_field(self, field, field_type=ProductAttribute.TEXT, product_class_instance=None):
+        if field.lower() == 'color':
+            field_type = ProductAttribute.COLOR
         if field not in self.attr_hash:
             self.attr_hash[field], _ = ProductAttribute.objects.get_or_create(
-                product_class=self.get_product_class(),
+                product_class=product_class_instance,
                 name=field,
                 code=slugify(field, ).replace('-', '_'),
                 type=field_type
@@ -265,14 +267,6 @@ class Command(BaseCommand):
         partner, _ = Partner.objects.get_or_create(name="ABC HAUZ")
         with open(filename, 'r') as _fp:
             contents = csv.DictReader(_fp)
-            # dataset_container = []
-            # matrix = [
-            #     set([self.phrase.get(line[f], line[f]) for f in fields if line[f]])
-            #     for line in contents]
-            # for line in matrix:
-            #     if line not in dataset_container:
-            #         dataset_container.append(line)
-            # print(dataset_container)
 
             Product.objects.all().delete()
             Category.objects.all().delete()
@@ -290,12 +284,12 @@ class Command(BaseCommand):
                             parent_slug = cat_parent.slug + '--'
                         _cat[cat] = method(name=cat, slug=parent_slug+slugify(cat))
                     cat_parent = _cat[cat]
-
                 parent_selector = line.get('Parent', '')
                 _parent_obj = parent_selector and self.get_product(parent_selector)
                 print(line['Regular price'] or 0, line['Sale price'] or 0, "===========")
+                product_class_instance = self.get_product_class(line)
                 p = Product.objects.create(
-                    product_class=self.get_product_class(),
+                    product_class=product_class_instance,
                     structure=struct[line['Type']],
                     upc=line['SKU'] or str(uuid.uuid4()).split('-')[-1].upper(),
                     parent=_parent_obj or None,
@@ -317,7 +311,7 @@ class Command(BaseCommand):
                     fetch_image(img.strip(), pi, field='original', name=p.slug)
                 for f in line.keys():
                     if f.startswith('Attribute') and f.endswith('name') and line.get(f):
-                        attr = self.get_attribute_field(line[f])
+                        attr = self.get_attribute_field(line[f], product_class_instance=product_class_instance)
                         if all([attr.code, line[f.replace('name', 'value(s)')]]):
                             setattr(p.attr, attr.code, line[f.replace('name', 'value(s)')])
                 p.save()
