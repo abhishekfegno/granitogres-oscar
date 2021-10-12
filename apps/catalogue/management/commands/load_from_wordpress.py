@@ -9,7 +9,7 @@ import urllib3
 from typing import Optional
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
-from oscar.apps.catalogue.models import ProductClass
+from apps.catalogue.models import ProductClass, ProductAttributeValue
 
 from apps.catalogue.models import Product, Category, ProductImage, ProductAttribute, Brand
 from apps.partner.models import Partner, StockRecord
@@ -235,25 +235,32 @@ class Command(BaseCommand):
             cat_parent = self._cat[cat]
         return cat_parent
 
-    pc = None
+    pc = dict()
     attr_hash = dict()
 
     def get_product_class(self, line):
-        if self.pc is None:
-            self.pc, _ = ProductClass.objects.get_or_create(name="Generic", slug="generic")
-        return self.pc
+        for i in range(1, 10):
+            key = f'Attribute {i} name'
+            if line.get(key, '').lower() == 'group':
+                value_key = f'Attribute {i} value(s)'
+                name = line.get(value_key)
+                if not self.pc.get(name):
+                    self.pc[name] = ProductClass.objects.get_or_create(name=name, defaults={'slug': slugify(name)})[0]
+                print(key, '=', self.pc[name])
+                return self.pc[name]
+        return ProductClass.objects.get_or_create(name="Generic", slug="generic")[0]
 
-    def get_attribute_field(self, field, field_type=ProductAttribute.TEXT, product_class_instance=None):
-        if field.lower() == 'color':
-            field_type = ProductAttribute.COLOR
-        if field not in self.attr_hash:
-            self.attr_hash[field], _ = ProductAttribute.objects.get_or_create(
+    def get_attribute_field(self, name, field_type=ProductAttribute.TEXT, product_class_instance=None):
+        if name not in self.attr_hash:
+            self.attr_hash[name], _ = ProductAttribute.objects.get_or_create(
                 product_class=product_class_instance,
-                name=field,
-                code=slugify(field, ).replace('-', '_'),
-                type=field_type
+                name=name,
+                defaults={
+                    'code': slugify(name, ).replace('-', '_'),
+                    'type': field_type
+                }
             )
-        return self.attr_hash[field]
+        return self.attr_hash[name]
 
     def handle(self, *args, **kwargs):
         fields = [f'Attribute {i} name' for i in range(1, 9)]
@@ -265,29 +272,35 @@ class Command(BaseCommand):
         }
         _cat = {}
         partner, _ = Partner.objects.get_or_create(name="ABC HAUZ")
+        write = 3
         with open(filename, 'r') as _fp:
             contents = csv.DictReader(_fp)
 
             Product.objects.all().delete()
             Category.objects.all().delete()
+            ProductClass.objects.all().delete()
+            ProductImage.objects.all().delete()
+            ProductAttributeValue.objects.all().delete()
+            ProductAttribute.objects.all().delete()
+            StockRecord.objects.all().delete()
+
             for line in contents:
-                print(line['Name'])
-                cat_line = line['Categories'].split(' > ')
-                cat_parent = self.get_category(line['Categories'].split(' > '))
-                for cat in cat_line:
-                    if cat not in _cat:
-                        if cat_parent is None:
-                            method = Category.add_root
-                            parent_slug = ''
-                        else:
-                            method = cat_parent.add_child
-                            parent_slug = cat_parent.slug + '--'
-                        _cat[cat] = method(name=cat, slug=parent_slug+slugify(cat))
-                    cat_parent = _cat[cat]
+                print("=" * 40)
+
+                print("Getting Product Class...")
+                product_class_instance = self.get_product_class(line)
+                attrs, brand_name = self.get_attribute_dict(line, product_class_instance)
+                print("Enrolling Brand...")
+                brand = self.get_brand(brand_name)
+                print(attrs)
+                print("Handling", line['Name'], "\n", " *** CATEGORIES *** ")
+                cat_list = line['Categories'].split(' > ')
+                cat_item = self.get_category(cat_list)
                 parent_selector = line.get('Parent', '')
                 _parent_obj = parent_selector and self.get_product(parent_selector)
                 print(line['Regular price'] or 0, line['Sale price'] or 0, "===========")
-                product_class_instance = self.get_product_class(line)
+
+                print("Saving Product Class...")
                 p = Product.objects.create(
                     product_class=product_class_instance,
                     structure=struct[line['Type']],
@@ -303,23 +316,32 @@ class Command(BaseCommand):
                     height=digit(line['Height (mm)']),
                     retail_price=digit(line['Regular price'] or 0),
                     effective_price=digit(line['Sale price'] or 0),
-                    # brand=Brand.objects.get_or_create(name=line['Sale price'] or 0),
+                    brand=brand,
                 )
-                p.categories.add(cat_parent)
+                print("Adding to Categories...")
+                p.categories.add(cat_item)
+
+                print("Fetching Images...")
                 for img in line['Images'].split(','):
                     pi = ProductImage(product=p)
                     fetch_image(img.strip(), pi, field='original', name=p.slug)
-                for f in line.keys():
-                    if f.startswith('Attribute') and f.endswith('name') and line.get(f):
-                        attr = self.get_attribute_field(line[f], product_class_instance=product_class_instance)
-                        if all([attr.code, line[f.replace('name', 'value(s)')]]):
-                            setattr(p.attr, attr.code, line[f.replace('name', 'value(s)')])
+
+                print("Extracting Attributes...")
+                # for f in line.keys():
+                #     if f.startswith('Attribute') and f.endswith('name') and line.get(f):
+                #         attr = self.get_attribute_field(line[f], self.get_suggested_field_type(f),
+                #                                         product_class_instance=product_class_instance)
+                #         
+                for attr, attr_data in attrs.items():
+                    setattr(p.attr, attr.code, attr_data['value'])
+                    if attr.code == 'color':
+                        pass
                 p.save()
                 if struct[line['Type']] == Product.PARENT:
+                    print("Saving Parental details...")
                     self.set_product(p, line=line)
-                    # self.parent[line['\ufeffID']] = p
-                    # self.parent_sku[line['SKU']] = p
                 else:
+                    print("Updating Stock...")
                     StockRecord.objects.get_or_create(
                         partner=partner,
                         product=p,
@@ -329,6 +351,59 @@ class Command(BaseCommand):
                         partner_sku=p.upc
                     )
         return
+
+    def get_suggested_field_type(self, f):
+        return ({
+            'hexcolor': ProductAttribute.COLOR,
+        }).get(slugify(f).replace('-', '_').lower(), ProductAttribute.TEXT)
+
+    def get_attribute_dict(self, line, product_class_instance):
+        fields = [
+            (
+                f'Attribute {i} name',
+                f'Attribute {i} value(s)',
+                f'Attribute {i} visible',
+                f'Attribute {i} global',
+                f'Attribute {i} default'
+            ) for i in range(1, 9)]
+        out = {}
+        brand_name = None
+        for same_attr_fields in fields:
+            name, value, visibility, is_global, default = [line.get(f) for f in same_attr_fields]
+            if name.lower() == 'brand':
+                brand_name = value
+                continue
+            if not name:
+                continue
+            attr_field = self.get_attribute_field(
+                name,
+                field_type=self.get_suggested_field_type(name),
+                product_class_instance=product_class_instance)
+            out[attr_field] = {
+                'value': value,
+                'is_visible': visibility,
+                'is_global': is_global,
+                'default': default,
+            }
+            if attr_field.code == 'color':
+                color_attr_field = self.get_attribute_field(
+                    "HexColor",
+                    field_type=self.get_suggested_field_type("HexColor"),
+                    product_class_instance=product_class_instance)
+                out[color_attr_field] = {
+                    'value': value,
+                    'is_visible': False,
+                    'is_global': is_global,
+                    'default': default,
+                }
+        return out, brand_name
+
+    def get_brand(self, brand_name):
+        if brand_name is None:
+            brand, _ = Brand.objects.get_or_create(name="Generic")
+        else:
+            brand, _ = Brand.objects.get_or_create(name=brand_name)
+        return brand
 
 
 

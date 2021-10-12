@@ -1,6 +1,7 @@
 # from oscar.core.loading import get_model
 from colorfield.fields import ColorField
 from colorfield.widgets import ColorWidget
+from django import forms
 from django.forms import TextInput, CharField, BoundField
 from oscar.apps.dashboard.catalogue import forms as base_forms
 
@@ -8,7 +9,7 @@ from oscar.apps.dashboard.catalogue import forms as base_forms
 # Product = get_model('catalogue', 'Product')
 from treebeard.forms import movenodeform_factory
 
-from apps.catalogue.models import ProductAttribute, Category
+from apps.catalogue.models import ProductAttribute, Category, Product
 
 
 class ColorFormField(ColorField):
@@ -30,9 +31,16 @@ class ProductForm(base_forms.ProductForm):
     FIELD_FACTORIES = {**base_forms.ProductForm.FIELD_FACTORIES, 'color': _attr_color_field}
 
     class Meta(base_forms.ProductForm.Meta):
+        model = Product
         fields = [
-            'title', 'upc', 'description', 'is_public', 'is_discountable', 'structure', 'tax', 'brand'
+            'title', 'upc', 'description', 'is_public', 'is_discountable', 'structure',
+            'tax', 'brand', 'other_product_info',
+            'weight', 'length', 'width', 'height',
+            'crossselling'
         ]
+        widgets = {
+            'structure': forms.HiddenInput()
+        }
 
 
 class ProductAttributesForm(base_forms.ProductAttributesForm):

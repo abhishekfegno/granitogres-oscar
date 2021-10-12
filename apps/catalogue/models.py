@@ -18,6 +18,7 @@ from oscar.apps.catalogue.abstract_models import (
     AbstractProductAttribute, AbstractProductRecommendation, AbstractOption, AbstractProductAttributeValue
 )
 from oscar.apps.catalogue.reviews.abstract_models import AbstractProductReview
+from oscar.core.loading import get_model
 from sorl.thumbnail import get_thumbnail
 
 from apps.catalogue.managers import ProductManagerSelector
@@ -59,9 +60,31 @@ class ProductAttribute(AbstractProductAttribute):
             raise ValidationError(_("Must be a hex value (like #fff or #C0C0C0)"))
         return valid
 
+    def save_value(self, product, value, is_visible=True):   # noqa: C901 too complex
+        ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
+        try:
+            value_obj = product.attribute_values.get(attribute=self)
+            value_obj.is_visible = is_visible
+        except ProductAttributeValue.DoesNotExist:
+            # FileField uses False for announcing deletion of the file
+            # not creating a new value
+            delete_file = self.is_file and value is False
+            if value is None or value == '' or delete_file:
+                return
+            value_obj = ProductAttributeValue.objects.create(
+                product=product, attribute=self, is_visible=is_visible)
+
+        if self.is_file:
+            self._save_file(value_obj, value)
+        elif self.is_multi_option:
+            self._save_multi_option(value_obj, value)
+        else:
+            self._save_value(value_obj, value)
+
 
 class ProductAttributeValue(AbstractProductAttributeValue):
     value_color = ColorField(_('Color'), blank=True, null=True)
+    is_visible = models.BooleanField(_('Is Visible in Details'), default=True)
 
     @property
     def _color_as_text(self):
@@ -76,6 +99,9 @@ class ProductAttributeValue(AbstractProductAttributeValue):
 
 class Brand(models.Model):
     name = models.CharField(max_length=48)
+
+    def __str__(self):
+        return str(self.name) or '-'
 
 
 class FavoriteProduct(models.Model):
@@ -127,7 +153,7 @@ class Product(AbstractProduct):
     crossselling = models.ManyToManyField(
         'catalogue.Product', blank=True,
         related_name='crosssell_with',
-        verbose_name=_("Upselling products"),
+        verbose_name=_("Cross Selling products"),
         help_text=_("These are products that are recommended to accompany the "
                     "main product."))
     browsable = ProductManagerSelector().strategy()
