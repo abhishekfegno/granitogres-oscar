@@ -65,7 +65,8 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
     reviews = serializers.SerializerMethodField()
     rating_split = serializers.SerializerMethodField()
-    brand = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    brand = serializers.SerializerMethodField()
+    # brand = serializers.SlugRelatedField(read_only=True, slug_field='name')
     breadcrumb = serializers.SerializerMethodField()
 
     def get_breadcrumb(self, instance):
@@ -81,6 +82,9 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             instance.reviews.filter(status=ProductReview.APPROVED).order_by('-total_votes').prefetch_related('images')[:4], many=True,
             context=self.context
         ).data
+
+    def get_brand(self, instance):
+        return instance.brand and instance.brand.name
 
     def get_rating_split(self, instance):
         return dict(instance.reviews.filter(status=ProductReview.APPROVED).aggregate(

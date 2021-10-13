@@ -383,7 +383,7 @@ class Command(BaseCommand):
                 'value': value,
                 'is_visible': visibility,
                 'is_global': is_global,
-                'default': default,
+                'default': default,apps/api_set_v2/views/catalogue
             }
             if attr_field.code == 'color':
                 color_attr_field = self.get_attribute_field(
