@@ -57,6 +57,8 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     images = serializers.SerializerMethodField()
     categories = serializers.SerializerMethodField()
     recommended_products = serializers.SerializerMethodField()
+    upselling = serializers.SerializerMethodField()
+    crossselling = serializers.SerializerMethodField()
     attributes = serializers.SerializerMethodField()
     variants = serializers.SerializerMethodField()
     options = OptionSerializer(many=True)
@@ -140,6 +142,26 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
         from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
         return ProductSimpleListSerializer(
             inst.sorted_recommended_products,
+            many=True,
+            context=self.context
+        ).data
+
+    def get_upselling(self, instance):
+        # inst = instance.parent if instance.is_child else instance
+        inst = instance
+        from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
+        return ProductSimpleListSerializer(
+            inst.upselling.all(),
+            many=True,
+            context=self.context
+        ).data
+
+    def get_crossselling(self, instance):
+        # inst = instance.parent if instance.is_child else instance
+        inst = instance
+        from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
+        return ProductSimpleListSerializer(
+            inst.crossselling.all(),
             many=True,
             context=self.context
         ).data
