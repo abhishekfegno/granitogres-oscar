@@ -98,7 +98,7 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, serializers.Mod
 
     def get_brand(self, instance):
         return instance.brand.name if instance.brand else (instance.parent.brand.name if instance.parent and instance.parent.brand else None)
-    
+
     class Meta:
         model = Product
         fields = ('id', 'parent', 'title', 'slug', 'primary_image', 'brand')
@@ -136,6 +136,7 @@ def custom_ProductListSerializer(queryset, context,
             "price": price_serializer_mixin.get_price(product),
             "is_meet": product.is_meet,
             "is_vegetarian": product.is_vegetarian,
+            "brand": product.get_brand_name(),
             "weight": getattr(
                 product.attribute_values.filter(attribute__code='weight').first(), 'value', 'unavailable'
             ) if not product.is_parent else None,

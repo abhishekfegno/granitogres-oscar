@@ -34,9 +34,13 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFie
     price = serializers.SerializerMethodField()
     weight = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
+    brand = serializers.SerializerMethodField()
 
     def get_url(self, instance):
         return reverse('product-detail', kwargs={'pk': instance.pk}, request=self.context.get('request'))
+
+    def get_brand(self, instance):
+        return instance.get_brand_name()
 
     def get_weight(self, instance):
         if instance.is_parent:
@@ -47,7 +51,7 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFie
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'primary_image', 'price', 'weight', 'url', 'rating', 'review_count')
+        fields = ('id', 'title', 'primary_image', 'price', 'weight', 'url', 'rating', 'review_count', 'brand')
 
 
 class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldMixin, ProductDetailSerializerMixin,
@@ -86,7 +90,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
         ).data
 
     def get_brand(self, instance):
-        return instance.brand and instance.brand.name
+        return instance.get_brand_name()
 
     def get_rating_split(self, instance):
         return dict(instance.reviews.filter(status=ProductReview.APPROVED).aggregate(
