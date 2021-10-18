@@ -134,6 +134,8 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             'review_count',
             'reviews',
             'breadcrumb',
+            'upselling',
+            'crossselling',
         )
 
     def get_recommended_products(self, instance):
