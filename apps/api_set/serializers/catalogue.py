@@ -94,10 +94,14 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
+    brand = serializers.SerializerMethodField()
 
+    def get_brand(self, instance):
+        return instance.brand.name if instance.brand else (instance.parent.brand.name if instance.parent and instance.parent.brand else None)
+    
     class Meta:
         model = Product
-        fields = ('id', 'parent', 'title', 'slug', 'primary_image',)
+        fields = ('id', 'parent', 'title', 'slug', 'primary_image', 'brand')
 
 
 class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite, serializers.ModelSerializer):
