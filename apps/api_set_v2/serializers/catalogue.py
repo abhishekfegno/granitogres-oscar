@@ -149,18 +149,18 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
         ).data
 
     def get_upselling(self, instance):
-        # inst = instance.parent if instance.is_child else instance
-        inst = instance
+        inst = instance.parent if instance.is_child else instance
+        # inst = instance 
         from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
         return ProductSimpleListSerializer(
-            inst.upselling.all(),
+            inst.parent.upselling.all(),
             many=True,
             context=self.context
         ).data
 
     def get_crossselling(self, instance):
-        # inst = instance.parent if instance.is_child else instance
-        inst = instance
+        inst = instance.parent if instance.is_child else instance
+        # inst = instance
         from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
         return ProductSimpleListSerializer(
             inst.crossselling.all(),
