@@ -45,11 +45,11 @@ def apply_filter(queryset, _filter, null_value_compatability='__'):
         return k + '__in' if client_side_value_splitter in v else k
 
     def set_value(key, value):
-        return [_v.strip() for _v in v.split(',')] if client_side_value_splitter in v else v.strip()
+        return [_v.strip() for _v in v.split(client_side_value_splitter)] if client_side_value_splitter in v else v.strip()
 
     for filter_values in filter_values_set:
-        if client_side_value_splitter in filter_values and not filter_values.endswith(f'{client_side_value_splitter}{null_value_compatability}'):
-            k, v = filter_values.split(client_side_value_splitter, 1)
+        if ':' in filter_values and not filter_values.endswith(f':{null_value_compatability}'):
+            k, v = filter_values.split(':', 1)
 
             # managed already
             # if v and v == null_value_compatability:
