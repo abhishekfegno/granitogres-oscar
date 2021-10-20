@@ -26,8 +26,8 @@ def brand_filter(queryset, brand_ids):
 def apply_filter(queryset, _filter, null_value_compatability='__'):
     """
     _filter:
-         #old => input = weight:25,30,35::minprice:25::maxprice:45::available_only:1::color=Red,Black,Blue::ram:4 GB,8 GB
-         input = weight:25#30#35::minprice:25::maxprice:45::available_only:1::color=Red#Black#Blue::ram:4 GB#8 GB
+         # old => input = weight:25,30,35::minprice:25::maxprice:45::available_only:1::color=Red,Black,Blue::ram:4 GB,8 GB
+         input = weight:25|30|35::minprice:25::maxprice:45::available_only:1::color=Red|Black|Blue::ram:4 GB|8 GB
          _flt = [
              weight__in : [25, 30, 35],
              minprice : 25,
@@ -39,7 +39,7 @@ def apply_filter(queryset, _filter, null_value_compatability='__'):
     """
     filter_values_set = _filter.split('::')
     filter_params = {}
-    client_side_value_splitter = "#"
+    client_side_value_splitter = "|"
 
     def set_key(key, value):
         return k + '__in' if client_side_value_splitter in v else k

@@ -162,7 +162,7 @@ class Product(AbstractProduct):
         instance = self
         return instance.brand.name if instance.brand else (
             (instance.parent.brand and instance.parent.brand.name) if instance.parent else None)
-    
+
     def update_rating(self):
         """
         Recalculate rating field
