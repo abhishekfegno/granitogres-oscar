@@ -48,7 +48,7 @@ def apply_filter(queryset, _filter, null_value_compatability='__'):
         return [_v.strip() for _v in v.split(',')] if client_side_value_splitter in v else v.strip()
 
     for filter_values in filter_values_set:
-        if ':' in filter_values and not filter_values.endswith(f':{null_value_compatability}'):
+        if client_side_value_splitter in filter_values and not filter_values.endswith(f'{client_side_value_splitter}{null_value_compatability}'):
             k, v = filter_values.split(client_side_value_splitter, 1)
 
             # managed already
