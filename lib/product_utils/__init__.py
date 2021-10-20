@@ -49,7 +49,7 @@ def apply_filter(queryset, _filter, null_value_compatability='__'):
 
     for filter_values in filter_values_set:
         if ':' in filter_values and not filter_values.endswith(f':{null_value_compatability}'):
-            k, v = filter_values.split(':', 1)
+            k, v = filter_values.split(client_side_value_splitter, 1)
 
             # managed already
             # if v and v == null_value_compatability:
