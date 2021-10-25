@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     # 'stores.dashboard',
 
     'apps.users',
+    # 'apps.api_set',
+    'apps.api_set_v2',
     'apps.api_set.apps.ApiSetConfig',
     'apps.mod_oscarapi.apps.ModOscarapiConfig',
     'apps.logistics.apps.LogisticsConfig',
@@ -162,14 +164,11 @@ MIDDLEWARE = [
 
 
 CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:8000',
-    'http://127.0.0.1:3000',
-    'http://dev.fegno.com:3000',    
-    'https://localhost:3000',
-    'https://dev.fegno.com:3000',    
+    'http://dev.fegno.com:3000',
+    'http://localhost:3000',
 ]
 
-# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -193,6 +192,9 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+CORS_ORIGIN_WHITELIST = (
+   'http://localhost:3000',
+)
 
 ROOT_URLCONF = 'osc.urls'
 WSGI_APPLICATION = 'osc.wsgi.application'

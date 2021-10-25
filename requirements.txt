@@ -42,6 +42,7 @@ django-oscar-stores==2.1
 django-phonenumber-field==2.0.1
 django-push-notifications==2.0.0
 django-redis==4.11.0
+django-redis-sessions==0.6.2
 django-rest-auth==0.9.5
 django-select-multiple-field==0.4.2
 django-solo==1.1.3
