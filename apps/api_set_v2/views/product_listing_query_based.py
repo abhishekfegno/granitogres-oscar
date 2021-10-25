@@ -78,15 +78,15 @@ def product_list(request, category='all', **kwargs):
     _sort = request.GET.get('sort')
     _filter = request.GET.get('filter')
     _offer_category = request.GET.get('offer_category')
-    _product_range = request.GET.get('product_range')
+    _range = request.GET.get('range')
     page_number = int(request.GET.get('page', '1'))
     page_size = int(request.GET.get('page_size', str(settings.DEFAULT_PAGE_SIZE)))
     only_favorite = bool(request.GET.get('only_favorite', False))
     out = {}
     # search_handler = get_product_search_handler_class()(request.GET, request.get_full_path(), [])
     title = 'All'
-    if _product_range:
-        product_range = get_object_or_404(Range, pk=_product_range)
+    if _range:
+        product_range = get_object_or_404(Range, slug=_range)
         if product_range:
             title = product_range.name
         queryset = product_range.all_products().filter(is_public=True)
@@ -138,7 +138,7 @@ def product_list(request, category='all', **kwargs):
             product_data = []
         rc = recommended_class(queryset)
         return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc, title=title)
-    if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not any([_search, _filter, _sort, _offer_category, _product_range, ]):
+    if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not any([_search, _filter, _sort, _offer_category, _range, ]):
         c_key = cache_key.product_list__key.format(page_number, page_size, category)
         # if settings.DEBUG:
         #     cache.delete(c_key)
