@@ -24,7 +24,7 @@
 <div class="page-header action">
     <h1>
         {% block headertext %}{{ title }}{% endblock %}
-        <a href="{% url 'dashboard:catalogue-brand-delete' pk=object.pk %}" class="btn btn-danger pull-right"> DELETE </a></div>
+        {% if object.pk %}<a href="{% url 'dashboard:catalogue-brand-delete' pk=object.pk %}" class="btn btn-danger pull-right"> DELETE </a>{% endif %}
     </h1>
 </div>
 {% endblock %}
