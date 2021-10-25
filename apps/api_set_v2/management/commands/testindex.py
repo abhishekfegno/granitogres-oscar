@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
         if content is None:
             print(f'Cannot find {slug} in Api ({self.url})!')
-        if content['content'] is not []:
+        if content['content'] is []:
             print(f'Cannot find {slug} in Api ({self.url})!')
 
         p_ids = [pdt['id'] for pdt in content['content']]

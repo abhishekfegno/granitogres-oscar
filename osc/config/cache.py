@@ -30,7 +30,7 @@ CACHES = {
 }
 CACHE_MIDDLEWARE_ALIAS = 'redis'
 CACHES['default'] = CACHES[CACHE_MIDDLEWARE_ALIAS]
-SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+# SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 
 # CACHING
 
