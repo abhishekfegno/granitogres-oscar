@@ -115,7 +115,7 @@ def product_suggestions(request, **kwargs):
     out = {'results': [],  'class': None, }
     if _search:
         Category.objects.filter()
-        queryset = apply_search(queryset=queryset, search=_search)
+        queryset = apply_search(queryset=queryset, search=_search).distinct('id')
         rc = recommended_class(queryset)
         queryset = queryset.values('title', 'slug', 'product_class_id')
         out['results'] = queryset[:_max_size]
