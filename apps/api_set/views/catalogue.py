@@ -121,8 +121,8 @@ def product_suggestions(request, **kwargs):
         _mapper = {}
         _mapper_len = 1
         for item in queryset:
-            if item['id'] not in _mapper:
-                _mapper[item['id']] = item
+            if item['title'] not in _mapper:
+                _mapper[item['title']] = item
                 _mapper_len += 1
             if _mapper_len > _max_size:
                 break
