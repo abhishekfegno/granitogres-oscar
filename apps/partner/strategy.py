@@ -1,6 +1,7 @@
 from oscar.apps.partner.availability import Unavailable, Available
+from oscar.apps.partner.prices import FixedPrice, TaxInclusiveFixedPrice
 from oscar.apps.partner.strategy import UK, UseFirstStockRecord, StockRequired, FixedRateTax, Structured, \
-    StockRequiredAvailability
+    StockRequiredAvailability, PurchaseInfo, UnavailablePrice
 
 from apps.availability.models import Zones
 from apps.partner.strategy_set.strategies import ZoneBasedIndianPricingStrategy
@@ -27,7 +28,25 @@ class ABCHauzPricing(UseFirstStockRecord, StockRequired, FixedRateTax, Structure
         self.kwargs = kwargs
 
     def get_rate(self, product, stockrecord=None):
-        return D(str(product.tax))
+        return D(str(product.tax/100))
+
+    def fetch_for_product(self, product, stockrecord=None):
+        """
+        Return the appropriate ``PurchaseInfo`` instance.
+
+        This method is not intended to be overridden.
+        """
+
+        if stockrecord is None:
+            stockrecord = self.select_stockrecord(product)
+        pinfo = PurchaseInfo(
+            price=self.pricing_policy(product, stockrecord),
+            availability=self.availability_policy(product, stockrecord),
+            stockrecord=stockrecord)
+        print(self.get_rate(product, stockrecord))
+        print(pinfo)
+        print(dir(pinfo))
+        return pinfo
 
     def availability_policy(self, product, stockrecord):
         if not stockrecord:
