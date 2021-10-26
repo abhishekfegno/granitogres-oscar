@@ -262,7 +262,18 @@ class Command(BaseCommand):
             )
         return self.attr_hash[name]
 
+    def clear_data(self):
+        Product.objects.all().delete()
+        Category.objects.all().delete()
+        ProductClass.objects.all().delete()
+        ProductImage.objects.all().delete()
+        ProductAttributeValue.objects.all().delete()
+        ProductAttribute.objects.all().delete()
+        StockRecord.objects.all().delete()
+
     def handle(self, *args, **kwargs):
+        if input('Do you want to clear database? Y/N').lower() == 'y':
+            self.clear_data()
         fields = [f'Attribute {i} name' for i in range(1, 9)]
         filename = kwargs['data_source_csv']
         struct = {
@@ -275,14 +286,6 @@ class Command(BaseCommand):
         write = 3
         with open(filename, 'r') as _fp:
             contents = csv.DictReader(_fp)
-
-            Product.objects.all().delete()
-            Category.objects.all().delete()
-            ProductClass.objects.all().delete()
-            ProductImage.objects.all().delete()
-            ProductAttributeValue.objects.all().delete()
-            ProductAttribute.objects.all().delete()
-            StockRecord.objects.all().delete()
 
             for line in contents:
                 print("=" * 40)
