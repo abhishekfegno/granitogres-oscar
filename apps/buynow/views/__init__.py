@@ -178,7 +178,7 @@ class BuyNowCheckoutBasket(CheckoutView):
         utils.set_payment_method_states(order, request, new_states)
 
         # Return order data
-        o_ser = self.order_serializer_class(order, context={ 'request': request })
+        o_ser = self.order_serializer_class(order, context={'request': request})
         return Response(o_ser.data)
 
 
