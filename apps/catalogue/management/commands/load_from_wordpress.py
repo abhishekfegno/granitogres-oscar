@@ -1,8 +1,10 @@
 import uuid
+
+import psycopg2
 from django.core.management import BaseCommand
 import csv
 
-from django.db import models
+from django.db import models, IntegrityError
 from django.utils.text import slugify
 
 import urllib3
@@ -271,8 +273,13 @@ class Command(BaseCommand):
         ProductAttribute.objects.all().delete()
         StockRecord.objects.all().delete()
 
+    def clean_line(self, line):
+        if '\ufeffName' in line:
+            line['Name'] = line.pop('\ufeffName')
+        return line
+
     def handle(self, *args, **kwargs):
-        if input('Do you want to clear database? Y/N').lower() == 'y':
+        if input('Do you want to clear database? Y/N : ').lower() == 'y':
             self.clear_data()
         fields = [f'Attribute {i} name' for i in range(1, 9)]
         filename = kwargs['data_source_csv']
@@ -296,6 +303,10 @@ class Command(BaseCommand):
                 print("Enrolling Brand...")
                 brand = self.get_brand(brand_name)
                 print(attrs)
+                print(line)
+
+                line = self.clean_line(line)
+
                 print("Handling", line['Name'], "\n", " *** CATEGORIES *** ")
                 cat_list = line['Categories'].split(' > ')
                 cat_item = self.get_category(cat_list)
@@ -304,26 +315,32 @@ class Command(BaseCommand):
                 print(line['Regular price'] or 0, line['Sale price'] or 0, "===========")
 
                 print("Saving Product Class...")
-                p = Product.objects.create(
-                    product_class=product_class_instance,
-                    structure=struct[line['Type']],
-                    upc=line['SKU'] or str(uuid.uuid4()).split('-')[-1].upper(),
-                    parent=_parent_obj or None,
-                    title=line['Name'],
-                    slug=slugify(line['Name']),
-                    description=slugify(line['Description']),
-                    about=slugify(line['Short description']),
-                    weight=digit(line['Weight (kg)']),
-                    length=digit(line['Length (mm)']),
-                    width=digit(line['Width (mm)']),
-                    height=digit(line['Height (mm)']),
-                    retail_price=digit(line['Regular price'] or 0),
-                    effective_price=digit(line['Sale price'] or 0),
-                    brand=brand,
-                )
-                print("Adding to Categories...")
-                p.categories.add(cat_item)
-
+                try:
+                    p = Product.objects.create(
+                        product_class=product_class_instance,
+                        structure=struct[line['Type']],
+                        upc=line['SKU'] or str(uuid.uuid4()).split('-')[-1].upper(),
+                        parent=_parent_obj or None,
+                        title=line['Name'],
+                        slug=slugify(line['Name']),
+                        description=slugify(line['Description']),
+                        about=slugify(line['Short description']),
+                        weight=digit(line['Weight (kg)']),
+                        length=digit(line.get('Length (mm)', line.get('Length (cm)', ))),
+                        width=digit(line.get('Width (mm)', line.get('Width (cm)', ))),
+                        height=digit(line.get('Height (mm)', line.get('Height (cm)', ))),
+                        retail_price=digit(line['Regular price'] or 0),
+                        effective_price=digit(line['Sale price'] or 0),
+                        brand=brand,
+                    )
+                    print("Adding to Categories...")
+                    p.categories.add(cat_item)
+                except psycopg2.errors.UniqueViolation as e:
+                    print(e)
+                    continue
+                except IntegrityError as e:
+                    print(e)
+                    continue
                 print("Fetching Images...")
                 for img in line['Images'].split(','):
                     pi = ProductImage(product=p)
@@ -348,8 +365,9 @@ class Command(BaseCommand):
                     StockRecord.objects.get_or_create(
                         partner=partner,
                         product=p,
-                        price_excl_tax=digit(line['Sale price']) / 1.18,
-                        price_retail=digit(line['Regular price']) / 1.18,
+                        cost_price=digit(line['Sale price']) or digit(line['Regular price']) / 1.18,
+                        price_excl_tax=digit(line['Sale price']) / 1.18 or digit(line['Regular price']) / 1.18,
+                        price_retail=digit(line['Regular price']),
                         num_in_stock=1000,
                         partner_sku=p.upc
                     )
@@ -373,10 +391,10 @@ class Command(BaseCommand):
         brand_name = None
         for same_attr_fields in fields:
             name, value, visibility, is_global, default = [line.get(f) for f in same_attr_fields]
+            if not name:
+                continue
             if name.lower() == 'brand':
                 brand_name = value
-                continue
-            if not name:
                 continue
             attr_field = self.get_attribute_field(
                 name,
