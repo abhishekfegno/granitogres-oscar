@@ -106,7 +106,7 @@ class BuyNowHauzCheckoutBasketView(HauzCheckoutView):
     serializer_class = BuyNowBasketSerializer
 
     def post(self, request, format=None, **kwargs, ):
-        super(BuyNowHauzCheckoutBasketView, self).post(request, format=format)
+        return super(BuyNowHauzCheckoutBasketView, self).post(request, format=format)
 
     def get_serializer(self, *args, **kwargs):
         serializer_class = self.get_serializer_class()
