@@ -79,9 +79,3 @@ class UserAddress(AbstractUserAddress):
         return {}
 
 from oscar.apps.address.models import *     # noqa isort:skip
-
-
-@receiver(sender=UserAddress, signal=pre_save)
-def save_country(sender, instance, **kwargs):
-    if not instance.country:
-        instance.country = Country.objects.get(pk='IN')
