@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.conf import settings
 from oscarapi.permissions import IsOwner
+from rest_framework.permissions import IsAuthenticated
 
 from apps.address.models import UserAddress
 from oscar.core import prices
@@ -420,7 +421,7 @@ class CheckoutView(OscarAPICheckoutView):
 
 class UserAddressList(generics.ListCreateAPIView):
     serializer_class = UserAddressSerializer
-    permission_classes = (IsOwner,)
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return UserAddress.objects.filter(user=self.request.user)

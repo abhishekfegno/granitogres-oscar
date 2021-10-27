@@ -29,7 +29,10 @@ class WishListLineSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMix
 
 
 class WishListSerializer(serializers.ModelSerializer):
-    lines = WishListLineSerializer(many=True, )
+    lines = serializers.SerializerMethodField()
+
+    def get_lines(self, instance):
+        return WishListLineSerializer(instance.lines.filter(product__isnull=False), many=True, context=self.context).data
 
     class Meta:
         model = WishList

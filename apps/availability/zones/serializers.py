@@ -27,8 +27,9 @@ class PointSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         try:
-            x, y = float(attrs['longitude']), float(attrs['latitude'])
-            attrs['point'] = Point(x, y)
+            if attrs.get('longitude') and attrs.get('latitude'):
+                x, y = float(attrs['longitude']), float(attrs['latitude'])
+                attrs['point'] = Point(x, y)
         except GDALException as e:
             raise forms.ValidationError(e)
         return attrs

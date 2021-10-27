@@ -18,7 +18,7 @@ f = Factory.create()
 
 
 def __(path):
-    return "https://abchauz.dev.fegno.com" + path
+    return "https://devserver.abchauz.com" + path
 
 
 class Command(BaseCommand):

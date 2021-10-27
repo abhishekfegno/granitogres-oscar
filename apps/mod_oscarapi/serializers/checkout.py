@@ -103,8 +103,24 @@ class UserAddressSerializer(CoreUserAddressSerializer):
     location_data = serializers.SerializerMethodField()
     country = serializers.SerializerMethodField()
 
+    def get_country_instance(self, validated_data):
+        india, _ = Country.objects.get_or_create(
+            iso_3166_1_a2='IN',
+            defaults={
+                'iso_3166_1_a3': 'IND',
+                'iso_3166_1_numeric': '356',
+                'printable_name': 'India',
+                'name': 'India',
+                'display_order': 0,
+                'is_shipping_country': True
+            })
+        validated_data['country'] = india
+        return validated_data
+
     def create(self, validated_data):
         point = validated_data.pop('location') if 'location' in validated_data else None
+        validated_data = self.get_country_instance(validated_data)
+
         instance = super(UserAddressSerializer, self).create(validated_data)
         if point and 'point' in point:
             instance.location = point['point']
@@ -113,6 +129,7 @@ class UserAddressSerializer(CoreUserAddressSerializer):
 
     def update(self, instance, validated_data):
         point = validated_data.pop('location') if 'location' in validated_data else None
+        validated_data = self.get_country_instance(validated_data)
         instance = super(UserAddressSerializer, self).update(instance, validated_data)
         if point:
             instance.location = Point(**point)
