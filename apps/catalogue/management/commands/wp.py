@@ -315,11 +315,22 @@ class Command(BaseCommand):
                 line = self.clean_line(line)
 
                 print("Handling", line['Name'], "\n", " *** CATEGORIES *** ")
-                cat_list = line['Categories'].split(' > ')
-                cat_item = self.get_category(cat_list)
+                print(line['Categories'], "*****************")
+                selected = []
+                if line['Categories']:
+                    categories = line['Categories'].replace('&amp;', '&').split(',')
+                    cat_list = [category.split(' > ') for category in categories]
+                    for i in cat_list:
+                        if len(i) > len(selected):
+                            selected = i
+                cat_item = None
+                if selected:
+                    cat_item = self.get_category(selected)
                 parent_selector = line.get('Parent', '')
                 _parent_obj = parent_selector and self.get_product(parent_selector)
                 print(line['Regular price'] or 0, line['Sale price'] or 0, "===========")
+
+                print(line["Name"], line["Type"])
 
                 print("Saving Product Class...")
                 try:
@@ -337,11 +348,12 @@ class Command(BaseCommand):
                         width=digit(line.get('Width (mm)', line.get('Width (cm)', ))),
                         height=digit(line.get('Height (mm)', line.get('Height (cm)', ))),
                         retail_price=digit(line['Regular price'] or 0),
-                        effective_price=digit(line['Sale price'] or 0),
+                        effective_price=digit(line['Sale price']) or digit(line['Regular price']),
                         brand=brand,
                     )
                     print("Adding to Categories...")
-                    p.categories.add(cat_item)
+                    if cat_item:
+                        p.categories.add(cat_item)
                 except psycopg2.errors.UniqueViolation as e:
                     print(e)
                     continue
@@ -358,7 +370,7 @@ class Command(BaseCommand):
                 #     if f.startswith('Attribute') and f.endswith('name') and line.get(f):
                 #         attr = self.get_attribute_field(line[f], self.get_suggested_field_type(f),
                 #                                         product_class_instance=product_class_instance)
-                #         
+                #
                 for attr, attr_data in attrs.items():
                     setattr(p.attr, attr.code, attr_data['value'])
                     if attr.code == 'color':
