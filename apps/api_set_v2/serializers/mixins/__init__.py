@@ -12,10 +12,10 @@ class ProductPrimaryImageFieldMixin(object):
     def get_primary_image(self, instance):
         request = (self.context or {}).get('request', empty())  # noqa: mixin assured
         req = request.build_absolute_uri
-        if instance.is_child:
-            return {
-                'mobile': req(image_not_found()),
-            }
+        # if instance.is_child:
+        #     return {
+        #         'mobile': req(image_not_found()),
+        #     }
         img = instance.primary_image()
         org_url = image_not_found() if type(img) is dict else getattr(img.original, 'url')
         img_mob = image_not_found() if type(img) is dict else img.thumbnail_mobile_listing
