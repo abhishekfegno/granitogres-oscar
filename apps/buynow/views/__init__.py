@@ -12,6 +12,9 @@ from ..serializers import CheckoutSerializer
 from oscarapicheckout.signals import order_placed
 from oscarapicheckout import utils
 
+from apps.mod_oscarapi.serializers.checkout import BuyNowBasketSerializer
+from apps.mod_oscarapi.views.checkout import CheckoutView as HauzCheckoutView
+
 
 AddProductSerializer = get_api_class('serializers.product', 'AddProductSerializer')
 Basket = get_model("basket", "Basket")  # noqa
@@ -97,6 +100,15 @@ class BuyNowUpdateQuantity(APIView):
             return Response({**basket_serializer.data}, status=status.HTTP_201_CREATED)
         else:
             return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BuyNowHauzCheckoutBasketView(HauzCheckoutView):
+    serializer_class = BuyNowBasketSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        serializer_class = self.get_serializer_class()
+        kwargs['context'] = self.get_serializer_context()
+        return serializer_class(self.kwargs['basket'], *args, **kwargs)
 
 
 class BuyNowCheckoutBasket(CheckoutView):

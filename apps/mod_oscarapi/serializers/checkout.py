@@ -15,6 +15,7 @@ from rest_framework import serializers, exceptions
 
 from apps.availability.facade import ZoneFacade
 from apps.availability.zones.serializers import PointSerializer
+from apps.basket.models import Basket
 from apps.mod_oscarapi.calculators import OrderTotalCalculator
 from apps.users.models import Location
 
@@ -96,6 +97,13 @@ class CheckoutSerializer(OscarAPICheckoutSerializer):
         attrs["shipping_charge"] = shipping_charge
         attrs["basket"] = basket
         return attrs
+
+
+class BuyNowBasketSerializer(CheckoutSerializer):
+
+    def __init__(self, basket_id, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['basket'].queryset = Basket.objects.filter(pk=basket_id)
 
 
 class UserAddressSerializer(CoreUserAddressSerializer):
