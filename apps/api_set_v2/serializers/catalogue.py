@@ -79,7 +79,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     def get_breadcrumb(self, instance):
         cat = instance.categories.order_by('-depth').first()
         if cat:
-            cats = instance.get_ancestors_and_self()
+            cats = cat.get_ancestors_and_self()
         else:
             cats = []
         return [
