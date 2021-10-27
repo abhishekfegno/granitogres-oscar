@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from oscar.apps.customer.wishlists.views import WishListAddProduct
 
 from apps.api_set.serializers.wishlist import WishListSerializer
+from apps.api_set.views.orders import _login_required
 from apps.catalogue.models import Product
 
 
@@ -26,6 +27,7 @@ def get_or_create_wishlist(request, *args, **kwargs):
 
 
 @api_view(['GET', 'POST', 'PATCH', 'DELETE'])
+@_login_required
 def wish_list(request, **kwargs):
     """
     request : method GET, POST, PATCH, DELETE
