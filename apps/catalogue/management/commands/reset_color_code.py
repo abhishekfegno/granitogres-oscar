@@ -118,16 +118,15 @@ Yellow-Brown=#cc9966
 class Command(BaseCommand):
     
     def handle(self, *args, **options):
-        all_attrs = ProductAttribute.objects.filter(code='color')
+        text_color_attrs = ProductAttribute.objects.filter(code='color')
         color_wheel = {}
-        color_attr = ProductAttribute.objects.filter(type=ProductAttribute.COLOR).select_related('product_class')
+        color_attr = ProductAttribute.objects.filter(type=ProductAttribute.COLOR).select_related('product_class').first()
         for line in data:
             color, _hex = line.split('=')
             hex_secondary = None
             if ',' in _hex:
                 _hex, hex_secondary = _hex.split(',')
             color_wheel[color] = {'primary': _hex, 'secondary': hex_secondary}
-        all_attrs =
-        for attr in all_attrs:
+        for text_color in text_color_attrs:
             pass
         return

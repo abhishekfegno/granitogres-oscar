@@ -28,12 +28,11 @@ class ABCHauzPricing(UseFirstStockRecord, StockRequired, FixedRateTax, Structure
         self.kwargs = kwargs
 
     def get_rate(self, product, stockrecord=None):
-        return D(str(product.tax/100))
+        return product.tax/100
 
     def fetch_for_product(self, product, stockrecord=None):
         """
         Return the appropriate ``PurchaseInfo`` instance.
-
         This method is not intended to be overridden.
         """
 

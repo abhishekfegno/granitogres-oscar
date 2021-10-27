@@ -95,9 +95,7 @@ def to_client_dict(value_array):
 
 @api_view()
 def filter_options(request, pk):
-    attrs = ProductAttribute.objects.filter(
-        is_varying=True, product_class__id=pk
-    ).prefetch_related('productattributevalue_set')
+    attrs = ProductAttribute.objects.filter(is_varying=True, product_class_id=pk).prefetch_related('productattributevalue_set')
     return Response({
         'results': [{
             'code': attr.code,

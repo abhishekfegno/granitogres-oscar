@@ -59,6 +59,22 @@ FILTER_BY_CHOICES = [
 ]
 
 
+def get_breadcrumb(_search, cat, product_range):
+    if cat:
+        cats = cat.get_ancestors_and_self()
+    else:
+        cats = []
+    out = [
+        {"title": "Home", "url": '?'},
+        *[{"title": c.name, "url": f'?category={c.slug}'} for c in cats],
+    ]
+    if product_range:
+        out.append({"title": product_range.title, "url": f"?product_range={product_range.id}"})
+    if _search:
+        out.append({"title": product_range.title, "url": f"?q={_search}"})
+    return out
+
+
 @api_view()
 def product_list(request, category='all', **kwargs):
     """
@@ -72,7 +88,6 @@ def product_list(request, category='all', **kwargs):
         other dynamic parameters are available at  reverse('wnc-filter-options', kwarg={'pk': '<ProductClass: id>'})
     """
     queryset = Product.browsable.browsable()
-    serializer_class = custom_ProductListSerializer
     _search = request.GET.get('q')
     _sort = request.GET.get('sort')
     _filter = request.GET.get('filter')
@@ -136,7 +151,8 @@ def product_list(request, category='all', **kwargs):
         else:
             product_data = []
         rc = recommended_class(queryset)
-        return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc, title=title)
+
+        return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc, title=title, bread_crumps=get_breadcrumb(_search, cat, product_range))
     if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not any([_search, _filter, _sort, _offer_category, _range, ]):
         c_key = cache_key.product_list__key.format(page_number, page_size, category)
         # if settings.DEBUG:
