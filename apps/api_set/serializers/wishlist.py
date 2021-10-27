@@ -13,7 +13,8 @@ class WishListLineSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMix
         return {
             'id': instance.product_id,
             'image': self.get_primary_image(instance.product),
-            'price': self.get_price(instance.product),
+            # 'price': self.get_price(instance.product),
+            'price': self.line.product.effective_price,
             'url': self.context['request'].build_absolute_uri(
                 reverse("product-detail", kwargs={'pk': instance.product_id})
             )
