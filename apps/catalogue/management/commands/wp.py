@@ -240,7 +240,7 @@ class Command(BaseCommand):
 
     pc = dict()
     attr_hash = dict()
-    generic_pc = ProductClass.objects.get_or_create(name="Generic", slug="generic")[0]
+    generic_pc = None
 
     def get_product_class(self, line):
         for i in range(1, 10):
@@ -252,6 +252,8 @@ class Command(BaseCommand):
                     self.pc[name] = ProductClass.objects.get_or_create(name=name, defaults={'slug': slugify(name)})[0]
                 print(key, '=', self.pc[name])
                 return self.pc[name]
+        if self.generic_pc is None:
+            self.generic_pc = ProductClass.objects.get_or_create(name="Generic", slug="generic")[0]
         return self.generic_pc
 
     def get_attribute_field(self, name, field_type=ProductAttribute.TEXT, product_class_instance=None):
@@ -283,7 +285,8 @@ class Command(BaseCommand):
         return line
 
     def handle(self, *args, **kwargs):
-        if kwargs['clear-db']:
+        print(kwargs)
+        if kwargs['clear_db']:
             self.clear_data()
         fields = [f'Attribute {i} name' for i in range(1, 9)]
         filename = kwargs['data_source_csv']
