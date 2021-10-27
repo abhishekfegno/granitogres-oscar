@@ -1,8 +1,10 @@
 # from oscar.apps.basket.abstract_models import AbstractBasket
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
 from apps.buynow.basket_utils.models import AbstractBuyNowBasket
+from apps.catalogue.models import Product
 
 
 class Basket(AbstractBuyNowBasket):
@@ -26,6 +28,8 @@ class Basket(AbstractBuyNowBasket):
             options = []
         if not self.id:
             self.save()
+
+        # if product.
 
         if quantity > settings.OSCAR_MAX_PER_LINE_QUANTITY:
             raise ValueError(
@@ -93,6 +97,10 @@ class Basket(AbstractBuyNowBasket):
 
     add_product.alters_data = True
     add = add_product
+
+    def clean(self, product):
+        if product.is_parent:
+            return product.children.all().last
 
     @property
     def sorted_recommended_products(self):

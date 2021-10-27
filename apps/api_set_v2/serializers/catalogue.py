@@ -11,6 +11,7 @@ from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin, Pr
 from apps.catalogue.models import Category, Product
 # from apps.catalogue.models import ProductReview
 from apps.catalogue.reviews.models import ProductReview, ProductReviewImage
+from apps.users.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -249,8 +250,11 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         self.take_images(validated_data)
+        # import pdb;pdb.set_trace()
         if validated_data['product'] is None:
             validated_data['product'] = validated_data['order_line'].product
+
+        # validated_data['user'] = User.objects.all().last()
         product = super().create(validated_data)
         self.save_images(product)
         return product
