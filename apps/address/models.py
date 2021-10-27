@@ -1,6 +1,7 @@
 
 from django.contrib.gis.db.models import PointField
 from django.db import models
+from django.db.models.signals import pre_save
 from oscar.apps.address.abstract_models import AbstractUserAddress
 from oscar.models.fields import UppercaseCharField
 
@@ -77,3 +78,9 @@ class UserAddress(AbstractUserAddress):
         return {}
 
 from oscar.apps.address.models import *     # noqa isort:skip
+
+
+@pre_save(sender=UserAddress)
+def save_country(sender, instance, **kwargs):
+    if not instance.country:
+        instance.country = Country.objects.get(pk='IN')

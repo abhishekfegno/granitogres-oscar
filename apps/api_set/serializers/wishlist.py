@@ -32,7 +32,7 @@ class WishListSerializer(serializers.ModelSerializer):
     lines = serializers.SerializerMethodField()
 
     def get_lines(self, instance):
-        return WishListLineSerializer(instance.lines.filter(product_isnull=False), many=True, context=self.context).data
+        return WishListLineSerializer(instance.lines.filter(product__isnull=False), many=True, context=self.context).data
 
     class Meta:
         model = WishList
