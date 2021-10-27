@@ -52,7 +52,7 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFie
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'primary_image', 'price', 'weight', 'url', 'rating', 'review_count', 'brand')
+        fields = ('id', 'title', 'structure', 'primary_image', 'price', 'weight', 'url', 'rating', 'review_count', 'brand')
 
 
 class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldMixin, ProductDetailSerializerMixin,
