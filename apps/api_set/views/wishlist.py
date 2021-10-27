@@ -68,7 +68,8 @@ def wish_list(request, **kwargs):
             return Response({'error': 'product_id is required'}, status=status.HTTP_400_BAD_REQUEST)
         product = get_object_or_404(Product, pk=data['product_id'])
         if product.structure == Product.PARENT:
-            return Response({'error': 'Cannot add parent product to wishlist.'}, status=status.HTTP_400_BAD_REQUEST)
+            product = product.children.all().select_relted('parent').last()
+            # return Response({'error': 'Cannot add parent product to wishlist.'}, status=status.HTTP_400_BAD_REQUEST)
         wish_list.add(product)
     elif request.method == 'PATCH':
         if 'product_id' not in data.keys():

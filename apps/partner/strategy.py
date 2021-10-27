@@ -43,9 +43,6 @@ class ABCHauzPricing(UseFirstStockRecord, StockRequired, FixedRateTax, Structure
             price=self.pricing_policy(product, stockrecord),
             availability=self.availability_policy(product, stockrecord),
             stockrecord=stockrecord)
-        print(self.get_rate(product, stockrecord))
-        print(pinfo)
-        print(dir(pinfo))
         return pinfo
 
     def availability_policy(self, product, stockrecord):
