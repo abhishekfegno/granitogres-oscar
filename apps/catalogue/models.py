@@ -287,7 +287,7 @@ class Product(AbstractProduct):
 
 class Category(AbstractCategory):
 
-    image = ImageField(_('Image'), upload_to='categories', blank=False,
+    image = ImageField(_('Image'), upload_to='categories', blank=True,
                        null=True, max_length=255)
     icon = ImageField(_('Icon Image'), upload_to='categories', blank=False,
                       help_text="Used to display in Homepage Icon. Suggested svg images or img less than 255X255px",

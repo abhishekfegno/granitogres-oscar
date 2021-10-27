@@ -206,6 +206,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('data_source_csv', type=str, help='please choose a path of images')
+        parser.add_argument('--clear-db', action='store_true', help='do you want to clear current catalogue ?')
 
     parent = dict()
     parent_sku = dict()
@@ -265,7 +266,9 @@ class Command(BaseCommand):
         return self.attr_hash[name]
 
     def clear_data(self):
+        print("Cleaning Earlier Dataset!")
         Product.objects.all().delete()
+        Brand.objects.all().delete()
         Category.objects.all().delete()
         ProductClass.objects.all().delete()
         ProductImage.objects.all().delete()
@@ -279,7 +282,7 @@ class Command(BaseCommand):
         return line
 
     def handle(self, *args, **kwargs):
-        if input('Do you want to clear database? Y/N : ').lower() == 'y':
+        if kwargs['clear-db']:
             self.clear_data()
         fields = [f'Attribute {i} name' for i in range(1, 9)]
         filename = kwargs['data_source_csv']
