@@ -74,7 +74,7 @@ def get_breadcrumb(_search, cat, product_range):
     if product_range:
         out.append({"title": product_range.title, "url": f"?product_range={product_range.id}"})
     if _search:
-        out.append({"title": product_range.title, "url": f"?q={_search}"})
+        out.append({"title": f"Search: {_search}", "url": f"?q={_search}"})
     return out
 
 
