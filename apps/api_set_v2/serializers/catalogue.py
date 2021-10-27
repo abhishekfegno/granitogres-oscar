@@ -77,10 +77,14 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     breadcrumb = serializers.SerializerMethodField()
 
     def get_breadcrumb(self, instance):
-        qs = instance.categories.order_by('-depth').first().get_ancestors_and_self()
+        cat = instance.categories.order_by('-depth').first()
+        if cat:
+            cats = instance.get_ancestors_and_self()
+        else:
+            cats = []
         return [
             {"title": "Home", "url": '?'},
-            *[{"title": c.name, "url": f'?category={c.slug}'} for c in qs],
+            *[{"title": c.name, "url": f'?category={c.slug}'} for c in cats],
             {"title": instance.title, "url": None},
         ]
 

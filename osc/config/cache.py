@@ -15,18 +15,18 @@ CACHES = {
     #     'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
     #     'LOCATION': '127.0.0.1:11211',
     # },
-    'localmem': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-    },
-    'db': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'my_cache_table',
-    },
-    'filebased': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache',
-    },
+    # 'localmem': {
+    #     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    #     'LOCATION': 'unique-snowflake',
+    # },
+    # 'db': {
+    #     'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+    #     'LOCATION': 'my_cache_table',
+    # },
+    # 'filebased': {
+    #     'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+    #     'LOCATION': '/tmp/django_cache',
+    # },
 }
 CACHE_MIDDLEWARE_ALIAS = 'redis'
 CACHES['default'] = CACHES[CACHE_MIDDLEWARE_ALIAS]

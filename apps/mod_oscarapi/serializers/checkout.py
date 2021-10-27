@@ -120,6 +120,7 @@ class UserAddressSerializer(CoreUserAddressSerializer):
     def create(self, validated_data):
         point = validated_data.pop('location') if 'location' in validated_data else None
         validated_data = self.get_country_instance(validated_data)
+
         instance = super(UserAddressSerializer, self).create(validated_data)
         if point and 'point' in point:
             instance.location = point['point']
