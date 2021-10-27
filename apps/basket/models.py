@@ -29,7 +29,8 @@ class Basket(AbstractBuyNowBasket):
         if not self.id:
             self.save()
 
-        # if product.
+        if product.is_parent:
+            product = product.children.all().last
 
         if quantity > settings.OSCAR_MAX_PER_LINE_QUANTITY:
             raise ValueError(
@@ -98,9 +99,9 @@ class Basket(AbstractBuyNowBasket):
     add_product.alters_data = True
     add = add_product
 
-    def clean(self, product):
-        if product.is_parent:
-            return product.children.all().last
+    # def clean(self, product):
+    #     if product.is_parent:
+    #         return product.children.all().last
 
     @property
     def sorted_recommended_products(self):
