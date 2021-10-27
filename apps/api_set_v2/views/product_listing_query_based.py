@@ -63,7 +63,10 @@ def get_breadcrumb(_search, cat, product_range):
     if cat:
         cats = cat.get_ancestors_and_self()
     else:
-        cats = ['All']
+        class C:
+            name = "All"
+            slug = "all"
+        cats = [C]
     out = [
         {"title": "Home", "url": '?'},
         *[{"title": c.name, "url": f'?category={c.slug}'} for c in cats],
