@@ -104,6 +104,7 @@ class BuyNowUpdateQuantity(APIView):
 
 class BuyNowHauzCheckoutBasketView(HauzCheckoutView):
     serializer_class = BuyNowBasketSerializer
+    basket_id = None
 
     def post(self, request, format=None, **kwargs, ):
         self.basket_id = kwargs['basket']
