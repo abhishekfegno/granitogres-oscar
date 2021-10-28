@@ -80,10 +80,10 @@ class WncLineSerializer(BasketLineSerializer):
         return
 
     def get_price_incl_tax(self, instance):
-        return math.ceil(instance.price_incl_tax)
+        return float(math.ceil(instance.price_incl_tax))
 
     def get_price_excl_tax(self, instance):
-        return math.ceil(instance.price_excl_tax)
+        return float(math.ceil(instance.price_excl_tax))
 
     class Meta:
         model = Line
