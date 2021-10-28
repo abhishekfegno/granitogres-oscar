@@ -23,6 +23,7 @@ class ProductReview(AbstractProductReview):
         max_length=255, validators=[validators.non_whitespace], null=True, blank=True)
 
     body = models.TextField(_("Body"), null=True, blank=True)
+    is_fake_review = models.BooleanField(default=False)
 
     order_line = models.ForeignKey('order.Line', related_name='review_set', null=True, on_delete=models.CASCADE)
 
