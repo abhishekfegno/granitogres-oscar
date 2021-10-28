@@ -303,16 +303,18 @@ class CheckoutView(OscarAPICheckoutView):
 
         # Save Order
         order = c_ser.save()
-        slots = TimeSlot.get_upcoming_slots()
-        if data.get('slot'):
-            for slot in slots:
-                if slot.id == data.get('slot'):
-                    order.slot = slot
-                    order.save()
-        if order.slot is None and slots:
-            order.slot = slots[0]
-            order.save()
-        slot_changed = data.get('slot') == order.slot_id
+        slot_changed = None
+        if settings.TIME_SLOT_ENABLED:
+            slots = TimeSlot.get_upcoming_slots()
+            if data.get('slot'):
+                for slot in slots:
+                    if slot.id == data.get('slot'):
+                        order.slot = slot
+                        order.save()
+            if order.slot is None and slots:
+                order.slot = slots[0]
+                order.save()
+            slot_changed = data.get('slot') == order.slot_id
         self.order_object = order
         request.session[CHECKOUT_ORDER_ID] = order.id
 

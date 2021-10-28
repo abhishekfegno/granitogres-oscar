@@ -1,16 +1,18 @@
 import datetime
-
+from django.db import models
 from dateutil.utils import today
+from django.conf import settings
 from django.contrib.gis.db.models import PointField
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db.models import Case, PositiveSmallIntegerField
 from django.db.models.signals import post_save
+from django.utils import timezone
 from django.utils.functional import cached_property, lazy
 from oscar.apps.address.abstract_models import (
     AbstractBillingAddress, AbstractShippingAddress)
 from oscar.apps.order.abstract_models import *
-
+from oscar.apps.order.abstract_models import AbstractOrder
 __all__ = ['PaymentEventQuantity', 'ShippingEventQuantity', 'Order']
 
 from oscar.models.fields import UppercaseCharField
@@ -26,7 +28,7 @@ def length_in_weeks(value):
     raise ValueError(f'day should be between 0 and 7')
 
 
-class TimeSlotConfiguration(models.Model):
+class   TimeSlotConfiguration(models.Model):
     start_time = models.TimeField(help_text="Delivery Time Starting of this slot")
     end_time = models.TimeField(help_text="(Expected) Delivery Time Ending of this slot")
     deliverable_no_of_orders = models.PositiveSmallIntegerField(help_text="No of Orders you can handle in this Slot! "
@@ -230,6 +232,8 @@ class TimeSlot(models.Model):
             curr_date = today()
         config_index = 0
         configurations = list(TimeSlotConfiguration.picked_index_config())
+        print(config_index, len(configurations))
+        # import pdb;pdb.set_trace
         while needed_slots > 0:
             config = configurations[config_index % len(configurations)]
             config_index += 1
