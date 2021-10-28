@@ -13,7 +13,6 @@ urlpatterns = [
     path('get-basket/', buy_now_get_basket, name="get-basket"),
     path('<int:basket>/checkout/', buy_now_checkout, name="checkout"),
 
-
 ]
 
 
