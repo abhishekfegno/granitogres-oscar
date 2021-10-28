@@ -25,7 +25,7 @@ class StockRecord(AbstractStockRecord):
 
     def save(self, **kwargs):
         if self.cost_price:
-            self.price_excl_tax = math.ceil(self.cost_price * 100 / (100 + self.product.tax))
+            self.price_excl_tax = float(math.ceil(self.cost_price * 100 / (100 + self.product.tax)))
 
         super(StockRecord, self).save(**kwargs)
 

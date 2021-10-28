@@ -154,10 +154,10 @@ class WncBasketSerializer(BasketSerializer):
         return get_symbol(instance.currency)
 
     def get_total_incl_tax_excl_discounts(self, instance):
-        return math.ceil(instance.total_incl_tax_excl_discounts)
+        return float(math.ceil(instance.total_incl_tax_excl_discounts))
 
     def get_total_incl_tax(self, instance):
-        return math.ceil(instance.total_incl_tax)
+        return float(math.ceil(instance.total_incl_tax))
 
     class Meta:
         model = Basket
