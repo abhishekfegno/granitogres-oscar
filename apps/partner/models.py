@@ -1,3 +1,4 @@
+import math
 from django.core.cache import cache
 from django.db.models.signals import post_save
 from django.utils.translation import gettext_lazy
@@ -24,9 +25,13 @@ class StockRecord(AbstractStockRecord):
 
     def save(self, **kwargs):
         if self.cost_price:
-            self.price_excl_tax = self.cost_price * 100 / (100 + self.product.tax)
+            self.price_excl_tax = math.ceil(self.cost_price * 100 / (100 + self.product.tax))
+
         super(StockRecord, self).save(**kwargs)
 
+    # @property
+    # def tax(self):
+    #     return math.ceil(self.product.tax)
 
 class Partner(AbstractPartner):
     pass

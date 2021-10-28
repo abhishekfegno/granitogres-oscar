@@ -1,3 +1,4 @@
+import math
 from django.conf import settings
 from oscar.apps.partner.availability import Unavailable
 from oscar.core.loading import get_model, get_class
@@ -78,6 +79,12 @@ class WncLineSerializer(BasketLineSerializer):
             return 'info'
         return
 
+    def get_price_incl_tax(self, instance):
+        return math.ceil(instance.price_incl_tax)
+
+    def get_price_excl_tax(self, instance):
+        return math.ceil(instance.price_excl_tax)
+
     class Meta:
         model = Line
 
@@ -145,6 +152,12 @@ class WncBasketSerializer(BasketSerializer):
 
     def get_currency_symbol(self, instance):
         return get_symbol(instance.currency)
+
+    def get_total_incl_tax_excl_discounts(self, instance):
+        return math.ceil(instance.total_incl_tax_excl_discounts)
+
+    def get_total_incl_tax(self, instance):
+        return math.ceil(instance.total_incl_tax)
 
     class Meta:
         model = Basket
