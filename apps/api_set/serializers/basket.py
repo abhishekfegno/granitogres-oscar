@@ -79,12 +79,11 @@ class WncLineSerializer(BasketLineSerializer):
             return 'info'
         return
 
-    def get_price_incl_tax(self):
-        print(self.price_incl_tax)
-        return math.ceil(self.price_incl_tax)
+    def get_price_incl_tax(self, instance):
+        return math.ceil(instance.price_incl_tax)
 
-    def get_price_excl_tax(self):
-        return math.ceil(self.price_excl_tax)
+    def get_price_excl_tax(self, instance):
+        return math.ceil(instance.price_excl_tax)
 
     class Meta:
         model = Line
@@ -154,9 +153,11 @@ class WncBasketSerializer(BasketSerializer):
     def get_currency_symbol(self, instance):
         return get_symbol(instance.currency)
 
-    def get_total_incl_tax(self):
-        print(self.total_incl_tax)
-        return math.ceil(self.total_incl_tax)
+    def get_total_incl_tax_excl_discounts(self, instance):
+        return math.ceil(instance.total_incl_tax_excl_discounts)
+
+    def get_total_incl_tax(self, instance):
+        return math.ceil(instance.total_incl_tax)
 
     class Meta:
         model = Basket

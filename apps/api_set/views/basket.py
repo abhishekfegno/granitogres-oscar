@@ -17,7 +17,7 @@ def get_basket(request):
     except ZeroDivisionError:
         return Response(out)
     upcoming_slots = [slot.to_dict() for slot in TimeSlot.get_upcoming_slots()]
-
+    # import pdb;pdb.set_trace()
     upcoming_slots[0]['is_next'] = True
     out["available_deliveries"] = upcoming_slots
     return Response(out)
