@@ -100,6 +100,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_gis',
+    'drf_extra_fields',
 
     'oscarapi',
     'oscarapicheckout',
