@@ -14,6 +14,13 @@ class Cash(PaymentRefundMixin, PaymentMethod):
     # Translators: Description of payment method in checkout
     name = 'Cash'
     code = 'cash'
+    __source_type_obj = None
+
+    @classmethod
+    def as_source_type(cls):
+        if cls.__source_type_obj is None:
+            cls.__source_type_obj = SourceType.objects.get_or_create(name=cls.name, code=cls.code)[0]
+        return cls.__source_type_obj
 
     def _record_payment(self, request, order, method_key, amount, reference, **kwargs):
         source = self.get_source(order, reference)

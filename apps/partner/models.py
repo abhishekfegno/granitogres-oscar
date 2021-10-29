@@ -33,6 +33,7 @@ class StockRecord(AbstractStockRecord):
     # def tax(self):
     #     return math.ceil(self.product.tax)
 
+
 class Partner(AbstractPartner):
     pass
 
