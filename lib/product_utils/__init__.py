@@ -139,14 +139,14 @@ class ClassRecommendation(object):
 
     def recommend(self, **kwargs):
         recommended_pclass = None   # to fill if in case of any secondary priority
-        if 'pclass' in kwargs:
+        if 'pclass' in kwargs and kwargs['pclass']:
             return self.render(kwargs['pclass'])
-        if 'search' in kwargs:
+        if 'search' in kwargs and kwargs['search']:
             pass
-        if 'range' in kwargs:
+        if 'range' in kwargs and kwargs['range']:
             _range = kwargs['range'].classes.all().first()
             return self.render(_range.id)
-        if 'category' in kwargs:
+        if 'category' in kwargs and kwargs['category']:
             return self.render(kwargs['category'].product_class_id)
         if 'queryset' in kwargs:
             values = kwargs['queryset'].values('id', 'product_class', 'parent__product_class')
