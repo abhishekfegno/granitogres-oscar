@@ -12,6 +12,7 @@ from apps.catalogue.models import Category, Product
 # from apps.catalogue.models import ProductReview
 from apps.catalogue.reviews.models import ProductReview, ProductReviewImage
 from apps.users.models import User
+from drf_extra_fields.fields import Base64ImageField
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -229,14 +230,14 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
 
 
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
-    image_01 = serializers.ImageField(allow_null=True, required=False)
-    image_02 = serializers.ImageField(allow_null=True, required=False)
-    image_03 = serializers.ImageField(allow_null=True, required=False)
-    image_04 = serializers.ImageField(allow_null=True, required=False)
-    image_05 = serializers.ImageField(allow_null=True, required=False)
-    image_06 = serializers.ImageField(allow_null=True, required=False)
-    image_07 = serializers.ImageField(allow_null=True, required=False)
-    image_08 = serializers.ImageField(allow_null=True, required=False)
+    image_01 = Base64ImageField(allow_null=True, required=False)
+    image_02 = Base64ImageField(allow_null=True, required=False)
+    image_03 = Base64ImageField(allow_null=True, required=False)
+    image_04 = Base64ImageField(allow_null=True, required=False)
+    image_05 = Base64ImageField(allow_null=True, required=False)
+    image_06 = Base64ImageField(allow_null=True, required=False)
+    image_07 = Base64ImageField(allow_null=True, required=False)
+    image_08 = Base64ImageField(allow_null=True, required=False)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     # product = serializers.HiddenField(allow_null=True, default=None)

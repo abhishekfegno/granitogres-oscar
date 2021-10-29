@@ -51,6 +51,7 @@ django-treebeard==4.3.1
 django-widget-tweaks==1.4.8
 djangorestframework==3.11.0
 djangorestframework-gis==0.15
+drf-extra-fields==3.1.1
 elasticsearch==7.6.0
 elasticsearch-dsl==7.1.0
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz

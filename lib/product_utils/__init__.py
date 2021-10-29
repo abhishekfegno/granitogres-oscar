@@ -172,10 +172,10 @@ def recommended_class(queryset, **kwargs):
 
     # Computation in python. Query optimization verified! average of 5-18 iterations and 8 query hits
     params = {
-        'search': kwargs['search'],
-        'range': kwargs['range'],
-        'category': kwargs["category"],
-        'pclass': kwargs['pclass'],
+        'search': kwargs.get('search'),
+        'range': kwargs.get('range'),
+        'category': kwargs.get("category"),
+        'pclass': kwargs.get('pclass'),
         'queryset': queryset
     }
     return ClassRecommendation().recommend(**params)
