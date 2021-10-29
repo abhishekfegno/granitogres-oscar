@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'apps.shipping.apps.ShippingConfig',
     'apps.rfq.apps.RfqConfig',
 
+
     'oscar.apps.analytics.apps.AnalyticsConfig',
     # 'oscar.apps.address.apps.AddressConfig',
     'oscar.apps.offer.apps.OfferConfig',

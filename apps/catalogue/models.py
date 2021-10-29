@@ -294,6 +294,8 @@ class Category(AbstractCategory):
                       null=True, max_length=255)
     exclude_in_listing = models.BooleanField(default=False)
 
+    product_class = models.ForeignKey('catalogue.ProductClass', on_delete=models.SET_NULL, null=True, blank=True)
+
     @property
     def thumbnail_web_listing(self):
         if self.image:
