@@ -85,6 +85,18 @@ def get_home_content(request):
 def index(request, *a, **k):
     cache_key = 'apps.api_set_v2.views.index?zone={}&v=0.0.9'.format
 
+    """
+        the _inner() method now has 5 slugs:
+            exclusive-products,
+            furnitures-for-your-home,
+            jumbo-offer,
+            offer-banner-x3,
+            customer-favorites
+        these slug is set on Range signal(post_save) and the cache is cleared accordingly.
+        
+        if there is a need to add more slug,add it below
+            
+    """
     def _inner():
         out = {'categories': []}
         cxt = {'context': {'request': request}}
@@ -113,7 +125,7 @@ def index(request, *a, **k):
                 'is_public': True,
             }
         )
-        jambo_offer_slug = 'furnitures-for-your-home'
+        jambo_offer_slug = 'jumbo-offer'
         jambo_offer, _created = Range.objects.get_or_create(
             slug=jambo_offer_slug,
             defaults={
