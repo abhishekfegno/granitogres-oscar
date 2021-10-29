@@ -56,6 +56,9 @@ INSTALLED_APPS = [
     'apps.availability.apps.AvailabilityConfig',
     'apps.catalogue.reviews.apps.CatalogueReviewsConfig',
     'apps.catalogue.apps.CatalogueConfig',
+
+    # 'apps.dashboard.ranges',
+    'apps.dashboard.ranges.apps.RangesDashboardConfig',
     'apps.dashboard.custom.apps.CustomConfig',
     'apps.dashboard.catalogue',
     # 'apps.dashboard.orders',
@@ -82,7 +85,7 @@ INSTALLED_APPS = [
     'oscar.apps.dashboard.offers.apps.OffersDashboardConfig',
     'oscar.apps.dashboard.partners.apps.PartnersDashboardConfig',
     'oscar.apps.dashboard.pages.apps.PagesDashboardConfig',
-    'oscar.apps.dashboard.ranges.apps.RangesDashboardConfig',
+    # 'oscar.apps.dashboard.ranges.apps.RangesDashboardConfig',
     'oscar.apps.dashboard.reviews.apps.ReviewsDashboardConfig',
     'oscar.apps.dashboard.vouchers.apps.VouchersDashboardConfig',
     'oscar.apps.dashboard.communications.apps.CommunicationsDashboardConfig',
@@ -124,9 +127,13 @@ INSTALLED_APPS = [
     'django_extensions',
     'push_notifications',
 
+
+
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+
     # BUILTINS
     'django.middleware.security.SecurityMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',
@@ -157,9 +164,8 @@ MIDDLEWARE = [
 
     # Enforced Response Modifiers
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
-    # 'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
+    'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
 
 ]
 

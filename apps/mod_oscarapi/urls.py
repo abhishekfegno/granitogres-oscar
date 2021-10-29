@@ -5,6 +5,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
+from apps.dashboard.ranges.views import RangeCreateView
 from apps.mod_oscarapi.views.basic import RangeCreate
 from apps.mod_oscarapi.views.root import api_root
 from apps.mod_oscarapi.views.validate_checkout import CheckoutValidationView
@@ -203,7 +204,7 @@ urlpatterns = [
     path("options/<int:pk>/", OptionDetail.as_view(), name="option-detail"),
     path("ranges/", RangeList.as_view(), name="range-list"),
     path("ranges/<int:pk>/", RangeDetail.as_view(), name="range-detail"),
-    path("ranges/create/", RangeCreate.as_view(), name="range-create"),
+    path("ranges/create/", RangeCreate.as_view(), name="create-range"),
     # path("categories/", CategoryList.as_view(), name="category-list"),
     path("categories/<int:pk>/", CategoryDetail.as_view(), name="category-detail"),
     re_path(

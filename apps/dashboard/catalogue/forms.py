@@ -52,5 +52,5 @@ class ProductAttributesForm(base_forms.ProductAttributesForm):
 
 CategoryForm = movenodeform_factory(
     Category,
-    fields=['name', 'description', 'image', 'icon'])
+    fields=['name', 'description', 'image', 'icon', 'product_class'])
 
