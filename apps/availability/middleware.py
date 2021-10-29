@@ -12,6 +12,7 @@ class CommonAvailabilityMiddleware(MiddlewareMixin):
         """
         getting comma separated partner_ids from cookies.
         """
+        # import pdb;pdb.set_trace()
         if not request.session.get('location') and request.user.is_authenticated:
             location = ZoneFacade.get_previous_location(request=request)
             if location:

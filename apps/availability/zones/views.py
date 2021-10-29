@@ -68,6 +68,7 @@ class SetZone(GenericAPIView):
         return Response(ZoneFacade.face(request))
 
     def post(self, request, *args, **kwargs):
+        # import pdb;pdb.set_trace()
         sobj = self.get_serializer(data=request.data)
         if not sobj.is_valid():
             out = {'error_message': "Sorry, We are unable to deliver to this location now!"}
