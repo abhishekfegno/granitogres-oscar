@@ -1,9 +1,9 @@
 from io import TextIOWrapper
 
+from django.contrib import messages
 from django.core import exceptions
 from django.utils.translation import gettext_lazy as _
 
-from django.core.checks import messages
 from django.db.models import Count
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404
