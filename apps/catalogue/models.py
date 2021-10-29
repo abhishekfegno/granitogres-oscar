@@ -12,6 +12,7 @@ from django.db.models import F
 from django.db.models.functions import Length
 from django.db.models.signals import post_save
 from django.db.transaction import atomic
+from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from oscar.apps.catalogue.abstract_models import (
     AbstractProduct, AbstractCategory, AbstractProductImage,
@@ -19,6 +20,7 @@ from oscar.apps.catalogue.abstract_models import (
 )
 from oscar.apps.catalogue.reviews.abstract_models import AbstractProductReview
 from oscar.core.loading import get_model
+from rest_framework.reverse import reverse
 from sorl.thumbnail import get_thumbnail
 
 from apps.catalogue.managers import ProductManagerSelector
@@ -188,6 +190,9 @@ class Product(AbstractProduct):
         if rating_count > 0:
             rating = float(rating_sum) / rating_count
         return rating, rating_count, review_count
+
+    def get_absolute_url_api(self):
+        return f'/product/{self.slug}/{self.pk}/'
 
     @property
     def tax_value(self) -> Decimal:
