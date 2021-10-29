@@ -238,8 +238,8 @@ def index(request, *a, **k):
                 'slug': customer_favorites.slug,
                 'content': pd(request, qs=customer_favorites.all_products(), limit=8, ),
                 'view_all': customer_favorites.slug,
-                'bg': '#fff',
-                'color': '#c4942f',
+                'bg': '#f5f6fa',
+                'color': '#555',
             },
             {
                 'model': 'social_media_posts',
