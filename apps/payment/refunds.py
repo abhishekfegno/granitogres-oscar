@@ -2,6 +2,7 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 from apps.payment.models import Source
 from apps.payment.utils import PaymentRefundMixin
+from apps.payment.utils.cash_payment import Cash
 
 
 class RefundFacade(object):
@@ -22,7 +23,9 @@ class RefundFacade(object):
             self.payment_methods.append(PaymentMethod())
 
     def get_sources_model_from_order(self, order, reference=''):
-        source, _ = Source.objects.get_or_create(order=order, defaults={'reference': reference})
+        source = Source.objects.filter(order=order).last()
+        if source is None:
+            source = Source.objects.create(order=order, reference=reference, source_type=Cash.as_source_type())
         return source
 
     def get_source_n_method(self, order, reference=None):

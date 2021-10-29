@@ -7,6 +7,7 @@ from apps.catalogue.models import Category, Product
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 from django.contrib.postgres.search import TrigramSimilarity
 
+from apps.partner.models import StockRecord
 from lib.product_utils.search import _trigram_search, _simple_search, _similarity_with_rank_search, _similarity_search
 
 ProductClass = get_model('catalogue', 'ProductClass')
@@ -113,29 +114,72 @@ def apply_sort(queryset, sort=None):
     return queryset
 
 
-def recommended_class(queryset):
-    # Computation in python. Query optimization verified! average of 5-18 iterations and 8 query hits
-    values = queryset.values('id', 'product_class', 'parent__product_class')
-    struct = {}
-    max_id = None
-    max_count = 0
-    for item in values:
-        key = item['product_class'] or item['parent__product_class']
-        if key not in struct.keys():
-            struct[key] = 1
+class ClassRecommendation(object):
+
+    def get_max_min(self, pclass=None):
+        qs = StockRecord.objects.exclude(product__structure=Product.PARENT).filter(
+            price_excl_tax__gt=0)
+        if pclass:
+            qs = qs.filter(product__product_class_id=pclass)
+        return qs.aggregate(
+            max_price=Max('price_excl_tax'),
+            min_price=Min('price_excl_tax'),
+        )
+
+    def render(self, _id, _max=0.0, _min=0.0, display_classes=False):
+        if display_classes:
+            product_classes = ProductClass.objects.all().values('id', 'name')
         else:
-            struct[key] += 1
-        if max_count <= struct[key]:
-            max_id = key
-            max_count = struct[key]
-    if len(values) and max_count * 1.0 > len(values) * 3 / 4 or settings.DEBUG:  # at least 3/4th are of same class.
+            product_classes = []
         return {
-            'id': max_id,
-            **Product.objects.filter(effective_price__isnull=False, product_class_id=max_id).aggregate(
-                max_price=Max('effective_price'),
-                min_price=Min('effective_price'),
-            )
+            'id': None,
+            **self.get_max_min(_id),
+            'product_classes': product_classes
         }
+
+    def recommend(self, **kwargs):
+        recommended_pclass = None   # to fill if in case of any secondary priority
+        if 'pclass' in kwargs:
+            return self.render(kwargs['pclass'])
+        if 'search' in kwargs:
+            pass
+        if 'range' in kwargs:
+            _range = kwargs['range'].classes.all().first()
+            return self.render(_range.id)
+        if 'category' in kwargs:
+            return self.render(kwargs['category'].product_class_id)
+        if 'queryset' in kwargs:
+            values = kwargs['queryset'].values('id', 'product_class', 'parent__product_class')
+            struct = {}
+            max_id = None
+            max_count = 0
+            for item in values:
+                key = item['product_class'] or item['parent__product_class']
+                if key not in struct.keys():
+                    struct[key] = 1
+                else:
+                    struct[key] += 1
+                if max_count <= struct[key]:
+                    max_id = key
+                    max_count = struct[key]
+            if len(values) and max_count * 2.0 > len(values) or settings.DEBUG:  # at least 3/4th are of same class.
+                return self.render(max_id)
+
+        return self.render(_id=None, display_classes=True)
+
+
+def recommended_class(queryset, **kwargs):
+
+    # Computation in python. Query optimization verified! average of 5-18 iterations and 8 query hits
+    params = {
+        'search': kwargs['search'],
+        'range': kwargs['range'],
+        'category': kwargs["category"],
+        'pclass': kwargs['pclass'],
+        'queryset': queryset
+    }
+    return ClassRecommendation().recommend(**params)
+
 
 
 

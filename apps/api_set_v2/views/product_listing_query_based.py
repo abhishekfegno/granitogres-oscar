@@ -96,6 +96,8 @@ def product_list(request, category='all', **kwargs):
     _filter = request.GET.get('filter')
     _offer_category = request.GET.get('offer_category')
     _range = request.GET.get('range')
+    _pclass = request.GET.get('pclass')
+
     page_number = int(request.GET.get('page', '1'))
     page_size = int(request.GET.get('page_size', str(settings.DEFAULT_PAGE_SIZE)))
     only_favorite = bool(request.GET.get('only_favorite', False))
@@ -155,7 +157,8 @@ def product_list(request, category='all', **kwargs):
 
         else:
             product_data = []
-        rc = recommended_class(queryset)
+        params = {'search': _search, 'range': product_range, "category": cat, "pclass": _pclass}
+        rc = recommended_class(queryset, **params)
 
         return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc, title=title,
                                   bread_crumps=get_breadcrumb(_search, cat, product_range))

@@ -23,8 +23,6 @@ from lib.cache import cache_library
 
 @api_view(['GET'])
 def get_session_id(request):
-    # import pdb;pdb.set_trace()
-    # print(request.META)
     print(request.META['REMOTE_ADDR'])
     value = ''.join(random.choices(string.ascii_lowercase+string.digits, k=50))
 
