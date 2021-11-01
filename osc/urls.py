@@ -25,6 +25,8 @@ from django.urls import path, include
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
 from rest_framework.documentation import include_docs_urls
+
+from apps.dashboard.catalogue.views import  ProductRedirectView
 from apps.mod_oscarapi.views.checkout import CheckoutView
 from django.views.i18n import JavaScriptCatalog
 
@@ -55,6 +57,8 @@ urlpatterns = [
     path('dashboard/ranges/', include('apps.dashboard.ranges.urls')),
     # https://github.com/django-oscar/django-oscar-accounts
     path('dashboard/accounts/', apps.get_app_config('accounts_dashboard').urls),
+
+    path('catalogue/<slug:slug>/', ProductRedirectView.as_view(), name='product-detail-api'),###API of product detail
 
     # path(r'dashboard/payments/cod/', include(cod_app.urls)),
 
