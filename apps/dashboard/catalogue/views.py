@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.exceptions import MultipleObjectsReturned
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_tables2 import SingleTableView
@@ -23,8 +24,10 @@ class ProductRedirectView(RedirectView):
         super().get_redirect_url(*args, **kwargs)
 
         slug = kwargs['slug']
-        # product, _ = get_object_or_404(Product, slug=slug)
-        product = Product.objects.filter(slug=slug)[0]
+        try:
+            product = get_object_or_404(Product, slug=slug)
+        except MultipleObjectsReturned:
+            product = Product.objects.filter(slug=slug)[0]
         # import pdb;pdb.set_trace()
         return product.get_absolute_url_api()
 
