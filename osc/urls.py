@@ -55,6 +55,7 @@ urlpatterns = [
     path('dashboard/logistics/', include('apps.logistics.urls')),
     path('dashboard/orders/', include('apps.order.timeslot.urls')),
     path('dashboard/ranges/', include('apps.dashboard.ranges.urls')),
+    # path('dashboard/communication/', include('apps.dashboard.communications.urls')),
     # https://github.com/django-oscar/django-oscar-accounts
     path('dashboard/accounts/', apps.get_app_config('accounts_dashboard').urls),
 

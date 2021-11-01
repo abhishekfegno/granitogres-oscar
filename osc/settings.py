@@ -63,6 +63,10 @@ INSTALLED_APPS = [
     'apps.dashboard.catalogue',
     # 'apps.dashboard.orders',
     'apps.dashboard.orders.apps.OrdersDashboardConfig',
+
+    # 'apps.dashboard.communications.apps.CommunicationsDashboardConfig',
+
+
     # 'apps.dashboard.catalogue.apps.CatalogueDashboardConfig',
     'apps.dashboard.users.apps.UsersDashboardConfig',
     'apps.checkout.apps.CheckoutConfig',

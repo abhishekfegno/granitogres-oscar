@@ -3,6 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.db import models, transaction
 from django.utils.module_loading import import_string
+from oscar.apps.dashboard.communications.views import Dispatcher
 from oscar.apps.order import processing
 from apps.payment.models import SourceType
 from oscar.core.loading import get_model
@@ -88,7 +89,24 @@ class EventHandler(processing.EventHandler):
                     )
 
             elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
-                pass
+                ######################################
+                dispatch = Dispatcher()
+                data = {
+                    'orderID': order.id,
+                    'shipping_address': order.shipping_address,
+                    'date_of_order': order.date_placed,
+                    'products': {i.id: {'image': i.product.primary_image(),
+                                        'name': i.product.name,
+                                        'quantity': i.quantity,
+                                        'price': i.product.effective_price,
+                                        'total': i.line_price_incl_tax,
+                                        } for i in order.lines.all()},
+                    'total': order.total_incl_tax,
+                }
+                msgs = data
+                email = order.email
+                dispatch.send_email_messages(email, msgs)
+                ####################################
         if hasattr(order, 'consignmentreturn'):
             if new_status == settings.ORDER_STATUS_RETURN_APPROVED:
                 order.consignmentreturn.status = order.consignmentreturn.COMPLETED
