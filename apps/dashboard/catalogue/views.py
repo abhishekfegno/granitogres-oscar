@@ -28,6 +28,12 @@ class ProductRedirectView(RedirectView):
         return product.get_absolute_url_api()
 
 
+class CatalogueRedirectView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        super().get_redirect_url(*args, **kwargs)
+        return f"/shop/"
+
+
 class ProductCreateUpdateView(CoreProductCreateUpdateView):
     form_class = ProductForm
 
