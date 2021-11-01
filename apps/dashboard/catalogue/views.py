@@ -21,9 +21,10 @@ from django.views.generic import RedirectView
 class ProductRedirectView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         super().get_redirect_url(*args, **kwargs)
-        # import pdb;pdb.set_trace()
+
         slug = kwargs['slug']
         product = get_object_or_404(Product, slug=slug)
+        import pdb;pdb.set_trace()
         return product.get_absolute_url_api()
 
 
