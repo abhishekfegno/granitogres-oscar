@@ -24,7 +24,7 @@ class ProductRedirectView(RedirectView):
 
         slug = kwargs['slug']
         product = get_object_or_404(Product, slug=slug)
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
         return product.get_absolute_url_api()
 
 
