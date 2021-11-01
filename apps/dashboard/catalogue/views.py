@@ -23,7 +23,8 @@ class ProductRedirectView(RedirectView):
         super().get_redirect_url(*args, **kwargs)
 
         slug = kwargs['slug']
-        product = get_object_or_404(Product, slug=slug)
+        # product, _ = get_object_or_404(Product, slug=slug)
+        product = Product.objects.filter(slug=slug)[0]
         # import pdb;pdb.set_trace()
         return product.get_absolute_url_api()
 
