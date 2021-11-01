@@ -45,6 +45,7 @@ class EventHandler(processing.EventHandler):
         Handle Refund and Update of Refund Quantity on `new_status` == 'Return'. 
         Refund Can be proceeded only after changing Order Status.
         """
+        dispatch = Dispatcher()
 
         if (
                 old_status not in settings.OSCAR_ORDER_REFUNDABLE_STATUS
@@ -63,6 +64,24 @@ class EventHandler(processing.EventHandler):
             lines_to_be_cancelled = all_lines.filter(status__in=get_statuses(128))
             self.cancel_stock_allocations(order, lines_to_be_cancelled)
         if hasattr(order, 'consignmentdelivery'):
+            if new_status == settings.ORDER_STATUS_PLACED:
+                ######################################       for placed
+                data = {
+                    'orderID': order.id,
+                    'shipping_address': order.shipping_address,
+                    'date_of_order': order.date_placed,
+                    'products': {i.id: {'image': i.product.primary_image(),
+                                        'name': i.product.name,
+                                        'quantity': i.quantity,
+                                        'price': i.product.effective_price,
+                                        'total': i.line_price_incl_tax,
+                                        } for i in order.lines.all()},
+                    'total': order.total_incl_tax,
+                }
+                msgs = data
+                email = order.email
+                dispatch.send_email_messages(email, msgs)
+                ####################################
             if new_status == settings.ORDER_STATUS_DELIVERED:
                 order.consignmentdelivery.status = order.consignmentdelivery.COMPLETED
                 order.consignmentdelivery.save()
@@ -90,7 +109,6 @@ class EventHandler(processing.EventHandler):
 
             elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
                 ######################################
-                dispatch = Dispatcher()
                 data = {
                     'orderID': order.id,
                     'shipping_address': order.shipping_address,
