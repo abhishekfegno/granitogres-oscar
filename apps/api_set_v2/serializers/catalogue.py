@@ -239,18 +239,19 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
     image_07 = Base64ImageField(allow_null=True, required=False)
     image_08 = Base64ImageField(allow_null=True, required=False)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    score = serializers.IntegerField(min_value=1, max_value=5)
 
     # product = serializers.HiddenField(allow_null=True, default=None)
 
     def take_images(self, validated_data):
-        self._image_01 = validated_data.pop('image_01')
-        self._image_02 = validated_data.pop('image_02')
-        self._image_03 = validated_data.pop('image_03')
-        self._image_04 = validated_data.pop('image_04')
-        self._image_05 = validated_data.pop('image_05')
-        self._image_06 = validated_data.pop('image_06')
-        self._image_07 = validated_data.pop('image_07')
-        self._image_08 = validated_data.pop('image_08')
+        self._image_01 = validated_data.pop('image_01') if 'image_01' in validated_data else None
+        self._image_02 = validated_data.pop('image_02') if 'image_02' in validated_data else None
+        self._image_03 = validated_data.pop('image_03') if 'image_03' in validated_data else None
+        self._image_04 = validated_data.pop('image_04') if 'image_04' in validated_data else None
+        self._image_05 = validated_data.pop('image_05') if 'image_05' in validated_data else None
+        self._image_06 = validated_data.pop('image_06') if 'image_06' in validated_data else None
+        self._image_07 = validated_data.pop('image_07') if 'image_07' in validated_data else None
+        self._image_08 = validated_data.pop('image_08') if 'image_08' in validated_data else None
         return validated_data
 
     def create(self, validated_data):
@@ -292,6 +293,9 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
             review_images.append(ProductReviewImage(review=product, original=self._image_08, display_order=7))
         if review_images:
             print("reviewing_images")
+
+    def validate_score(self, score):
+        return score
 
     def validate(self, attrs):
         if attrs['order_line'].order.user != attrs['user']:
