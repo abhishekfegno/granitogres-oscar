@@ -3,7 +3,6 @@ from typing import Any
 from django.conf import settings
 from django.db import models, transaction
 from django.utils.module_loading import import_string
-from oscar.apps.dashboard.communications.views import Dispatcher
 from oscar.apps.order import processing
 from apps.payment.models import SourceType
 from oscar.core.loading import get_model
@@ -12,6 +11,7 @@ from .models import Order, PaymentEventType
 from ..payment import refunds
 from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
+from ..utils.email_notifications import EmailNotification, Dispatcher
 from ..utils.pushnotifications import OrderStatusPushNotification, PushNotification
 from ..utils.utils import get_statuses
 
@@ -46,7 +46,7 @@ class EventHandler(processing.EventHandler):
         Refund Can be proceeded only after changing Order Status.
         """
         dispatch = Dispatcher()
-
+        mail = EmailNotification()
         if (
                 old_status not in settings.OSCAR_ORDER_REFUNDABLE_STATUS
                 and
@@ -66,20 +66,7 @@ class EventHandler(processing.EventHandler):
         if hasattr(order, 'consignmentdelivery'):
             if new_status == settings.ORDER_STATUS_PLACED:
                 ######################################       for placed
-                data = {
-                    'orderID': order.id,
-                    'shipping_address': order.shipping_address,
-                    'date_of_order': order.date_placed,
-                    'products': {i.id: {'image': i.product.primary_image(),
-                                        'name': i.product.name,
-                                        'quantity': i.quantity,
-                                        'price': i.product.effective_price,
-                                        'total': i.line_price_incl_tax,
-                                        } for i in order.lines.all()},
-                    'total': order.total_incl_tax,
-                }
-                msgs = data
-                email = order.email
+                email, msgs = mail.get_mail_format(order)
                 dispatch.send_email_messages(email, msgs)
                 ####################################
             if new_status == settings.ORDER_STATUS_DELIVERED:
@@ -109,20 +96,7 @@ class EventHandler(processing.EventHandler):
 
             elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
                 ######################################
-                data = {
-                    'orderID': order.id,
-                    'shipping_address': order.shipping_address,
-                    'date_of_order': order.date_placed,
-                    'products': {i.id: {'image': i.product.primary_image(),
-                                        'name': i.product.name,
-                                        'quantity': i.quantity,
-                                        'price': i.product.effective_price,
-                                        'total': i.line_price_incl_tax,
-                                        } for i in order.lines.all()},
-                    'total': order.total_incl_tax,
-                }
-                msgs = data
-                email = order.email
+                email, msgs = mail.get_mail_format(order)
                 dispatch.send_email_messages(email, msgs)
                 ####################################
         if hasattr(order, 'consignmentreturn'):
