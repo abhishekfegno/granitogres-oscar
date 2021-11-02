@@ -3,6 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.db import models, transaction
 from django.utils.module_loading import import_string
+from oscar.apps.customer.alerts.utils import Dispatcher
 from oscar.apps.order import processing
 from apps.payment.models import SourceType
 from oscar.core.loading import get_model
@@ -11,7 +12,7 @@ from .models import Order, PaymentEventType
 from ..payment import refunds
 from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
-from ..utils.email_notifications import EmailNotification, Dispatcher
+from ..utils.email_notifications import EmailNotification
 from ..utils.pushnotifications import OrderStatusPushNotification, PushNotification
 from ..utils.utils import get_statuses
 
