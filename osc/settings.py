@@ -115,7 +115,7 @@ INSTALLED_APPS = [
     # third PArty
     'floppyforms',
     'colorfield',
-    # 'cashondelivery',
+    'taggit',
 
     #CORS
     'corsheaders',

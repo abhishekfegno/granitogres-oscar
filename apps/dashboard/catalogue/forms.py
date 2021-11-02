@@ -36,7 +36,8 @@ class ProductForm(base_forms.ProductForm):
             'title', 'upc', 'description', 'is_public', 'is_discountable', 'structure',
             'tax', 'brand', 'other_product_info',
             'weight', 'length', 'width', 'height',
-            'crossselling'
+            'crossselling',
+            'search_tags', 'seo_title', 'seo_description', 'seo_keywords',
         ]
         widgets = {
             'structure': forms.HiddenInput()
