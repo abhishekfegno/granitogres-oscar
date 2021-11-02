@@ -239,6 +239,7 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
     image_07 = Base64ImageField(allow_null=True, required=False)
     image_08 = Base64ImageField(allow_null=True, required=False)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    score = serializers.IntegerField(min_value=1, max_value=5)
 
     # product = serializers.HiddenField(allow_null=True, default=None)
 
@@ -292,6 +293,9 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
             review_images.append(ProductReviewImage(review=product, original=self._image_08, display_order=7))
         if review_images:
             print("reviewing_images")
+
+    def validate_score(self, score):
+        return score
 
     def validate(self, attrs):
         if attrs['order_line'].order.user != attrs['user']:

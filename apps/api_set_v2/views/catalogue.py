@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404, CreateAPIView, ListAPIView, UpdateAPIView, DestroyAPIView, \
     RetrieveUpdateAPIView
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 
 from apps.api_set.views.orders import _login_required
@@ -97,14 +97,18 @@ class ProductReviewListView(ListAPIView):
 class ProductReviewCreateView(CreateAPIView):
     serializer_class = ProductReviewCreateSerializer
     queryset = ProductReview.objects.all()
-    parser_classes = [MultiPartParser, FormParser, ]
+    parser_classes = [JSONParser, MultiPartParser, FormParser, ]
+    
+    def post(self, request, *args, **kwargs):
+        # import pdb; pdb.set_trace()
+        return super(ProductReviewCreateView, self).post(request, *args, **kwargs)
 
 
 class ProductReviewUpdateView(RetrieveUpdateAPIView):
     serializer_class = ProductReviewCreateSerializer
     queryset = ProductReview.objects.all()
     lookup_url_kwarg = 'review_pk'
-    parser_classes = [MultiPartParser, FormParser, ]
+    parser_classes = [JSONParser, MultiPartParser, FormParser, ]
 
     # def check_object_permissions(self, request, obj):
     #     if request.user.is_anonymous or obj.user != request.user:

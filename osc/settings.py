@@ -243,7 +243,7 @@ from .config.sms import *                   # noqa: F401,F404
 from .config.static import *                # noqa: F401,F404
 from .config.templates import *             # noqa: F401,F404
 
-
+DATA_UPLOAD_MAX_MEMORY_SIZE = 62914560  # 60MB
 
 """
 Email : grocery@gmail.com
