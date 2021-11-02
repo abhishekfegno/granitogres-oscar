@@ -72,6 +72,13 @@ OSCAR_INITIAL_LINE_STATUS = ORDER_STATUS_PENDING
 
 admin_or_staff = lambda user, url_name, url_args, url_kwargs: user.is_staff or user.is_superuser
 
+OSCAR_ORDER_STATUS_UNTIL_DELIVER = [
+    (1, ORDER_STATUS_PLACED),
+    (2, ORDER_STATUS_CONFIRMED),
+    (3, ORDER_STATUS_OUT_FOR_DELIVERY),
+    (4, ORDER_STATUS_DELIVERED),
+]
+
 OSCAR_ORDER_STATUS_PIPELINE = {
 
     # 'Pending': ('Order Confirmed', 'Canceled', 'Pending', 'Payment Declined'),
