@@ -240,6 +240,10 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
     image_08 = Base64ImageField(allow_null=True, required=False)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     score = serializers.IntegerField(min_value=1, max_value=5)
+    images = serializers.SerializerMethodField()
+
+    def get_images(self, instance):
+        return ProductReviewImageSerializer(instance.images.all(), many=True, context=self.context).data
 
     # product = serializers.HiddenField(allow_null=True, default=None)
 
@@ -261,31 +265,35 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
             validated_data['product'] = validated_data['order_line'].product
 
         # validated_data['user'] = User.objects.all().last()
-        product = super().create(validated_data)
-        self.save_images(product)
-        return product
+        self.instance = super().create(validated_data)
+        self.save_images(self.instance)
+        return self.instance
 
     def update(self, instance, validated_data):
         self.take_images(validated_data)
-        product = super().update(instance, validated_data)
-        self.save_images(product)
-        return product
+        self.instance = super().update(instance, validated_data)
+        self.save_images(self.instance)
+        return self.instance
 
     def save_images(self, product):
         review_images = []
         if self._image_01:
             print("adding image 1")
             pri = ProductReviewImage.objects.create(review=product, original=self._image_01, display_order=0)
-            print(pri.id)
         if self._image_02:
+            print("adding image 2")
             review_images.append(ProductReviewImage(review=product, original=self._image_02, display_order=1))
         if self._image_03:
+            print("adding image 3")
             review_images.append(ProductReviewImage(review=product, original=self._image_03, display_order=2))
         if self._image_04:
+            print("adding image 4")
             review_images.append(ProductReviewImage(review=product, original=self._image_04, display_order=3))
         if self._image_05:
+            print("adding image 5")
             review_images.append(ProductReviewImage(review=product, original=self._image_05, display_order=4))
         if self._image_06:
+            print("adding image 6")
             review_images.append(ProductReviewImage(review=product, original=self._image_06, display_order=5))
         if self._image_07:
             review_images.append(ProductReviewImage(review=product, original=self._image_07, display_order=6))
@@ -293,6 +301,7 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
             review_images.append(ProductReviewImage(review=product, original=self._image_08, display_order=7))
         if review_images:
             print("reviewing_images")
+            pr = ProductReviewImage.objects.bulk_create(review_images, ignore_conflicts=True)
 
     def validate_score(self, score):
         return score
@@ -309,5 +318,5 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductReview
-        fields = ('id', 'score', 'title', 'body', 'user', 'order_line', 'product',
+        fields = ('id', 'score', 'title', 'body', 'user', 'order_line', 'product', 'images',
                   "image_01", 'image_02', 'image_03', 'image_04', 'image_05', 'image_06', 'image_07', 'image_08',)
