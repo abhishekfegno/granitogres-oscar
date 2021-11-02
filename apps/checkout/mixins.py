@@ -9,12 +9,7 @@ class OrderPlacementMixin(CoreOrderPlacementMixin):
                     'orderID': order.id,
                     'shipping_address': order.shipping_address,
                     'date_of_order': order.date_placed,
-                    'products': {i.id: {'image': i.product.primary_image(),
-                                        'name': i.product.name,
-                                        'quantity': i.quantity,
-                                        'price': i.product.effective_price,
-                                        'total': i.line_price_incl_tax,
-                                        } for i in order.lines.all()},
+                    'products': order.lines.all,
                     'total': order.total_incl_tax,
                 }
         return ctx

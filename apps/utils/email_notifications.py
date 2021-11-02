@@ -1,9 +1,13 @@
+import os
+
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, EmailMessage
+from django.template.loader import render_to_string
 from oscar.apps.customer.models import Email
 from oscar.core import logging
 
 from apps.order.models import CommunicationEvent
+from osc.config.base_dir import BASE_DIR
 
 
 class EmailNotification:
@@ -12,16 +16,15 @@ class EmailNotification:
 
     def get_mail_format(self, order):
         data = {
+                'subject': order.status,
+                'body': {
                     'orderID': order.id,
                     'shipping_address': order.shipping_address,
                     'date_of_order': order.date_placed,
-                    'products': {i.id: {'image': i.product.primary_image(),
-                                        'name': i.product.name,
-                                        'quantity': i.quantity,
-                                        'price': i.product.effective_price,
-                                        'total': i.line_price_incl_tax,
-                                        } for i in order.lines.all()},
+                    'products': order.lines.all,
                     'total': order.total_incl_tax,
+                    },
+                'html': render_to_string(os.path.join(BASE_DIR, '/oscar/customer/emails/index.html'), context={'order': order})
                 }
         msgs = data
         email = order.email

@@ -68,7 +68,7 @@ class EventHandler(processing.EventHandler):
             if new_status == settings.ORDER_STATUS_PLACED:
                 ######################################       for placed
                 email, msgs = mail.get_mail_format(order)
-                dispatch.send_email_messages(email, msgs)
+                dispatch.send_email_messages(order.email, msgs)
                 ####################################
             if new_status == settings.ORDER_STATUS_DELIVERED:
                 order.consignmentdelivery.status = order.consignmentdelivery.COMPLETED
@@ -98,7 +98,7 @@ class EventHandler(processing.EventHandler):
             elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
                 ######################################
                 email, msgs = mail.get_mail_format(order)
-                dispatch.send_email_messages(email, msgs)
+                dispatch.send_email_messages(order.email, msgs)
                 ####################################
         if hasattr(order, 'consignmentreturn'):
             if new_status == settings.ORDER_STATUS_RETURN_APPROVED:

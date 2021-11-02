@@ -1,27 +1,6 @@
 {% extends 'oscar/customer/emails/base.html' %}
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--  <head>-->
-<!--    <meta charset="UTF-8" />-->
-<!--    <meta http-equiv="X-UA-Compatible" content="IE=edge" />-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0" />-->
-<!--    <title>ABCHAUZ</title>-->
-<!--    <style>-->
-<!--        body{-->
-<!--            font-size: large;-->
-<!--        }-->
-<!--      .wrapper {-->
-<!--        width: 600px;-->
-<!--        margin: auto;-->
-<!--      }-->
-<!--      th {-->
-<!--        text-align: left;-->
-<!--      }-->
-<!--      .product_table img{-->
-<!--          max-width: 50px;-->
-<!--      }-->
-<!--    </style>-->
-<!--  </head>-->
+{% load currency_filters i18n %}
+
   {% block body %}
   <body>
     <div class="wrapper">
@@ -29,7 +8,7 @@
         <tbody>
           <tr>
             <td>
-              <img src="header.png" width="100%; margin:0;" />
+              <img src="{{ STATIC_URL }}/header.png" width="100%; margin:0;" />
             </td>
           </tr>
           <tr>
@@ -85,7 +64,7 @@
                 <tbody>
                 {% for line in order.lines.all %}
                   <tr>
-                    <td><img src="https://picsum.photos/100" /></td>
+                    <td><img src="{{ line.product.primary_image() }}" /></td>
                     <td>{{ line.title }}</td>
                     <td>{{ line.quantity }}</td>
                     <td> {{ line.unit_price_incl_tax }}</td>
@@ -125,7 +104,7 @@
           </tr>
           <tr>
               <td>
-                  <img src="footer.png" style="width: 100%;"/>
+                  <img src="{{ STATIC_URL }}/footer.png" style="width: 100%;"/>
               </td>
           </tr>
         </tbody>
