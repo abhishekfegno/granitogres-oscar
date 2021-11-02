@@ -57,6 +57,7 @@ class DeliverabilityCheckSerializer(ZonalDataSerializer):
         pass
 
     def create(self, validated_data):
+        # import pdb;pdb.set_trace()
         if settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION:
             key = 'point'
         elif settings.LOCATION_FETCHING_MODE == settings.PINCODE:

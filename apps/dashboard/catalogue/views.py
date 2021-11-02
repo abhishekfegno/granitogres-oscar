@@ -1,4 +1,6 @@
 from django.contrib import messages
+from django.core.exceptions import MultipleObjectsReturned
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_tables2 import SingleTableView
 from oscar.apps.dashboard.catalogue.views import (
@@ -6,7 +8,7 @@ from oscar.apps.dashboard.catalogue.views import (
     ProductClassCreateView as CoreProductClassCreateView,
     ProductClassUpdateView as CoreProductClassUpdateView,
     CategoryUpdateView as CoreCategoryUpdateView,
-    CategoryCreateView as CoreCategoryCreateView, CategoryListMixin,
+    CategoryCreateView as CoreCategoryCreateView, CategoryListMixin, Product,
 )
 from django.views import generic
 
@@ -14,6 +16,26 @@ from apps.catalogue.models import Brand
 from apps.dashboard.catalogue.forms import ProductForm, CategoryForm
 from apps.dashboard.catalogue.formset import ProductAttributesFormSet
 from apps.dashboard.catalogue.tables import BrandTable
+from django.views.generic import RedirectView
+
+
+class ProductRedirectView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        super().get_redirect_url(*args, **kwargs)
+
+        slug = kwargs['slug']
+        try:
+            product = get_object_or_404(Product, slug=slug)
+        except MultipleObjectsReturned:
+            product = Product.objects.filter(slug=slug)[0]
+        # import pdb;pdb.set_trace()
+        return product.get_absolute_url_api()
+
+
+class CatalogueRedirectView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        super().get_redirect_url(*args, **kwargs)
+        return f"/shop/"
 
 
 class ProductCreateUpdateView(CoreProductCreateUpdateView):

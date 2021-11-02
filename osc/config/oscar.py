@@ -142,6 +142,7 @@ OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_AFTER_DELIVERY = (
     ('Returned', 'Returned'),
 )
 
+OSCAR_HOMEPAGE = '/'
 # Menu structure of the dashboard navigation
 
 OSCAR_DASHBOARD_NAVIGATION = [
