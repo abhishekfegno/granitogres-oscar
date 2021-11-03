@@ -131,7 +131,6 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             "seo_title",
             "seo_description",
             "seo_keywords",
-            "search_tags",
             "structure",
             "recommended_products",
             "attributes",
