@@ -1,4 +1,5 @@
 from django.views.decorators.cache import never_cache
+from django.views.generic import RedirectView
 
 from apps.api_set.urls import *
 from django.urls import path, include
@@ -79,6 +80,7 @@ catalogue_urlpatterns = [
         path("d/<slug:product>/mark_as_fav/", mark_as_fav, name="wnc-category-product-mark_as_fav-v2"),  # detail
         path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),                                 # filter
         path("suggestions/", product_suggestions, name="wnc-product-suggestions"),                       # category
+        path('reviews-detail/', RedirectView.as_view(url='/'), name="reviews-detail"),
     ]))
 ]
 
