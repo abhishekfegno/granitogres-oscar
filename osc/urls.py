@@ -41,7 +41,6 @@ view_checkout = never_cache(CheckoutView.as_view())
 
 @api_view()
 def policy_html(request, path):
-    print(path)
     flatpage = get_object_or_404(FlatPage.objects.filter(), url=path)
     return Response({
         'title': flatpage.title,
@@ -91,7 +90,7 @@ urlpatterns = [
 
     path('api/v2/push/', include('apps.utils.push_urls')),
     path('api/v1/push/', include('apps.utils.push_urls')),
-    path('api/v1/policies<path:path>', policy_html, name="policies"),
+    path('api/v2/policies<path:path>', policy_html, name="policies"),
     path('', include('apps.users.urls')),
     path('', include('apps.dashboard.custom.urls')),
     path('', include(apps.get_app_config('oscar').urls[0])),  # > Django-2.0
