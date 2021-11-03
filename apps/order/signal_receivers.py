@@ -12,24 +12,7 @@ def order_status_changed__receiver(order, old_status, new_status, **kwargs):
     """ Make line status "Delivered" on  Order become "Delivered" """
     if new_status == settings.ORDER_STATUS_DELIVERED:
         Order.objects.filter(pk=order.pk).update(date_delivered=datetime.now())
-        order = Order.objects.filter(pk=order.pk)
-        email = order.email
 
-        dispatch = Dispatcher()
-        order = {
-            'orderID': order.id,
-            'shipping_address': order.shipping_address,
-            'date_of_order': order.date_placed,
-            'products': {i.id: {'image': i.product.primary_image(),
-                                'name': i.product.name,
-                                'quantity': i.quantity,
-                                'price': i.product.effective_price,
-                                'total': i.line_price_incl_tax,
-                                } for i in order.lines.all()},
-            'total': order.total_incl_tax,
-        }
-        msgs = order
-        dispatch.send_email_messages(email, msgs)
 
 
 @receiver(order_line_status_changed)
