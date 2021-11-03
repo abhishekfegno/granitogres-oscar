@@ -3,10 +3,7 @@ import os
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, EmailMessage
 from django.template.loader import render_to_string
-from oscar.apps.customer.models import Email
-from oscar.core import logging
 
-from apps.order.models import CommunicationEvent
 from osc.config.base_dir import BASE_DIR
 
 
@@ -14,8 +11,8 @@ class EmailNotification:
 
     USER_TYPE = (settings.CUSTOMER, settings.DELIVERY_BOY, )
 
-    def get_mail_format(self, order):
-        data = {
+    def get_mail_format_and_send(self, order):
+        messages = {
                 'subject': order.status,
                 'body': {
                     'orderID': order.id,
@@ -26,9 +23,15 @@ class EmailNotification:
                     },
                 'html': render_to_string('/oscar/customer/emails/index.html', context={'order': order})
                 }
-        msgs = data
-        email = order.email
-        return email, msgs
+
+        from_email = settings.OSCAR_FROM_EMAIL
+        recipient = order.email
+        email = EmailMultiAlternatives(messages['subject'],
+                                       messages['body'],
+                                       from_email=from_email,
+                                       to=[recipient])
+        email.attach_alternative(messages['html'], "text/html")
+        return email
 
 
 OSCAR_ORDER_STATUS_CHANGE_MESSAGE = {
