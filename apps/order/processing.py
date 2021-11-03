@@ -80,7 +80,7 @@ class EventHandler(processing.EventHandler):
             """
             order_code = f"order__{new_status.lower().replace(' ', '_')}"
             opm = OrderPlacementMixin()
-            opm.kwargs['request'] =setattr(self, 'request', None)
+            opm.request = setattr(self, 'request', None)
             opm.send_confirmation_message(order, order_code)
 
         if hasattr(order, 'consignmentdelivery'):

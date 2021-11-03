@@ -17,13 +17,15 @@
     <div class="wrapper">
       <table class="outer body" style="width: 100%; font-family: sans-serif;" role="presentation" border="0" cellpadding="0" cellspacing="0" >
         <tbody>
-        {% block tbody %}
-
-          <tr>
+        <tr>
             <td>
               <img src="{{ settings.OSCAR_DOMAIN_NAME }}/{{ STATIC_URL }}/assets/email/header.png" width="100%; margin:0;" />
             </td>
           </tr>
+        {% block tbody %}
+
+          <tbody>
+
           <tr>
             <td>
               {% block header_01 %}
@@ -84,34 +86,7 @@
                     <td>1000</td>
                     <td>2000</td>
                   </tr>
-                  <tr>
-                    <td><img src="https://picsum.photos/200" /></td>
-                    <td>Testing Product</td>
-                    <td>2</td>
-                    <td>1000</td>
-                    <td>2000</td>
-                  </tr>
-                  <tr>
-                    <td><img src="https://picsum.photos/150" /></td>
-                    <td>Testing Product</td>
-                    <td>2</td>
-                    <td>1000</td>
-                    <td>2000</td>
-                  </tr>
-                  <tr>
-                    <td><img src="https://picsum.photos/250" /></td>
-                    <td>Testing Product</td>
-                    <td>2</td>
-                    <td>1000</td>
-                    <td>2000</td>
-                  </tr>
-                  <tr>
-                    <td><img src="https://picsum.photos/350" /></td>
-                    <td>Testing Product</td>
-                    <td>2</td>
-                    <td>1000</td>
-                    <td>2000</td>
-                  </tr>
+
                   <tr style="margin: 10px 0 20px 0">
                     <td colspan="3" style="font-weight: 700; font-size: large">
                       Total
@@ -144,13 +119,22 @@
               </table>
             </td>
           </tr>
-          <tr>
+
+      </tbody>
+
+        {% endblock %}
+        {% if status_url %}
+            <tr>
+                <td class="content-block">
+                    {% blocktrans %}You can view the status of this order by clicking <a href="{{ status_url }}" title="order status">here</a>{% endblocktrans %}
+                </td>
+            </tr>
+        {% endif %}
+        <tr>
               <td>
                   <img src="{{ settings.OSCAR_DOMAIN_NAME }}{{ STATIC_URL }}assets/email/footer.png" style="width: 100%;"/>
               </td>
           </tr>
-
-        {% endblock %}
         </tbody>
       </table>
     </div>
