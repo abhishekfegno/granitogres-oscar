@@ -24,7 +24,7 @@ class EmailNotification:
                     'products': order.lines.all,
                     'total': order.total_incl_tax,
                     },
-                'html': render_to_string(os.path.join(BASE_DIR, '/oscar/customer/emails/index.html'), context={'order': order})
+                'html': render_to_string('/oscar/customer/emails/index.html', context={'order': order})
                 }
         msgs = data
         email = order.email
