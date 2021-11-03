@@ -67,24 +67,23 @@ class EventHandler(processing.EventHandler):
         if hasattr(order, 'consignmentdelivery'):
             if new_status == settings.ORDER_STATUS_PLACED:
                 ######################################       for placed
-                email, msgs = mail.get_mail_format(order)
-                # order = Order.objects.filter(pk=order.pk)
-                # email = order.email
+                # email, msgs = mail.get_mail_format(order)
+                order = Order.objects.filter(pk=order.pk)
+                email = order.email
 
-                # dispatch = Dispatcher()
-                # order = {
-                #     'orderID': order.id,
-                #     'shipping_address': order.shipping_address,
-                #     'date_of_order': order.date_placed,
-                #     'products': {i.id: {'image': i.product.primary_image(),
-                #                         'name': i.product.name,
-                #                         'quantity': i.quantity,
-                #                         'price': i.product.effective_price,
-                #                         'total': i.line_price_incl_tax,
-                #                         } for i in order.lines.all()},
-                #     'total': order.total_incl_tax,
-                # }
-                # msgs = order
+                data = {
+                    'orderID': order.id,
+                    'shipping_address': order.shipping_address,
+                    'date_of_order': order.date_placed,
+                    'products': {i.id: {'image': i.product.primary_image(),
+                                        'name': i.product.name,
+                                        'quantity': i.quantity,
+                                        'price': i.product.effective_price,
+                                        'total': i.line_price_incl_tax,
+                                        } for i in order.lines.all()},
+                    'total': order.total_incl_tax,
+                }
+                msgs = data
                 dispatch.send_email_messages(email, msgs)
                 ####################################
             if new_status == settings.ORDER_STATUS_DELIVERED:
@@ -114,23 +113,23 @@ class EventHandler(processing.EventHandler):
 
             elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
                 ######################################
-                email, msgs = mail.get_mail_format(order)
-                # email = order.email
+                # email, msgs = mail.get_mail_format(order)
+                order = Order.objects.filter(pk=order.pk)
+                email = order.email
 
-                # dispatch = Dispatcher()
-                # order = {
-                #     'orderID': order.id,
-                #     'shipping_address': order.shipping_address,
-                #     'date_of_order': order.date_placed,
-                #     'products': {i.id: {'image': i.product.primary_image(),
-                #                         'name': i.product.name,
-                #                         'quantity': i.quantity,
-                #                         'price': i.product.effective_price,
-                #                         'total': i.line_price_incl_tax,
-                #                         } for i in order.lines.all()},
-                #     'total': order.total_incl_tax,
-                # }
-                # msgs = order
+                data = {
+                    'orderID': order.id,
+                    'shipping_address': order.shipping_address,
+                    'date_of_order': order.date_placed,
+                    'products': {i.id: {'image': i.product.primary_image(),
+                                        'name': i.product.name,
+                                        'quantity': i.quantity,
+                                        'price': i.product.effective_price,
+                                        'total': i.line_price_incl_tax,
+                                        } for i in order.lines.all()},
+                    'total': order.total_incl_tax,
+                }
+                msgs = data
                 dispatch.send_email_messages(email, msgs)
                 ####################################
         if hasattr(order, 'consignmentreturn'):
