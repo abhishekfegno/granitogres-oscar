@@ -295,10 +295,10 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 'url_name': 'dashboard-custom:dashboard-return-reason-list',
                 'access_fn': admin_or_staff,
             },
-            # {
-            #     'label': _('Email templates'),
-            #     'url_name': 'dashboard:comms-list',
-            # },
+            {
+                'label': _('Email templates'),
+                'url_name': 'dashboard:comms-list',
+            },
             {
                 'label': _('Reviews'),
                 'url_name': 'dashboard:reviews-list',

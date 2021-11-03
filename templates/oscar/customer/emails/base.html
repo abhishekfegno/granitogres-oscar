@@ -12,10 +12,12 @@
     </style>
   </head>
   <body>
-    <span class="preheader">This is preheader text. Some clients will show this text as a preview.</span>
+    <span class="preheader">You have received new email from ABCHAUZ.COM.</span>
     <div class="wrapper">
       <table class="outer body" style="width: 100%; font-family: sans-serif;" role="presentation" border="0" cellpadding="0" cellspacing="0" >
         <tbody>
+        {% block tbody %}
+<!--
           <tr>
             <td>
               <img src="header.png" width="100%; margin:0;" />
@@ -23,6 +25,7 @@
           </tr>
           <tr>
             <td>
+              {% block header_01 %}
               <table style="width: 100%; margin: 10px 0">
                 <tbody>
                   <tr>
@@ -31,6 +34,7 @@
                   </tr>
                 </tbody>
               </table>
+              {% endblock %}
             </td>
           </tr>
           <tr>
@@ -144,6 +148,8 @@
                   <img src="footer.png" style="width: 100%;"/>
               </td>
           </tr>
+-->
+        {% endblock %}
         </tbody>
       </table>
     </div>

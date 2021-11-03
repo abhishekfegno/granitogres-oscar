@@ -3,6 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.db import models, transaction
 from django.utils.module_loading import import_string
+from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.apps.customer.alerts.utils import Dispatcher
 from oscar.apps.order import processing
 from apps.payment.models import SourceType
@@ -46,8 +47,6 @@ class EventHandler(processing.EventHandler):
         Handle Refund and Update of Refund Quantity on `new_status` == 'Return'. 
         Refund Can be proceeded only after changing Order Status.
         """
-        dispatch = Dispatcher()
-        mail = EmailNotification()
         if (
                 old_status not in settings.OSCAR_ORDER_REFUNDABLE_STATUS
                 and
@@ -64,6 +63,23 @@ class EventHandler(processing.EventHandler):
         elif new_status in get_statuses(128):
             lines_to_be_cancelled = all_lines.filter(status__in=get_statuses(128))
             self.cancel_stock_allocations(order, lines_to_be_cancelled)
+
+        if new_status in settings.OSCAR_SEND_EMAIL_ORDER_STATUS:
+            """
+            documentatiomn: how we process the logic.
+            concidering the order status ; we create a code such that
+            
+            order__placed for "Placed Status", order__order_confirmed for "Order Confirmed" Status etc...
+            we need to place 
+            * 'templates/oscar/customer/emails/commtype_<order_code>_subject.txt'
+            * 'templates/oscar/customer/emails/commtype_<order_code>_subject.txt'
+            * 'templates/oscar/customer/emails/commtype_<order_code>_body.html'
+            * 'templates/oscar/customer/sms/commtype_<order_code>_body.txt'
+            
+            files for each status to work with this logic.
+            """
+            order_code = f"order__{new_status.lower().replace(' ', '_')}"
+            OrderPlacementMixin().send_confirmation_message(order, order_code)
 
         if hasattr(order, 'consignmentdelivery'):
             if new_status == settings.ORDER_STATUS_DELIVERED:

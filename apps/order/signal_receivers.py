@@ -12,7 +12,6 @@ def order_status_changed__receiver(order, old_status, new_status, **kwargs):
         Order.objects.filter(pk=order.pk).update(date_delivered=datetime.now())
 
 
-
 @receiver(order_line_status_changed)
 def order_line_status_changed__receiver_for_refund(line, old_status, new_status, **kwargs):
     pass
