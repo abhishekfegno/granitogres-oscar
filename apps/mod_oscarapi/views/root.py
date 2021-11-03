@@ -11,6 +11,11 @@ from rest_framework.reverse import reverse
 def PUBLIC_APIS(r, f):
     return [
         ("configuration", reverse('api-v2--configuration', request=r, format=f)),
+        ("Policies", collections.OrderedDict([
+            ("Privacy Policy", r.build_absolute_uri("/api/v1/policies/pages/legal/privacy-policy/")),
+            ("Return Policy", r.build_absolute_uri("/api/v1/policies/pages/legal/return-policy/")),
+            ("Terms and Conditions", r.build_absolute_uri("/api/v1/policies/pages/legal/terms-and-conditions/")),
+        ])),
         ("Authorization", collections.OrderedDict([
             ("Send OTP", reverse("api-v1--send-otp", request=r, format=f)),
             ("Resend OTP", reverse("api-v1--resend-otp", request=r, format=f)),

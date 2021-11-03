@@ -64,29 +64,8 @@ class EventHandler(processing.EventHandler):
         elif new_status in get_statuses(128):
             lines_to_be_cancelled = all_lines.filter(status__in=get_statuses(128))
             self.cancel_stock_allocations(order, lines_to_be_cancelled)
-        if hasattr(order, 'consignmentdelivery'):
-            if new_status == settings.ORDER_STATUS_PLACED:
-                ######################################       for placed
-                email, msgs = mail.get_mail_format(order)
-                # order = Order.objects.filter(pk=order.pk)
-                # email = order.email
 
-                # dispatch = Dispatcher()
-                # order = {
-                #     'orderID': order.id,
-                #     'shipping_address': order.shipping_address,
-                #     'date_of_order': order.date_placed,
-                #     'products': {i.id: {'image': i.product.primary_image(),
-                #                         'name': i.product.name,
-                #                         'quantity': i.quantity,
-                #                         'price': i.product.effective_price,
-                #                         'total': i.line_price_incl_tax,
-                #                         } for i in order.lines.all()},
-                #     'total': order.total_incl_tax,
-                # }
-                # msgs = order
-                dispatch.send_email_messages(email, msgs)
-                ####################################
+        if hasattr(order, 'consignmentdelivery'):
             if new_status == settings.ORDER_STATUS_DELIVERED:
                 order.consignmentdelivery.status = order.consignmentdelivery.COMPLETED
                 order.consignmentdelivery.save()
@@ -112,27 +91,6 @@ class EventHandler(processing.EventHandler):
                                 "list!",
                     )
 
-            elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
-                ######################################
-                email, msgs = mail.get_mail_format(order)
-                # email = order.email
-
-                # dispatch = Dispatcher()
-                # order = {
-                #     'orderID': order.id,
-                #     'shipping_address': order.shipping_address,
-                #     'date_of_order': order.date_placed,
-                #     'products': {i.id: {'image': i.product.primary_image(),
-                #                         'name': i.product.name,
-                #                         'quantity': i.quantity,
-                #                         'price': i.product.effective_price,
-                #                         'total': i.line_price_incl_tax,
-                #                         } for i in order.lines.all()},
-                #     'total': order.total_incl_tax,
-                # }
-                # msgs = order
-                dispatch.send_email_messages(email, msgs)
-                ####################################
         if hasattr(order, 'consignmentreturn'):
             if new_status == settings.ORDER_STATUS_RETURN_APPROVED:
                 order.consignmentreturn.status = order.consignmentreturn.COMPLETED

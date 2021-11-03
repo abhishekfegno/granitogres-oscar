@@ -5,7 +5,6 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
-from apps.dashboard.ranges.views import RangeCreateView
 from apps.mod_oscarapi.views.basic import RangeCreate
 from apps.mod_oscarapi.views.root import api_root
 from apps.mod_oscarapi.views.validate_checkout import CheckoutValidationView

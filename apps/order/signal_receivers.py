@@ -1,10 +1,8 @@
 from django.conf import settings
 from django.dispatch import receiver
 from django.utils.datetime_safe import datetime
-from oscar.apps.dashboard.communications.views import Dispatcher
 from oscar.apps.order.signals import order_line_status_changed, order_status_changed
 from apps.order.models import Order
-from apps.payment import refunds
 
 
 @receiver(order_status_changed)

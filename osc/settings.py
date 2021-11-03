@@ -248,6 +248,7 @@ from .config.static import *                # noqa: F401,F404
 from .config.templates import *             # noqa: F401,F404
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 62914560  # 60MB
+OSCAR_SAVE_SENT_EMAILS_TO_DB = True
 
 """
 Email : grocery@gmail.com

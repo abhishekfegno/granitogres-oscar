@@ -20,17 +20,32 @@ from django.apps import apps
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.flatpages.models import FlatPage
+from django.contrib.flatpages.sitemaps import FlatPageSitemap
+from django.contrib.sitemaps.views import sitemap
 from django.shortcuts import render
 from django.urls import path, include
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
 from rest_framework.documentation import include_docs_urls
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 
 from apps.dashboard.catalogue.views import ProductRedirectView, CatalogueRedirectView
 from apps.mod_oscarapi.views.checkout import CheckoutView
 from django.views.i18n import JavaScriptCatalog
 
 view_checkout = never_cache(CheckoutView.as_view())
+
+
+def policy_html(request, url):
+    flatpage = get_object_or_404(FlatPage.objects.filter(), url=url)
+    return Response({
+        'title': flatpage.title,
+        'url': flatpage.url,
+        'content': flatpage.content,
+        'registration_required': flatpage.registration_required,
+    })
 
 
 urlpatterns = [
@@ -63,6 +78,9 @@ urlpatterns = [
     path('catalogue/', CatalogueRedirectView.as_view(), name='catalogue_redirect'),
 
     # path(r'dashboard/payments/cod/', include(cod_app.urls)),
+    path('sitemap.xml', sitemap,
+         {'sitemaps': {'flatpages': FlatPageSitemap}},
+         name='django.contrib.sitemaps.views.sitemap'),
 
     path('api/docs/', include_docs_urls(title='Fegno Store API', public=True)),
     path('i18n/', include('django.conf.urls.i18n')),  # > Django-2.0
@@ -70,6 +88,7 @@ urlpatterns = [
 
     path('api/v2/push/', include('apps.utils.push_urls')),
     path('api/v1/push/', include('apps.utils.push_urls')),
+    path('api/v1/policies/<str:url>', policy_html, name="policies"),
     path('', include('apps.users.urls')),
     path('', include('apps.dashboard.custom.urls')),
     path('', include(apps.get_app_config('oscar').urls[0])),  # > Django-2.0

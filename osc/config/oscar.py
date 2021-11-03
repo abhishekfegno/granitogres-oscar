@@ -99,6 +99,12 @@ OSCAR_USER_CANCELLABLE_ORDER_STATUS = (
     'Placed', 'Order Confirmed',  'Out For Delivery',
 )
 
+OSCAR_SEND_EMAIL_ORDER_STATUS = (
+    ORDER_STATUS_PLACED, ORDER_STATUS_CONFIRMED,  ORDER_STATUS_OUT_FOR_DELIVERY, ORDER_STATUS_DELIVERED,
+    ORDER_STATUS_PAYMENT_DECLINED,
+    ORDER_STATUS_RETURN_REQUESTED, ORDER_STATUS_RETURN_APPROVED, ORDER_STATUS_RETURNED
+)
+
 OSCAR_LINE_STATUS_PIPELINE = {
     'Placed': ('Canceled',),                                 # user can cancel an item until order confirm
     'Order Confirmed': (),                                   # admin can deliver or confirm item

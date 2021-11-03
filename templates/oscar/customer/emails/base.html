@@ -1,43 +1,151 @@
-{% load i18n %}
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
     <title>ABCHAUZ</title>
     <style>
-        body{
-            font-size: large;
-        }
-      .wrapper {
-        width: 600px;
-        margin: auto;
-      }
-      th {
-        text-align: left;
-      }
-      .product_table img{
-          max-width: 50px;
-      }
+        body{font-size: large;}.wrapper {width: 600px;margin: auto;}th {text-align: left;}.product_table img{max-width: 50px;}.preheader {color: transparent;display: none;height: 0;max-height: 0;max-width: 0;opacity: 0;overflow: hidden;mso-hide: all;visibility: hidden;width: 0; }
     </style>
   </head>
-                                    {% block header %}{% endblock %}
-                                    {% block tbody %}
-                                    <tr>
-                                        <td class="content-block">
-                                            {% block body %}
-
-                                            {% endblock %}
-                                        </td>
-                                    </tr>
-                                    {% endblock %}
-                                    {% block footer %}
-                                        <tr>
-                                            <td class="content-block">
-                                                <p>{% trans "Thanks for using our site!" %}</p>
-                                                <p>{% blocktrans with name=site.name %}The {{ name }} team{% endblocktrans %}</p>
-                                            </td>
-                                        </tr>
-                                    {% endblock %}
+  <body>
+    <span class="preheader">This is preheader text. Some clients will show this text as a preview.</span>
+    <div class="wrapper">
+      <table class="outer body" style="width: 100%; font-family: sans-serif;" role="presentation" border="0" cellpadding="0" cellspacing="0" >
+        <tbody>
+          <tr>
+            <td>
+              <img src="header.png" width="100%; margin:0;" />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table style="width: 100%; margin: 10px 0">
+                <tbody>
+                  <tr>
+                    <td style="width: 50%"><strong>Order ID</strong></td>
+                    <td><strong>Date of order</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table style="width: 100%; margin: 5px 0">
+                <tbody>
+                  <tr>
+                    <td>Dear, Customer</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table style="width: 80%">
+                <tbody>
+                  <tr>
+                    <td><strong>Shipping Address</strong></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Shipping Address ,Shipping Address ,Shipping
+                      Address,Shipping Address
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table style="width: 100%; margin: 10px 0" class="product_table">
+                <thead>
+                  <th>Image</th>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Total</th>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><img src="https://picsum.photos/100" /></td>
+                    <td>Testing Product</td>
+                    <td>2</td>
+                    <td>1000</td>
+                    <td>2000</td>
+                  </tr>
+                  <tr>
+                    <td><img src="https://picsum.photos/200" /></td>
+                    <td>Testing Product</td>
+                    <td>2</td>
+                    <td>1000</td>
+                    <td>2000</td>
+                  </tr>
+                  <tr>
+                    <td><img src="https://picsum.photos/150" /></td>
+                    <td>Testing Product</td>
+                    <td>2</td>
+                    <td>1000</td>
+                    <td>2000</td>
+                  </tr>
+                  <tr>
+                    <td><img src="https://picsum.photos/250" /></td>
+                    <td>Testing Product</td>
+                    <td>2</td>
+                    <td>1000</td>
+                    <td>2000</td>
+                  </tr>
+                  <tr>
+                    <td><img src="https://picsum.photos/350" /></td>
+                    <td>Testing Product</td>
+                    <td>2</td>
+                    <td>1000</td>
+                    <td>2000</td>
+                  </tr>
+                  <tr style="margin: 10px 0 20px 0">
+                    <td colspan="3" style="font-weight: 700; font-size: large">
+                      Total
+                    </td>
+                    <td colspan="2" style="font-weight: 700; font-size: large">
+                      14524545
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table
+                style="
+                  width: 70%;
+                  margin: auto;
+                  text-align: center; font-size: larger; font-family:sans-serif;padding: 50px 0; font-weight: 700;"
+              >
+                <tbody>
+                  <tr>
+                    <td>
+                      Your Order No. ********** with ***********... has been
+                      received. Sit back and relax, while we get your order
+                      ready to dispatch.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+              <td>
+                  <img src="footer.png" style="width: 100%;"/>
+              </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
