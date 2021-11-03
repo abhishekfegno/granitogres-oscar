@@ -127,7 +127,7 @@ class Product(AbstractProduct):
     seo_title = models.CharField(max_length=120, null=True, blank=True)
     seo_description = models.CharField(max_length=255, null=True, blank=True)
     seo_keywords = models.CharField(max_length=255, null=True, blank=True)
-    search_tags = TaggableManager(blank=True)
+    search_tags = models.TextField(null=True, blank=True)
 
     about = models.TextField(null=True, blank=True)
     storage_and_uses = models.TextField(null=True, blank=True)

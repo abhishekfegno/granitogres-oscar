@@ -107,7 +107,11 @@ def product_list(request, category='all', **kwargs):
     product_range = None
     cat = None
     if _range:
-        product_range = get_object_or_404(Range, slug=_range)
+        if type(_range) is int or _range.isdigit():
+            params = {'id': _range}
+        else:
+            params = {'slug': _range}
+        product_range = get_object_or_404(Range, **params)
         if product_range:
             title = product_range.name
         queryset = product_range.all_products().filter(is_public=True)
