@@ -6,14 +6,14 @@ from django.contrib.postgres.search import TrigramSimilarity
 
 
 def _trigram_search(queryset, search, extends=True):
-    trigram_similarity = TrigramSimilarity('title', search)
+    trigram_similarity = TrigramSimilarity('search_tags', search)
     query = SearchQuery(search)
     for s in search.split(' '):
         query |= SearchQuery(s)
     return queryset.annotate(
         similarity=trigram_similarity,
     ).filter(
-        similarity__gt=0,
+        similarity__gt=0.4,
     ).order_by('-similarity')
 
 
