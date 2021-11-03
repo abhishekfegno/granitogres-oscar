@@ -128,6 +128,10 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             "url",
             "title",
             "description",
+            "seo_title",
+            "seo_description",
+            "seo_keywords",
+            "search_tags",
             "structure",
             "recommended_products",
             "attributes",
@@ -151,32 +155,43 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     def get_recommended_products(self, instance):
         # inst = instance.parent if instance.is_child else instance
         inst = instance
-        from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
-        return ProductSimpleListSerializer(
-            inst.sorted_recommended_products,
-            many=True,
-            context=self.context
-        ).data
+        # from apps.api_set_v2.utils.product import get_optimized_product_dict
+
+        return custom_ProductListSerializer(inst.sorted_recommended_products, context=self.context).data
+        #
+        # from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
+        # return ProductSimpleListSerializer(
+        #     inst.sorted_recommended_products,
+        #     many=True,
+        #     context=self.context
+        # ).data
 
     def get_upselling(self, instance):
         inst = instance.parent if instance.is_child else instance
         # inst = instance
-        from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
-        return ProductSimpleListSerializer(
-            inst.upselling.all(),
-            many=True,
-            context=self.context
-        ).data
+        # from apps.api_set_v2.utils.product import get_optimized_product_dict
+
+        return custom_ProductListSerializer(inst.upselling.all(), self.context).data
+        # from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
+        # return ProductSimpleListSerializer(
+        #     inst.upselling.all(),
+        #     many=True,
+        #     context=self.context
+        # ).data
 
     def get_crossselling(self, instance):
         inst = instance.parent if instance.is_child else instance
         # inst = instance
-        from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
-        return ProductSimpleListSerializer(
-            inst.crossselling.all(),
-            many=True,
-            context=self.context
-        ).data
+
+        # from apps.api_set_v2.utils.product import get_optimized_product_dict
+        return custom_ProductListSerializer(inst.crossselling.all(), self.context).data
+
+        # from apps.api_set.serializers.catalogue import ProductSimpleListSerializer
+        # return ProductSimpleListSerializer(
+        #     inst.crossselling.all(),
+        #     many=True,
+        #     context=self.context
+        # ).data
 
     def get_variants(self, instance):
         from django.db import connection
@@ -230,7 +245,7 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
 
 
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
-    image_01 = Base64ImageField(allow_null=True, required=False)
+    image_01 = Base64ImageField(allow_null=True, required=False, )
     image_02 = Base64ImageField(allow_null=True, required=False)
     image_03 = Base64ImageField(allow_null=True, required=False)
     image_04 = Base64ImageField(allow_null=True, required=False)

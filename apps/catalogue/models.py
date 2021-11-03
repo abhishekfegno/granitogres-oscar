@@ -22,6 +22,7 @@ from oscar.apps.catalogue.reviews.abstract_models import AbstractProductReview
 from oscar.core.loading import get_model
 from rest_framework.reverse import reverse
 from sorl.thumbnail import get_thumbnail
+from taggit.managers import TaggableManager
 
 from apps.catalogue.managers import ProductManagerSelector
 from apps.partner.models import StockRecord
@@ -121,6 +122,12 @@ class Product(AbstractProduct):
     # just cached pricing
     effective_price = models.FloatField(_('Effective Retail Price.'), null=True, blank=True)
     retail_price = models.FloatField(_('Retail Price.'), null=True, blank=True)
+
+    # search_tags = models.TextField(null=True, blank=True)
+    seo_title = models.CharField(max_length=120, null=True, blank=True)
+    seo_description = models.CharField(max_length=255, null=True, blank=True)
+    seo_keywords = models.CharField(max_length=255, null=True, blank=True)
+    search_tags = TaggableManager(blank=True)
 
     about = models.TextField(null=True, blank=True)
     storage_and_uses = models.TextField(null=True, blank=True)

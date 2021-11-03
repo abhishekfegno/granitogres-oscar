@@ -319,15 +319,45 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
         } for note in instance.notes.all().order_by('-date_updated')]
 
     def get_status_changes(self, instance):
-        return [{
+        out = [{
             'old_status': None,
             'new_status': settings.ORDER_STATUS_PLACED,
             'date_created': instance.date_placed,
-        }] + [{
-            'old_status': status.old_status,
-            'new_status': status.new_status,
-            'date_created': status.date_created,
-        } for status in instance.status_changes.all().order_by('id')]
+        }]
+
+        init = {
+            status.new_status: {
+                'old_status': status.old_status,
+                'new_status': status.new_status,
+                'date_created': status.date_created,
+            } for status in instance.status_changes.all().order_by('id')
+        }
+        added_statuses = filter(lambda x: x['new_status'], out)
+        is_cancelled = settings.ORDER_STATUS_CANCELED in added_statuses
+        is_return_initiated = settings.ORDER_STATUS_RETURN_REQUESTED in added_statuses
+        if not is_return_initiated:
+            if not is_cancelled:
+                items = sorted(settings.OSCAR_ORDER_STATUS_UNTIL_DELIVER, key=lambda x: x[0])
+                for display_order, status in items:
+                    if status in init:
+                        out.append(init[status])
+                    else:
+                        out.append({
+                            'old_status': None,
+                            'new_status': status,
+                            'date_created': None
+                        })
+        else:
+            for returned_status in settings.OSCAR_ADMIN_LINE_POST_DELIVERY_ORDER_STATUSES:
+                if returned_status in init:
+                    out.append(init[returned_status])
+                else:
+                    out.append({
+                        'old_status': None,
+                        'new_status': returned_status,
+                        'date_created': None
+                    })
+        return out
 
     def get_shipping_events(self, instance):
         events = instance.shipping_events.order_by(
@@ -343,7 +373,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                 'date_created': event.date_created,
                 'amount': event.amount,
                 'reference': event.amount,
-                'lines': "\n ".join([f"{seq.quantity} X {seq.line.product.get_title()}"
+                'lines': "\n ".join([f"{seq.quantity} X {seq.line.title}"
                                      for seq in event.line_quantities.all()])
             })
         return event_map
@@ -362,7 +392,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                 'date_created': event.date_created,
                 'amount': event.amount,
                 'reference': event.amount,
-                'lines': "\n ".join([f"{peq.quantity} X {peq.line.product.get_title()}"
+                'lines': "\n ".join([f"{peq.quantity} X {peq.line.title}"
                                      for peq in event.line_quantities.all()])
             })
         return event_map
