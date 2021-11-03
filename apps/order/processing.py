@@ -43,6 +43,7 @@ class EventHandler(processing.EventHandler):
         old_status = order.status
         order.set_status(new_status)
         OrderStatusPushNotification(order.user).send_status_update(order, new_status)
+
         """ 
         Handle Refund and Update of Refund Quantity on `new_status` == 'Return'. 
         Refund Can be proceeded only after changing Order Status.
@@ -80,7 +81,11 @@ class EventHandler(processing.EventHandler):
             """
             order_code = f"order__{new_status.lower().replace(' ', '_')}"
             opm = OrderPlacementMixin()
-            opm.request = setattr(self, 'request', None)
+
+            class FakeReq:
+                user = order.user
+
+            opm.request = FakeReq()
             # opm.send_confirmation_message(order, order_code)
             print(order, order_code)
             print(opm.get_message_context(order, order_code))
