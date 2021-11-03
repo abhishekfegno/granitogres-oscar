@@ -111,7 +111,7 @@ def product_list(request, category='all', **kwargs):
             params = {'id': _range}
         else:
             params = {'slug': _range}
-        product_range = get_object_or_404(Range, **params)
+        product_range = Range.objects.filter(**params).first()
         if product_range:
             title = product_range.name
         queryset = product_range.all_products().filter(is_public=True)
@@ -125,6 +125,8 @@ def product_list(request, category='all', **kwargs):
         title = cat.name
     if only_favorite and request.user.is_authenticated:
         queryset = queryset.browsable.filter(id__in=request.user.product.all().values_list('id'))
+    if _pclass:
+        queryset = queryset.filter(product_class=_pclass)
     if _filter:
         """
         input = weight__in:25,30,35|price__gte:25|price__lte:45

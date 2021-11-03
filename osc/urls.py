@@ -27,6 +27,7 @@ from django.shortcuts import render
 from django.urls import path, include
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
+from rest_framework.decorators import api_view
 from rest_framework.documentation import include_docs_urls
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -38,8 +39,9 @@ from django.views.i18n import JavaScriptCatalog
 view_checkout = never_cache(CheckoutView.as_view())
 
 
-def policy_html(request, url):
-    flatpage = get_object_or_404(FlatPage.objects.filter(), url=url)
+@api_view()
+def policy_html(request, path):
+    flatpage = get_object_or_404(FlatPage.objects.filter(), url=path)
     return Response({
         'title': flatpage.title,
         'url': flatpage.url,
@@ -49,9 +51,9 @@ def policy_html(request, url):
 
 
 urlpatterns = [
-    path('api/v1/checkout/', view_checkout, name='api-checkout'),               # Must be before oscar_api.urls
-    path('api/v2/checkout/', view_checkout, name='api-checkout'),               # Must be before oscar_api.urls
-    # path('api/v1/', include(apps.get_app_config("oscarapicheckout").urls[0])),  # Must be before oscar_api.urls
+    path('api/v1/checkout/', view_checkout, name='api-checkout'),                   # Must be before oscar_api.urls
+    path('api/v2/checkout/', view_checkout, name='api-checkout'),                   # Must be before oscar_api.urls
+    # path('api/v1/', include(apps.get_app_config("oscarapicheckout").urls[0])),    # Must be before oscar_api.urls
 
     path('api/v1/', include('oscarapi.urls')),
     path('api/v1/buy-now/', include('apps.buynow.urls')),
@@ -88,7 +90,7 @@ urlpatterns = [
 
     path('api/v2/push/', include('apps.utils.push_urls')),
     path('api/v1/push/', include('apps.utils.push_urls')),
-    path('api/v1/policies/<str:url>', policy_html, name="policies"),
+    path('api/v2/policies<path:path>', policy_html, name="policies"),
     path('', include('apps.users.urls')),
     path('', include('apps.dashboard.custom.urls')),
     path('', include(apps.get_app_config('oscar').urls[0])),  # > Django-2.0
