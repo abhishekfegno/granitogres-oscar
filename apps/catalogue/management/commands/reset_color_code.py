@@ -111,8 +111,7 @@ White and Gray=#FFFFFF,#808080
 Wooden Finish=#731b00
 YELLOW=#FFB70B
 Yellow=#FFB70B
-Yellow-Brown=#cc9966
-"""
+Yellow-Brown=#cc9966""".split('\n')
 
 
 class Command(BaseCommand):
