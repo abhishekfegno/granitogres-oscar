@@ -44,12 +44,12 @@ def get_optimized_product_dict(
         )
     # if needs_stock:
     #     product_set = product_set.filter(stockrecords__isnull=False)
-    if offset and limit:
-        product_set = product_set[offset:limit]
-    elif limit:
-        product_set = product_set[:limit]
-    elif offset:
-        product_set = product_set[offset:]
+    # if offset and limit:
+    #     product_set = product_set[offset:limit]
+    # elif limit:
+    #     product_set = product_set[:limit]
+    # elif offset:
+    #     product_set = product_set[offset:]
 
     st_set_01 = StockRecord.objects.filter(
         product__in=product_set, product__structure=Product.STANDALONE).values_list('id')
@@ -69,12 +69,12 @@ def get_optimized_product_dict(
     if zone:
         sr_set = sr_set.filter(partner__zone__id=zone)
 
-    # if offset and limit:
-    #     sr_set = sr_set[offset:limit]
-    # elif limit:
-    #     sr_set = sr_set[:limit]
-    # elif offset:
-    #     sr_set = sr_set[offset:]
+    if offset and limit:
+        sr_set = sr_set[offset:limit]
+    elif limit:
+        sr_set = sr_set[:limit]
+    elif offset:
+        sr_set = sr_set[offset:]
 
     product_data = {}
     cxt = {'request': request}
