@@ -114,12 +114,12 @@ def product_list(request, category='all', **kwargs):
         product_range = Range.objects.filter(**params).first()
         if product_range:
             title = product_range.name
-        queryset = product_range.all_products().filter(is_public=True)
+            queryset = product_range.all_products().filter(is_public=True)
     elif _offer_category:
         offer_banner_object = get_object_or_404(OfferBanner, code=_offer_category, offer__status=ConditionalOffer.OPEN)
         if offer_banner_object and offer_banner_object.product_range:
             title = offer_banner_object.product_range.name
-        queryset = offer_banner_object.products().filter(is_public=True)
+            queryset = offer_banner_object.products().filter(is_public=True)
     elif category != 'all':
         queryset, cat = category_filter(queryset=queryset, category_slug=category, return_as_tuple=True)
         title = cat.name

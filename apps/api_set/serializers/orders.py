@@ -319,17 +319,19 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
         } for note in instance.notes.all().order_by('-date_updated')]
 
     def get_status_changes(self, instance):
-        out = [{
-            'old_status': None,
-            'new_status': settings.ORDER_STATUS_PLACED,
-            'date_created': instance.date_placed,
-        }]
+        out = [
+            # {
+            #     'old_status': None,               # issue 1. fixed
+            #     'new_status': settings.ORDER_STATUS_PLACED,
+            #     'date_created': instance.date_placed,
+            # }
+        ]
 
         init = {
             status.new_status: {
                 'old_status': status.old_status,
                 'new_status': status.new_status,
-                'date_created': status.date_created,
+                'date_created': status.date_created,        # issue 2. date not comming
             } for status in instance.status_changes.all().order_by('id')
         }
         added_statuses = filter(lambda x: x['new_status'], out)
@@ -338,16 +340,27 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
         if not is_return_initiated:
             if not is_cancelled:
                 items = sorted(settings.OSCAR_ORDER_STATUS_UNTIL_DELIVER, key=lambda x: x[0])
+                earlier_status = None
                 for display_order, status in items:
                     if status in init:
                         out.append(init[status])
                     else:
                         out.append({
-                            'old_status': None,
+                            'old_status': earlier_status,
                             'new_status': status,
                             'date_created': None
                         })
+                    earlier_status = status
+            else:
+                out = list(init.values())
+                out.append({
+                            'old_status': out[-1]['new_status'],
+                            'new_status': 'Return Initiated',
+                            'date_created': out[-1]['date_created']
+                        })
         else:
+            earlier_status = None
+
             for returned_status in settings.OSCAR_ADMIN_LINE_POST_DELIVERY_ORDER_STATUSES:
                 if returned_status in init:
                     out.append(init[returned_status])
@@ -357,6 +370,14 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                         'new_status': returned_status,
                         'date_created': None
                     })
+                earlier_status = returned_status
+            if settings.ORDER_STATUS_RETURNED in init:
+                out.append({
+                    'old_status': out[-1]['new_status'],
+                    'new_status': 'Return Initiated',
+                    'date_created': out[-1]['date_created']
+                })
+
         return out
 
     def get_shipping_events(self, instance):

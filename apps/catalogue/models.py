@@ -308,6 +308,13 @@ class Category(AbstractCategory):
 
     product_class = models.ForeignKey('catalogue.ProductClass', on_delete=models.SET_NULL, null=True, blank=True)
 
+    # search_tags = models.TextField(null=True, blank=True)
+    seo_title = models.CharField(max_length=120, null=True, blank=True)
+    seo_description = models.CharField(max_length=255, null=True, blank=True)
+    seo_keywords = models.CharField(max_length=255, null=True, blank=True)
+    search_tags = models.TextField(max_length=255, null=True, blank=True)
+    ogmail = models.CharField(max_length=255, null=True, blank=True)
+
     @property
     def thumbnail_web_listing(self):
         if self.image:

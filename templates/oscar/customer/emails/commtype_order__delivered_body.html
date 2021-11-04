@@ -59,6 +59,7 @@
                   <th>Image</th>
                   <th>Product</th>
                   <th>Quantity</th>
+                  <th>Shipping Charge</th>
                   <th>Total</th>
                 </thead>
                 <tbody>
@@ -67,6 +68,7 @@
                     <td><img src="{{ line.product.primary_image }}" /></td>
                     <td>{{ line.product }}</td>
                     <td>{{ line.quantity }}</td>
+                    <td> {{ line}}</td>
                     <td>{{ line.line_price_incl_tax }}</td>
                   </tr>
                 {% endfor %}
