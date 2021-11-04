@@ -377,7 +377,9 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                     'new_status': 'Return Initiated',
                     'date_created': out[-1]['date_created']
                 })
-        out[0]['date_created'] = instance.date_placed
+        if len(out):
+            out[0]['date_created'] = instance.date_placed
+
         return out
 
     def get_shipping_events(self, instance):
