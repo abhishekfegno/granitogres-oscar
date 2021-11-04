@@ -331,7 +331,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
             status.new_status: {
                 'old_status': status.old_status,
                 'new_status': status.new_status,
-                'date_created': status.date_created,        # issue 2. date not comming
+                'date_created': status.date_created ,        # issue 2. date not comming
             } for status in instance.status_changes.all().order_by('id')
         }
         added_statuses = filter(lambda x: x['new_status'], out)
@@ -348,7 +348,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                         out.append({
                             'old_status': earlier_status,
                             'new_status': status,
-                            'date_created': None
+                            'date_created': instance.date_placed
                         })
                     earlier_status = status
             else:
