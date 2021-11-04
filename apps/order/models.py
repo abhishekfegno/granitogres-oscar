@@ -272,7 +272,7 @@ class Order(AbstractOrder):
 
     def _create_order_status_change(self, old_status, new_status):
         # Not setting the status on the order as that should be handled before
-        self.status_changes.create(old_status=old_status, new_status=new_status, created_date=self.date_placed)
+        self.status_changes.create(old_status=old_status, new_status=new_status, date_created=self.date_placed)
 
     @property
     def preferred_slot_text(self):
