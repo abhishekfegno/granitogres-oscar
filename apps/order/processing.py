@@ -31,52 +31,19 @@ class EventHandler(processing.EventHandler):
             ).update(status=new_status)
         return
 
-    @transaction.atomic
-    def handle_order_status_change(self, order: Order, new_status: str, note_msg=None, note_type='System'):
-        """
-        Handle Order Status Change in Oscar.
-        """
-
-        """
-        Change Order Status
-        """
-        old_status = order.status
-        order.set_status(new_status)
-        OrderStatusPushNotification(order.user).send_status_update(order, new_status)
-
-        """ 
-        Handle Refund and Update of Refund Quantity on `new_status` == 'Return'. 
-        Refund Can be proceeded only after changing Order Status.
-        """
-        if (
-                old_status not in settings.OSCAR_ORDER_REFUNDABLE_STATUS
-                and
-                new_status in settings.OSCAR_ORDER_REFUNDABLE_STATUS
-        ):
-            refunds.RefundFacade().refund_order(order=order)
-            order.lines.update(refunded_quantity=models.F('quantity'))
-        self.pipeline_order_lines(order, new_status)
-
-        all_lines = order.lines.all().select_related('stockrecord')
-        if new_status in get_statuses(8):
-            lines_to_be_consumed = all_lines.filter(status__in=get_statuses(8))
-            self.consume_stock_allocations(order, lines_to_be_consumed)
-        elif new_status in get_statuses(128):
-            lines_to_be_cancelled = all_lines.filter(status__in=get_statuses(128))
-            self.cancel_stock_allocations(order, lines_to_be_cancelled)
-
+    def email_order_status(self, order, new_status):
         if new_status in settings.OSCAR_SEND_EMAIL_ORDER_STATUS:
             """
             documentatiomn: how we process the logic.
             concidering the order status ; we create a code such that
-            
+
             order__placed for "Placed Status", order__order_confirmed for "Order Confirmed" Status etc...
             we need to place 
             * 'templates/oscar/customer/emails/commtype_<order_code>_subject.txt'
             * 'templates/oscar/customer/emails/commtype_<order_code>_subject.txt'
             * 'templates/oscar/customer/emails/commtype_<order_code>_body.html'
             * 'templates/oscar/customer/sms/commtype_<order_code>_body.txt'
-            
+
             files for each status to work with this logic.
             """
             order_code = f"order__{new_status.lower().replace(' ', '_')}"
@@ -89,65 +56,33 @@ class EventHandler(processing.EventHandler):
             opm.send_confirmation_message(order, order_code)
             print(order, order_code)
             ctx = opm.get_message_context(order, order_code)
-            messages = CommunicationEventType.objects.get_and_render(order_code, ctx)
+            # messages = CommunicationEventType.objects.get_and_render(order_code, ctx)
+            comm_type = CommunicationEventType(code=order_code)
+            messages = comm_type.get_messages(ctx)
+
             print(messages['body'])
 
-        if hasattr(order, 'consignmentdelivery'):
-            if new_status == settings.ORDER_STATUS_DELIVERED:
-                order.consignmentdelivery.status = order.consignmentdelivery.COMPLETED
-                order.consignmentdelivery.save()
-                if (
-                        order.consignmentdelivery.delivery_trip
-                        and order.consignmentdelivery.delivery_trip.status == order.consignmentdelivery.delivery_trip.ON_TRIP
-                ):
-                    PushNotification(order.consignmentdelivery.delivery_trip.agent).send_message(
-                        title=f"Consignment #handler{order.consignmentdelivery.id} has been Delivered!",
-                        message="Hey, a delivery consignment has been marked as Delivered! Moving items to completed "
-                                "list!",
-                    )
-            elif new_status == settings.ORDER_STATUS_CANCELED:
-                order.consignmentdelivery.status = order.consignmentdelivery.CANCELLED
-                order.consignmentdelivery.save()
-                if (
-                        order.consignmentdelivery.delivery_trip
-                        and order.consignmentdelivery.delivery_trip.status == order.consignmentdelivery.delivery_trip.ON_TRIP
-                ):
-                    PushNotification(order.consignmentdelivery.delivery_trip.agent).send_message(
-                        title=f"Consignment #{order.consignmentdelivery.id} has been Cancelled!",
-                        message="Hey, a delivery consignment has been marked as Cancelled! Moving items to cancelled "
-                                "list!",
-                    )
+    @transaction.atomic
+    def handle_order_status_change(self, order: Order, new_status: str, note_msg=None, note_type='System'):
+        """
+        Handle Order Status Change in Oscar.
+        """
 
-        if hasattr(order, 'consignmentreturn'):
-            if new_status == settings.ORDER_STATUS_RETURN_APPROVED:
-                order.consignmentreturn.status = order.consignmentreturn.COMPLETED
-                order.consignmentreturn.save()
-                if (
-                        order.consignmentreturn.delivery_trip
-                        and order.consignmentreturn.delivery_trip.status == order.consignmentreturn.delivery_trip.ON_TRIP
-                ):
-                    PushNotification(order.consignmentreturn.delivery_trip.agent).send_message(
-                        title=f"Return #{order.consignmentreturn.id} has been Picked Up!",
-                        message="Hey, A return consignment has been marked as Picked Up! Moving items to completed "
-                                "list!",
-                    )
-            elif old_status in get_statuses(32+16) and new_status == settings.ORDER_STATUS_DELIVERED:
-                order.consignmentreturn.status = order.consignmentreturn.CANCELLED
-                order.consignmentreturn.save()
-                if (
-                        order.consignmentreturn.delivery_trip
-                        and (
-                        order.consignmentreturn.delivery_trip.status
-                        == order.consignmentreturn.delivery_trip.ON_TRIP
-                )):
-                    PushNotification(order.consignmentreturn.delivery_trip.agent).send_message(
-                        title=f"Return #{order.consignmentreturn.id} has been Cancelled!",
-                        message="Hey, a return consignment has been marked as Cancelled! Moving items to cancelled "
-                                "list!",
-                    )
+        """
+        Change Order Status
+        """
+        old_status = order.status
+        order.set_status(new_status)
 
-            elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
-                pass
+        if order.status == old_status:
+            return
+
+        OrderStatusPushNotification(order.user).send_status_update(order, new_status)
+        self.email_order_status(order, new_status)
+
+        self.pipeline_order_lines(order, new_status)
+        self.handle_consignments(order, old_status, new_status)
+        self.handle_refund(order, old_status, new_status)
 
         if note_msg:
             """
@@ -248,4 +183,86 @@ class EventHandler(processing.EventHandler):
         for line, qty in zip(lines, line_quantities):
             if line.stockrecord:
                 line.stockrecord.cancel_allocation(qty)
+
+    def handle_consignments(self, order, old_status, new_status):
+        if hasattr(order, 'consignmentdelivery'):
+            if new_status == settings.ORDER_STATUS_DELIVERED:
+                order.consignmentdelivery.status = order.consignmentdelivery.COMPLETED
+                order.consignmentdelivery.save()
+                if (
+                        order.consignmentdelivery.delivery_trip
+                        and order.consignmentdelivery.delivery_trip.status == order.consignmentdelivery.delivery_trip.ON_TRIP
+                ):
+                    PushNotification(order.consignmentdelivery.delivery_trip.agent).send_message(
+                        title=f"Consignment #handler{order.consignmentdelivery.id} has been Delivered!",
+                        message="Hey, a delivery consignment has been marked as Delivered! Moving items to completed "
+                                "list!",
+                    )
+            elif new_status == settings.ORDER_STATUS_CANCELED:
+                order.consignmentdelivery.status = order.consignmentdelivery.CANCELLED
+                order.consignmentdelivery.save()
+                if (
+                        order.consignmentdelivery.delivery_trip
+                        and order.consignmentdelivery.delivery_trip.status == order.consignmentdelivery.delivery_trip.ON_TRIP
+                ):
+                    PushNotification(order.consignmentdelivery.delivery_trip.agent).send_message(
+                        title=f"Consignment #{order.consignmentdelivery.id} has been Cancelled!",
+                        message="Hey, a delivery consignment has been marked as Cancelled! Moving items to cancelled "
+                                "list!",
+                    )
+
+        if hasattr(order, 'consignmentreturn'):
+            if new_status == settings.ORDER_STATUS_RETURN_APPROVED:
+                order.consignmentreturn.status = order.consignmentreturn.COMPLETED
+                order.consignmentreturn.save()
+                if (
+                        order.consignmentreturn.delivery_trip
+                        and order.consignmentreturn.delivery_trip.status == order.consignmentreturn.delivery_trip.ON_TRIP
+                ):
+                    PushNotification(order.consignmentreturn.delivery_trip.agent).send_message(
+                        title=f"Return #{order.consignmentreturn.id} has been Picked Up!",
+                        message="Hey, A return consignment has been marked as Picked Up! Moving items to completed "
+                                "list!",
+                    )
+            elif old_status in get_statuses(32 + 16) and new_status == settings.ORDER_STATUS_DELIVERED:
+                order.consignmentreturn.status = order.consignmentreturn.CANCELLED
+                order.consignmentreturn.save()
+                if (
+                        order.consignmentreturn.delivery_trip
+                        and (
+                        order.consignmentreturn.delivery_trip.status
+                        == order.consignmentreturn.delivery_trip.ON_TRIP
+                )):
+                    PushNotification(order.consignmentreturn.delivery_trip.agent).send_message(
+                        title=f"Return #{order.consignmentreturn.id} has been Cancelled!",
+                        message="Hey, a return consignment has been marked as Cancelled! Moving items to cancelled "
+                                "list!",
+                    )
+
+            elif new_status == settings.ORDER_STATUS_OUT_FOR_DELIVERY:
+                pass
+
+    def handle_refund(self, order: Order, old_status: str, new_status: str):
+        """
+        Handle Refund and Update of Refund Quantity on `new_status` == 'Return'.
+        Refund Can be proceeded only after changing Order Status.
+        """
+        if (
+                old_status not in settings.OSCAR_ORDER_REFUNDABLE_STATUS
+                and
+                new_status in settings.OSCAR_ORDER_REFUNDABLE_STATUS
+        ):
+            refunds.RefundFacade().refund_order(order=order)
+            order.lines.update(refunded_quantity=models.F('quantity'))
+
+        all_lines = order.lines.all().select_related('stockrecord')
+        if new_status in get_statuses(8):
+            lines_to_be_consumed = all_lines.filter(status__in=get_statuses(8))
+            self.consume_stock_allocations(order, lines_to_be_consumed)
+        elif new_status in get_statuses(128):
+            lines_to_be_cancelled = all_lines.filter(status__in=get_statuses(128))
+            self.cancel_stock_allocations(order, lines_to_be_cancelled)
+
+
+
 
