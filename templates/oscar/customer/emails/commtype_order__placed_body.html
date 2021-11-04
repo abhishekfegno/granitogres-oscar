@@ -6,7 +6,7 @@
     <td class="content-block">
         <p xmlns="http://www.w3.org/1999/html">{% trans 'Hello,' %}</p>
         <p>{% blocktrans with order_number=order.number %}We are pleased to confirm your order {{ order_number }}
-            has been placed. Thank you for choosing ABCHAUZ.{% endblocktrans %}</p>
+            has been Placed. Thank you for choosing ABCHAUZ.{% endblocktrans %}</p>
     </td>
 </tr>
         <tbody>
@@ -64,7 +64,7 @@
                 <tbody>
                 {% for line in order.lines.all %}
                   <tr>
-                    <td><img src="{{ line.product.primary_image()}}" /></td>
+                    <td><img src="{{ line.product.primary_image }}" /></td>
                     <td>{{ line.product }}</td>
                     <td>{{ line.quantity }}</td>
                     <td>{{ line.line_price_incl_tax }}</td>
@@ -92,7 +92,7 @@
               >
                 <tbody>
                   <tr>
-                    <td>assets
+                    <td>
                       Your Order No. ********** with ***********... has been
                       received. Sit back and relax, while we get your order
                       ready to dispatch.
@@ -103,5 +103,6 @@
             </td>
           </tr>
 </tbody>
+
 
 {% endblock %}
