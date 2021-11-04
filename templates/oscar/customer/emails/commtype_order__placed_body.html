@@ -16,7 +16,7 @@
               <table style="width: 100%; margin: 10px 0">
                 <tbody>
                   <tr>
-                    <td style="width: 50%"><strong>Order ID: {{ order.id }}</strong></td>
+                    <td style="width: 50%"><strong>Order ID: {{ order.number }}</strong></td>
                     <td><strong>Date of order:{{ order.created_at }}</strong></td>
                   </tr>
                 </tbody>
@@ -59,17 +59,15 @@
                   <th>Image</th>
                   <th>Product</th>
                   <th>Quantity</th>
-                  <th>Price</th>
                   <th>Total</th>
                 </thead>
                 <tbody>
                 {% for line in order.lines.all %}
                   <tr>
-                    <td><img src="https://picsum.photos/100" /></td>
+                    <td><img src="{{ line.product.primary_image()}}" /></td>
                     <td>{{ line.product }}</td>
                     <td>{{ line.quantity }}</td>
-                    <td>{{ line.unit_price_tax }}</td>
-                    <td>{{ line.price_incl_tax }}</td>
+                    <td>{{ line.line_price_incl_tax }}</td>
                   </tr>
                 {% endfor %}
                   <tr style="margin: 10px 0 20px 0">
@@ -94,7 +92,7 @@
               >
                 <tbody>
                   <tr>
-                    <td>
+                    <td>assets
                       Your Order No. ********** with ***********... has been
                       received. Sit back and relax, while we get your order
                       ready to dispatch.
