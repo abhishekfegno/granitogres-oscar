@@ -120,6 +120,8 @@ def product_suggestions(request, **kwargs):
         _mapper_len = 1
         for item in queryset:
             if item['title'] not in _mapper:
+                # title = item['title']
+                item['title'] = " ".join([s.capitalize() for s in item['title'].split(' ') if s.isalpha() and len(s) > 2])
                 _mapper[item['title']] = item
                 _mapper_len += 1
             if _mapper_len > _max_size:
