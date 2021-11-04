@@ -77,12 +77,13 @@ class EventHandler(processing.EventHandler):
         if order.status == old_status:
             return
 
-        OrderStatusPushNotification(order.user).send_status_update(order, new_status)
+
         self.email_order_status(order, new_status)
 
         self.pipeline_order_lines(order, new_status)
         self.handle_consignments(order, old_status, new_status)
         self.handle_refund(order, old_status, new_status)
+        OrderStatusPushNotification(order.user).send_status_update(order, new_status)
 
         if note_msg:
             """
