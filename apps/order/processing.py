@@ -3,7 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.db import models, transaction
 from django.utils.module_loading import import_string
-from oscar.apps.checkout.mixins import OrderPlacementMixin
+from oscar.apps.checkout.mixins import OrderPlacementMixin, CommunicationEventType
 from oscar.apps.customer.alerts.utils import Dispatcher
 from oscar.apps.order import processing
 from apps.payment.models import SourceType
@@ -86,11 +86,11 @@ class EventHandler(processing.EventHandler):
                 user = order.user
 
             opm.request = FakeReq()
-            # opm.send_confirmation_message(order, order_code)
+            opm.send_confirmation_message(order, order_code)
             print(order, order_code)
-            print(opm.get_message_context(order, order_code))
-            # print(opm.send_confirmation_message(order, order_code))
-
+            ctx = opm.get_message_context(order, order_code)
+            messages = CommunicationEventType.objects.get_and_render(order_code, ctx)
+            print(messages['body'])
 
         if hasattr(order, 'consignmentdelivery'):
             if new_status == settings.ORDER_STATUS_DELIVERED:
