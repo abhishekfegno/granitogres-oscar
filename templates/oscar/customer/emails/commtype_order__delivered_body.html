@@ -17,7 +17,7 @@
                 <tbody>
                   <tr>
                     <td style="width: 50%"><strong>Order ID: {{ order.number }}</strong></td>
-                    <td><strong>Date of order:{{ order.created_at }}</strong></td>
+                    <td><strong>Date of order:{{ order.date_placed }}</strong></td>
                   </tr>
                 </tbody>
               </table>
@@ -64,7 +64,7 @@
                 <tbody>
                 {% for line in order.lines.all %}
                   <tr>
-                    <td><img src="{{ line.product.primary_image }}" /></td>
+                    <td><img src="{{ line.product.__cached_primary_image_logic }}" /></td>
                     <td>{{ line.product }}</td>
                     <td>{{ line.quantity }}</td>
                     <td>{{ line.line_price_incl_tax }}</td>
@@ -76,8 +76,9 @@
                       Shipping Charge:
                     </td>
                     <td colspan="2" style="font-weight: 700; font-size: large">
-                      {{ order.shipping_incl_tax }}
+                      {{ order.shipping_incl_tax|currency:order.currency }}
                     </td>
+                    <br><br>
                     <td colspan="3" style="font-weight: 700; font-size: large">
                       Total
                     </td>
@@ -100,9 +101,7 @@
                 <tbody>
                   <tr>
                     <td>
-                      Your Order No. ********** with ***********... has been
-                      received. Sit back and relax, while we get your order
-                      ready to dispatch.
+
                     </td>
                   </tr>
                 </tbody>
