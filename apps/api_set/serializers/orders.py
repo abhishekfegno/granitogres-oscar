@@ -334,7 +334,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                 'date_created': status.date_created ,        # issue 2. date not comming
             } for status in instance.status_changes.all().order_by('id')
         }
-        added_statuses = filter(lambda x: x['new_status'], out)
+        added_statuses = list(init.keys())
         is_cancelled = settings.ORDER_STATUS_CANCELED in added_statuses
         is_return_initiated = settings.ORDER_STATUS_RETURN_REQUESTED in added_statuses
         if not is_return_initiated:
@@ -348,7 +348,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                         out.append({
                             'old_status': earlier_status,
                             'new_status': status,
-                            'date_created': instance.date_placed
+                            'date_created': None
                         })
                     earlier_status = status
             else:
