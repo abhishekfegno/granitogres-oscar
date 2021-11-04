@@ -348,7 +348,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                         out.append({
                             'old_status': earlier_status,
                             'new_status': status,
-                            'date_created': None
+                            'date_created': status.date_created
                         })
                     earlier_status = status
             else:
