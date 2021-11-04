@@ -105,7 +105,7 @@ OSCAR_SEND_EMAIL_ORDER_STATUS = (
     ORDER_STATUS_RETURN_REQUESTED, ORDER_STATUS_RETURN_APPROVED, ORDER_STATUS_RETURNED
 )
 
-OSCAR_DOMAIN_NAME = 'abchauz.com'  #for rendering image into email template
+OSCAR_DOMAIN_NAME = 'devserver.abchauz.com'  #for rendering image into email template
 
 
 OSCAR_LINE_STATUS_PIPELINE = {
