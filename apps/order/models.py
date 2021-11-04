@@ -270,6 +270,10 @@ class Order(AbstractOrder):
     date_delivered = models.DateTimeField(null=True, blank=True, help_text="Date of Consignment Delivery")
     slot = models.ForeignKey(TimeSlot, on_delete=models.SET_NULL, null=True, related_name='orders')
 
+    def _create_order_status_change(self, old_status, new_status):
+        # Not setting the status on the order as that should be handled before
+        self.status_changes.create(old_status=old_status, new_status=new_status, created_date=self.date_placed)
+
     @property
     def preferred_slot_text(self):
         return self.slot and self.slot.slot
