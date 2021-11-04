@@ -49,8 +49,7 @@ class Command(BaseCommand):
                 is_created = False
                 break
         if p_class is None:
-            p_class = ProductClass.objects.get_or_create(slug=slug, defaults={"name": name})
-            is_created = True
+            p_class, is_created = ProductClass.objects.get_or_create(slug=slug, defaults={"name": name})
             print(p_class, is_created)
 
         # attrs = row['Attributes'].strip().split(',')
@@ -92,10 +91,10 @@ class Command(BaseCommand):
         return p_class
 
     def get_product(self, row) -> Product:
-        if row['Product ID'] in self.initial_product:
-            return self.initial_product[row['Product ID']]
+        # if row['Product ID'] in self.initial_product:
+        #     return self.initial_product[row['Product ID']]
         product = Product.objects.filter(id=row['Product ID']).select_related('product_class').first()
-        self.initial_product[row['Product ID']] = product
+        # self.initial_product[row['Product ID']] = product
         return product
 
     def update_product_class_from_row(self, product: Product, row: list, product_class: ProductClass, ) -> Union[None, Product]:
@@ -122,30 +121,26 @@ class Command(BaseCommand):
             print("Cant access file ", json_file)
             return
 
-        ProductAttributeValue.objects.all().delete()
-        AttributeOptionGroup.objects.all().delete()
-        AttributeOption.objects.all().delete()
-        AttributeOption.objects.all().delete()
-        ProductAttribute.objects.all().delete()
+        # ProductAttributeValue.objects.all().delete()
+        # AttributeOptionGroup.objects.all().delete()
+        # AttributeOption.objects.all().delete()
+        # AttributeOption.objects.all().delete()
+        # ProductAttribute.objects.all().delete()
 
         with open(path) as csvfile_pointer:
             row_reader = csv.DictReader(csvfile_pointer, delimiter=',', quotechar='"')
-            count = 1
             for row in row_reader:
-
                 p_class = self.extract_product_class_from_row(row)
-
                 product = self.update_product_class_from_row(self.get_product(row), row, p_class)
-                count += 1
-                if count > 5:
-                    break
+                print(
+                    "PClass Name: " + row['NEW GROUP'],
+                    "PClass Name@DB", p_class,
+                    "Product ID: " + row['Product ID'],
+                    "Product Name@DB: ", product and product.pk)
         with open(json_file) as jsonfile_pointer:
             json_data = json.load(jsonfile_pointer)
-            count = 1
             for attribute_data in json_data:
                 self.update_product_attribute(attribute_data)
-                if count > 25:
-                    break
 
     def attr_type_descriptor(
             self,
@@ -155,7 +150,7 @@ class Command(BaseCommand):
         """
         return ( field_type, should_show_in_filter, should_show_in_attributes_selector )
         """
-        if len(value_text.split(' ')) > 3:
+        if value_text and len(value_text.split(' ')) > 3:
             return ProductAttribute.RICHTEXT, False, True
         if value_color:
             return ProductAttribute.COLOR, False, True
@@ -185,9 +180,14 @@ class Command(BaseCommand):
             return
         field_type, add_to_filter, add_to_attribute = self.attr_type_descriptor(**attr)
         if not hasattr(product.attr, attr['attribute__code']):
-            p_class = product.product_class
+            if product.is_child:
+                product.parent.refresh_from_db(fields=('product_class', ))
+            else:
+                product.refresh_from_db(fields=('product_class',))
+            p_class = product.get_product_class()
             print("Creating ", attr['attribute__name'], "For", p_class)
             p_class.attributes.create(
+                product_class=p_class,
                 name=attr['attribute__name'],
                 code=attr['attribute__code'],
                 type=field_type,
