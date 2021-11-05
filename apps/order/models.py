@@ -298,7 +298,7 @@ class Order(AbstractOrder):
 
     @property
     def is_cancelable(self):
-        return bool(self.status in settings.OSCAR_USER_CANCELLABLE_ORDER_STATUS)
+        return self.status in settings.OSCAR_USER_CANCELLABLE_ORDER_STATUS
 
     @property
     def max_time_to__return(self):
