@@ -121,22 +121,21 @@ class Command(BaseCommand):
             print("Cant access file ", json_file)
             return
 
-        # ProductAttributeValue.objects.all().delete()
-        # AttributeOptionGroup.objects.all().delete()
-        # AttributeOption.objects.all().delete()
-        # AttributeOption.objects.all().delete()
-        # ProductAttribute.objects.all().delete()
+        ProductAttributeValue.objects.all().delete()
+        AttributeOptionGroup.objects.all().delete()
+        AttributeOption.objects.all().delete()
+        ProductAttribute.objects.all().delete()
 
-        # with open(path) as csvfile_pointer:
-        #     row_reader = csv.DictReader(csvfile_pointer, delimiter=',', quotechar='"')
-        #     for row in row_reader:
-        #         p_class = self.extract_product_class_from_row(row)
-        #         product = self.update_product_class_from_row(self.get_product(row), row, p_class)
-        #         print(
-        #             "PClass Name: " + row['NEW GROUP'],
-        #             "PClass Name@DB", p_class,
-        #             "Product ID: " + row['Product ID'],
-        #             "Product Name@DB: ", product and product.pk)
+        with open(path) as csvfile_pointer:
+            row_reader = csv.DictReader(csvfile_pointer, delimiter=',', quotechar='"')
+            for row in row_reader:
+                p_class = self.extract_product_class_from_row(row)
+                product = self.update_product_class_from_row(self.get_product(row), row, p_class)
+                print(
+                    "PClass Name: " + row['NEW GROUP'],
+                    "PClass Name@DB", p_class,
+                    "Product ID: " + row['Product ID'],
+                    "Product Name@DB: ", product and product.pk)
         with open(json_file) as jsonfile_pointer:
             json_data = json.load(jsonfile_pointer)
             for attribute_data in json_data:
