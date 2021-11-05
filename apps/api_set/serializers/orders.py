@@ -239,6 +239,47 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     def get_total_incl_tax(self, instance):
         return float(instance.total_incl_tax)
 
+    is_returnable = serializers.SerializerMethodField()
+    is_cancellable = serializers.SerializerMethodField()
+    can_return_until = serializers.SerializerMethodField()
+    max_time_to__return = serializers.SerializerMethodField()
+
+    def get_is_returnable(self, instance):
+        order = instance
+        if not order.delivery_time or order.status != settings.ORDER_STATUS_DELIVERED:
+            return {
+                'status': False,
+                'reason': 'Order is not yet delivered!'
+            }
+        if order.is_return_time_expired:
+            return {
+                'status': False,
+                'reason': 'Return Time Elapsed.'
+            }
+        if order.lines.filter(status__in=[
+            settings.ORDER_STATUS_RETURN_REQUESTED,
+            settings.ORDER_STATUS_RETURN_APPROVED,
+            settings.ORDER_STATUS_RETURNED
+        ]).exists():
+            return {
+                'status': False,
+                'reason': 'You already have initiated / processed a return request.'
+            }
+
+        return {
+                'status': True,
+                'reason': f'You can return any item within ' + str(order.max_time_to__return)
+            }
+
+    def get_is_cancellable(self, instance):
+        return instance.is_cancelable
+
+    def get_max_time_to__return(self, instance):
+        return str(instance.max_time_to__return)
+
+    def get_can_return_until(self, instance):
+        return str(instance.max_time_to__return)
+
     class Meta:
         model = Order
         fields = (
@@ -255,7 +296,10 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             "shipping_address",
             "billing_address",
             'should_show_line_status',
+            'max_time_to__return',
             'num_lines', 'status', 'date_placed', 'lines', 'info',
+            'is_returnable', 'is_cancellable', 'can_return_until',
+
         )
 
 

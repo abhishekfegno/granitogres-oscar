@@ -105,7 +105,7 @@ OSCAR_ORDER_STATUS_PIPELINE = {
 }
 
 OSCAR_USER_CANCELLABLE_ORDER_STATUS = (
-    'Placed', 'Order Confirmed',  'Out For Delivery',
+    'Placed', 'Order Confirmed', 'Packed', 'Shipped',  'Out For Delivery',
 )
 
 OSCAR_SEND_EMAIL_ORDER_STATUS = (
