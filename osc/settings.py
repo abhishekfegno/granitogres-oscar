@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'apps.logistics.apps.LogisticsConfig',
     'apps.buynow.apps.BuyNowConfig',
 
-    'apps.couriers.delhivery',
+    'couriers.delhivery',
 
     'oscar',
     'apps.address.apps.AddressConfig',

@@ -1,0 +1,108 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load i18n humanize %}
+
+{% block title %}
+Pickups | {{ block.super }}
+{% endblock %}
+{% block body_class %} {{ block.super }} Pickups {% endblock %}
+{% block navbar %}
+{% if not is_popup %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+{% block dashboard_nav %}
+{% if not is_popup %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+{% block breadcrumbs %}
+
+<ul class="breadcrumb">
+    <li>
+        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+    </li>
+    <li >
+        <a href="{% url 'dashboard-pickup:list' %}">Pickups</a>
+    </li>
+    <li class="active">
+        Pickups
+    </li>
+</ul>
+{% endblock %}
+
+{% block header %}
+<div class="page-header">
+    <h1> Request new Pickup!</h1>
+</div>
+{% endblock header %}
+
+{% block dashboard_content %}
+<div class="table-header">
+    <h2>Pickups</h2>
+</div>
+<style>
+.animatemove{
+  animation: MoveUpDown 1s linear infinite;
+  position: relative;
+}
+@keyframes MoveUpDown {
+  0%, 100% {top: 0px;}
+  50% {top: 5px}
+}
+</style>
+<div class="well">
+    {% if another_pickup_permitted %}
+    <table class="table table-stripped ">
+        <caption> Sorry! Your last request is not yet Collected, Any order until then will be picked up on arrival! </caption>
+    </table>
+
+    {% else %}
+    <div class="row">
+        <div class="col-md-2 row-eq-height"  style="text-align:center; padding-top:60px;">
+            <img src="https://shopichigo.com/wp-content/uploads/2016/12/box-icon.png" height="140px">
+        </div>
+        <div class="col-md-6 row-eq-height">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-info"> Request a Pickup! </button>
+            </form>
+
+        </div>
+        <div class="col-md-4 row-eq-height"  style="text-align:center; padding-top:60px;">
+            <img src="https://cl.delhivery.com/assets/images/thank-you-truck.png" class="animatemove" height="140px">
+        </div>
+    </div>
+    {% endif %}
+</div>
+<script>
+    var date_input = document.getElementById('id_date');
+    var time_input = document.getElementById('id_time');
+    var expected_orders = document.getElementById('id_expected_orders');
+    if (expected_orders) expected_orders.classList.add('form-control');
+
+    if (date_input && time_input){
+        date_input.setAttribute('type', 'date');
+        date_input.classList.add('form-control');
+        time_input.setAttribute('type', 'time');
+        time_input.classList.add('form-control');
+        time_input.classList.add('form-control');
+
+        var date = new Date();
+        date.setDate(date.getDate() + 1);
+
+        var day = date.getDate();
+        var month = date.getMonth() + 1;
+        var year = date.getFullYear();
+
+        if (month < 10) { month = "0" + month };
+        if (day < 10) { day = "0" + day };
+
+        var tomorrow = year + "-" + month + "-" + day;
+        console.log(tomorrow);
+        date_input.setAttribute('value',  tomorrow);
+        time_input.value = '10:00' ;
+    }
+
+</script>
+{% endblock dashboard_content %}

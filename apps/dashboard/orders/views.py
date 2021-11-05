@@ -4,9 +4,9 @@ from django.forms import modelform_factory
 from oscar.apps.dashboard.orders.views import OrderDetailView as OscarOrderDetailView, OrderListView as OscarOrderListView
 from django.utils.translation import gettext_lazy as _
 
+from couriers.delhivery.facade import Delhivery
 from apps.dashboard.orders.forms import OrderSearchForm
 from apps.order.models import OrderNote, Order
-from apps.order.processing import EventHandler
 from apps.payment.refunds import RefundFacade
 from lib.exceptions import AlertException
 
@@ -61,6 +61,16 @@ class OrderDetailView(OscarOrderDetailView):
                 EventHandler().handle_order_line_status_change(line, new_status, already_refunded_together=True, note_msg=msgs, note_type="Admin")
                 msgs.append(msg)
                 # line.set_status(new_status)
+                if new_status == settings.ORDER_STATUS_REFUND_APPROVED:
+                    d = Delhivery()
+                    d.pack_return(order)
+                    from apps.order.processing import EventHandler
+                    eh = EventHandler()
+                    note_msg = f"Return request for {len(lines)} Item(s)  Return has been approved"
+                    note_msg_2 = f"Return Pickup initiated for {len(lines)} Item(s)!"
+                    eh.create_note(order, message=note_msg, note_type="System")
+                    eh.create_note(order, message=note_msg_2, note_type="System")
+
         except AlertException as ae:
             messages.error(request, str(ae))
 

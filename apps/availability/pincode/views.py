@@ -180,6 +180,62 @@ def check_availability(request):
     return Response(out)
 
 
+@api_view(['GET'])
+def check_delivery_availability(request, pincode):
+    """
+    request : GET
+    params : /../../<pincode>/
+    RETURN : 'pincode' Is a deliverable location if 'status' => true
+    """
+
+    # availability optimized for chikaara. (Inside kerala only.)
+    out = {
+        "status": "unavailable",
+        "is_available": False,
+        "status_text": None,
+        "response": None,
+        "expected_delivery_on": "",
+        "courier_partner": "Delhivery",
+    }
+    product_id = request.GET.get('product')
+    # pincode = request.GET.get('pincode')
+    if not pincode:
+        return Response({
+            "status": "pincode_required",
+            "status_text": "Pincode Required"
+        }, status=400)
+    if not pincode.isdigit() or not len(pincode) == 6:
+        return Response({
+            "status": "pincode_invalid",
+            "status_text": "Invalid Pincode"
+        }, status=400)
+
+    from couriers.delhivery.models import DelhiveryResponse
+    status, response = DelhiveryResponse.verify(pincode)
+
+    if not status:
+        return Response(response, status=400)
+
+    local_area = ((response['inc'] + ', ') if response['inc'] else '') + response['district']
+    out['status'] = 'available'
+    out['is_available'] = True
+    out['status_text'] = local_area
+    out['response'] = response
+    if request.GET.get('set_session'):
+        request.session[settings.PIN_CODE] = pincode
+        request.session[f'{settings.PIN_CODE}_name'] = local_area
+        request.user.pincode = pincode
+        request.user.pincode_name = local_area
+        request.user.save()
+    return Response(out)
+
+    # out['status'] = "delivery_not_available"
+    # out['status_text'] = "We could not delivery to this area!"
+
+    # TODO : Implement Check With Shipping Partners to get Estimated delivery or Price.
+    # return Response(out, status=400)
+
+
 
 
 

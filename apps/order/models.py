@@ -28,7 +28,7 @@ def length_in_weeks(value):
     raise ValueError(f'day should be between 0 and 7')
 
 
-class   TimeSlotConfiguration(models.Model):
+class TimeSlotConfiguration(models.Model):
     start_time = models.TimeField(help_text="Delivery Time Starting of this slot")
     end_time = models.TimeField(help_text="(Expected) Delivery Time Ending of this slot")
     deliverable_no_of_orders = models.PositiveSmallIntegerField(help_text="No of Orders you can handle in this Slot! "
@@ -269,6 +269,24 @@ class TimeSlot(models.Model):
 class Order(AbstractOrder):
     date_delivered = models.DateTimeField(null=True, blank=True, help_text="Date of Consignment Delivery")
     slot = models.ForeignKey(TimeSlot, on_delete=models.SET_NULL, null=True, related_name='orders')
+    pickup = models.ForeignKey('delhivery.RequestPickUp', null=True, blank=True, on_delete=models.SET_NULL,
+                               related_name='delhivery_consignments')
+    waybill = models.CharField(null=True, max_length=64)
+
+    def payment_type_for_delhivery(self):
+        # Prepaid / COD / Pickup / REPL
+        if self.status in dict(settings.OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_AFTER_DELIVERY).keys():
+            return "Pickup"
+        from apps.payment.models import Source
+        s = Source.objects.filter(order=self).last()
+        from apps.payment.utils.cash_payment import Cash
+        if s.source_type == Cash.name:
+            return 'COD'
+        return 'Prepaid'
+
+    @property
+    def shipping_description(self):
+        return f"{self.num_lines} items from Chikaara Cosmetics against Order #{self.number} "
 
     def _create_order_status_change(self, old_status, new_status):
         # Not setting the status on the order as that should be handled before
