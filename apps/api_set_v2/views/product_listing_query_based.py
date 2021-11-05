@@ -168,8 +168,16 @@ def product_list(request, category='all', **kwargs):
         params = {'search': _search, 'range': product_range, "category": cat, "pclass": _pclass}
         rc = recommended_class(queryset, **params)
         # import pdb;pdb.set_trace()
+        
+        cat_data = {}
+        if cat:
+            cat_data['seo_title'] = cat.seo_title
+            cat_data['seo_description'] = cat.seo_description
+            cat_data['seo_keywords'] = cat.seo_keywords
+            cat_data['ogimage'] = request.build_absolute_uri(cat.ogimage.url) if cat.ogimage else None
+        
         return list_api_formatter(request, page_obj=page_obj, results=product_data, product_class=rc, title=title,
-                                  bread_crumps=get_breadcrumb(_search, cat, product_range), seo_fields=[field for field in Category.objects.filter(slug=_search).values('id', 'slug', 'seo_title', 'seo_description', 'seo_keywords', 'ogimage') if _search ])
+                                  bread_crumps=get_breadcrumb(_search, cat, product_range), seo_fields=cat_data)
 
     if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not any([_search, _filter, _sort, _offer_category, _range, ]):
         c_key = cache_key.product_list__key.format(page_number, page_size, category)
