@@ -247,6 +247,11 @@ class Product(AbstractProduct):
     def name(self):
         return self.get_title()
 
+    @property
+    def absolute_image_path(self):
+        item = self.primary_image()
+        return settings.MEDIA_ROOT + str(item.image.path)
+
     def __cached_primary_image_logic(self):
         img = self.primary_image()
         return img['original'] if type(img) is dict else img.thumbnail_mobile_listing

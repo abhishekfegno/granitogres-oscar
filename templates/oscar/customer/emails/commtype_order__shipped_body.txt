@@ -1,6 +1,6 @@
 {% load currency_filters i18n %}{% blocktrans with order_number=order.number %}Hello,
 
-We are pleased to confirm your order {{ order_number }} has been Packed.{% endblocktrans %}
+We are pleased to confirm your order {{ order_number }} has been Shipped.{% endblocktrans %}
 
 {% trans 'Your order contains:' %}
 
@@ -18,4 +18,4 @@ We are pleased to confirm your order {{ order_number }} has been Packed.{% endbl
 {{ status_url }}{% endblocktrans %}
 {% endif %}
 
-{% blocktrans %}The team{% endblocktrans %}
+{% blocktrans %}The team{% endblocktrans%}
