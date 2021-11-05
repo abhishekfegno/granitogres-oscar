@@ -251,7 +251,7 @@ class Product(AbstractProduct):
     def absolute_image_path(self):
         if self.primary_image():
             item = self.primary_image().original
-            return settings.MEDIA_ROOT + '/' + str(item)
+            return settings.MEDIA_ROOT + '/' + str(item.url)
         return image_not_found()
 
     def __cached_primary_image_logic(self):

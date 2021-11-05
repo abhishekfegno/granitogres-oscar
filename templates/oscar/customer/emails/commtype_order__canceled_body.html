@@ -65,7 +65,7 @@
                 <tbody>
                 {% for line in order.lines.all %}
                   <tr>
-                    <td><img src="https://picsum.photos/100" /></td>
+                    <td><img src="{{ line.product.absolute_image_path }}"/></td>
                     <td>{{ line.product }}</td>
                     <td>{{ line.quantity }}</td>
                     <td>{{ line.unit_price_tax }}</td>
