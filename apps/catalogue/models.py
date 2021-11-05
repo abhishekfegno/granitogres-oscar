@@ -249,8 +249,10 @@ class Product(AbstractProduct):
 
     @property
     def absolute_image_path(self):
-        item = self.primary_image()
-        return settings.MEDIA_ROOT + str(item.image.path)
+        if self.primary_image():
+            item = self.primary_image().original
+            return settings.MEDIA_ROOT + '/' + str(item)
+        return image_not_found()
 
     def __cached_primary_image_logic(self):
         img = self.primary_image()
