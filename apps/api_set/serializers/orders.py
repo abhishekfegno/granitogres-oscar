@@ -364,25 +364,24 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
         } for note in instance.notes.all().order_by('-date_updated')]
 
     def get_status_changes(self, instance):
-        out = [
-        ]
+        out = []
 
         init = {
             status.new_status: {
                 'old_status': status.old_status,
                 'new_status': status.new_status,
-                'date_created': status.date_created ,        # issue 2. date not comming
+                'date_created': status.date_created,        # issue 2. date not comming
             } for status in instance.status_changes.all().order_by('id')
         }
 
-        if settings.ORDER_SATAUS_PLACED not in init:
+        if not settings.ORDER_STATUS_PLACED in init:
             """
             To add "Placed" for order status which donot have a "Placed" status in "status_changes".
             """
             out.append({
                 'old_status': None,
                 'new_status': settings.ORDER_SATAUS_PLACED,
-                'date_created': instance.date_created,  # issue 2. date not comming
+                'date_created': instance.date_created,          # issue 2. date not comming
             })
 
         added_statuses = list(init.keys())
