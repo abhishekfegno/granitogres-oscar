@@ -1,6 +1,6 @@
-{% load currency_filters i18n %}{% blocktrans with order_number=order.number %}Hello,
+{% load currency_filters i18n %}Hello,
 
-We are happy to inform you the delivery of your order {{ order_number }} has been successfully completed!.{% endblocktrans %}
+We are happy to inform you the delivery of your order {{ order.number }} has been successfully completed!.
 
 
 {% for line in order.lines.all %} * {{ line.title }} -  {{ line.line_price_incl_tax|currency:order.currency }}
@@ -17,4 +17,4 @@ You can view the status of this order at the below URL:
 {{ status_url }}
 {% endif %}
 
-{% blocktrans %}The team{% endblocktrans %}
+The team

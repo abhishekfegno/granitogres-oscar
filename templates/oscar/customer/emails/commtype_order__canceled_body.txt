@@ -1,6 +1,6 @@
-{% load currency_filters i18n %}{% blocktrans with order_number=order.number %}Hello,
+{% load currency_filters i18n %}Hello,
 
-We are pleased to confirm your order {{ order_number }} has been canceled.{% endblocktrans %}
+We are pleased to confirm your order {{ order.number }} has been canceled.
 
 
 {% for line in order.lines.all %}

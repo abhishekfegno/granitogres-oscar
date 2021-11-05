@@ -1,1 +1,1 @@
-{% load i18n %}{% blocktrans with number=order.number %}Your order {{ number }} has been canceled!{% endblocktrans %}
+{% load i18n %}Your order {{ order.number }} has been canceled!

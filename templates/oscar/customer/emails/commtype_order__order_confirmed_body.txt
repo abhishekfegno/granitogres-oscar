@@ -1,7 +1,7 @@
-{% load currency_filters i18n %}{% blocktrans with order_number=order.number %}Hello,
+{% load currency_filters i18n %}Hello,
 
-We are pleased to confirm your order {{ order_number }} has been received and
-will be processed shortly.{% endblocktrans %}
+We are pleased to confirm your order {{ order.number }} has been received and
+will be processed shortly.
 
 
 
