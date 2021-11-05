@@ -12,6 +12,7 @@ from apps.api_set.serializers.catalogue import ProductListSerializer
 from apps.api_set_v2.serializers.catalogue import ProductSimpleListSerializer, custom_ProductListSerializer
 from apps.order.models import Order, Line
 from apps.payment.refunds import RefundFacade
+from apps.payment.utils.cash_payment import Cash
 from apps.utils.utils import get_statuses
 
 
@@ -363,13 +364,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
         } for note in instance.notes.all().order_by('-date_updated')]
 
     def get_status_changes(self, instance):
-        out = [
-            # {
-            #     'old_status': None,               # issue 1. fixed
-            #     'new_status': settings.ORDER_STATUS_PLACED,
-            #     'date_created': instance.date_placed,
-            # }
-        ]
+        out = []
 
         init = {
             status.new_status: {
@@ -384,7 +379,13 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
         items = sorted(settings.OSCAR_ORDER_STATUS_UNTIL_DELIVER, key=lambda x: x[0])
 
         if not is_return_initiated:
+            """
+            From Placed to Delivered or Placed to Cancelled
+            """
             if not is_cancelled:
+                """
+                From Placed to Delivered.
+                """
                 earlier_status = None
                 for display_order, status in items:
                     if status in init:
@@ -397,24 +398,24 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                         })
                     earlier_status = status
             else:
-                if instance.sources.all().select_related('source_type').last().source_type.name == 'Cash':
-                    pass
-                    # out = list(init.values())
-                    # out.append({
-                    #     'old_status': out[-1]['new_status'],`
-                    #     'new_status': 'Cancelled',
-                    #     'date_created': out[-1]['date_created']
-                    # })
-                else:
-                    out = list(init.values())
+                """
+                Placed to Cancelled.
+                """
+                is_cod = instance.sources.all().select_related('source_type').last().source_type.name == Cash.name
+                out = list(init.values())
+                if not is_cod:
+                    """ if Online Payment. """
                     out.append({
                         'old_status': out[-1]['new_status'],
                         'new_status': 'Refund Initiated',
                         'date_created': out[-1]['date_created']
                     })
         else:
-            earlier_status = None
+            """
+            From Delivered to Returned
+            """
 
+            earlier_status = None
             for returned_status in settings.OSCAR_ADMIN_LINE_POST_DELIVERY_ORDER_STATUSES:
                 if returned_status in init:
                     out.append(init[returned_status])
