@@ -2,22 +2,19 @@
 
 We are happy to inform you the delivery of your order {{ order_number }} has been successfully completed!.{% endblocktrans %}
 
-{% trans 'Your order contains:' %}
 
-{% for line in order.lines.all %} * {{ line.title }} - {%  trans 'quantity:' %} {{ line.quantity }} - {% trans 'price:' %} {{ line.line_price_incl_tax|currency:order.currency }}
+{% for line in order.lines.all %} * {{ line.title }} -  {{ line.line_price_incl_tax|currency:order.currency }}
 {% endfor %}
-{% trans 'Basket total:' %} {{ order.basket_total_incl_tax|currency:order.currency }}
-{% trans 'Shipping:' %} {{ order.shipping_incl_tax|currency:order.currency }}
-{% trans 'Order Total:' %} {{ order.total_incl_tax|currency:order.currency }}
 
-{% trans 'Shipping address:' %}
+
+
 
 {% for field in order.shipping_address.active_address_fields %}  {{ field }}
 {% endfor %}
 
 {% if status_url %}
-{% blocktrans %}You can view the status of this order at the below URL:
-{{ status_url }}{% endblocktrans %}
+You can view the status of this order at the below URL:
+{{ status_url }}
 {% endif %}
 
 {% blocktrans %}The team{% endblocktrans %}
