@@ -56,7 +56,8 @@ OSCAR_GOOGLE_ANALYTICS_ID = None
 # Other statuses
 ORDER_STATUS_PLACED = 'Placed'
 ORDER_STATUS_CONFIRMED = 'Order Confirmed'
-# ORDER_STATUS_SHIPPED = 'Shipped'
+ORDER_STATUS_PACKED = 'Packed'
+ORDER_STATUS_SHIPPED = 'Shipped'
 ORDER_STATUS_OUT_FOR_DELIVERY = 'Out For Delivery'
 ORDER_STATUS_DELIVERED = 'Delivered'
 ORDER_STATUS_RETURN_REQUESTED = 'Return Requested'
@@ -77,8 +78,10 @@ admin_or_staff = lambda user, url_name, url_args, url_kwargs: user.is_staff or u
 OSCAR_ORDER_STATUS_UNTIL_DELIVER = [
     (1, ORDER_STATUS_PLACED),
     (2, ORDER_STATUS_CONFIRMED),
-    (3, ORDER_STATUS_OUT_FOR_DELIVERY),
-    (4, ORDER_STATUS_DELIVERED),
+    (3, ORDER_STATUS_PACKED),
+    (4, ORDER_STATUS_SHIPPED),
+    (5, ORDER_STATUS_OUT_FOR_DELIVERY),
+    (6, ORDER_STATUS_DELIVERED),
 ]
 
 OSCAR_ORDER_STATUS_PIPELINE = {
@@ -87,14 +90,15 @@ OSCAR_ORDER_STATUS_PIPELINE = {
     # admin / user can cancel an order / an item
 
     'Placed': ('Order Confirmed', 'Payment Declined', 'Canceled'),  # admin / user can cancel an order / an item
-    'Order Confirmed': ('Out For Delivery', 'Delivered', 'Canceled'),  # only admin can set these statuses
+    'Order Confirmed': ('Packed', 'Out For Delivery', 'Delivered', 'Canceled'),  # only admin can set these statuses
+    'Packed': ('Shipped', 'Out For Delivery', 'Delivered', 'Canceled'),  # only admin can set these statuses
+    'Shipped': ('Out For Delivery', 'Delivered', 'Canceled'),  # only admin can set these statuses
     'Out For Delivery': ('Delivered', 'Canceled'),  # only admin can set these statuses
     'Delivered': ('Return Requested', ),
     'Return Requested': ('Return Approved', ),
     'Return Approved': ('Returned', ),
     'Payment Declined': (),
     'Canceled': (),
-
 }
 
 OSCAR_USER_CANCELLABLE_ORDER_STATUS = (
