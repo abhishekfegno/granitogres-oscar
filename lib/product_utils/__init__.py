@@ -126,13 +126,13 @@ class ClassRecommendation(object):
             min_price=Min('price_excl_tax'),
         )
 
-    def render(self, _id, _max=0.0, _min=0.0, display_classes=False):
+    def render(self, _id,  display_classes=False):
         if display_classes:
             product_classes = ProductClass.objects.all().values('id', 'name')
         else:
             product_classes = []
         return {
-            'id': None,
+            'id': _id,
             **self.get_max_min(_id),
             'product_classes': product_classes
         }
