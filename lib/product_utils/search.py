@@ -13,7 +13,7 @@ def _trigram_search(queryset, search, extends=True):
     return queryset.annotate(
         similarity=trigram_similarity,
     ).filter(
-        similarity__gt=0.7,
+        similarity__gt=0.07,
     ).order_by('-similarity')
 
 
