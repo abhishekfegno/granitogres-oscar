@@ -15,4 +15,4 @@ We are pleased to confirm your order {{ order.number }} is out for delivery.
 {% if status_url %}
 You can view the status of this order at the below URL:
 {{ status_url }}
-
+{% endif %}

@@ -17,4 +17,3 @@ You can view the status of this order at the below URL:
 {{ status_url }}
 {% endif %}
 
-The team
