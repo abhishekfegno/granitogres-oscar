@@ -218,6 +218,7 @@ class ProductDetailWebSerializer(ProductAttributeFieldMixin, ProductPriceFieldMi
             'benifits',
             'other_product_info',
             'variable_weight_policy',
+            'seo_title', 'seo_description', 'seo_keywords', 'search_tags'
             # 'deliverable',
         )
 

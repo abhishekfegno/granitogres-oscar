@@ -16,7 +16,7 @@ from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.availability.models import PinCode
 from apps.catalogue.models import Category, Product
 from apps.dashboard.custom.models import HomePageMegaBanner, InAppBanner, OfferBanner, TopCategory, OfferBox, \
-    InAppFullScreenBanner, InAppSliderBanner, SocialMediaPost
+    InAppFullScreenBanner, InAppSliderBanner, SocialMediaPost, SiteConfig
 from apps.utils import banner_not_found
 from lib.cache import cache_library
 
@@ -251,6 +251,9 @@ def index(request, *a, **k):
                 'color': '#555',
             },
         ]
+        out['siteconfig'] = SiteConfig.objects.all().values('home_seo_title', 'home_seo_description', 'home_seo_keyword',
+                                                            'home_seo_image', 'home_seo_image_alt')
+
         return out
 
     # return Response(_inner())
