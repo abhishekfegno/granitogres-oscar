@@ -73,9 +73,9 @@ class OrderListSerializer(serializers.ModelSerializer):
             }
 
         return {
-                'status': True,
-                'reason': f'You can return any item within ' + str(order.max_time_to__return)
-            }
+            'status': True,
+            'reason': f'You can return any item within ' + str(order.max_time_to__return)
+        }
 
     def get_is_cancellable(self, instance):
         return instance.is_cancelable
@@ -107,7 +107,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 
     def get_billing_address(self, instance):
         return InlineBillingAddressSerializer(instance.billing_address, context=self.context).data
-    
+
     def get_info(self, instance) -> dict:
         is_cancelled = instance.status == settings.ORDER_STATUS_CANCELED
         has_cancelled_items = any([
@@ -197,10 +197,10 @@ class OrderDetailSerializer(serializers.ModelSerializer):
                 'message': "Return request waiting for approval"
             }
         return {
-                'type': SUCCESS,
-                'has_cancelled_items': has_cancelled_items,
-                'message': ""
-            }
+            'type': SUCCESS,
+            'has_cancelled_items': has_cancelled_items,
+            'message': ""
+        }
 
     def get_should_show_line_status(self, instance) -> bool:
         return instance.status in get_statuses(240)
@@ -268,9 +268,9 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             }
 
         return {
-                'status': True,
-                'reason': f'You can return any item within ' + str(order.max_time_to__return)
-            }
+            'status': True,
+            'reason': f'You can return any item within ' + str(order.max_time_to__return)
+        }
 
     def get_is_cancellable(self, instance):
         return instance.is_cancelable
@@ -364,7 +364,8 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
         } for note in instance.notes.all().order_by('-date_updated')]
 
     def get_status_changes(self, instance):
-        out = []
+        out = [
+        ]
 
         init = {
             status.new_status: {
@@ -373,15 +374,27 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                 'date_created': status.date_created ,        # issue 2. date not comming
             } for status in instance.status_changes.all().order_by('id')
         }
+
+        if settings.ORDER_SATAUS_PLACED not in init:
+            """
+            To add "Placed" for order status which donot have a "Placed" status in "status_changes".
+            """
+            out.append({
+                'old_status': None,
+                'new_status': settings.ORDER_SATAUS_PLACED,
+                'date_created': instance.date_created,  # issue 2. date not comming
+            })
+
         added_statuses = list(init.keys())
         is_cancelled = settings.ORDER_STATUS_CANCELED in added_statuses
         is_return_initiated = settings.ORDER_STATUS_RETURN_REQUESTED in added_statuses
-        items = sorted(settings.OSCAR_ORDER_STATUS_UNTIL_DELIVER, key=lambda x: x[0])
 
         if not is_return_initiated:
             """
             From Placed to Delivered or Placed to Cancelled
             """
+            items = sorted(settings.OSCAR_ORDER_STATUS_UNTIL_DELIVER, key=lambda x: x[0])
+
             if not is_cancelled:
                 """
                 From Placed to Delivered.
@@ -401,6 +414,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                 """
                 Placed to Cancelled.
                 """
+
                 is_cod = instance.sources.all().select_related('source_type').last().source_type.name == Cash.name
                 out = list(init.values())
                 if not is_cod:
