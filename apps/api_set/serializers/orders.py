@@ -337,9 +337,10 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
         added_statuses = list(init.keys())
         is_cancelled = settings.ORDER_STATUS_CANCELED in added_statuses
         is_return_initiated = settings.ORDER_STATUS_RETURN_REQUESTED in added_statuses
+        items = sorted(settings.OSCAR_ORDER_STATUS_UNTIL_DELIVER, key=lambda x: x[0])
+
         if not is_return_initiated:
             if not is_cancelled:
-                items = sorted(settings.OSCAR_ORDER_STATUS_UNTIL_DELIVER, key=lambda x: x[0])
                 earlier_status = None
                 for display_order, status in items:
                     if status in init:
@@ -354,20 +355,24 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
             else:
                 if instance.sources.all().select_related('source_type').last().source_type.name == 'Cash':
                     pass
-                    out = list(init.values())
-                    out.append({
-                        'old_status': out[-1]['new_status'],
-                        'new_status': 'Cancelled',
-                        'date_created': out[-1]['date_created']
-                    })
+                    # out = list(init.values())
+                    # out.append({
+                    #     'old_status': out[-1]['new_status'],
+                    #     'new_status': 'Cancelled',
+                    #     'date_created': out[-1]['date_created']
+                    # })
                 else:
-
                     out = list(init.values())
-                    out.append({
+                    for display_order, status in items:
+                        if status in init:
+                            out.append(init[status])
+                        else:
+                            out.append({
                                 'old_status': out[-1]['new_status'],
                                 'new_status': 'Refund Initiated',
                                 'date_created': out[-1]['date_created']
                             })
+
         else:
             earlier_status = None
 
