@@ -357,6 +357,13 @@ class SiteConfig(SingletonModel):
 
     referrer = 'site-config'
 
+    # seo_title = models.CharField(max_length=120, null=True, blank=True)
+    # seo_description = models.CharField(max_length=255, null=True, blank=True)
+    # seo_keywords = models.CharField(max_length=255, null=True, blank=True)
+    # search_tags = models.TextField(null=True, blank=True)
+    # seo_image = models.FileField(null=True, blank=True)
+    # seo_image_alt = models.FileField(null=True, blank=True)
+
     @property
     def expected_out_for_delivery_delay(self):
         return timedelta(minutes=self.EXPECTED_OUT_FOR_DELIVERY_DELAY)
