@@ -374,15 +374,15 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
             } for status in instance.status_changes.all().order_by('id')
         }
 
-        if settings.ORDER_STATUS_PLACED not in init:
-            """
-            To add "Placed" for order status which do not have a "Placed" status in "status_changes".
-            """
-            out.append({
-                'old_status': None,
-                'new_status': settings.ORDER_STATUS_PLACED,
-                'date_created': instance.date_placed,          # issue 2. date not comming
-            })
+        # if settings.ORDER_STATUS_PLACED not in init:
+        #     """
+        #     To add "Placed" for order status which do not have a "Placed" status in "status_changes".
+        #     """
+        #     out.append({
+        #         'old_status': None,
+        #         'new_status': settings.ORDER_STATUS_PLACED,
+        #         'date_created': instance.date_placed,          # issue 2. date not comming
+        #     })
 
         added_statuses = list(init.keys())
         is_cancelled = settings.ORDER_STATUS_CANCELED in added_statuses
