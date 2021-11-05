@@ -91,6 +91,7 @@ urlpatterns = [
     path('api/v2/push/', include('apps.utils.push_urls')),
     path('api/v1/push/', include('apps.utils.push_urls')),
     path('api/v2/policies<path:path>', policy_html, name="policies"),
+    path('dashboard/', include('couriers.delhivery.urls')),
     path('', include('apps.users.urls')),
     path('', include('apps.dashboard.custom.urls')),
     path('', include(apps.get_app_config('oscar').urls[0])),  # > Django-2.0

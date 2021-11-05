@@ -1,0 +1,81 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load i18n humanize %}
+
+{% block title %}
+Pickups | {{ block.super }}
+{% endblock %}
+{% block body_class %} {{ block.super }} Pickups {% endblock %}
+{% block navbar %}
+{% if not is_popup %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+{% block dashboard_nav %}
+{% if not is_popup %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li>
+        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+    </li>
+    <li class="active">
+        Pickups
+    </li>
+</ul>
+{% endblock %}
+
+{% block header %}
+<div class="page-header">
+    <h1><a href="{% url 'dashboard-pickup:create' %}" class="btn btn-primary btn-lg pull-right">
+        <i class="icon-plus"></i> Request New Pickup</a>
+        Pickups </h1>
+</div>
+{% endblock header %}
+
+{% block dashboard_content %}
+<div class="table-header">
+    <h2>Pickups</h2>
+</div>
+<div class="well">
+    <table class="table table-stripped ">
+        <thead>
+        <tr>
+            <th class="table-header">ID</th>
+            <th class="table-header">Pickup Requested Date</th>
+            <th class="table-header">Pickup Expected Date</th>
+            <th class="table-header">Response</th>
+            <th class="table-header">Status</th>
+            <th class="table-header">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in object_list %}
+        <tr>
+            <td>{{ object.id }}</td>
+            <td>{{ object.created_at|naturaltime }}</td>
+            <td>{{ object.date }}, {{ object.time }} </td>
+            <td>{{ object.response_html|safe }}</td>
+            <td>
+                {% if not object.completed %}
+                    <img src="{{ STATIC_URL }}img/processing.gif" height="30px">
+                {% else %}
+                    <img src="{{ STATIC_URL }}img/tick.jpeg" height="30px">
+                {% endif %}
+            </td>
+            <td>{% if not object.completed %}
+                <form action="{% url 'dashboard-pickup:update' pk=object.pk %}" method="post">
+                    <input type="hidden" hidden  name="completed" value="1">
+                    <button class="btn btn-success" type="submit">Mark as Collected!</button>
+                    <small class="text-muted"> This will update status of  all 'PACKED' orders to 'SHIPPED'</small>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock dashboard_content %}

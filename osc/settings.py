@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'apps.logistics.apps.LogisticsConfig',
     'apps.buynow.apps.BuyNowConfig',
 
+    'couriers.delhivery',
+
     'oscar',
     'apps.address.apps.AddressConfig',
     'apps.basket.apps.BasketConfig',

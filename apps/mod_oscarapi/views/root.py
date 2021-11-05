@@ -27,6 +27,7 @@ def PUBLIC_APIS(r, f):
             ("UnSet Session", reverse("availability-api:unset-zone", request=r, format=f)),
             ("User Profile", reverse("rest_user_details", request=r, format=f)),
             ("API Logout", reverse("rest_logout", request=r, format=f)),
+            ("New Pincode Availability API", reverse("availability-api:check-delivery-availability", request=r, format=f)),
         ])),
         ("Index Page", collections.OrderedDict([
             ("Home", reverse("api-home", request=r, format=f)),

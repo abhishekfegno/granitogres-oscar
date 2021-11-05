@@ -9,6 +9,7 @@ from oscar.apps.order import processing
 from apps.payment.models import SourceType
 from oscar.core.loading import get_model
 
+from couriers.delhivery.facade import Delhivery
 from .models import Order, PaymentEventType
 from ..payment import refunds
 from ..payment.refunds import RefundFacade
@@ -77,13 +78,15 @@ class EventHandler(processing.EventHandler):
         if order.status == old_status:
             return
 
-
         self.email_order_status(order, new_status)
 
         self.pipeline_order_lines(order, new_status)
         self.handle_consignments(order, old_status, new_status)
         self.handle_refund(order, old_status, new_status)
+        self.handle_delivery(order, old_status, new_status)
         OrderStatusPushNotification(order.user).send_status_update(order, new_status)
+
+
 
         if note_msg:
             """
@@ -263,6 +266,20 @@ class EventHandler(processing.EventHandler):
         elif new_status in get_statuses(128):
             lines_to_be_cancelled = all_lines.filter(status__in=get_statuses(128))
             self.cancel_stock_allocations(order, lines_to_be_cancelled)
+
+    def handle_delivery(self, order, old_status, new_status):
+        if new_status == settings.ORDER_STATUS_PACKED:
+            d = Delhivery()
+            d.pack_order(order)
+
+        if new_status == settings.ORDER_STATUS_CANCELED and old_status not in (
+                settings.ORDER_STATUS_PLACED, settings.ORDER_STATUS_CONFIRMED, settings.ORDER_STATUS_PACKED
+        ):
+            d = Delhivery()
+            d.cancel_courier(order)
+
+        send_sms_for_order_status_change(order)
+
 
 
 
