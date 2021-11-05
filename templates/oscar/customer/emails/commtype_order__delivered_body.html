@@ -64,7 +64,7 @@
                 <tbody>
                 {% for line in order.lines.all %}
                   <tr>
-                    <td><img src="{{ line.product.__cached_primary_image_logic }}" /></td>
+                    <td><img src="{{ line.product.absolute_image_path }}" /></td>
                     <td>{{ line.product }}</td>
                     <td>{{ line.quantity }}</td>
                     <td>{{ line.line_price_incl_tax }}</td>
@@ -73,10 +73,7 @@
 
                   <tr style="margin: 10px 0 20px 0">
                     <td colspan="3" style="font-weight: 700; font-size: large">
-                      Shipping Charge:
-                    </td>
-                    <td colspan="2" style="font-weight: 700; font-size: large">
-                      {{ order.shipping_incl_tax|currency:order.currency }}
+                      Shipping Charge:{{ order.shipping_incl_tax|currency:order.currency }}
                     </td>
                     <br><br>
                     <td colspan="3" style="font-weight: 700; font-size: large">
