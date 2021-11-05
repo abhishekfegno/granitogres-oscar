@@ -381,7 +381,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
             out.append({
                 'old_status': None,
                 'new_status': settings.ORDER_STATUS_PLACED,
-                'date_created': instance.date_created,          # issue 2. date not comming
+                'date_created': instance.date_placed,          # issue 2. date not comming
             })
 
         added_statuses = list(init.keys())
