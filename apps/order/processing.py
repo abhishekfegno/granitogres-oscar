@@ -10,6 +10,7 @@ from apps.payment.models import SourceType
 from oscar.core.loading import get_model
 
 from couriers.delhivery.facade import Delhivery
+from lib.utils.sms import send_sms_for_order_status_change
 from .models import Order, PaymentEventType
 from ..payment import refunds
 from ..payment.refunds import RefundFacade
