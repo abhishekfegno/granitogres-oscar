@@ -374,13 +374,13 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
             } for status in instance.status_changes.all().order_by('id')
         }
 
-        if settings.ORDER_STATUS_PLACED not in init:
+        if not( settings.ORDER_STATUS_PLACED in init ):
             """
             To add "Placed" for order status which donot have a "Placed" status in "status_changes".
             """
             out.append({
                 'old_status': None,
-                'new_status': settings.ORDER_SATAUS_PLACED,
+                'new_status': settings.ORDER_STATUS_PLACED,
                 'date_created': instance.date_created,          # issue 2. date not comming
             })
 
