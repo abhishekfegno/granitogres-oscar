@@ -412,11 +412,11 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                             out.append(init[status])
                         else:
                             out.append({
-                                'old_status': out[-1]['new_status'],
+                                'old_status': earlier_status,
                                 'new_status': 'Refund Initiated',
                                 'date_created': out[-1]['date_created']
                             })
-
+                        earlier_status = status
         else:
             earlier_status = None
 
