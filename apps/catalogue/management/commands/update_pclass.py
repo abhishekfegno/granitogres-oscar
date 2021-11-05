@@ -10,7 +10,7 @@ from apps.catalogue.models import ProductClass, Product, ProductAttributeValue
 from oscar.core.utils import slugify
 
 from apps.catalogue.models import ProductAttribute
-
+from .ppp import ppa
 
 def _slugify(val):
     return slugify(val).replace('-', '_')
@@ -126,20 +126,22 @@ class Command(BaseCommand):
         AttributeOption.objects.all().delete()
         ProductAttribute.objects.all().delete()
 
-        with open(path) as csvfile_pointer:
-            row_reader = csv.DictReader(csvfile_pointer, delimiter=',', quotechar='"')
-            for row in row_reader:
-                p_class = self.extract_product_class_from_row(row)
-                product = self.update_product_class_from_row(self.get_product(row), row, p_class)
-                print(
-                    "PClass Name: " + row['NEW GROUP'],
-                    "PClass Name@DB", p_class,
-                    "Product ID: " + row['Product ID'],
-                    "Product Name@DB: ", product and product.pk)
-        with open(json_file) as jsonfile_pointer:
-            json_data = json.load(jsonfile_pointer)
-            for attribute_data in json_data:
-                self.update_product_attribute(attribute_data)
+        # with open(path) as csvfile_pointer:
+        #     row_reader = csv.DictReader(csvfile_pointer, delimiter=',', quotechar='"')
+        #     for row in row_reader:
+        #         p_class = self.extract_product_class_from_row(row)
+        #         product = self.update_product_class_from_row(self.get_product(row), row, p_class)
+        #         print(
+        #             "PClass Name: " + row['NEW GROUP'],
+        #             "PClass Name@DB", p_class,
+        #             "Product ID: " + row['Product ID'],
+        #             "Product Name@DB: ", product and product.pk)
+        # with open(json_file) as jsonfile_pointer:
+        #     json_data = json.load(jsonfile_pointer)
+        #     for attribute_data in json_data:
+        #         self.update_product_attribute(attribute_data)
+        for attribute_data in ppa:
+            self.update_product_attribute(attribute_data)
 
     def attr_type_descriptor(
             self,
@@ -168,7 +170,7 @@ class Command(BaseCommand):
             "attribute__name": "Salient Feature",
             "attribute__code": "salient_feature",
             "value_text": "Anti Corrosive and Easy to Clean..",
-            "value_color": null,
+            "value_color": None,
             "value_image": ""
           },
         """
