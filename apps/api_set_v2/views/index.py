@@ -251,8 +251,11 @@ def index(request, *a, **k):
                 'color': '#555',
             },
         ]
-        out['siteconfig'] = SiteConfig.objects.all().values('home_seo_title', 'home_seo_description', 'home_seo_keyword',
-                                                            'home_seo_image', 'home_seo_image_alt')
+        out['siteconfig'] = [field for field in SiteConfig.objects.all().values('home_seo_title', 'home_seo_description',
+                                                                                'home_seo_keywords', 'home_seo_image',
+                                                                                'home_seo_image_alt')]
+
+        out['seo_footer'] = [field for field in SiteConfig.objects.all().values('home_seo_footer')]
 
         return out
 

@@ -44,10 +44,6 @@ class CategorySerializer(serializers.ModelSerializer):
             # 'offers_upto',
             'description',
             'children',
-            'seo_title',
-            'seo_description',
-            'seo_keywords',
-            'ogimage',
         )
 
     children = serializers.SerializerMethodField()
