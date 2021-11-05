@@ -401,24 +401,17 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                     pass
                     # out = list(init.values())
                     # out.append({
-                    #     'old_status': out[-1]['new_status'],
+                    #     'old_status': out[-1]['new_status'],`
                     #     'new_status': 'Cancelled',
                     #     'date_created': out[-1]['date_created']
                     # })
                 else:
                     out = list(init.values())
-                    # import pdb;pdb.set_trace()
-                    earlier_status = 'Placed'
-                    for display_order, status in items:
-                        if status in init:
-                            out.append(init[status])
-                        else:
-                            out.append({
-                                'old_status': earlier_status,
-                                'new_status': 'Refund Initiated',
-                                'date_created': out[-1]['date_created']
-                            })
-                        earlier_status = status
+                    out.append({
+                        'old_status': out[-1]['new_status'],
+                        'new_status': 'Refund Initiated',
+                        'date_created': out[-1]['date_created']
+                    })
         else:
             earlier_status = None
 

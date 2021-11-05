@@ -1,117 +1,104 @@
-{% extends 'oscar/customer/emails/base.html' %}
-{% load currency_filters i18n %}
 
-{% block body %}
-<body>
-  <div class="wrapper">
-    <table class="outer" style="width: 100%; font-family: sans-serif;">
-      <tbody>
-        <tr>
-          <td>
-            <img src="{{ STATIC_URL }}/header.png" width="100%; margin:0;" />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            {% block header_01 %}
-            <table style="width: 100%; margin: 10px 0">
-              <tbody>
-                <tr>
-                  <td style="width: 50%"><strong>Order ID</strong></td>
-                  <td><strong>{{ order.number }}}</strong></td>
-                </tr>
-              </tbody>
-            </table>
-            {% endblock %}
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <table style="width: 100%; margin: 5px 0">
-              <tbody>
-                <tr>
-                  <td>Dear, Customer</td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <table style="width: 80%">
-              <tbody>
-                <tr>
-                  <td><strong>Shipping Address</strong></td>
-                </tr>
-                <tr>
-                  <td>
-                    <p>{% for field in order.shipping_address.active_address_fields %}  {{ field }}<br/>
-                      {% endfor %}</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <table style="width: 100%; margin: 10px 0" class="product_table">
-              <thead>
-                <th>Image</th>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-              </thead>
-              <tbody>
-              {% for line in order.lines.all %}
-                <tr>
-                  <td><img src="{{ line.product.primary_image() }}" /></td>
-                  <td>{{ line.title }}</td>
-                  <td>{{ line.quantity }}</td>
-                  <td> {{ line.unit_price_incl_tax }}</td>
-                  <td>{{ line.line_price_incl_tax|currency:order.currency }}</td>
-                </tr>
-                {% endblock %}
-                <tr style="margin: 10px 0 20px 0">
-                  <td colspan="3" style="font-weight: 700; font-size: large">
-                    Total
-                  </td>
-                  <td colspan="2" style="font-weight: 700; font-size: large">
-                    {{ order.total_incl_tax|currency:order.currency }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <table
-              style="
-                width: 70%;
-                margin: auto;
-                text-align: center; font-size: small; font-family:sans-serif;padding: 50px 0; font-weight: 700;">
-              <tbody>
-                <tr>
-                  <td>
-                    Your Order No. {{ order.number }} has been
-                    received. Sit back and relax, while we get your order
-                    ready to dispatch.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
+{% block tbody %}
+<tr>
+    <td class="content-block">
+        <p xmlns="http://www.w3.org/1999/html">{% trans 'Hello,' %}</p>
+        <p>{% blocktrans with order_number=order.number %}We are pleased to confirm your order {{ order_number }}
+            has been Placed. Thank you for choosing ABCHAUZ.{% endblocktrans %}</p>
+    </td>
+</tr>
+        <tbody>
         <tr>
             <td>
-                <img src="{{ STATIC_URL }}/footer.png" style="width: 100%;"/>
+              {% block header_01 %}
+              <table style="width: 100%; margin: 10px 0">
+                <tbody>
+                  <tr>
+                    <td style="width: 50%"><strong>Order ID: {{ order.number }}</strong></td>
+                    <td><strong>Date of order:{{ order.date_placed }}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+              {% endblock %}
             </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</body>
+          </tr>
+          <tr>
+            <td>
+              <table style="width: 100%; margin: 5px 0">
+                <tbody>
+                  <tr>
+                    <td>Dear, Customer</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table style="width: 80%">
+                <tbody>
+                  <tr>
+                    <td><strong>Shipping Address</strong></td>
+                  </tr>
+                  <tr>
+                    <td>
+                        <p>{% for field in order.shipping_address.active_address_fields %}  {{ field }}<br/>
+                        {% endfor %}</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table style="width: 100%; margin: 10px 0" class="product_table">
+                <thead>
+<!--                  <th>Image</th>-->
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Total</th>
+                </thead>
+                <tbody>
+                {% for line in order.lines.all %}
+                  <tr>
+<!--                    <td><img src="" /></td>-->
+                    <td>{{ line.product }}</td>
+                    <td>{{ line.quantity }}</td>
+                    <td>{{ line.line_price_incl_tax }}</td>
+                  </tr>
+                {% endfor %}
+                  <tr style="margin: 10px 0 20px 0">
+                    <td colspan="3" style="font-weight: 700; font-size: large">
+                      Total
+                    </td>
+                    <td colspan="2" style="font-weight: 700; font-size: large">
+                      {{ order.total_incl_tax|currency:order.currency }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table
+                style="
+                  width: 70%;
+                  margin: auto;
+                  text-align: center; font-size: larger; font-family:sans-serif;padding: 50px 0; font-weight: 700;"
+              >
+                <tbody>
+                  <tr>
+                    <td>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+</tbody>
+
+
 {% endblock %}
 <!--</html>-->
