@@ -407,6 +407,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                     # })
                 else:
                     out = list(init.values())
+                    earlier_status = 'Placed'
                     for display_order, status in items:
                         if status in init:
                             out.append(init[status])
