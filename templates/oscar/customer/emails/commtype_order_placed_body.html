@@ -17,7 +17,7 @@
                 <tbody>
                   <tr>
                     <td style="width: 50%"><strong>Order ID: {{ order.number }}</strong></td>
-                    <td><strong>Date of order:{{ order.created_at }}</strong></td>
+                    <td><strong>Date of order:{{ order.date_placed }}</strong></td>
                   </tr>
                 </tbody>
               </table>
@@ -64,7 +64,7 @@
                 <tbody>
                 {% for line in order.lines.all %}
                   <tr>
-                    <td><img src="{{ site }}{{ line.product.absolute_image_path }}" /></td>
+                    <td><img src="{{ site }}{{ line.product.primary_image.original.url }}" /></td>
                     <td>{{ line.product }}</td>
                     <td>{{ line.quantity }}</td>
                     <td>{{ line.line_price_incl_tax }}</td>
