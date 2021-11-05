@@ -9,7 +9,6 @@ will be processed shortly.{% endblock %}
 {% endfor %}
 
 
-{% trans 'Shipping address:' %}
 
 {% for field in order.shipping_address.active_address_fields %}  {{ field }}
 {% endfor %}
