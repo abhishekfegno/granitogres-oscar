@@ -111,22 +111,47 @@ White and Gray=#FFFFFF,#808080
 Wooden Finish=#731b00
 YELLOW=#FFB70B
 Yellow=#FFB70B
-Yellow-Brown=#cc9966
-"""
+Yellow-Brown=#cc9966""".split('\n')
 
 
 class Command(BaseCommand):
     
     def handle(self, *args, **options):
         text_color_attrs = ProductAttribute.objects.filter(code='color')
+        for attr in text_color_attrs:
+            attr.pk = None
+            attr.code = 'secondary_hexcode'
+            attr.name = 'Secondary Hexcode'
+            attr.save()
+
         color_wheel = {}
-        color_attr = ProductAttribute.objects.filter(type=ProductAttribute.COLOR).select_related('product_class').first()
+        # color_attr = ProductAttribute.objects.filter(type=ProductAttribute.COLOR, code="hexcolor").select_related('product_class')
+        # secondary_color_attr = ProductAttribute.objects.filter(type=ProductAttribute.COLOR, code="secondary_hexcode").select_related('product_class').first()
+
         for line in data:
             color, _hex = line.split('=')
             hex_secondary = None
             if ',' in _hex:
                 _hex, hex_secondary = _hex.split(',')
-            color_wheel[color] = {'primary': _hex, 'secondary': hex_secondary}
-        for text_color in text_color_attrs:
-            pass
+            color_wheel[color.strip()] = {'primary': _hex, 'secondary': hex_secondary}
+        color_attrs = ProductAttributeValue.objects.filter(attribute__code='color').select_related('product').prefetch_related('product__attributes')
+
+        for text_color in color_attrs:
+            if getattr(text_color.product.attr, "color"):
+                _color = getattr(text_color.product.attr, "color").strip()
+                if ',' in _color and _color not in color_wheel:
+                    col = _color.split(',')
+                    if len(col) > 0:
+                        _color = col[0].strip()
+                        setattr(text_color.product.attr, 'hexcolor', color_wheel[_color]['primary'])
+                        if len(col) > 1:
+                            _color = col[1].strip()
+                            if color_wheel[_color]['secondary']:
+                                setattr(text_color.product, 'secondary_hexcode', color_wheel[col]['secondary'])
+                        text_color.product.attr.save()
+                else:
+                    setattr(text_color.product.attr, 'hexcolor', color_wheel[_color]['primary'])
+                    if color_wheel[_color]['secondary']:
+                        setattr(text_color.product, 'secondary_hexcode', color_wheel[_color]['secondary'])
+                print(text_color)
         return
