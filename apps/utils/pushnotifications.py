@@ -185,6 +185,14 @@ OSCAR_ORDER_STATUS_CHANGE_MESSAGE = {
         'title': 'We are Preparing your Basket! Please Refer #{order.number} for more details.',
         'message': 'Order Confirmed! Please Refer #{order.number} for more details. Tap to open',
     },
+    settings.ORDER_STATUS_PACKED: {
+        'title': 'We are Packed your Order! Please Refer #{order.number} for more details.',
+        'message': 'Order Packed! Please Refer #{order.number} for more details. Tap to open',
+    },
+    settings.ORDER_STATUS_SHIPPED: {
+        'title': 'We have shipped your Order! Please Refer #{order.number} for more details.',
+        'message': 'Order Shipped! Please Refer #{order.number} for more details. Tap to open',
+    },
     settings.ORDER_STATUS_OUT_FOR_DELIVERY: {
         'title': 'On the Way to delivery with #{order.number}! Please Refer #{order.number} for more details.',
         'message': 'We might reach you within a couple of hours! Tap to open',
@@ -221,6 +229,8 @@ class OrderStatusPushNotification(PushNotification):
     USER_TYPE = (settings.CUSTOMER, )
 
     def send_status_update(self, order, new_status):
+
+
         title = OSCAR_ORDER_STATUS_CHANGE_MESSAGE[new_status]['title'].format(order=order)[:256]
         message = OSCAR_ORDER_STATUS_CHANGE_MESSAGE[new_status]['message'].format(order=order)[:256]
         kwargs = {
