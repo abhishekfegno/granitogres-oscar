@@ -15,8 +15,6 @@ will be processed shortly.{% endblock %}
 {% endfor %}
 
 {% if status_url %}
-{% blocktrans %}You can view the status of this order at the below URL:
-{{ status_url }}{% endblocktrans %}
+You can view the status of this order at the below URL:
+{{ status_url }}
 {% endif %}
-
-{% blocktrans %}The team{% endblocktrans %}
