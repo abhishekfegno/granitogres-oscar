@@ -12,7 +12,7 @@ from solo.models import SingletonModel
 from sorl.thumbnail import get_thumbnail
 
 from apps.utils.pushnotifications import NewOfferPushNotification
-
+from ckeditor.fields import RichTextField
 
 class empty:
 
@@ -357,12 +357,12 @@ class SiteConfig(SingletonModel):
 
     referrer = 'site-config'
 
-    # seo_title = models.CharField(max_length=120, null=True, blank=True)
-    # seo_description = models.CharField(max_length=255, null=True, blank=True)
-    # seo_keywords = models.CharField(max_length=255, null=True, blank=True)
-    # search_tags = models.TextField(null=True, blank=True)
-    # seo_image = models.FileField(null=True, blank=True)
-    # seo_image_alt = models.FileField(null=True, blank=True)
+    home_seo_title = models.CharField(max_length=120, null=True, blank=True)
+    home_seo_description = models.CharField(max_length=255, null=True, blank=True)
+    home_seo_keywords = models.CharField(max_length=255, null=True, blank=True)
+    home_seo_image = models.ImageField(null=True, blank=True)
+    home_seo_image_alt = models.CharField(max_length=255, null=True, blank=True)
+    home_seo_footer = RichTextField(max_length=255, null=True, blank=True)
 
     @property
     def expected_out_for_delivery_delay(self):

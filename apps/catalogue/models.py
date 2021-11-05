@@ -312,8 +312,7 @@ class Category(AbstractCategory):
     seo_title = models.CharField(max_length=120, null=True, blank=True)
     seo_description = models.CharField(max_length=255, null=True, blank=True)
     seo_keywords = models.CharField(max_length=255, null=True, blank=True)
-    search_tags = models.TextField(max_length=255, null=True, blank=True)
-    ogmail = models.CharField(max_length=255, null=True, blank=True)
+    ogimage = models.ImageField(max_length=255, null=True, blank=True)
 
     @property
     def thumbnail_web_listing(self):

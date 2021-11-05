@@ -131,6 +131,7 @@ INSTALLED_APPS = [
     'elastic_panel',
     'django_extensions',
     'push_notifications',
+    'ckeditor',
 
 
 

@@ -47,7 +47,7 @@ class CategorySerializer(serializers.ModelSerializer):
             'seo_title',
             'seo_description',
             'seo_keywords',
-            'search_tags',
+            'ogimage',
         )
 
     children = serializers.SerializerMethodField()

@@ -132,3 +132,4 @@ wasabi==0.8.2
 wcwidth==0.1.9
 Whoosh==2.7.4
 zipp==3.6.0
+django_ckeditor-6.1.0
