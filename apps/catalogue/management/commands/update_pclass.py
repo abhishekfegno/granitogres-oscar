@@ -181,19 +181,16 @@ class Command(BaseCommand):
             return
         field_type, add_to_filter, add_to_attribute = self.attr_type_descriptor(**attr)
         if not hasattr(product.attr, attr['attribute__code']):
-            if product.is_child:
-                product.parent.refresh_from_db(fields=('product_class', ))
-            else:
-                product.refresh_from_db(fields=('product_class',))
             p_class = product.get_product_class()
-            print("Creating ", attr['attribute__name'], "For", p_class)
-            p_class.attributes.create(
+            p_class.attributes.get_or_create(
                 product_class=p_class,
-                name=attr['attribute__name'],
                 code=attr['attribute__code'],
-                type=field_type,
-                is_varying=add_to_attribute,
-                is_visible_in_filter=add_to_filter
+                defaults={
+                    "name": attr['attribute__name'],
+                    "type": field_type,
+                    "is_varying" : add_to_attribute,
+                    "is_visible_in_filter": add_to_filter
+                }
             )
         print("Updating attribte")
         value = attr['value_text'] or attr['value_color'] or attr['value_image']

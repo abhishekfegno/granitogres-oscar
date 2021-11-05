@@ -118,7 +118,7 @@ OSCAR_DOMAIN_NAME = os.environ.get('OSCAR_DOMAIN_NAME', 'https://devserver.abcha
 
 
 OSCAR_LINE_STATUS_PIPELINE = {
-    'Placed': ('Canceled',),                                 # user can cancel an item until order confirm
+    'Placed': ('Canceled', ),                                 # user can cancel an item until order confirm
     'Order Confirmed': (),                                   # admin can deliver or confirm item
     'Out For Delivery': (),                                  # our for delivery
     'Delivered': ('Return Requested', ),                     # delivered item can be triggered for return
