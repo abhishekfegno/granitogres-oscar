@@ -136,8 +136,8 @@ def product_list(request, category='all', **kwargs):
     if _search:
         queryset = apply_search(queryset=queryset, search=_search)
         title = f"Search: '{_search}'"
-        if queryset.count() < 5:
-            queryset |= apply_search(queryset=queryset, search=_search, mode='_simple',)
+        # if queryset.count() < 5:
+        #     queryset |= apply_search(queryset=queryset, search=_search, mode='_simple',)
 
     if _sort:
         _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
@@ -181,8 +181,6 @@ def product_list(request, category='all', **kwargs):
 
     if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not any([_search, _filter, _sort, _offer_category, _range, ]):
         c_key = cache_key.product_list__key.format(page_number, page_size, category)
-        # if settings.DEBUG:
-        #     cache.delete(c_key)
         out = cache_library(c_key, cb=_inner, ttl=180)
     else:
         out = _inner()
