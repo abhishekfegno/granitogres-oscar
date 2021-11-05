@@ -63,6 +63,9 @@ ORDER_STATUS_DELIVERED = 'Delivered'
 ORDER_STATUS_RETURN_REQUESTED = 'Return Requested'
 ORDER_STATUS_RETURN_APPROVED = 'Return Approved'
 ORDER_STATUS_RETURNED = 'Returned'
+ORDER_STATUS_REFUND_APPROVED = 'Return Pickup Initiated'
+ORDER_STATUS_REPLACEMENT_APPROVED = 'Replacement Pickup Initiated'
+ORDER_STATUS_REPLACED = 'Returned and Replacement Initiated'
 ORDER_STATUS_CANCELED = 'Canceled'
 
 # Needed by oscarapicheckout
