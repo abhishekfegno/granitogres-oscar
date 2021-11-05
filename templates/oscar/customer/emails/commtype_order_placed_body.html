@@ -64,7 +64,7 @@
                 <tbody>
                 {% for line in order.lines.all %}
                   <tr>
-                    <td><img src="{{ line.product.absolute_image_path }}" /></td>
+                    <td><img src="{{ site }}{{ line.product.absolute_image_path }}" /></td>
                     <td>{{ line.product }}</td>
                     <td>{{ line.quantity }}</td>
                     <td>{{ line.line_price_incl_tax }}</td>
