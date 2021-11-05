@@ -43,6 +43,7 @@ class CategorySerializer(serializers.ModelSerializer):
             'img_thumb_mob',
             # 'offers_upto',
             'description',
+            'product_class',
             'children',
         )
 
