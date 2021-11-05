@@ -354,6 +354,12 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
             else:
                 if instance.sources.all().select_related('source_type').last().source_type.name == 'Cash':
                     pass
+                    out = list(init.values())
+                    out.append({
+                        'old_status': out[-1]['new_status'],
+                        'new_status': 'Cancelled',
+                        'date_created': out[-1]['date_created']
+                    })
                 else:
 
                     out = list(init.values())
