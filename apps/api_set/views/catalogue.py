@@ -96,8 +96,8 @@ def __(val):
 
 def to_client_dict(value_array):
     return [{
-        # 'count': value.product_count,
-        'label': value,
+        'label': value[0],
+        'count': value[1],
         'is_checked': False
     } for value in value_array]
 
@@ -110,13 +110,21 @@ def filter_options(request, pk):
     )
     out = []
     for attr in attrs:
-        values = list(set([__(value) for value in attr.productattributevalue_set.filter(product_count__gt=0).order_by('product_count')]))
-        # values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text')
-        out.append({
+        _inner_out = {}
+        for value in attr.productattributevalue_set.filter(product_count__gt=0).order_by('-product_count'):
+            if value.value not in _inner_out:
+                _inner_out[value.value] = 0
+            _inner_out[value.value] += value.product_count
+        _inner_out = sorted(__iterable=list(_inner_out.items()), key=lambda c: c[1])
+        val = {
             'code': attr.code,
             'label': attr.name,
-            'val': to_client_dict(values)
-        })
+            'val': to_client_dict(_inner_out)
+        }
+
+        # values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text')
+
+        out.append(val)
     return Response({'results': out})
 
 
