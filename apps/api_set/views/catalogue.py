@@ -80,15 +80,16 @@ def product_detail_web(request, product):
 
 def __(val):
     if type(val.value) == AttributeOption:
-        return str(val.value)
+        return {'pk': val.pk, 'value': str(val.value)}
         # return {str(x) for x in val.options.all().values_list('name', flat=True)}
     else:
-        return val.value
+        return {'pk': val.pk, 'value': val.value}
 
 
 def to_client_dict(value_array):
     return [{
-        'label': value,
+        'id': value['id'],
+        'label': value['value'],
         'is_checked': False
     } for value in value_array]
 
