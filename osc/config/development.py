@@ -34,6 +34,8 @@ AUTHENTICATION_BACKENDS = (
 
 INTERNAL_IPS = [
     '127.0.0.1',
+    'localhost',
+    'localhost:8000',
     '192.168.1.100',
     'grocery.dev.fegno.com',
     'abchauz.dev.fegno.com',

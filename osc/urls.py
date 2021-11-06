@@ -100,9 +100,17 @@ urlpatterns = [
 
 if 'stores' in settings.INSTALLED_APPS:
     urlpatterns += [
-        path('stores/', apps.get_app_config('stores').urls),
+        # basic configuration for Oscar
+        path('', include(apps.get_app_config('oscar').urls[0])),
+
+        # adds URLs for the dashboard store manager
         path('dashboard/stores/', apps.get_app_config('stores_dashboard').urls),
-        path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalogue'),
+
+        # adds URLs for overview and detail pages
+        path('stores/', apps.get_app_config('stores').urls),
+
+        # adds internationalization URLs
+        path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
     ]
 
 

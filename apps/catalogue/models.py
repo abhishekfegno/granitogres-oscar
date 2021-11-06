@@ -51,8 +51,8 @@ class ProductAttribute(AbstractProductAttribute):
         (AbstractProductAttribute.IMAGE, _("Image")),
         (COLOR, _("Color")),
     )
-    is_varying = models.BooleanField(_('Is Varying For Child Shown detail page child switcher.'), default=False)
-    is_visible_in_filter = models.BooleanField(_('Is Visible in Filter'), default=True)
+    is_varying = models.BooleanField(_('Is Varying.'), help_text="Is Varying for child? Will be shown detail page child switcher", default=False)
+    is_visible_in_filter = models.BooleanField(_('Is Visible in Filter'), help_text="Do we need to show this attribute at filter?", default=True)
 
     type = models.CharField(
         choices=TYPE_CHOICES, default=TYPE_CHOICES[0][0],
