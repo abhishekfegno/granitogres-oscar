@@ -420,6 +420,8 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                         })
 
                 for _id, _stat in settings.OSCAR_ORDER_STATUS_UNTIL_DELIVER:
+                    if _stat:
+                        continue
                     out.append(init[_stat])
 
                 # out += list(init.values())
