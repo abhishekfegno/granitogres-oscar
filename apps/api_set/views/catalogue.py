@@ -86,6 +86,14 @@ def __(val):
         return val.value
 
 
+# def to_client_dict(value_array):
+#     return [{
+#         'label': value.vaue,
+#         'pcount': value.product_count,
+#         'is_checked': False
+#     } for value in value_array]
+
+
 def to_client_dict(value_array):
     return [{
         'label': value,
@@ -99,14 +107,13 @@ def filter_options(request, pk):
     out = []
     for attr in attrs:
         if attr.is_visible_in_filter and attr.productattributevalue_set.exists():
-            # val = list(set([__(value) for value in attr.productattributevalue_set.all() if value.product_count > 0]))
-            values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text', flat=True)
+            values = list(set([__(value) for value in attr.productattributevalue_set.all() if value.product_count > 0]))
+            # values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text')
             out.append({
                 'code': attr.code,
                 'label': attr.name,
                 'val': to_client_dict(values)
             })
-
     return Response({'results': out})
 
 
