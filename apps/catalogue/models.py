@@ -90,10 +90,14 @@ class ProductAttribute(AbstractProductAttribute):
 class ProductAttributeValue(AbstractProductAttributeValue):
     value_color = ColorField(_('Color'), blank=True, null=True)
     is_visible = models.BooleanField(_('Is Visible in Details'), default=True)
-    product_count = models.BooleanField(_('Count of Products'), default=True)
+    product_count = models.PositiveIntegerField(_('Count of Products'), default=True)
 
     def _calculate_product_count(self):
-        pass
+        model_filter = self.__class__._default_manager.filter
+        attr_name = 'value_%s' % self.attribute.type
+        if self.value_text or self.value_color:
+            qs = model_filter(**{f'{attr_name}__iexact': self.value_as_text})
+            qs.update(product_count=qs.count())
 
     @property
     def _color_as_text(self):
