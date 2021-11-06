@@ -419,7 +419,10 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                             'date_created': instance.date_placed,  # issue 2. date not comming
                         })
 
-                out += list(init.values())
+                for _id, _stat in settings.OSCAR_ORDER_STATUS_UNTIL_DELIVER:
+                    out.append(init[_stat])
+
+                # out += list(init.values())
                 if not is_cod:
                     """ if Online Payment. """
                     out.append({
