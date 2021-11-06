@@ -80,16 +80,15 @@ def product_detail_web(request, product):
 
 def __(val):
     if type(val.value) == AttributeOption:
-        return {'id': val.pk, 'value': str(val.value)}
+        return str(val.value)
         # return {str(x) for x in val.options.all().values_list('name', flat=True)}
     else:
-        return {'id': val.pk, 'value': val.value}
+        return val.value
 
 
 def to_client_dict(value_array):
     return [{
-        'id': value['id'],
-        'label': value['value'],
+        'label': value,
         'is_checked': False
     } for value in value_array]
 
@@ -97,6 +96,7 @@ def to_client_dict(value_array):
 @api_view()
 def filter_options(request, pk):
     attrs = ProductAttribute.objects.filter(is_varying=True, product_class_id=pk).prefetch_related('productattributevalue_set')
+    # import pdb; pdb.set_trace()
     return Response({
         'results': [{
             'code': attr.code,
@@ -104,6 +104,10 @@ def filter_options(request, pk):
             'val': to_client_dict({__(value) for value in attr.productattributevalue_set.all()})
         } for attr in attrs if attr.productattributevalue_set.exists() if attr.is_visible_in_filter]
     })
+
+
+def _sanitize(name):
+    return " ".join([s.capitalize() for s in name.split(' ') if s.isalpha() and len(s) > 2])
 
 
 @api_view()
@@ -115,14 +119,14 @@ def product_suggestions(request, **kwargs):
     if _search:
         Category.objects.filter()
         queryset = apply_search(queryset=queryset, search=_search)
-        rc = recommended_class(queryset)
+        rc = recommended_class(queryset, search=_search)
         queryset = queryset.values('id', 'title', 'slug', 'product_class_id', )[:_max_size*3]
         _mapper = {}
         _mapper_len = 1
         for item in queryset:
             if item['title'] not in _mapper:
                 # title = item['title']
-                item['title'] = " ".join([s.capitalize() for s in item['title'].split(' ') if s.isalpha() and len(s) > 2])
+                item['title'] = _sanitize(item['title'])
                 _mapper[item['title']] = item
                 _mapper_len += 1
             if _mapper_len > _max_size:
@@ -130,7 +134,6 @@ def product_suggestions(request, **kwargs):
         out['results'] = list(_mapper.values())
         out['class'] = rc
 
-    # return JsonResponse(out, status=(400 if len(out['results']) == 0 else 200))
     return Response(out, status=(400 if len(out['results']) == 0 else 200))
 
 
