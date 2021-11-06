@@ -106,7 +106,7 @@ def to_client_dict(value_array):
 def filter_options(request, pk):
     attrs = ProductAttribute.objects.filter(is_visible_in_filter=True, product_class_id=pk).prefetch_related(Prefetch(
         'productattributevalue_set',
-        queryset=ProductAttributeValue.objects.filter(product_count__gt=0, product_class_id=pk))
+        queryset=ProductAttributeValue.objects.filter(product_count__gt=0))
     )
     out = []
     for attr in attrs:
