@@ -110,7 +110,7 @@ def filter_options(request, pk):
     )
     out = []
     for attr in attrs:
-        values = list(set([__(value) for value in attr.productattributevalue_set.filter(product_count__gt=0, product_class_id=pk)]))
+        values = list(set([__(value) for value in attr.productattributevalue_set.filter(product_count__gt=0)]))
         # values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text')
         out.append({
             'code': attr.code,
