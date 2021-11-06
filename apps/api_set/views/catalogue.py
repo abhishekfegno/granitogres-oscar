@@ -101,7 +101,7 @@ def filter_options(request, pk):
             'code': attr.code,
             'label': attr.name,
             'val': to_client_dict({__(value) for value in attr.productattributevalue_set.all()})
-        } for attr in attrs if attr.productattributevalue_set.exists()]
+        } for attr in attrs if attr.productattributevalue_set.exists() if attr.is_visible_in_filter]
     })
 
 
