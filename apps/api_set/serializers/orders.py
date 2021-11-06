@@ -418,11 +418,20 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                             'new_status': settings.ORDER_STATUS_PLACED,
                             'date_created': instance.date_placed,  # issue 2. date not comming
                         })
-
+                old_status = None
+                old_datetime = None
                 for _id, _stat in settings.OSCAR_ORDER_STATUS_UNTIL_DELIVER:
                     if _stat == settings.ORDER_STATUS_PLACED and settings.ORDER_STATUS_PLACED not in init:
-                        continue
-                    out.append(init[_stat])
+                        old_datetime = instance.date_placed
+                    else:
+                        _data = init.get(_stat, {
+                            'old_status': old_status,
+                            'new_status': _stat,
+                            'date_created': old_datetime or instance.date_placed,  # issue 2. date not comming
+                        })
+                        old_datetime = _data['date_created']
+                        out.append(_data)
+                    old_status = _stat
 
                 # out += list(init.values())
                 if not is_cod:
