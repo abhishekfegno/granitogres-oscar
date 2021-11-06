@@ -95,15 +95,19 @@ def to_client_dict(value_array):
 
 @api_view()
 def filter_options(request, pk):
-    attrs = ProductAttribute.objects.filter(is_varying=True, product_class_id=pk).prefetch_related('productattributevalue_set')
-    # import pdb; pdb.set_trace()
-    return Response({
-        'results': [{
-            'code': attr.code,
-            'label': attr.name,
-            'val': to_client_dict({__(value) for value in attr.productattributevalue_set.all() if value.product_count > 0})
-        } for attr in attrs if attr.productattributevalue_set.exists() if attr.is_visible_in_filter]
-    })
+    attrs = ProductAttribute.objects.filter(is_visible_in_filter=True, product_class_id=pk).prefetch_related('productattributevalue_set')
+    out = []
+    for attr in attrs:
+        if attr.is_visible_in_filter and attr.productattributevalue_set.exists():
+            # val = list(set([__(value) for value in attr.productattributevalue_set.all() if value.product_count > 0]))
+            values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text', flat=True)
+            out.append({
+                'code': attr.code,
+                'label': attr.name,
+                'val': to_client_dict(values)
+            })
+
+    return Response({'results': out})
 
 
 def _sanitize(name):

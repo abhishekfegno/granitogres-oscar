@@ -5,7 +5,13 @@ from apps.dashboard.catalogue.forms import ProductAttributesForm
 
 ProductClass = get_model('catalogue', 'ProductClass')
 
-ProductAttributesFormSet = inlineformset_factory(ProductClass,
-                                                 ProductAttribute,
-                                                 form=ProductAttributesForm,
-                                                 extra=3)
+ProductAttributesFormSet = inlineformset_factory(
+    ProductClass,
+    ProductAttribute,
+    form=ProductAttributesForm,
+    extra=3
+)
+
+
+
+
