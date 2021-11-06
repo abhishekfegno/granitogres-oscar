@@ -35,7 +35,7 @@ TOP_RATED = "rating"
 NEWEST = "newest"
 PRICE_HIGH_TO_LOW = "price-desc"
 PRICE_LOW_TO_HIGH = "price-asc"
-TITLE_A_TO_Z = "title-asc"wp
+TITLE_A_TO_Z = "title-asc"
 TITLE_Z_TO_A = "title-desc"
 
 SORT_BY_CHOICES = [
