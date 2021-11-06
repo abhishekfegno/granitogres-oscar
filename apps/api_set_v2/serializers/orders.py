@@ -92,7 +92,7 @@ class OrderListSerializer(serializers.ModelSerializer):
                 'message': "The return will be picked up soon!"
             }
 
-        return_statuses = [s.status for s in self.get_return_lines(instance)]
+        return_statuses = [s.status for s in get_statuses(112)]
         if settings.ORDER_STATUS_RETURNED in return_statuses:
             return {
                 'type': WARNING,
@@ -177,7 +177,7 @@ class OrderListSerializer(serializers.ModelSerializer):
 
     def get_is_cancellable(self, instance) -> bool:
         return instance.is_cancelable
-
+    
     def get_is_on_the_way(self, instance) -> bool:
         return instance.status in get_statuses(6)
 

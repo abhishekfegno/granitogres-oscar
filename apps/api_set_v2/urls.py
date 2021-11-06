@@ -1,17 +1,22 @@
+from allauth.account.views import confirm_email
+from django.conf.urls import url
 from django.views.decorators.cache import never_cache
 from django.views.generic import RedirectView
 
-from apps.api_set.urls import *
+# from apps.api_set.urls import *
 from django.urls import path, include
 # Loading V1 Apis In order to patch
-from apps.api_set.views.auth import LoginWithOTPForDeliveryBoy, ProfileView
-from apps.api_set.views.catalogue import product_suggestions
+from apps.api_set.urls import configuration
+from apps.api_set.views.auth import LoginWithOTPForDeliveryBoy, ProfileView, SendOTP, resend_otp, LoginWithOTP
+from apps.api_set.views.basket import get_basket
+from apps.api_set.views.catalogue import product_suggestions, categories_list_cached, filter_options, budget_bag
 from apps.api_set.views.index import (
     home, offer_products
 )
 #  End loading v1 apis
-from apps.api_set.views.orders import order_cancel_request, order_return_request
-from apps.api_set.views.public import cancel_reasons_list
+from apps.api_set.views.orders import order_cancel_request, order_return_request, orders_more_detail
+from apps.api_set.views.public import cancel_reasons_list, availability, return_reasons_list
+from apps.api_set.views.wishlist import wish_list
 from apps.api_set_v2.views.catalogue import *
 
 from apps.api_set_v2.views.index import index, offers, pincode_list

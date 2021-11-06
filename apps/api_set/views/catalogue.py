@@ -107,7 +107,7 @@ def filter_options(request, pk):
     out = []
     for attr in attrs:
         if attr.is_visible_in_filter and attr.productattributevalue_set.exists():
-            values = list(set([__(value) for value in attr.productattributevalue_set.all() if value.product_count > 0]))
+            values = list(set([__(value) for value in attr.productattributevalue_set.all() if value.product_count > 0 and value.product.structure != Product.PARENT]))
             # values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text')
             out.append({
                 'code': attr.code,
