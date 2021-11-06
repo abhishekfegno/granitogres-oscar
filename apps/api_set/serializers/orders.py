@@ -108,6 +108,9 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     def get_billing_address(self, instance):
         return InlineBillingAddressSerializer(instance.billing_address, context=self.context).data
 
+    def get_return_lines(self, instance):
+        return instance.lines.filter(status__in=get_statuses(112))
+
     def get_info(self, instance) -> dict:
         is_cancelled = instance.status == settings.ORDER_STATUS_CANCELED
         has_cancelled_items = any([
