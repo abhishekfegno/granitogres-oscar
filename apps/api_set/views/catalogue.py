@@ -96,7 +96,7 @@ def __(val):
 
 def to_client_dict(value_array):
     return [{
-        'count': value.product_count,
+        # 'count': value.product_count,
         'label': value,
         'is_checked': False
     } for value in value_array]
@@ -110,7 +110,7 @@ def filter_options(request, pk):
     )
     out = []
     for attr in attrs:
-        values = list(set([__(value) for value in attr.productattributevalue_set.filter(product_count__gt=0)]))
+        values = list(set([__(value) for value in attr.productattributevalue_set.filter(product_count__gt=0).order_by('product_count')]))
         # values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text')
         out.append({
             'code': attr.code,
