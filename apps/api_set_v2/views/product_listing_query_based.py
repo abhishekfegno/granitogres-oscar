@@ -35,7 +35,7 @@ TOP_RATED = "rating"
 NEWEST = "newest"
 PRICE_HIGH_TO_LOW = "price-desc"
 PRICE_LOW_TO_HIGH = "price-asc"
-TITLE_A_TO_Z = "title-asc"
+TITLE_A_TO_Z = "title-asc"wp
 TITLE_Z_TO_A = "title-desc"
 
 SORT_BY_CHOICES = [
@@ -90,6 +90,7 @@ def product_list(request, category='all', **kwargs):
         Where minprice, maxprice and  available_only are common for all.
         other dynamic parameters are available at  reverse('wnc-filter-options', kwarg={'pk': '<ProductClass: id>'})
     """
+    _default_category = 'all'
     queryset = Product.browsable.browsable()
     _search = request.GET.get('q')
     _sort = request.GET.get('sort')
@@ -120,13 +121,16 @@ def product_list(request, category='all', **kwargs):
         if offer_banner_object and offer_banner_object.product_range:
             title = offer_banner_object.product_range.name
             queryset = offer_banner_object.products().filter(is_public=True)
-    elif category != 'all':
+    elif category != _default_category:
         queryset, cat = category_filter(queryset=queryset, category_slug=category, return_as_tuple=True)
         title = cat.name
+
     if only_favorite and request.user.is_authenticated:
         queryset = queryset.browsable.filter(id__in=request.user.product.all().values_list('id'))
-    if _pclass:
+
+    if _pclass and (_search or category == _default_category):
         queryset = queryset.filter(product_class=_pclass)
+
     if _filter:
         """
         input = weight__in:25,30,35|price__gte:25|price__lte:45

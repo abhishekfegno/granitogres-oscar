@@ -334,8 +334,16 @@ class Command(BaseCommand):
 
                 print("Saving Product Class...")
                 try:
+                    if struct[line['Type']] == Product.CHILD:
+                        if not _parent_obj:
+                            continue
+                        _parent_obj.product_class = product_class_instance
+                        saving_pc = None
+                    else:
+                        saving_pc = product_class_instance
+
                     p = Product.objects.create(
-                        product_class=product_class_instance,
+                        product_class=saving_pc,
                         structure=struct[line['Type']],
                         upc=line['SKU'] or str(uuid.uuid4()).split('-')[-1].upper(),
                         parent=_parent_obj or None,
@@ -356,9 +364,15 @@ class Command(BaseCommand):
                         p.categories.add(cat_item)
                 except psycopg2.errors.UniqueViolation as e:
                     print(e)
+                    print(line)
                     continue
                 except IntegrityError as e:
                     print(e)
+                    print(line)
+                    continue
+                except AttributeError as e:
+                    print(e)
+                    print(line)
                     continue
                 print("Fetching Images...")
                 for img in line['Images'].split(','):
