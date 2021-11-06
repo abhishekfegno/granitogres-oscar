@@ -80,10 +80,10 @@ def product_detail_web(request, product):
 
 def __(val):
     if type(val.value) == AttributeOption:
-        return {'pk': val.pk, 'value': str(val.value)}
+        return {'id': val.pk, 'value': str(val.value)}
         # return {str(x) for x in val.options.all().values_list('name', flat=True)}
     else:
-        return {'pk': val.pk, 'value': val.value}
+        return {'id': val.pk, 'value': val.value}
 
 
 def to_client_dict(value_array):

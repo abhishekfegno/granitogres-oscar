@@ -90,6 +90,10 @@ class ProductAttribute(AbstractProductAttribute):
 class ProductAttributeValue(AbstractProductAttributeValue):
     value_color = ColorField(_('Color'), blank=True, null=True)
     is_visible = models.BooleanField(_('Is Visible in Details'), default=True)
+    product_count = models.BooleanField(_('Count of Products'), default=True)
+
+    def _calculate_product_count(self):
+        pass
 
     @property
     def _color_as_text(self):
