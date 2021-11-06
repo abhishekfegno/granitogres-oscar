@@ -115,7 +115,8 @@ def filter_options(request, pk):
             if value.value not in _inner_out:
                 _inner_out[value.value] = 0
             _inner_out[value.value] += value.product_count
-        _inner_out = sorted(__iterable=list(_inner_out.items()), key=lambda c: c[1])
+        _inner_out = list(_inner_out.items())
+        _inner_out.sort(key=lambda c: c[1], reverse=True)
         val = {
             'code': attr.code,
             'label': attr.name,
