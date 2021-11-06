@@ -420,7 +420,7 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                         })
 
                 for _id, _stat in settings.OSCAR_ORDER_STATUS_UNTIL_DELIVER:
-                    if _stat:
+                    if _stat == settings.ORDER_STATUS_PLACED and settings.ORDER_STATUS_PLACED not in init:
                         continue
                     out.append(init[_stat])
 
