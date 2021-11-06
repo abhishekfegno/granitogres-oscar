@@ -413,13 +413,13 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                     To add "Placed" for order status which do not have a "Placed" status in "status_changes".
                     """
                     if settings.ORDER_STATUS_PLACED not in init:
-                        init[settings.ORDER_STATUS_PLACED] = {
+                        out.append({
                             'old_status': None,
                             'new_status': settings.ORDER_STATUS_PLACED,
                             'date_created': instance.date_placed,  # issue 2. date not comming
-                        }
+                        })
 
-                out = list(init.values())
+                out += list(init.values())
                 if not is_cod:
                     """ if Online Payment. """
                     out.append({
