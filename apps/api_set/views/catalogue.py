@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db.models import Count, Sum, Q, Case, When, Value, F, ForeignKey, SET_NULL, PositiveIntegerField
+from django.db.models import Count, Sum, Q, Case, When, Value, F, ForeignKey, SET_NULL, PositiveIntegerField, Prefetch
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from factory.django import get_model
@@ -9,7 +9,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from apps.api_set.serializers.catalogue import (
-    CategorySerializer, ProductDetailWebSerializer, custom_ProductListSerializer
+    CategorySerializer, ProductDetailWebSerializer, custom_ProductListSerializer, ProductAttributeValue
 )
 from apps.api_set.views.orders import _login_required
 from apps.order.models import Line
@@ -96,6 +96,7 @@ def __(val):
 
 def to_client_dict(value_array):
     return [{
+        'count': value.product_count,
         'label': value,
         'is_checked': False
     } for value in value_array]
@@ -103,17 +104,19 @@ def to_client_dict(value_array):
 
 @api_view()
 def filter_options(request, pk):
-    attrs = ProductAttribute.objects.filter(is_visible_in_filter=True, product_class_id=pk).prefetch_related('productattributevalue_set')
+    attrs = ProductAttribute.objects.filter(is_visible_in_filter=True, product_class_id=pk).prefetch_related(Prefetch(
+        'productattributevalue_set',
+        queryset=ProductAttributeValue.objects.filter(product_count__gt=0, product_class_id=pk))
+    )
     out = []
     for attr in attrs:
-        if attr.is_visible_in_filter and attr.productattributevalue_set.exists():
-            values = list(set([__(value) for value in attr.productattributevalue_set.filter(product_count__gt=0, product_class_id=pk)]))
-            # values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text')
-            out.append({
-                'code': attr.code,
-                'label': attr.name,
-                'val': to_client_dict(values)
-            })
+        values = list(set([__(value) for value in attr.productattributevalue_set.filter(product_count__gt=0, product_class_id=pk)]))
+        # values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text')
+        out.append({
+            'code': attr.code,
+            'label': attr.name,
+            'val': to_client_dict(values)
+        })
     return Response({'results': out})
 
 
