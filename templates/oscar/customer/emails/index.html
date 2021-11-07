@@ -28,7 +28,7 @@
               <table style="width: 100%; margin: 5px 0">
                 <tbody>
                   <tr>
-                    <td>Dear, Customer</td>
+                    <td>Dear, {{ order.user.get_full_name }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -43,8 +43,7 @@
                   </tr>
                   <tr>
                     <td>
-                        <p>{% for field in order.shipping_address.active_address_fields %}  {{ field }}<br/>
-                        {% endfor %}</p>
+                        <p>{{ order.shipping_address.summary_line }}</p>
                     </td>
                   </tr>
                 </tbody>
@@ -72,6 +71,30 @@
                   <tr style="margin: 10px 0 20px 0">
                     <td colspan="3" style="font-weight: 700; font-size: large">
                       Total
+                    </td>
+                    <td colspan="2" style="font-weight: 700; font-size: large">
+                      {{ order.basket_total_incl_tax|currency:order.currency }}
+                    </td>
+                  </tr>
+                  <tr style="margin: 10px 0 20px 0">
+                    <td colspan="3" style="font-weight: 700; font-size: large">
+                      Shipping Charges
+                    </td>
+                    <td colspan="2" style="font-weight: 700; font-size: large">
+                      {{ order.shipping_incl_tax|currency:order.currency }}
+                    </td>
+                  </tr>
+                  <tr style="margin: 10px 0 20px 0">
+                    <td colspan="3" style="font-weight: 700; font-size: large">
+                        Discounts
+                    </td>
+                    <td colspan="2" style="font-weight: 700; font-size: large">
+                      {{ order.total_incl_tax_excl_discount|currency:order.currency }}
+                    </td>
+                  </tr>
+                  <tr style="margin: 10px 0 20px 0">
+                    <td colspan="3" style="font-weight: 700; font-size: large">
+                      Payable
                     </td>
                     <td colspan="2" style="font-weight: 700; font-size: large">
                       {{ order.total_incl_tax|currency:order.currency }}

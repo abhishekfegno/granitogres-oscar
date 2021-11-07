@@ -111,7 +111,65 @@ def filter_options(request, pk):
     out = []
     for attr in attrs:
         _inner_out = {}
-        for value in attr.productattributevalue_set.filter(product_count__gt=0).order_by('-product_count'):
+        for value in attr.productattributevalue_set.filter(product_count__gt=0,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                           ).order_by('-product_count'):
             if value.value not in _inner_out:
                 _inner_out[value.value] = 0
             _inner_out[value.value] += value.product_count
