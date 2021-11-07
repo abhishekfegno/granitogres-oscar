@@ -129,3 +129,22 @@ NEED_LOCATION_ON_ADDRESS_SAVING = False
 
 TIME_SLOT_ENABLED = False
 
+CKEDITOR_UPLOAD_PATH = "cms/"
+CKEDITOR_IMAGE_BACKEND = 'pillow'
+CKEDITOR_RESTRICT_BY_USER = True
+CKEDITOR_BROWSE_SHOW_DIRS = False
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'full',
+        'height': 700,
+        'width': 'auto',
+        'uiColor': '#f4f5f7',
+
+    },
+}
+
+
+
+
+

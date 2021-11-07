@@ -7,8 +7,6 @@ will be processed shortly.
 {% for line in order.lines.all %}
 {% endfor %}
 
-
-
 {% for field in order.shipping_address.active_address_fields %}  {{ field }}
 {% endfor %}
 

@@ -18,6 +18,7 @@ import os
 import debug_toolbar
 from django.apps import apps
 from django.conf import settings
+from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.flatpages.models import FlatPage
@@ -95,6 +96,9 @@ urlpatterns = [
     path('', include('apps.users.urls')),
     path('', include('apps.dashboard.custom.urls')),
     path('', include(apps.get_app_config('oscar').urls[0])),  # > Django-2.0
+
+    # url(r'^ckeditor/', include('ckeditor.urls')),
+    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
 
 ]
 

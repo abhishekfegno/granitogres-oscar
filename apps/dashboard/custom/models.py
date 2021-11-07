@@ -14,6 +14,7 @@ from sorl.thumbnail import get_thumbnail
 from apps.utils.pushnotifications import NewOfferPushNotification
 from ckeditor.fields import RichTextField
 
+
 class empty:
 
     def __init__(self, **kwargs):
@@ -362,7 +363,7 @@ class SiteConfig(SingletonModel):
     home_seo_keywords = models.CharField(max_length=255, null=True, blank=True)
     home_seo_image = models.ImageField(null=True, blank=True)
     home_seo_image_alt = models.CharField(max_length=255, null=True, blank=True)
-    home_seo_footer = RichTextField(max_length=255, null=True, blank=True)
+    home_seo_footer = RichTextField(null=True, blank=True)
 
     @property
     def expected_out_for_delivery_delay(self):
