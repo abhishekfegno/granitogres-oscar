@@ -11,8 +11,8 @@
                         <td align="left">
                           <table border="0" cellpadding="0" cellspacing="0" align="left" class="m_6870997060859637215col">
                             <tbody>
-                            <tr>
                               {% for line in order.lines.all %}
+                              <tr>
                               <td valign="middle" width="120" align="center" class="m_6870997060859637215link" style="padding-top:20px">
                                 <a style="color:#027cd8;text-decoration:none;outline:none;color:#fff;font-size:13px" href="#" target="_blank">
                                   <img border="0" src="{{ site }}{{ line.product.primary_image.original.url }}" alt="HIGHWAY ENGINEERING, NM PUBLISHER,10th Ed" style="border:none;max-width:125px;max-height:125px" class="CToWUd">
@@ -40,9 +40,9 @@
                                   <span style="float:right;font-size:12px;padding-right:5px"> </span>
                                 </p>
                               </td>
-                              <br><br>
+                              </tr>
                               {% endfor %}
-                            </tr>
+
                             </tbody>
                           </table> </td>
                       </tr>
