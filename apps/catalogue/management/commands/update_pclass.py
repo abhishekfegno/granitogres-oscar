@@ -61,7 +61,7 @@ class Command(BaseCommand):
         #     for attr in remaining_attrs:
         #         objects.append(ProductAttribute(
         #             name=attr, code=_slugify(attr),
-        #             product_class=pclass,
+        #             product_class=pclass,attribute__
         #             type=ProductAttribute.TEXT, required=False, is_varying=True))
         #         if attr.lower() == "color":
         #             objects.append(ProductAttribute(
