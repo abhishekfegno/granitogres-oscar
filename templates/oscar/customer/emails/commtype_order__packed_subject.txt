@@ -1,1 +1,1 @@
-{% load i18n %}Confirmation of order {{ order.number }}
+{% load i18n %}Order has packed and ready to be shipped {{ order.number }}
