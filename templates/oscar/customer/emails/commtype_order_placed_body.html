@@ -1,7 +1,8 @@
-{% extends 'oscar/customer/emails/base.html' %}
+{% extends "oscar/customer/emails/base.html" %}
+{% load static %}
 
 {% load currency_filters i18n %}
-{% block body %}
+<!--{% block body %}-->
 
 {% block header_subject %}
 <tr>
@@ -40,14 +41,14 @@
           </tr>
 {% endblock %}
 
-{% block delivery_details %}
-                {% include 'oscar/customer/emails/delivery_details.html' %}
+<!--{% block delivery_details %}-->
+<!--                {% include 'oscar/customer/emails/delivery_details.html' %}-->
 
-{% endblock %}
+<!--{% endblock %}-->
 
-{% block order_details %}
-                {% include 'oscar/customer/emails/cart_lines.html' %}
+<!--{% block order_details %}-->
+<!--                {% include 'oscar/customer/emails/cart_lines.html' %}-->
 
-{% endblock %}
+<!--{% endblock %}-->
 
-{% endblock %}
+<!--{% endblock %}-->
