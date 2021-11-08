@@ -41,10 +41,13 @@
 {% endblock %}
 
 {% block delivery_details %}
+                {% include 'oscar/customer/emails/delivery_details.html' %}
 
 {% endblock %}
 
 {% block order_details %}
+                {% include 'oscar/customer/emails/cart_lines.html' %}
 
 {% endblock %}
+
 {% endblock %}
