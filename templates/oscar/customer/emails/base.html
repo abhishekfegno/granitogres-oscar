@@ -38,11 +38,13 @@
         .ptable {padding-right:20px;padding-left:20px;background-color:#fff;width:642px;max-width:642px}
     </style>
 </head>
-{% block body %}
 <body itemscope itemtype="http://schema.org/EmailMessage">
 <span class="preheader"> You have received new email from ABCHAUZ.COM. </span>
 <div class="wrapper">
+      {% block body %}
+
   <table class="outer body" style="width: 100%;" role="presentation" border="0" cellpadding="0" cellspacing="0" >
+
     <tbody>
     <tr>
       <td>
@@ -138,7 +140,8 @@
     </tr>
     </tbody>
   </table>
+      {% endblock  %}
+
 </div>
 </body>
-{% endblock %}
 </html>
