@@ -1,8 +1,9 @@
 {% load currency_filters i18n %}Hello,
 
+{% block bodycontent %}
 We are pleased to confirm your order {{ order.number }} has been received and
 will be processed shortly.
-
+{% endblock %}
 
 {% for line in order.lines.all %}
 {% endfor %}
