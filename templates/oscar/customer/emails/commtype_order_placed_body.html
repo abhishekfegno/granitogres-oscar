@@ -1,6 +1,7 @@
 {% extends 'oscar/customer/emails/base.html' %}
 
 {% load currency_filters i18n %}
+{% block body %}
 
 {% block header_subject %}
 <tr>
@@ -37,4 +38,13 @@
               </table>
             </td>
           </tr>
+{% endblock %}
+
+{% block delivery_details %}
+
+{% endblock %}
+
+{% block order_details %}
+
+{% endblock %}
 {% endblock %}
