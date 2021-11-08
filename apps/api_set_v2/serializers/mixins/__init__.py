@@ -35,7 +35,7 @@ class ProductAttributeFieldMixin(object):
             """
             attrs_value = instance.attribute_values.filter(
                 **self.attribute_values_filter
-            ).annotate(
+            ).filter().annotate(
                 att_name=F('attribute__name'),
                 att_code=F('attribute__code'),
             )
