@@ -19,7 +19,7 @@
         .wrapper { width: 680px; margin: auto; background-color: #fff;  border-radius: 4px; font-size:smaller; overflow:hidden}
 
         .header-image{ width:100%; margin:0;   }
-        table {width: 100%; margin: 0}
+        table {width: 600px; margin: 0}
         th {text-align: left;}
 
         .product_table img{max-width: 50px;}
@@ -39,7 +39,6 @@
     </style>
 </head>
 <body itemscope itemtype="http://schema.org/EmailMessage">
-<span class="preheader"> You have received new email from ABCHAUZ.COM. </span>
 <div class="wrapper">
       {% block body %}
 
@@ -48,12 +47,14 @@
     <tbody>
     <tr>
       <td>
-        <img src="{{ site }}assets/email/header.png" class="header-image" width="100%; margin:0;" />
+        <img src="{{ site }}/assets/email/header.png" class="header-image" width="100%; margin:0;" />
       </td>
     </tr>
     <tbody>
     <tr>
       <th>
+        <span class="preheader"> You have received new email from ABCHAUZ.COM. </span>
+
         <table class="p-2">
             {% block header_subject %}
 
@@ -135,7 +136,7 @@
     </tr>
     <tr>
       <td>
-        <img src="{{ site }}assets/email/footer.png" style="width: 100%;"/>
+        <img src="{{ site }}/assets/email/footer.png" style="width: 100%;"/>
       </td>
     </tr>
     </tbody>
