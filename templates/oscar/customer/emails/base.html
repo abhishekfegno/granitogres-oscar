@@ -1,144 +1,144 @@
 <!DOCTYPE html>
 {% load static %}
+{% load currency_filters i18n %}
+
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-    <title>ABCHAUZ</title>
-    <style>
-        body{font-size: large;}.wrapper {width: 600px;margin: auto;}th {text-align: left;}.product_table img{max-width: 50px;}.preheader {color: transparent;display: none;height: 0;max-height: 0;max-width: 0;opacity: 0;overflow: hidden;mso-hide: all;visibility: hidden;width: 0; }
-        body{background-color: #e9e4d5; width: 100%;}
-        .wrapper { width: 600px; margin: auto; background-color: #fff; padding: 20px; border-radius: 4px; font-size:smaller;}
+  <title>ABCHAUZ - House of homes</title>
+  <style>
+
+        body{background-color: #f5f5f5; }
+        body * {font-family: sans-serif;}, *{font-family: sans-serif;}
+
+        .preheader {color: transparent;display: none;height: 0;max-height: 0;max-width: 0;opacity: 0;overflow: hidden;mso-hide: all;visibility: hidden;width: 0; }
+        .wrapper { width: 680px; margin: auto; background-color: #fff;  border-radius: 4px; font-size:smaller; overflow:hidden}
+
+        .header-image{ width:100%; margin:0;   }
+        table {width: 100%; margin: 0}
+        th {text-align: left;}
+
+        .product_table img{max-width: 50px;}
+        .w-100 {width:100%}
+        .thin-text{ font-weight: 200 }
+        .p-2 {padding:20px;}
+        .text-dark { color: #323232 !important }
+        .text-muted { color: #8d8d8d  !important }
+        .text-muted  b { color: #323232  !important }
+        .col-6 { width:50%; !important}
+        .col-3 { width:25%; !important}
+        .col-9 { width:75%; !important}
+        .float-right{float:right !important}
+        .coloured-box { border: 1px solid #f79f08; background-color: #f5f5f580 }
+        .qty-line{line-height:18px;margin-top:0px;margin-bottom:0px;font-family:Arial;font-style:normal;font-size:12px;font-stretch:normal;color:#212121}
+        .ptable {padding-right:20px;padding-left:20px;background-color:#fff;width:642px;max-width:642px}
     </style>
-  </head>
-  <body itemscope itemtype="http://schema.org/EmailMessage">
-    <span class="preheader">
-      {% block preheader %}You have received new email from ABCHAUZ.COM.{% endblock %}
-    </span>
-    <div class="wrapper">
-      <table class="outer body" style="width: 100%; font-family: sans-serif;" role="presentation" border="0" cellpadding="0" cellspacing="0" >
-        <tbody>
-        <tr>
-            <td>
-              <img src="{{ site }}/assets/email/header.png" width="100%; margin:0;" />
-            </td>
-          </tr>
-          {% block tbody %}
-          <tbody>
-          <tr>
-            <td>
-              {% block header_01 %}
-              <table style="width: 100%; margin: 10px 0">
-                <tbody>
-                  <tr>
-                    <td style="width: 50%"><strong>Order ID</strong></td>
-                    <td><strong>Date of order</strong></td>
-                  </tr>
-                </tbody>
-              </table>
-              {% endblock %}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <table style="width: 100%; margin: 5px 0">
-                <tbody>
-                  <tr>
-                    <td>Dear, Customer</td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <table style="width: 80%">
-                <tbody>
-                  <tr>
-                    <td><strong>Shipping Address</strong></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      Shipping Address ,Shipping Address ,Shipping
-                      Address,Shipping Address
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <table style="width: 100%; margin: 10px 0" class="product_table">
-                <thead>
-                  <th>Image</th>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                  <th>Total</th>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><img src="https://picsum.photos/100" /></td>
-                    <td>Testing Product</td>
-                    <td>2</td>
-                    <td>1000</td>
-                    <td>2000</td>
-                  </tr>
+</head>
+{% block body %}
+<body itemscope itemtype="http://schema.org/EmailMessage">
+<span class="preheader"> You have received new email from ABCHAUZ.COM. </span>
+<div class="wrapper">
+  <table class="outer body" style="width: 100%;" role="presentation" border="0" cellpadding="0" cellspacing="0" >
+    <tbody>
+    <tr>
+      <td>
+        <img src="{{ site }}assets/email/header.png" class="header-image" width="100%; margin:0;" />
+      </td>
+    </tr>
+    <tbody>
+    <tr>
+      <th>
+        <table class="p-2">
+            {% block header_subject %}
 
-                  <tr style="margin: 10px 0 20px 0">
-                    <td colspan="3" style="font-weight: 700; font-size: large">
-                      Total
-                    </td>
-                    <td colspan="2" style="font-weight: 700; font-size: large">
-                      14524545
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
+            {% endblock %}
+            {% block delivery_details %}
+                {% include 'oscar/customer/emails/delivery_details.html '%}
+
+            {% endblock %}
+
+            {% block order_details %}
+                {% include 'oscar/customer/emails/cart_lines.html' %}
+            {% endblock %}
           <tr>
             <td>
-              <table
-                style="
-                  width: 70%;
-                  margin: auto;
-                  text-align: center; font-family:sans-serif;padding: 20px 0;"
-              >
+              <table border="0" width="600" cellpadding="0" cellspacing="0" class="m_6870997060859637215container" style="padding-right:20px;padding-left:20px;background-color:#fff;width:640px;max-width:640px">
                 <tbody>
-                  <tr>
-                    <td>
-                      Your Order No. ********** with ***********... has been
-                      received. Sit back and relax, while we get your order
-                      ready to dispatch.
-                    </td>
-                  </tr>
+                <tr>
+                  <td>
+                    <table width="100%" cellspacing="0" cellpadding="0" style="width:600px;max-width:600px;background:#ffffff">
+                      <tbody>
+                      <tr class="m_6870997060859637215col" style="color:#212121">
+                        <td align="left" valign="top" class="m_6870997060859637215container" style="color:#212121;border-bottom:1px solid #f0f0f0">
+                          <p style="font-family:Arial;font-size:14px;font-weight:bold;line-height:1.86;color:#212121">
+                            Thank you for shopping with <span class="il">ABCHAUZ.COM</span>!</p>
+                          <p style="font-family:Arial;font-size:12px;color:#212121;margin-bottom:5px" class="">
+                            <!--Got Questions? Please get in touch with our
+                            <a href="" style="color:#2175ff" target="_blank" >24x7 Customer Care</a>-->
+                          </p>
+                          <br></td>
+                      </tr>
+                      </tbody>
+                    </table></td>
+                </tr>
+                <tr>
+                  <td>
+                    <table width="100%" cellspacing="0" cellpadding="0" style="width:640px;max-width:600px;margin-top:14px">
+                      <tbody>
+                      <tr>
+                        <td align="left" valign="top" class="m_6870997060859637215container" style="color:#2c2c2c;line-height:20px;font-weight:300;background-color:transparent">
+                          <table>
+                            <tbody>
+                            <tr>
+                              <td style="width:60%;text-align:left"><a style="color:#027cd8;text-decoration:none;outline:none;color:#ffffff;font-size:13px" href="https://devserver.abchauz.com/assets/email/abchauz-logo.svg" target="_blank" alt="Flipkart.com" style="border:none" class="CToWUd"></a></td>
+                              <!--                              <td style="width:10%;text-align:right"><a style="text-decoration:none;outline:none;color:#ffffff;font-size:13px" href="http://delivery.nct.flipkart.com/QRFNSEO?id=88656=ehkDAAoOVwYCTFIGAQENW1YGDwMAV1ICBQdSDg0HUAAMVAFVBVJTBFIJV1RbUAtfBAJFUwEDBwYCUFAOVgMFUQhWBFUBVwMFAgAAVQYCDQ8FVQlXAwdSAQYEUksFBFAHDVYHBgUCVQQMBQFcUUhQTUYTAxoaUABeW0cERU0cDVRNS1VcW0YKUkZEGgYMWRdoYCV3ZnB7WltWTRcE&amp;fl=URFHQAgZTl8aVlgME19ZS0ZNWlpYGxEdUV0IVF8dClhsAUF8fWAUB1ZRVhwlTFBDQisOYFdxFgVoCAkBbl03Wng/eQYGfwt3flhDNjtcbl5/TmB7d2UkcX15DQFwcTBUdCgAaHZOE1pgf1MwB2EKfkMuZgF0RA1HBnRWTX16UF13CFd2ZF8iCkQCcwMZDHRUWTwKXX9CEHZ5aRRRdUIzWm4QSnVgYRNfRXNhPxV+U1EAJVF6XG0fYlREPnRnagcDVTpRclsEUWIGVEVVEFJ1cmA0WEwGWTRKYGVVZw1UFnpyU3RBa1MnAUYAXDIGcA0JBjZdZnNfAnh3SxZFcEcCQUwXQkp/GyRqTlRbXVpGaGZCMEt6VFpTVmZbCQZCAE5TDyt8eFNFI1VDWwQSIlBze1ETdm1YBTJBAn0oBgZBJFxwKx5HR3w3QVlyDRE7fWgPRzdvR00DNHFqZzlWfFkRR0g6SURlTwhjZAFRLBpXXXx5ImNBZHBVdlZ5LEdtBgx2fD0GHQoEM2d7eVpQVmV5aHQQd1oEZxMFQXgHZkVFKARYIHxabW4jaWN3TCJTXwBWCgd1XFJ4LXt5QDVRW3gPQG8kB0ADfwJSYVFiFhRhV351BUNMTX4kYFZbOEdsawwaUhZpb2hCL0FhZANIUF0PCXkoQXAFflV2VXhVfnFXV1sNAXpHYnw3XwAN&amp;ext=ZT10cnVl" target="_blank" data-saferedirecturl="https://www.google.com/url?q=http://delivery.nct.flipkart.com/QRFNSEO?id%3D88656%3DehkDAAoOVwYCTFIGAQENW1YGDwMAV1ICBQdSDg0HUAAMVAFVBVJTBFIJV1RbUAtfBAJFUwEDBwYCUFAOVgMFUQhWBFUBVwMFAgAAVQYCDQ8FVQlXAwdSAQYEUksFBFAHDVYHBgUCVQQMBQFcUUhQTUYTAxoaUABeW0cERU0cDVRNS1VcW0YKUkZEGgYMWRdoYCV3ZnB7WltWTRcE%26fl%3DURFHQAgZTl8aVlgME19ZS0ZNWlpYGxEdUV0IVF8dClhsAUF8fWAUB1ZRVhwlTFBDQisOYFdxFgVoCAkBbl03Wng/eQYGfwt3flhDNjtcbl5/TmB7d2UkcX15DQFwcTBUdCgAaHZOE1pgf1MwB2EKfkMuZgF0RA1HBnRWTX16UF13CFd2ZF8iCkQCcwMZDHRUWTwKXX9CEHZ5aRRRdUIzWm4QSnVgYRNfRXNhPxV%2BU1EAJVF6XG0fYlREPnRnagcDVTpRclsEUWIGVEVVEFJ1cmA0WEwGWTRKYGVVZw1UFnpyU3RBa1MnAUYAXDIGcA0JBjZdZnNfAnh3SxZFcEcCQUwXQkp/GyRqTlRbXVpGaGZCMEt6VFpTVmZbCQZCAE5TDyt8eFNFI1VDWwQSIlBze1ETdm1YBTJBAn0oBgZBJFxwKx5HR3w3QVlyDRE7fWgPRzdvR00DNHFqZzlWfFkRR0g6SURlTwhjZAFRLBpXXXx5ImNBZHBVdlZ5LEdtBgx2fD0GHQoEM2d7eVpQVmV5aHQQd1oEZxMFQXgHZkVFKARYIHxabW4jaWN3TCJTXwBWCgd1XFJ4LXt5QDVRW3gPQG8kB0ADfwJSYVFiFhRhV351BUNMTX4kYFZbOEdsawwaUhZpb2hCL0FhZANIUF0PCXkoQXAFflV2VXhVfnFXV1sNAXpHYnw3XwAN%26ext%3DZT10cnVl&amp;source=gmail&amp;ust=1636369034875000&amp;usg=AFQjCNHyne7qBoqCgXEgzYzKMwcBCvqLLg"><img border="0" height="24" src="https://ci6.googleusercontent.com/proxy/3QE9kvI6a_sNZY1yz9h1e9UTtBEe6bvUPfsokYVFhigLrmrCJxcv1_CZk0b5cJWyTHa1prcEfHSGUl1QMcg36fPaTs0H7MVxDk0pgC8ujoEedjfg26Rdff_eNArN9_s=s0-d-e1-ft#http://img6a.flixcart.com/www/promos/new/20160910-183744-google-play-min.png" alt="Flipkart.com" style="border:none;margin-top:10px" class="CToWUd"></a></td>-->
+                              <!--                              <td style="width:10%;text-align:right"><a style="text-decoration:none;outline:none;color:#ffffff;font-size:13px" href="http://delivery.nct.flipkart.com/QRFNSEO?id=88656=ehkDAAoOVwYCTAFWUgNbAQMGDgBUBlYABFJSBlEBAAMNXVAHBlACBVVSA1FUAgAPVwVFUwEDBwYCUFAOVgMFUQhWBFUBVwMFAgAAVQYCDQ8FVQlXAwdSAQYEUksFBFAHDVYHBgUCVQQMBQFcUUhQTUYTAxoaUABeW0cERU0cDVRNS1VcW0YKUkZEGgYMWRdoYCV3ZnB7WltWTRcE&amp;fl=URFHQAgZTl8aVlgME19ZS0ZNWlpYGxEdUV0IVF8dClhsAUF8fWAUB1ZRVhwlTFBDQisOZH5bHFd3ey9+dVBURFAQA2dKXBRBYx1GIxFZAUMCIElGc00xH315LH9gVSBEQwlHcntnAHxfBHwMMUdgCx8bSkBtfCMKAANRB1lrUE9IIFxedncTekBmQT0kGXoLAQVreg1lDAcGUitneFZOT1ocAG8CYzBnQEdDDlB2c3F7KHt2Un8GSgBpLAN1UQtYcjcLV0tcD1RkVU4SK2JoTWQEXRhGTD1FSEEmT3J9Uk9jDgsJanQAX3B+dhcPbV0AUCEIGAdMB3VHUARiZlwLfA8hYEUfAwQDAWVaB1daaAtTEnBRd0dTVWFbIlpGXA5QABFhQAJYG2oBdQwPUwNISUIQclxYVyx2XlMEAVcFKUYOHGdiBwZZY1ZbZz0wbQ9DHxtSUnBnAW0fQFIGUAY1dH0xWFcLegJWTQBHD1ZDfA5mVVMBfwQKBGFgLlBze1JYDT95Z3d+B3d/V0UPBV4VVAA7dUdBfjBYYggDBXlZJF5REkl2VE8HV19qATJVUVkKBxEOe2plM1hZcAQAcUAJA1FScR1fTDZCDXpOPyRQXVtVO3hdbW0uH3ZhCVpeQVIFXBFyU15OAEJSRVcLC0dPSVEHWFhYBiJ4XlMyemtdIQYMKXVAQXoNCwwN&amp;ext=ZT10cnVl" target="_blank" data-saferedirecturl="https://www.google.com/url?q=http://delivery.nct.flipkart.com/QRFNSEO?id%3D88656%3DehkDAAoOVwYCTAFWUgNbAQMGDgBUBlYABFJSBlEBAAMNXVAHBlACBVVSA1FUAgAPVwVFUwEDBwYCUFAOVgMFUQhWBFUBVwMFAgAAVQYCDQ8FVQlXAwdSAQYEUksFBFAHDVYHBgUCVQQMBQFcUUhQTUYTAxoaUABeW0cERU0cDVRNS1VcW0YKUkZEGgYMWRdoYCV3ZnB7WltWTRcE%26fl%3DURFHQAgZTl8aVlgME19ZS0ZNWlpYGxEdUV0IVF8dClhsAUF8fWAUB1ZRVhwlTFBDQisOZH5bHFd3ey9%2BdVBURFAQA2dKXBRBYx1GIxFZAUMCIElGc00xH315LH9gVSBEQwlHcntnAHxfBHwMMUdgCx8bSkBtfCMKAANRB1lrUE9IIFxedncTekBmQT0kGXoLAQVreg1lDAcGUitneFZOT1ocAG8CYzBnQEdDDlB2c3F7KHt2Un8GSgBpLAN1UQtYcjcLV0tcD1RkVU4SK2JoTWQEXRhGTD1FSEEmT3J9Uk9jDgsJanQAX3B%2BdhcPbV0AUCEIGAdMB3VHUARiZlwLfA8hYEUfAwQDAWVaB1daaAtTEnBRd0dTVWFbIlpGXA5QABFhQAJYG2oBdQwPUwNISUIQclxYVyx2XlMEAVcFKUYOHGdiBwZZY1ZbZz0wbQ9DHxtSUnBnAW0fQFIGUAY1dH0xWFcLegJWTQBHD1ZDfA5mVVMBfwQKBGFgLlBze1JYDT95Z3d%2BB3d/V0UPBV4VVAA7dUdBfjBYYggDBXlZJF5REkl2VE8HV19qATJVUVkKBxEOe2plM1hZcAQAcUAJA1FScR1fTDZCDXpOPyRQXVtVO3hdbW0uH3ZhCVpeQVIFXBFyU15OAEJSRVcLC0dPSVEHWFhYBiJ4XlMyemtdIQYMKXVAQXoNCwwN%26ext%3DZT10cnVl&amp;source=gmail&amp;ust=1636369034876000&amp;usg=AFQjCNHKMEGD3ZWp7zLNZK0xwsYydltlyQ"><img border="0" height="24" src="https://ci4.googleusercontent.com/proxy/QypvFRQDLBLrj10OMzTKLzSZQuMK2CfotEga4oOV9lbsjq3-KGtkoYz3K2w-hbkiqilkj7EORpiOpODCSSxAgpHd-y3FC1hCd2g7ocbGtAcBgHC1Xdyzc1tRoePbQXA=s0-d-e1-ft#http://img5a.flixcart.com/www/promos/new/20160910-183649-apple-store-min.png" alt="Flipkart.com" style="border:none;margin-top:10px" class="CToWUd"></a></td>-->
+                            </tr>
+                            </tbody>
+                          </table></td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <table width="100%" cellspacing="0" cellpadding="0" style="margin:0 auto;width:600px;max-width:600px;margin-top:4px">
+                            <tbody>
+                            <tr>
+                              <td align="left" valign="top" class="m_6870997060859637215container" style="color:#2c2c2c;line-height:20px;font-weight:300;background-color:transparent">
+                                <table>
+                                  <tbody>
+                                  <tr>
+                                    <td><p style="font-family:Arial;font-size:10px;color:#878787">
+                                      You are receiving this email because you have purchased from abchauz.com . This email was sent from a notification-only address that cannot accept incoming email.
+                                      Please do not reply to this message.
+                                    </p></td>
+                                  </tr>
+                                  </tbody>
+                                </table></td>
+                            </tr>
+                            </tbody>
+                          </table></td>
+                      </tr>
+                      </tbody>
+                    </table></td>
+                </tr>
                 </tbody>
               </table>
             </td>
           </tr>
-
-      </tbody>
-
-        {% endblock %}
-        {% if status_url %}
-            <tr>
-                <td class="content-block">
-                    You can view the status of this order by clicking <a href="{{ status_url }}" title="order status">here</a>
-                </td>
-            </tr>
-        {% endif %}
-        <tr>
-              <td>
-                  <img src="{{ site }}/assets/email/footer.png" style="width: 100%;"/>
-              </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </body>
+        </table>
+      </th>
+    </tr>
+    <tr>
+      <td>
+        <img src="{{ site }}assets/email/footer.png" style="width: 100%;"/>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+{% endblock %}
 </html>

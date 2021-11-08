@@ -1,0 +1,84 @@
+          <tr>
+            <td>
+              <table border="0" width="600" cellpadding="0" cellspacing="0" class="m_6870997060859637215container" style="padding-right:20px;padding-left:20px;background-color:#fff;width:642px;max-width:642px;padding-top:0px;padding-bottom:0px">
+                <tbody>
+                <tr>
+                  <td>
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-bottom:20px;border-bottom:1px solid #f0f0f0">
+                      <tbody>
+                      <tr>
+                        <td align="left">
+                          <table border="0" cellpadding="0" cellspacing="0" align="left" class="m_6870997060859637215col">
+                            <tbody>
+                            <tr>
+                              {% for line in order.lines.all %}
+                              <td valign="middle" width="120" align="center" class="m_6870997060859637215link" style="padding-top:20px">
+                                <a style="color:#027cd8;text-decoration:none;outline:none;color:#fff;font-size:13px" href="#" target="_blank">
+                                  <img border="0" src="https://ci4.googleusercontent.com/proxy/3C2AZnYP6I9MoeI5ZE8S4dC9K8soAFtZO3qOEr9I4e8abklo20tkoKeF2JwCpZkU7f4vcj8zLXQFhtCWLLtg6SxCnKn_A5uNgMnvUT7laPgHEwGuOS8RXEc-BDcYxldxUydeIywevB6jj9fEOgUNNdBVKte0RqGRxvTqVrOihYnWKaY6t_lvDrmVSgkNoeKRInfCmHjGVQBMAXU=s0-d-e1-ft#http://img.fkcdn.com/image/100/100/kg9qbgw0/regionalbooks/q/w/m/highway-engineering-nm-publisher-10th-ed-original-imafwjuagvewwycg.jpeg" alt="HIGHWAY ENGINEERING, NM PUBLISHER,10th Ed" style="border:none;max-width:125px;max-height:125px" class="CToWUd">
+                                </a>
+                              </td>
+                              <td valign="top" align="left" style="padding-top:20px;padding-left:15px">
+                                <p style="margin-top:0;margin-bottom:7px" class="m_6870997060859637215link">
+                                  <a href="#" style="font-family:Arial;font-size:14px;font-weight:normal;font-style:normal;font-stretch:normal;line-height:20px;color:#212121;text-decoration:none!important;word-spacing:0.2em;max-width:360px;display:inline-block;min-width:352px;width:352px" target="_blank" >
+                                    {{ line.product }}
+                                  </a>
+                                  <span style="min-width:100px;font-size:12px;font-weight:bold;padding-right:0px;line-height:20px;text-align:right;display:inline-block;float:right">₨. 330.0 </span>
+                                </p>
+<!--                                <p style="line-height:18px;margin-top:0px;margin-bottom:2px;font-family:Arial;font-size:12px;color:#212121">-->
+<!--                                  Delivery-->
+<!--                                  <span style="line-height:18px;font-family:Arial;font-size:12px;font-weight:bold;color:#139b3b">-->
+<!--                                  by Mon, Sep 13, 2021 </span>-->
+<!--                                </p>-->
+                                <p style="line-height:18px;margin-top:0px;margin-bottom:2px;font-family:Arial;font-size:12px;color:#212121">
+                                  Seller: Book shoppe <span style="float:right;font-size:12px;padding-right:5px">
+                                  <span style="color:#878787;text-align:right;margin-right:5px"> Amount /span>
+                                  <span style="float:right;text-align:right">₨. {{ line.line_price_incl_tax }}</span> </span>
+                                </p>
+                                <p style="qty-line">
+                                  Qty: {{ line.quantity }}
+                                  <span style="float:right;font-size:12px;padding-right:5px"> </span>
+                                </p>
+                              </td>
+                              {% endfor %}
+                            </tr>
+                            </tbody>
+                          </table> </td>
+                      </tr>
+                      </tbody>
+                    </table></td>
+                </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table border="0"  width="600%" cellspacing="0" class="ptable" cellpadding="0" style="margin:0;max-width:600px;background:#ffffff">
+                <tbody>
+                <tr style="color:#212121;display:block;margin:0 auto;clear:both">
+                  <td align="left" valign="top" class="m_6870997060859637215container" style="color:#212121;display:block">
+                    <table width="100%" style="margin-bottom:0px;padding-top:20px;padding-bottom:20px;border-bottom:1px solid #f0f0f0">
+                      <tbody>
+                      <tr>
+                        <td width="40%"></td>
+                        <td align="right" width="34%"><p style="margin-top:14px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:3px"><span style="color:#3f3f3f;text-align:right">Item(s) total</span></p></td>
+                        <td><p style="margin-top:14px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:3px"><span style="padding-right:0px">₨.  {{ order.basket_total_incl_tax|currency:order.currency }} </span></p></td>
+                      </tr>
+                      <tr>
+                        <td width="50%"></td>
+                        <td align="right" width="34%"><p style="margin-top:0px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:10px"><span style="color:#3f3f3f;text-align:right">Delivery charges</span></p></td>
+                        <td><p style="margin-top:0px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:10px"><span style="padding-right:0px">₨.{{ order.shipping_incl_tax|currency:order.currency }}</span></p></td>
+                      </tr>
+                      <tr>
+                        <td width="40%"></td>
+                        <td align="right" width="34%"><p style="margin-top:0px;font-family:Arial;font-size:14px;text-align:right;color:#3f3f3f;line-height:14px;padding-top:0px;margin-bottom:0"><span style="color:#212121;text-align:right;font-weight:bold">Amount Payable on Delivery</span></p></td>
+                        <td><p style="margin-top:0px;font-family:Arial;font-size:14px;text-align:right;color:#3f3f3f;padding-top:0px;margin-bottom:0">
+                          <span style="padding-right:0px;font-weight:bold">₨. {{ order.total_incl_tax|currency:order.currency }} </span></p></td>
+                      </tr>
+                      </tbody>
+                    </table></td>
+                </tr>
+                </tbody>
+              </table></td>
+            </td>
+          </tr>
