@@ -108,6 +108,44 @@ OSCAR_USER_CANCELLABLE_ORDER_STATUS = (
     'Placed', 'Order Confirmed', 'Packed', 'Shipped',  'Out For Delivery',
 )
 
+EMAIL_MESSAGES = {
+    'CONFIRMED': "CONFIRMED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is confirmed. \n"
+                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
+    'SHIPPED'   : "SHIPPED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is shipped. \n"
+                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
+    'PLACED'   : "PLACED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is placed. \n"
+                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
+    'DELIVERED' : "DELIVERED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is delivered. \n"
+                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
+    'CANCELED' : "CANCELED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is confirmed. \n"
+                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
+    'PAYMENT_RECEIVED': "RECEIVED: Your Payment of Rs.{order.total_incl_tax}/- against Order #{order.number} is RECEIVED.",
+    'PAYMENT_DECLINED': "DECLINED: Your Payment of Rs.{order.total_incl_tax}/- against Order #{order.number} is DECLINED.",
+
+    'PAYMENT_REFUNDED': "REFUNDED: Your Payment of Rs.{refund_amount}/- against Order #{order.number} is Refunded.\n"
+                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
+    'RETURN_INITIATED': "RETURN: Return Request against your Order #{order.number} is Initiated.\n"
+                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
+    'REPLACEMENT_INITIATED': "REPLACEMENT: Replacement Request against your Order #{order.number} is Initiated.\n"
+                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
+    'RETURNED'         : "RETURND: Your Order #{order.number} is Returned.\n"
+                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
+    'RETURN_REJECTED' : "RETURN: Your Return Request Against Order #{order.number} could not be processed.\n"
+                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
+    'CANCELED': "ITEM CANCEL: {line.product.title} Has been Cancelled from Order #{order.number}.\n"
+                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+}
+
 OSCAR_SEND_EMAIL_ORDER_STATUS = (
     ORDER_STATUS_PLACED, ORDER_STATUS_CONFIRMED, ORDER_STATUS_PACKED, ORDER_STATUS_SHIPPED,
     ORDER_STATUS_OUT_FOR_DELIVERY, ORDER_STATUS_DELIVERED, ORDER_STATUS_CANCELED,

@@ -39,9 +39,9 @@
                       <tr>
                         <td colspan="2">
                           <hr style="border-top:1px solid #212121">
+                            {{ status=order.status}}
                           <p style="font-family:Arial;font-size:12px;text-align:left;color:#212121;padding-top:0px;padding-bottom:0px;line-height:19px;margin-top:0;margin-bottom:0">
-                            You will receive the next update when the item in your
-                            <span class="il">order</span> is packed/shipped by the seller.
+                            {{ settings.EMAIL_MESSAGES.status }}
                           </p>
                         </td>
                       </tr>
