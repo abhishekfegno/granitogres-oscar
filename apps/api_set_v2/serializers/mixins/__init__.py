@@ -35,10 +35,10 @@ class ProductAttributeFieldMixin(object):
             """
             attrs_value = instance.attribute_values.filter(
                 **self.attribute_values_filter
-            ).annotate(
+            ).filter(attribute__is_visible_in_detail_page=True).annotate(
                 att_name=F('attribute__name'),
                 att_code=F('attribute__code'),
-            )
+            ).order_by('attribute__order_in_detail_page')
             return [{       # saves model mapping and another 5 queries
                 'name': attr.att_name,
                 'value': attr.value_as_text,

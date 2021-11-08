@@ -48,7 +48,7 @@ class ProductAttributesForm(base_forms.ProductAttributesForm):
 
     class Meta:
         model = ProductAttribute
-        fields = ["name", "code", "type", "option_group", 'is_visible_in_filter',  'is_varying', "required"]
+        fields = ["name", "code", "type", "option_group", 'is_visible_in_filter', 'is_visible_in_detail_page', 'order_in_detail_page', 'is_varying', "required"]
 
 
 CategoryForm = movenodeform_factory(

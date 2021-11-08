@@ -53,6 +53,8 @@ class ProductAttribute(AbstractProductAttribute):
     )
     is_varying = models.BooleanField(_('Is Varying.'), help_text="Is Varying for child? Will be shown detail page child switcher", default=False)
     is_visible_in_filter = models.BooleanField(_('Is Visible in Filter'), help_text="Do we need to show this attribute at filter?", default=True)
+    is_visible_in_detail_page = models.BooleanField(_('Is Visible in Detail page'), help_text="Do we need to show this attribute detail page?", default=True)
+    order_in_detail_page = models.PositiveSmallIntegerField(_('Display order'), help_text="order 1 will show at top.", default=20)
 
     type = models.CharField(
         choices=TYPE_CHOICES, default=TYPE_CHOICES[0][0],
