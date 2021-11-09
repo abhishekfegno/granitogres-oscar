@@ -68,6 +68,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'mobile', 'email',
             'first_name', 'last_name',
-            'image',
+            'image', 'token',
             'is_active', 'is_delivery_boy',
         ]
