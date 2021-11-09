@@ -31,7 +31,12 @@ def get_optimized_product_dict(
     stock record -> partner -> zone
     
     """
-    zone: int = request.session.get('zone')         # zone => Zone.pk
+    zone = None
+    if request.GET.get('pincode'):
+        from apps.availability.facade import ZoneFacade, get_zone_from_pincode
+        zone = get_zone_from_pincode(request.GET.get('pincode'))
+    if zone is None:
+        zone: int = request.session.get('zone')         # zone => Zone.pk
     if qs is not None:
         if not qs:
             return {}

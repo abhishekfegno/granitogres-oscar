@@ -98,6 +98,7 @@ def product_list(request, category='all', **kwargs):
     _offer_category = request.GET.get('offer_category')
     _range = request.GET.get('range')
     _pclass = request.GET.get('pclass')
+    _pincode = request.GET.get('pincode')
 
     page_number = int(request.GET.get('page', '1'))
     page_size = int(request.GET.get('page_size', str(settings.DEFAULT_PAGE_SIZE)))
