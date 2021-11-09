@@ -60,7 +60,7 @@ class CheckoutView(OscarAPICheckoutView):
         # "total": float(basket.total_incl_tax),
         "notes": "Some Notes for address as string.",
         "phone_number": "+919497270863",
-        "shippingcode": <"free-shipping"|"express-delivery">,
+        "shippingcode": <"self-shipping"|"express-delivery">,
         "shipping_address": (User Address ID),
         "billing_address": (User Address ID),
         "payment": cash,
@@ -73,7 +73,7 @@ class CheckoutView(OscarAPICheckoutView):
         # "total": float(basket.total_incl_tax),
         "notes": "Some Notes for address as string.",
         "phone_number": "+919497270863",
-        "shippingcode": <"free-shipping"|"express-delivery">,
+        "shippingcode": <"self-shipping"|"express-delivery">,
         "shipping_address": (User Address ID),
         "billing_address": (User Address ID),
         "payment": "razor_pay",
@@ -187,7 +187,7 @@ class CheckoutView(OscarAPICheckoutView):
 
         try:
             ship = None
-            shippingcode = data.get('shippingcode', 'free-shipping')
+            shippingcode = data.get('shippingcode', 'self-shipping')
             for repo in Repository().get_available_shipping_methods(basket, user=user, shipping_addr=shipping_address,
                                                                     request=request, ):
                 if repo.code == shippingcode:

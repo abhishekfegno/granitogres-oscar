@@ -151,7 +151,7 @@ class ProductReviewImageCreateView(CreateAPIView):
         self.perform_create(serializer)
         return_data = [{
             'id': i.id,
-            'original': request.build_absolute_uri(i.original.url)
+            'original': request.build_absolute_uri(i.original.url),
         } for i in serializer.instances]
         return Response({"response": return_data}, status=status.HTTP_201_CREATED)
 

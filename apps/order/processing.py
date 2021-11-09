@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from django.conf import settings
@@ -11,7 +12,7 @@ from oscar.core.loading import get_model
 
 from couriers.delhivery.facade import Delhivery
 from lib.utils.sms import send_sms_for_order_status_change
-from .models import Order, PaymentEventType
+from .models import Order, PaymentEventType, ShippingEventType
 from ..payment import refunds
 from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
@@ -85,10 +86,10 @@ class EventHandler(processing.EventHandler):
         self.handle_consignments(order, old_status, new_status)
         self.handle_refund(order, old_status, new_status)
         self.handle_delivery(order, old_status, new_status)
-        OrderStatusPushNotification(order.user).send_status_update(order, new_status)
-
-
-
+        try:
+            OrderStatusPushNotification(order.user).send_status_update(order, new_status)
+        except KeyError as e:
+            logging.error(e)
         if note_msg:
             """
             Add note if there is an EventHandler note msg.
@@ -269,18 +270,25 @@ class EventHandler(processing.EventHandler):
             self.cancel_stock_allocations(order, lines_to_be_cancelled)
 
     def handle_delivery(self, order, old_status, new_status):
+        event_type = None
         if new_status == settings.ORDER_STATUS_PACKED:
             d = Delhivery()
             d.pack_order(order)
-
-        if new_status == settings.ORDER_STATUS_CANCELED and old_status not in (
+            event_type = PaymentEventType.objects.get_or_create(code="packed", defaults={'Name': "Packed"})[0]
+        elif new_status == settings.ORDER_STATUS_CANCELED and old_status not in (
                 settings.ORDER_STATUS_PLACED, settings.ORDER_STATUS_CONFIRMED, settings.ORDER_STATUS_PACKED
         ):
             d = Delhivery()
             d.cancel_courier(order)
-
+            event_type = PaymentEventType.objects.get_or_create(code="cancellation", defaults={'Name': "Cancellation"})[0]
         send_sms_for_order_status_change(order)
 
+        lines = [line for line in order.lines.all().exclude(status__in=settings.OSCAR_ORDER_REFUNDABLE_STATUS)]
+        EventHandler().handle_shipping_event(
+            order, event_type=event_type,
+            lines=lines,
+            line_quantities=[l.quantity for l in lines],
+        )
 
 
 
