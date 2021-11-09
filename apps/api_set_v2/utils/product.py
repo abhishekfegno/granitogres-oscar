@@ -34,7 +34,8 @@ def get_optimized_product_dict(
     zone = None
     if request.GET.get('pincode'):
         from apps.availability.facade import ZoneFacade, get_zone_from_pincode
-        zone = get_zone_from_pincode(request.GET.get('pincode'))
+        _zone = get_zone_from_pincode(request.GET.get('pincode'))
+        zone = _zone.id
     if zone is None:
         zone: int = request.session.get('zone')         # zone => Zone.pk
     if qs is not None:
