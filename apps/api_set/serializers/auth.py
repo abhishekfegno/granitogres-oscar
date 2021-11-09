@@ -1,6 +1,8 @@
 import re
 from oscar.core.compat import get_user_model
+from rest_auth.serializers import TokenSerializer
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
 from apps.api_set import app_settings
 from apps.api_set.app_settings import OTP_MAX_VALUE, OTP_MIN_VALUE
@@ -60,12 +62,16 @@ class OtpSerializer(MobileNumberSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    token = serializers.SerializerMethodField()
+
+    def get_token(self, instance):
+        return Token.objects.get_or_create(user=instance)[0].key
 
     class Meta:
         model = User
         fields = [
             'id', 'mobile', 'email',
             'first_name', 'last_name',
-            'image',
+            'image', 'token',
             'is_active', 'is_delivery_boy',
         ]

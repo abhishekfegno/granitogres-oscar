@@ -4,6 +4,7 @@ from django.db.models import Q, QuerySet, Case, Value, When, IntegerField
 from django.http import HttpRequest
 
 from apps.api_set_v2.serializers.catalogue import ProductSimpleListSerializer
+from apps.availability.models import Zones
 from apps.catalogue.models import Product
 from apps.partner.models import StockRecord
 
@@ -68,7 +69,8 @@ def get_optimized_product_dict(
     ).prefetch_related('product__images', 'product__parent__images').order_by('to_first')
 
     if zone:
-        sr_set = sr_set.filter(partner__zone_id=zone)
+        _zones = Zones.objects.filter(pk=zone).values_list('partner_id', flat=True)
+        sr_set = sr_set.filter(partner_id__in=_zones)
     else:
         sr_set = sr_set.none()
 
