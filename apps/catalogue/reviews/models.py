@@ -43,10 +43,10 @@ class ProductReviewImage(models.Model):
         ProductReview,
         on_delete=models.CASCADE,
         related_name='images',
-        verbose_name=_("Product"))
+        verbose_name=_("Product"), null=True)
     original = models.FileField(
         _("Original"), upload_to='review-media/', max_length=255)
-    caption = models.CharField(_("Caption"), max_length=200, blank=True)
+    caption = models.CharField(_("Caption"), max_length=200, blank=True, null=True)
 
     #: Use display_order to determine which is the "primary" image
     display_order = models.PositiveIntegerField(

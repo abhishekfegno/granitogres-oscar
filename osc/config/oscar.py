@@ -346,53 +346,53 @@ OSCAR_DASHBOARD_NAVIGATION = [
             # {'label': _('Shipping charges'), 'url_name': 'dashboard:shipping-method-list', },
 
         ]
-    }, {
-        'label': _('Logistics'),
-        'icon': 'icon-double-angle-down',
-        'children': [
-            {'label': _('Upcomming Time Slots'), 'url_name': 'logistics:scheduledtimeslot-list',
-             'access_fn': admin_or_staff},
-
-            {'label': _('Delivery Agents'), 'url_name': 'logistics:dashboard-delivery-boy-list',
-             'access_fn': admin_or_staff},
-
-            {'label': _('Create Trip'), 'url_name': 'logistics:new-trip',
-             'access_fn': admin_or_staff},
-
-            {'label': _('Planned Trips'), 'url_name': 'logistics:planned-trips',
-             'access_fn': admin_or_staff},
-
-            {'label': _('Active Trips'), 'url_name': 'logistics:active-trips',
-             'access_fn': admin_or_staff},
-
-            {'label': _('Delivered Trips'), 'url_name': 'logistics:delivered-trips',
-             'access_fn': admin_or_staff,
-             },
-            {'label': _('Cancelled Trips'), 'url_name': 'logistics:cancelled-trips',
-             'access_fn': admin_or_staff,
-             },
-        ],
-    }, {
-        'label': 'Accounts',
-        'icon': 'icon-globe',
-        'children': [
-            {
-                'label': 'Accounts',
-                'url_name': 'accounts_dashboard:accounts-list',
-            },
-            {
-                'label': 'Transfers',
-                'url_name': 'accounts_dashboard:transfers-list',
-            },
-            {
-                'label': 'Deferred income report',
-                'url_name': 'accounts_dashboard:report-deferred-income',
-            },
-            {
-                'label': 'Profit/loss report',
-                'url_name': 'accounts_dashboard:report-profit-loss',
-            },
-        ]
+    # }, {
+    #     'label': _('Logistics'),
+    #     'icon': 'icon-double-angle-down',
+    #     'children': [
+    #         {'label': _('Upcomming Time Slots'), 'url_name': 'logistics:scheduledtimeslot-list',
+    #          'access_fn': admin_or_staff},
+    #
+    #         {'label': _('Delivery Agents'), 'url_name': 'logistics:dashboard-delivery-boy-list',
+    #          'access_fn': admin_or_staff},
+    #
+    #         {'label': _('Create Trip'), 'url_name': 'logistics:new-trip',
+    #          'access_fn': admin_or_staff},
+    #
+    #         {'label': _('Planned Trips'), 'url_name': 'logistics:planned-trips',
+    #          'access_fn': admin_or_staff},
+    #
+    #         {'label': _('Active Trips'), 'url_name': 'logistics:active-trips',
+    #          'access_fn': admin_or_staff},
+    #
+    #         {'label': _('Delivered Trips'), 'url_name': 'logistics:delivered-trips',
+    #          'access_fn': admin_or_staff,
+    #          },
+    #         {'label': _('Cancelled Trips'), 'url_name': 'logistics:cancelled-trips',
+    #          'access_fn': admin_or_staff,
+    #          },
+    #     ],
+    # }, {
+    #     'label': 'Accounts',
+    #     'icon': 'icon-globe',
+    #     'children': [
+    #         {
+    #             'label': 'Accounts',
+    #             'url_name': 'accounts_dashboard:accounts-list',
+    #         },
+    #         {
+    #             'label': 'Transfers',
+    #             'url_name': 'accounts_dashboard:transfers-list',
+    #         },
+    #         {
+    #             'label': 'Deferred income report',
+    #             'url_name': 'accounts_dashboard:report-deferred-income',
+    #         },
+    #         {
+    #             'label': 'Profit/loss report',
+    #             'url_name': 'accounts_dashboard:report-profit-loss',
+    #         },
+    #     ]
     }]
 
 
