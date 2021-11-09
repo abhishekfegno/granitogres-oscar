@@ -281,6 +281,9 @@ class EventHandler(processing.EventHandler):
             d = Delhivery()
             d.cancel_courier(order)
             event_type = PaymentEventType.objects.get_or_create(code="cancellation", defaults={'Name': "Cancellation"})[0]
+        else:
+            event_type = PaymentEventType.objects.get_or_create(code="delivery", defaults={'Name': "Delivery"})[0]
+
         send_sms_for_order_status_change(order)
 
         lines = [line for line in order.lines.all().exclude(status__in=settings.OSCAR_ORDER_REFUNDABLE_STATUS)]
