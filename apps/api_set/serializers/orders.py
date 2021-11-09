@@ -408,15 +408,15 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
                 Placed to Cancelled.
                 
                 """
-                status_to_cancel = OSCAR_ORDER_STATUS_PIPELINE
-                for status_ in status_to_cancel:
-
-                    if status_ == instance.status:
-                        out.append({
-                            'old_status': instance.status,
-                            'new_status': OSCAR_ORDER_STATUS_PIPELINE[instance.status][-1],
-                            'date_created': instance.date_placed
-                        })
+                # status_to_cancel = OSCAR_ORDER_STATUS_PIPELINE
+                # for status_ in status_to_cancel:
+                #
+                #     if status_ == instance.status:
+                #         out.append({
+                #             'old_status': instance.status,
+                #             'new_status': OSCAR_ORDER_STATUS_PIPELINE[instance.status][-1],
+                #             'date_created': instance.date_placed
+                #         })
 
 
                 is_cod = instance.sources.all().select_related('source_type').last().source_type.name == Cash.name
