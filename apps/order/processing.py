@@ -274,13 +274,16 @@ class EventHandler(processing.EventHandler):
         if new_status == settings.ORDER_STATUS_PACKED:
             d = Delhivery()
             d.pack_order(order)
-            event_type = PaymentEventType.objects.get_or_create(code="packed", defaults={'Name': "Packed"})[0]
+            event_type = ShippingEventType.objects.get_or_create(code="packed", defaults={'Name': "Packed"})[0]
         elif new_status == settings.ORDER_STATUS_CANCELED and old_status not in (
                 settings.ORDER_STATUS_PLACED, settings.ORDER_STATUS_CONFIRMED, settings.ORDER_STATUS_PACKED
         ):
             d = Delhivery()
             d.cancel_courier(order)
-            event_type = PaymentEventType.objects.get_or_create(code="cancellation", defaults={'Name': "Cancellation"})[0]
+            event_type = ShippingEventType.objects.get_or_create(code="cancellation", defaults={'name': "Cancellation"})[0]
+        else:
+            event_type = ShippingEventType.objects.get_or_create(code="delivery", defaults={'name': "Delivery"})[0]
+
         send_sms_for_order_status_change(order)
 
         lines = [line for line in order.lines.all().exclude(status__in=settings.OSCAR_ORDER_REFUNDABLE_STATUS)]

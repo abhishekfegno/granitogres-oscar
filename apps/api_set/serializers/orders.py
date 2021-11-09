@@ -469,23 +469,22 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
         return out
 
     def get_shipping_events(self, instance):
-        events = instance.shipping_events.order_by(
-            '-date_created', '-pk').select_related('event_type').prefetch_related('line_quantities').all()
-        if not len(events):
-            return None
-        # Collect all events by event-type
-        event_map = []
-        for event in events:
-            event_name = event.event_type.name
-            event_map.append({
-                'event': event_name,
-                'date_created': event.date_created,
-                'amount': event.amount,
-                'reference': event.amount,
-                'lines': "\n ".join([f"{seq.quantity} X {seq.line.title}"
-                                     for seq in event.line_quantities.all()])
-            })
-        return event_map
+        return None
+        # events = instance.shipping_events.order_by(
+        #     '-date_created', '-pk').select_related('event_type').prefetch_related('line_quantities').all()
+        # if not len(events):
+        #     return None
+        # # Collect all events by event-type
+        # event_map = []
+        # for event in events:
+        #     event_name = event.event_type.name
+        #     event_map.append({
+        #         'event': event_name,
+        #         'date_created': event.date_created,
+        #         'lines': "\n ".join([f"{seq.quantity} X {seq.line.title}"
+        #                              for seq in event.line_quantities.all()])
+        #     })
+        # return event_map
 
     def get_payment_events(self, instance):
         events = instance.payment_events.order_by(
