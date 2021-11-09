@@ -31,6 +31,51 @@ def send_sms_for_order_status_change(order):
             pass
 
 
+class Fast2SMS:
+    def __init__(self):
+        self.url = FAST_2_SMS_BASE_URL
+
+    def send_p_sms(self, phone_no, message):
+        url = self.url
+
+        querystring = {
+            "authorization": settings.FAST_2_SMS_API_KEY,
+            "sender_id": getattr(settings, 'FAST_2_SMS_SENDER_ID', "SMSINI"),
+            "language": "english",
+            "route": "p",
+            "numbers": phone_no,
+            "message": message,
+        }
+        headers = {'cache-control': "no-cache"}
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        print(response.text)
+        return True
+
+    def send_qt_sms(self, phone_no, message):
+        url = "https://www.fast2sms.com/dev/bulk"
+
+        querystring = {
+            "authorization": settings.FAST_2_SMS_API_KEY,
+            "sender_id": "BathxB",
+            "language": "english",
+            "route": "qt",
+            "numbers": phone_no,
+            "message": settings.FAST_2_SMS_TEMPLATE_ID,
+            "variables": "{BB}",
+            "variables_values": "%s" % message
+        }
+        headers = {'cache-control': "no-cache"}
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        print(response.text)
+        return True
+
+
+def _send_p_sms(phone_no, message):
+    return Fast2SMS().send_p_sms(phone_no, message)
+
+######################################################################3
+
+
 def send_p_sms(phone_no, message):
     url = "https://www.fast2sms.com/dev/bulk"
 
