@@ -1,7 +1,5 @@
 import logging
-import os
 from pprint import pprint
-from typing import Optional
 
 from django.conf import settings
 from push_notifications.models import GCMDevice, APNSDevice, APNSDeviceQuerySet, GCMDeviceQuerySet
@@ -229,16 +227,15 @@ class OrderStatusPushNotification(PushNotification):
     USER_TYPE = (settings.CUSTOMER, )
 
     def send_status_update(self, order, new_status):
-
-
-        title = OSCAR_ORDER_STATUS_CHANGE_MESSAGE[new_status]['title'].format(order=order)[:256]
-        message = OSCAR_ORDER_STATUS_CHANGE_MESSAGE[new_status]['message'].format(order=order)[:256]
-        kwargs = {
-                'order_id': order.id,
-                'order_number': order.number,
-                'order_status': new_status,
-        }
-        self.send_message(title, message, action='open_orders', extra_notification_kwargs=kwargs)
+        if new_status in OSCAR_ORDER_STATUS_CHANGE_MESSAGE:
+            title = OSCAR_ORDER_STATUS_CHANGE_MESSAGE[new_status]['title'].format(order=order)[:256]
+            message = OSCAR_ORDER_STATUS_CHANGE_MESSAGE[new_status]['message'].format(order=order)[:256]
+            kwargs = {
+                    'order_id': order.id,
+                    'order_number': order.number,
+                    'order_status': new_status,
+            }
+            self.send_message(title, message, action='open_orders', extra_notification_kwargs=kwargs)
 
     def send_refund_update(self, order, amount):
         title = "Refund Initiated!"

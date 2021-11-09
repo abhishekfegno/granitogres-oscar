@@ -61,7 +61,6 @@ home_urlpatterns = [
 
 account_urlpatterns = [
     path("auth/", include(v1__registration_apis)),
-
     path('rest-auth/registration/', include('rest_auth.registration.urls')),
     path('rest-auth/', include('rest_auth.urls')),
     path('account/', include('allauth.urls')),
@@ -77,15 +76,22 @@ catalogue_urlpatterns = [
         path("c/<slug:category>/", product_list, name="wnc-category-product-list-v2"),                   # category
         path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),        # detail
         path("d/<slug:product>/reviews/", ProductReviewListView.as_view(), name="wnc-category-product-review-web-v2"),
-        path("review/create/", ProductReviewCreateView.as_view(), name="wnc-category-product-review-create-web-v2"),
-        path("review/<int:review_pk>/update/", ProductReviewUpdateView.as_view(), name="wnc-category-product-review-update-web-v2"),
-        path("review/<int:review_pk>/delete/", ProductReviewDeleteView.as_view(), name="product-review-delete-v2"),
-        path("review/<int:review_pk>/vote/", vote_review, name="product-review-voting-v2"),
-        path("review/image/<int:image_id>/delete/", ProductReviewImageDeleteView.as_view(), name="wnc-category-product-review-image-delete-web-v2"),
         path("d/<slug:product>/mark_as_fav/", mark_as_fav, name="wnc-category-product-mark_as_fav-v2"),  # detail
         path("f/<slug:pk>/", filter_options, name="wnc-filter-options"),                                 # filter
         path("suggestions/", product_suggestions, name="wnc-product-suggestions"),                       # category
         path('reviews-detail/', RedirectView.as_view(url='/'), name="reviews-detail"),
+        path('review/', include([
+            path("create/", ProductReviewCreateView.as_view(), name="wnc-category-product-review-create-web-v2"),
+            path("<int:review_pk>/update/", ProductReviewUpdateView.as_view(),
+                 name="wnc-category-product-review-update-web-v2"),
+            path("<int:review_pk>/delete/", ProductReviewDeleteView.as_view(), name="product-review-delete-v2"),
+            path("<int:review_pk>/vote/", vote_review, name="product-review-voting-v2"),
+            path('image/', include([
+                path("create/", ProductReviewImageCreateView.as_view(), name="wnc-category-product-review-image-create-web-v2"),
+                path("<int:image_id>/delete/", ProductReviewImageDeleteView.as_view(), name="wnc-category-product-review-image-delete-web-v2"),
+            ])),
+
+        ]))
     ]))
 ]
 

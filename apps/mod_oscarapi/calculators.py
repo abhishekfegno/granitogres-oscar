@@ -22,5 +22,5 @@ class OrderTotalCalculator(object):
         return prices.Price(
             currency=basket.currency,
             excl_tax=excl_tax,
-            incl_tax=incl_tax
+            incl_tax=incl_tax,
         )

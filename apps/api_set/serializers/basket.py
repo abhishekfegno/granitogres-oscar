@@ -61,7 +61,12 @@ class WncLineSerializer(BasketLineSerializer):
                     isinstance(instance.purchase_info.availability, Unavailable)
                     or instance.stockrecord.net_stock_level < instance.quantity
             ):
-                self.__warning = "'%(product)s' is no longer available"
+                if instance.quantity == 0:
+                    self.__warning = "'%(product)s' is no longer available"
+                else:
+                    self.__warning = "'%(product)s' " + (
+                        f"donot have {instance.quantity} stock left. Available {instance.stockrecord.net_stock_level} stock left."
+                    )
             else:
                 self.__warning = None
             # self.__warning = instance.get_warning()

@@ -219,20 +219,20 @@ OSCAR_DASHBOARD_NAVIGATION = [
         'icon': 'icon-sitemap',
         'children': [
             {
-                'label': _('Brands'),
-                'url_name': 'dashboard:catalogue-brand-list',
+                'label': _('Product Types'),
+                'url_name': 'dashboard:catalogue-class-list',
             },
             {
                 'label': _('Products'),
                 'url_name': 'dashboard:catalogue-product-list',
             },
             {
-                'label': _('Product Types'),
-                'url_name': 'dashboard:catalogue-class-list',
-            },
-            {
                 'label': _('Categories'),
                 'url_name': 'dashboard:catalogue-category-list',
+            },
+            {
+                'label': _('Brands'),
+                'url_name': 'dashboard:catalogue-brand-list',
             },
             {
                 'label': _('Ranges'),
@@ -325,12 +325,12 @@ OSCAR_DASHBOARD_NAVIGATION = [
             {'label': _('Offers'),
              'url_name': 'dashboard:offer-list',
              },
-            {'label': _('Vouchers'),
-             'url_name': 'dashboard:voucher-list',
-             },
-            {'label': _('Voucher Sets'),
-             'url_name': 'dashboard:voucher-set-list',
-             },
+            # {'label': _('Vouchers'),
+            #  'url_name': 'dashboard:voucher-list',
+            #  },
+            # {'label': _('Voucher Sets'),
+            #  'url_name': 'dashboard:voucher-set-list',
+            #  },
         ],
     },
     {
@@ -356,82 +356,83 @@ OSCAR_DASHBOARD_NAVIGATION = [
             },
         ]
     },
+    # {
+    #     'label': _('Reports'),
+    #     'icon': 'icon-bar-chart',
+    #     'url_name': 'dashboard:reports-index',
+    # }, {
+    #     'label': 'Accounts',
+    #     'icon': 'las la-wallet',
+    #     'children': [
+    #         {'label': 'Accounts', 'url_name': 'accounts_dashboard:accounts-list', },
+    #         {'label': 'Transfers', 'url_name': 'accounts_dashboard:transfers-list', },
+    #         {'label': 'Deferred income report', 'url_name': 'accounts_dashboard:report-deferred-income', },
+    #         {'label': 'Profit/loss report', 'url_name': 'accounts_dashboard:report-profit-loss', },
+    #         # {'label': _('COD transactions'),'url_name': 'cashondelivery-transaction-list', },
+    #     ]
+    # },
     {
-        'label': _('Reports'),
-        'icon': 'icon-bar-chart',
-        'url_name': 'dashboard:reports-index',
-    }, {
-        'label': 'Accounts',
-        'icon': 'las la-wallet',
-        'children': [
-            {'label': 'Accounts', 'url_name': 'accounts_dashboard:accounts-list', },
-            {'label': 'Transfers', 'url_name': 'accounts_dashboard:transfers-list', },
-            {'label': 'Deferred income report', 'url_name': 'accounts_dashboard:report-deferred-income', },
-            {'label': 'Profit/loss report', 'url_name': 'accounts_dashboard:report-profit-loss', },
-            # {'label': _('COD transactions'),'url_name': 'cashondelivery-transaction-list', },
-        ]
-    }, {
         'label': _('Configurations'),
         'icon': 'icon-double-angle-down',
         'children': [
             {'label': _('Site Configuration'), 'url_name': 'dashboard-custom:site-config',
              'access_fn': admin_or_staff},
-            {'label': _('Choose Pincodes with services'), 'url_name': 'availability:pincode-selector',
-             'access_fn': admin_or_staff},
             {'label': _('Availability: Zones'), 'url_name': 'availability:zones-list',
              'access_fn': admin_or_staff},
-            {'label': _('Time Slots'), 'url_name': 'timeslotconfiguration-list',
+            {'label': _('Choose Pincodes with services'), 'url_name': 'availability:pincode-selector',
              'access_fn': admin_or_staff},
+            # {'label': _('Time Slots'), 'url_name': 'timeslotconfiguration-list',
+            #  'access_fn': admin_or_staff},
             # {'label': _('Shipping charges'), 'url_name': 'dashboard:shipping-method-list', },
 
         ]
-    }, {
-        'label': _('Logistics'),
-        'icon': 'icon-double-angle-down',
-        'children': [
-            {'label': _('Upcomming Time Slots'), 'url_name': 'logistics:scheduledtimeslot-list',
-             'access_fn': admin_or_staff},
-
-            {'label': _('Delivery Agents'), 'url_name': 'logistics:dashboard-delivery-boy-list',
-             'access_fn': admin_or_staff},
-
-            {'label': _('Create Trip'), 'url_name': 'logistics:new-trip',
-             'access_fn': admin_or_staff},
-
-            {'label': _('Planned Trips'), 'url_name': 'logistics:planned-trips',
-             'access_fn': admin_or_staff},
-
-            {'label': _('Active Trips'), 'url_name': 'logistics:active-trips',
-             'access_fn': admin_or_staff},
-
-            {'label': _('Delivered Trips'), 'url_name': 'logistics:delivered-trips',
-             'access_fn': admin_or_staff,
-             },
-            {'label': _('Cancelled Trips'), 'url_name': 'logistics:cancelled-trips',
-             'access_fn': admin_or_staff,
-             },
-        ],
-    }, {
-        'label': 'Accounts',
-        'icon': 'icon-globe',
-        'children': [
-            {
-                'label': 'Accounts',
-                'url_name': 'accounts_dashboard:accounts-list',
-            },
-            {
-                'label': 'Transfers',
-                'url_name': 'accounts_dashboard:transfers-list',
-            },
-            {
-                'label': 'Deferred income report',
-                'url_name': 'accounts_dashboard:report-deferred-income',
-            },
-            {
-                'label': 'Profit/loss report',
-                'url_name': 'accounts_dashboard:report-profit-loss',
-            },
-        ]
+    # }, {
+    #     'label': _('Logistics'),
+    #     'icon': 'icon-double-angle-down',
+    #     'children': [
+    #         {'label': _('Upcomming Time Slots'), 'url_name': 'logistics:scheduledtimeslot-list',
+    #          'access_fn': admin_or_staff},
+    #
+    #         {'label': _('Delivery Agents'), 'url_name': 'logistics:dashboard-delivery-boy-list',
+    #          'access_fn': admin_or_staff},
+    #
+    #         {'label': _('Create Trip'), 'url_name': 'logistics:new-trip',
+    #          'access_fn': admin_or_staff},
+    #
+    #         {'label': _('Planned Trips'), 'url_name': 'logistics:planned-trips',
+    #          'access_fn': admin_or_staff},
+    #
+    #         {'label': _('Active Trips'), 'url_name': 'logistics:active-trips',
+    #          'access_fn': admin_or_staff},
+    #
+    #         {'label': _('Delivered Trips'), 'url_name': 'logistics:delivered-trips',
+    #          'access_fn': admin_or_staff,
+    #          },
+    #         {'label': _('Cancelled Trips'), 'url_name': 'logistics:cancelled-trips',
+    #          'access_fn': admin_or_staff,
+    #          },
+    #     ],
+    # }, {
+    #     'label': 'Accounts',
+    #     'icon': 'icon-globe',
+    #     'children': [
+    #         {
+    #             'label': 'Accounts',
+    #             'url_name': 'accounts_dashboard:accounts-list',
+    #         },
+    #         {
+    #             'label': 'Transfers',
+    #             'url_name': 'accounts_dashboard:transfers-list',
+    #         },
+    #         {
+    #             'label': 'Deferred income report',
+    #             'url_name': 'accounts_dashboard:report-deferred-income',
+    #         },
+    #         {
+    #             'label': 'Profit/loss report',
+    #             'url_name': 'accounts_dashboard:report-profit-loss',
+    #         },
+    #     ]
     }]
 
 

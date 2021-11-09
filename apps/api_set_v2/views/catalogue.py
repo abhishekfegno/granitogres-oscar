@@ -98,10 +98,6 @@ class ProductReviewCreateView(CreateAPIView):
     serializer_class = ProductReviewCreateSerializer
     queryset = ProductReview.objects.all()
     parser_classes = [JSONParser, MultiPartParser, FormParser, ]
-    
-    def post(self, request, *args, **kwargs):
-        # import pdb; pdb.set_trace()
-        return super(ProductReviewCreateView, self).post(request, *args, **kwargs)
 
 
 class ProductReviewUpdateView(RetrieveUpdateAPIView):
@@ -110,11 +106,11 @@ class ProductReviewUpdateView(RetrieveUpdateAPIView):
     lookup_url_kwarg = 'review_pk'
     parser_classes = [JSONParser, MultiPartParser, FormParser, ]
 
-    # def check_object_permissions(self, request, obj):
-    #     if request.user.is_anonymous or obj.user != request.user:
-    #         self.permission_denied(
-    #             request, message="You do not have permission to update this review.!"
-    #         )
+    def check_object_permissions(self, request, obj):
+        if request.user.is_anonymous or obj.user != request.user:
+            self.permission_denied(
+                request, message="You do not have permission to update this review.!"
+            )
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -141,6 +137,23 @@ class ProductReviewDeleteView(DestroyAPIView):
             self.permission_denied(
                 request, message="You do not have permission to update this review.!"
             )
+
+
+class ProductReviewImageCreateView(CreateAPIView):
+    serializer_class = ProductReviewImageSerializer
+    queryset = ProductReviewImage.objects.all()
+    http_method_names = ['post']
+    parser_classes = [MultiPartParser, FormParser, ]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data,  context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return_data = [{
+            'id': i.id,
+            'original': request.build_absolute_uri(i.original.url),
+        } for i in serializer.instances]
+        return Response({"response": return_data}, status=status.HTTP_201_CREATED)
 
 
 class ProductReviewImageDeleteView(DestroyAPIView):

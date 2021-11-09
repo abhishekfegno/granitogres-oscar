@@ -19,7 +19,7 @@ from apps.dashboard.custom.models import SiteConfig
 
 
 class OwnDeliveryKerala(methods.FixedPrice):
-    code = "free-shipping"
+    code = "self-shipping"
     name = _("Own Delivery")
 
     def calculate(self, basket, *args, **kwargs):

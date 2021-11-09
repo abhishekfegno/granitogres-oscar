@@ -63,6 +63,7 @@ def PUBLIC_APIS(r, f):
                 ("Product Review Create", reverse("wnc-category-product-review-create-web-v2", request=r, format=f)),
                 ("Product Review Update", reverse("wnc-category-product-review-update-web-v2", request=r, format=f, kwargs={'review_pk': 1})),
                 ("Product Review Delete", reverse("product-review-delete-v2", request=r, format=f, kwargs={'review_pk': 1})),
+                ("Product Review Create Image", reverse("wnc-category-product-review-image-create-web-v2", request=r, format=f, )),
                 ("Product Review Image Delete", reverse("wnc-category-product-review-image-delete-web-v2", request=r, format=f, kwargs={'image_id': 1})),
                 ("Vote Review", reverse("product-review-voting-v2", request=r, format=f, kwargs={'review_pk': 1})),
 

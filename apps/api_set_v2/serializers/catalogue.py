@@ -53,7 +53,8 @@ class ProductSimpleListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFie
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'structure', 'primary_image', 'price', 'weight', 'url', 'rating', 'review_count', 'brand')
+        fields = (
+            'id', 'title', 'structure', 'primary_image', 'price', 'weight', 'url', 'rating', 'review_count', 'brand')
 
 
 class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldMixin, ProductDetailSerializerMixin,
@@ -91,7 +92,8 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
 
     def get_reviews(self, instance):
         return ProductReviewListSerializer(
-            instance.reviews.filter(status=ProductReview.APPROVED, title__isnull=False).order_by('-total_votes').prefetch_related('images')[:4], many=True,
+            instance.reviews.filter(status=ProductReview.APPROVED, title__isnull=False).order_by(
+                '-total_votes').prefetch_related('images')[:4], many=True,
             context=self.context
         ).data
 
@@ -208,11 +210,29 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
         return
 
 
-class ProductReviewImageSerializer(serializers.ModelSerializer):
+class ProductReviewImageSerializer(serializers.Serializer):
 
-    class Meta:
-        model = ProductReviewImage
-        fields = ('id', 'original', 'display_order')
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        out = []
+        for img in validated_data.values():
+            if not img: continue
+            ip = ProductReviewImage(original=img)
+            ip.original.save(img.name, img, save=True)
+            out.append(ip)
+        self.instances = ProductReviewImage.objects.bulk_create(out, ignore_conflicts=True)
+        return self.instances
+    
+    image_01 = serializers.ImageField(allow_null=True, required=False)
+    image_02 = serializers.ImageField(allow_null=True, required=False)
+    image_03 = serializers.ImageField(allow_null=True, required=False)
+    image_04 = serializers.ImageField(allow_null=True, required=False)
+    image_05 = serializers.ImageField(allow_null=True, required=False)
+    image_06 = serializers.ImageField(allow_null=True, required=False)
+    image_07 = serializers.ImageField(allow_null=True, required=False)
+    image_08 = serializers.ImageField(allow_null=True, required=False)
 
 
 class ProductReviewListSerializer(serializers.ModelSerializer):
@@ -244,78 +264,66 @@ class ProductReviewListSerializer(serializers.ModelSerializer):
 
 
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
-    image_01 = Base64ImageField(allow_null=True, required=False, )
-    image_02 = Base64ImageField(allow_null=True, required=False)
-    image_03 = Base64ImageField(allow_null=True, required=False)
-    image_04 = Base64ImageField(allow_null=True, required=False)
-    image_05 = Base64ImageField(allow_null=True, required=False)
-    image_06 = Base64ImageField(allow_null=True, required=False)
-    image_07 = Base64ImageField(allow_null=True, required=False)
-    image_08 = Base64ImageField(allow_null=True, required=False)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     score = serializers.IntegerField(min_value=1, max_value=5)
-    images = serializers.SerializerMethodField()
+    posted_images = serializers.SerializerMethodField()
+    images = ProductReviewImageSerializer(many=True)
 
-    def get_images(self, instance):
+    def get_posted_images(self, instance):
         return ProductReviewImageSerializer(instance.images.all(), many=True, context=self.context).data
 
-    # product = serializers.HiddenField(allow_null=True, default=None)
-
-    def take_images(self, validated_data):
-        self._image_01 = validated_data.pop('image_01') if 'image_01' in validated_data else None
-        self._image_02 = validated_data.pop('image_02') if 'image_02' in validated_data else None
-        self._image_03 = validated_data.pop('image_03') if 'image_03' in validated_data else None
-        self._image_04 = validated_data.pop('image_04') if 'image_04' in validated_data else None
-        self._image_05 = validated_data.pop('image_05') if 'image_05' in validated_data else None
-        self._image_06 = validated_data.pop('image_06') if 'image_06' in validated_data else None
-        self._image_07 = validated_data.pop('image_07') if 'image_07' in validated_data else None
-        self._image_08 = validated_data.pop('image_08') if 'image_08' in validated_data else None
-        return validated_data
-
-    def create(self, validated_data):
-        self.take_images(validated_data)
-        # import pdb;pdb.set_trace()
-        if validated_data['product'] is None:
-            validated_data['product'] = validated_data['order_line'].product
-
-        # validated_data['user'] = User.objects.all().last()
-        self.instance = super().create(validated_data)
-        self.save_images(self.instance)
-        return self.instance
-
-    def update(self, instance, validated_data):
-        self.take_images(validated_data)
-        self.instance = super().update(instance, validated_data)
-        self.save_images(self.instance)
-        return self.instance
-
-    def save_images(self, product):
-        review_images = []
-        if self._image_01:
-            print("adding image 1")
-            pri = ProductReviewImage.objects.create(review=product, original=self._image_01, display_order=0)
-        if self._image_02:
-            print("adding image 2")
-            review_images.append(ProductReviewImage(review=product, original=self._image_02, display_order=1))
-        if self._image_03:
-            print("adding image 3")
-            review_images.append(ProductReviewImage(review=product, original=self._image_03, display_order=2))
-        if self._image_04:
-            print("adding image 4")
-            review_images.append(ProductReviewImage(review=product, original=self._image_04, display_order=3))
-        if self._image_05:
-            print("adding image 5")
-            review_images.append(ProductReviewImage(review=product, original=self._image_05, display_order=4))
-        if self._image_06:
-            print("adding image 6")
-            review_images.append(ProductReviewImage(review=product, original=self._image_06, display_order=5))
-        if self._image_07:
-            review_images.append(ProductReviewImage(review=product, original=self._image_07, display_order=6))
-        if self._image_08:
-            review_images.append(ProductReviewImage(review=product, original=self._image_08, display_order=7))
-        if review_images:
-            print("reviewing_images")
-            pr = ProductReviewImage.objects.bulk_create(review_images, ignore_conflicts=True)
+    # def take_images(self, validated_data):
+    #     self._image_01 = validated_data.pop('image_01') if 'image_01' in validated_data else None
+    #     self._image_02 = validated_data.pop('image_02') if 'image_02' in validated_data else None
+    #     self._image_03 = validated_data.pop('image_03') if 'image_03' in validated_data else None
+    #     self._image_04 = validated_data.pop('image_04') if 'image_04' in validated_data else None
+    #     self._image_05 = validated_data.pop('image_05') if 'image_05' in validated_data else None
+    #     self._image_06 = validated_data.pop('image_06') if 'image_06' in validated_data else None
+    #     self._image_07 = validated_data.pop('image_07') if 'image_07' in validated_data else None
+    #     self._image_08 = validated_data.pop('image_08') if 'image_08' in validated_data else None
+    #     return validated_data
+    #
+    # def create(self, validated_data):
+    #     # self.take_images(validated_data)
+    #     if validated_data['product'] is None:
+    #         validated_data['product'] = validated_data['order_line'].product
+    #     self.instance = super().create(validated_data)
+    #     self.save_images(self.instance)
+    #     return self.instance
+    #
+    # def update(self, instance, validated_data):
+    #     self.take_images(validated_data)
+    #     self.instance = super().update(instance, validated_data)
+    #     self.save_images(self.instance)
+    #     return self.instance
+    #
+    # def save_images(self, product):
+    #     review_images = []
+    #     if self._image_01:
+    #         print("adding image 1")
+    #         pri = ProductReviewImage.objects.create(review=product, original=self._image_01, display_order=0)
+    #     if self._image_02:
+    #         print("adding image 2")
+    #         review_images.append(ProductReviewImage(review=product, original=self._image_02, display_order=1))
+    #     if self._image_03:
+    #         print("adding image 3")
+    #         review_images.append(ProductReviewImage(review=product, original=self._image_03, display_order=2))
+    #     if self._image_04:
+    #         print("adding image 4")
+    #         review_images.append(ProductReviewImage(review=product, original=self._image_04, display_order=3))
+    #     if self._image_05:
+    #         print("adding image 5")
+    #         review_images.append(ProductReviewImage(review=product, original=self._image_05, display_order=4))
+    #     if self._image_06:
+    #         print("adding image 6")
+    #         review_images.append(ProductReviewImage(review=product, original=self._image_06, display_order=5))
+    #     if self._image_07:
+    #         review_images.append(ProductReviewImage(review=product, original=self._image_07, display_order=6))
+    #     if self._image_08:
+    #         review_images.append(ProductReviewImage(review=product, original=self._image_08, display_order=7))
+    #     if review_images:
+    #         print("reviewing_images")
+    #         pr = ProductReviewImage.objects.bulk_create(review_images, ignore_conflicts=True)
 
     def validate_score(self, score):
         return score
@@ -332,5 +340,7 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductReview
-        fields = ('id', 'score', 'title', 'body', 'user', 'order_line', 'product', 'images',
-                  "image_01", 'image_02', 'image_03', 'image_04', 'image_05', 'image_06', 'image_07', 'image_08',)
+        fields = (
+            'id', 'score', 'title', 'body', 'user', 'order_line', 'product', 'images', 'posted_images',
+            # "image_01", 'image_02', 'image_03', 'image_04', 'image_05', 'image_06', 'image_07', 'image_08',
+        )
