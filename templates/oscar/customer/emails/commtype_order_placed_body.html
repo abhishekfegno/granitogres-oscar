@@ -9,17 +9,13 @@
               <table width="640px;" class="w-100 thin-text">
                 <tbody>
                 <tr>
-                  <td style="" class="text-muted col-6" colspan="6">
-                    Hey <span class="text-dark"> {{ order.user.get_full_name }},</span>
-                  </td>
+
                   <td class="text-muted col-6"  colspan="6">
                     <div class="float-right">Order placed on <b class="text-dark">{{ order.date_placed_date }}</b></div>
                   </td>
                 </tr>
                 <tr>
-                  <td class="text-muted col-6"  colspan="6">
-                    <div class="float-left">Your order has been successfully placed.</div>
-                  </td>
+
                   <td class="text-muted col-6"  colspan="6">
                     <div class="float-right">Order ID <b class="text-dark">{{ order.number}}</b></div>
                   </td>
@@ -29,8 +25,18 @@
               <table width="640px;" class="w-100 thin-text">
                 <tbody>
                 <tr>
+                  <td style="font-weight:200;" class="text-muted col-6" colspan="6">
+                    Hey <span class="text-dark"> {{ order.user.get_full_name }},</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:200;" class="text-muted col-6"  colspan="6">
+                    <div class="float-left">Your order has been successfully placed.</div>
+                  </td>
+                </tr>
+                <tr>
                   <td colspan="2" class="col-2" style="float:center"><img src="https://devserver.abchauz.com/assets/email/safety.png" width="80px" alt="safety"></td>
-                  <td colspan="10" class="col-10 text-muted thin-text" width="640px;">
+                  <td colspan="10" class="col-10 text-muted thin-text" width="640px;" style="font-weight: 200;">
                     We are committed to serving you with utmost regard for your safety.
                     Please note, the delivery date of your order may change considerably on the government's zonal advisory in your area.</td>
                 </tr>

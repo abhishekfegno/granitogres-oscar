@@ -275,7 +275,7 @@ class Order(AbstractOrder):
 
     @property
     def date_placed_date(self):
-        return self.date_placed.striptime
+        return self.date_placed.date()
 
     def payment_type_for_delhivery(self):
         # Prepaid / COD / Pickup / REPL
