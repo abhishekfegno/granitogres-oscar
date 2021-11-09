@@ -7,8 +7,10 @@ from apps.availability.models import Zones
 from apps.partner.strategy_set.strategies import ZoneBasedIndianPricingStrategy
 from decimal import Decimal as D
 
+from apps.partner.strategy_set.utils.stock_records import ZoneBasedStockRecord
 
-class ABCHauzPricing(UseFirstStockRecord, StockRequired, FixedRateTax, Structured):
+
+class ABCHauzPricing(ZoneBasedStockRecord, StockRequired, FixedRateTax, Structured):
     """
     Sample strategy for the UK that:
 
