@@ -69,7 +69,8 @@ def get_optimized_product_dict(
     ).prefetch_related('product__images', 'product__parent__images').order_by('to_first')
 
     if zone:
-        sr_set = sr_set.filter(partner_id__in=Zones.objects.filter(pk=zone).values_list('partner_id', flat=True))
+        _zones = Zones.objects.filter(pk=zone).values_list('partner_id', flat=True)
+        sr_set = sr_set.filter(partner_id__in=_zones)
     else:
         sr_set = sr_set.none()
 
