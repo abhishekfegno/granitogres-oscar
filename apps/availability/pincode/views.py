@@ -76,12 +76,14 @@ def load_page(request, partner, district):
     communities = district_object.get_children()
 
     if not communities.exists():
-        if request.method == 'GET':
-            out['error_code'] = NO_COMMUNITIES_UNLOCKED
-            out['error'] = 'You Have Not Unlocked Any Communities in this District!'
-            return Response(out, status=400)
-        else:
-            load_all_postal_code_in_district(district_object)
+        load_all_postal_code_in_district(district_object)
+
+        # if request.method == 'GET':
+        #     out['error_code'] = NO_COMMUNITIES_UNLOCKED
+        #     out['error'] = 'You Have Not Unlocked Any Communities in this District!'
+        #     return Response(out, status=400)
+        # else:
+        #     load_all_postal_code_in_district(district_object)
         communities = district_object.get_children()
     postal = PinCode.objects.filter(path__startswith=district_object.path, depth=PinCode.POSTAL_CODE_DEPTH)
 
