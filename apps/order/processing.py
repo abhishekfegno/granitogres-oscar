@@ -270,29 +270,14 @@ class EventHandler(processing.EventHandler):
             self.cancel_stock_allocations(order, lines_to_be_cancelled)
 
     def handle_delivery(self, order, old_status, new_status):
-        event_type = None
         if new_status == settings.ORDER_STATUS_PACKED:
             d = Delhivery()
             d.pack_order(order)
-            event_type = ShippingEventType.objects.get_or_create(code="packed", defaults={'name': "Packed"})[0]
         elif new_status == settings.ORDER_STATUS_CANCELED and old_status not in (
                 settings.ORDER_STATUS_PLACED, settings.ORDER_STATUS_CONFIRMED, settings.ORDER_STATUS_PACKED
         ):
             d = Delhivery()
             d.cancel_courier(order)
-            event_type = ShippingEventType.objects.get_or_create(code="cancellation", defaults={'name': "Cancellation"})[0]
-        else:
-            event_type = ShippingEventType.objects.get_or_create(code="delivery", defaults={'name': "Delivery"})[0]
 
         send_sms_for_order_status_change(order)
-
-        lines = [line for line in order.lines.all().exclude(status__in=settings.OSCAR_ORDER_REFUNDABLE_STATUS)]
-        EventHandler().handle_shipping_event(
-            order, event_type=event_type,
-            lines=lines,
-            line_quantities=[l.quantity for l in lines],
-        )
-
-
-
 
