@@ -16,7 +16,7 @@
         body * {font-family: sans-serif;}, *{font-family: sans-serif;}
 
         .preheader {color: transparent;display: none;height: 0;max-height: 0;max-width: 0;opacity: 0;overflow: hidden;mso-hide: all;visibility: hidden;width: 0; }
-        .wrapper { width: 680px; margin: auto; background-color: #fff;  border-radius: 4px; font-size:smaller; overflow:hidden}
+        .wrapper { width: 640px; margin: auto; background-color: #f5f5f5;  border-radius: 4px; font-size:smaller; overflow:hidden}
 
         .header-image{ width:100%; margin:0;   }
         table {width: 640px; margin: 0}
@@ -39,15 +39,15 @@
     </style>
 </head>
 <body itemscope itemtype="http://schema.org/EmailMessage">
-<div class="wrapper">
+<div class="wrapper" align="center" style="background-color: #e2e2e2;">
       {% block body %}
 
-  <table  class="outer body" style="width: 640px;" role="presentation" border="0" cellpadding="0" cellspacing="0" >
+  <table  class="outer body" style="width: 640px;background-color:#fff" role="presentation" border="0" cellpadding="0" cellspacing="0" >
 
     <tbody>
     <tr>
       <td>
-        <img src="{{ site }}/assets/email/header.png" class="header-image" width="640px; margin:0;" />
+        <img src="{{ site }}/assets/email/header.png" class="header-image" width="100%" />
       </td>
     </tr>
     <tbody>
@@ -56,9 +56,44 @@
 <!--        <span class="preheader"> You have received new email from ABCHAUZ.COM. </span>-->
 
         <table class="p-2">
+          <tr>
+            <td>
+              <table width="640px;" class="w-100 thin-text" >
+                <tbody>
+                <tr>
+
+                  <td class="text-muted col-6"  colspan="6" align="right">
+                    <div class="float-right">Order placed on <b class="text-dark">{{ order.date_placed_date }}</b></div>
+                  </td>
+                </tr>
+                <tr>
+
+                  <td class="text-muted col-6"  colspan="6" align="right">
+                    <div class="float-right">Order ID <b class="text-dark">{{ order.number}}</b></div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+              <table width="640px;" class="w-100 thin-text">
+                <tbody>
+                <tr>
+                  <td style="font-weight:200;" class="text-muted col-6" colspan="6" align="left">
+                    Hey <span class="text-dark"> {{ order.user.get_full_name }},</span>
+                  </td>
+                </tr>
             {% block header_subject %}
 
             {% endblock %}
+                <td colspan="2" class="col-2" style="float:center"><img src="https://devserver.abchauz.com/assets/email/safety.png" width="80px" alt="safety"></td>
+                  <td colspan="10" class="col-10 text-muted thin-text" width="640px;" style="font-weight: 200;">
+                    We are committed to serving you with utmost regard for your safety.
+                    Please note, the delivery date of your order may change considerably on the government's zonal advisory in your area.</td>
+                </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+
 
             {% block delivery_details %}
                 {% include 'oscar/customer/emails/delivery_details.html' %}
@@ -69,7 +104,7 @@
             {% endblock %}
           <tr>
             <td>
-              <table border="0" width="640" cellpadding="0" cellspacing="0" class="m_6870997060859637215container" style="padding-right:20px;padding-left:20px;background-color:#fff;width:640px;max-width:640px">
+              <table border="0" width="640px;" cellpadding="0" cellspacing="0" class="m_6870997060859637215container" style="padding-left: 0px; padding-right:20px;background-color:#fff;width:640px;max-width:640px">
                 <tbody>
                 <tr>
                   <td>
@@ -90,7 +125,7 @@
                 </tr>
                 <tr>
                   <td>
-                    <table width="100%" cellspacing="0" cellpadding="0" style="width:640px;max-width:600px;margin-top:14px">
+                    <table width="640px;" cellspacing="0" cellpadding="0" style="width:640px;max-width:600px;margin-top:14px">
                       <tbody>
                       <tr>
                         <td align="left" valign="top" class="m_6870997060859637215container" style="color:#2c2c2c;line-height:20px;font-weight:300;background-color:transparent">
@@ -106,7 +141,7 @@
                       </tr>
                       <tr>
                         <td>
-                          <table width="100%" cellspacing="0" cellpadding="0" style="margin:0 auto;width:600px;max-width:600px;margin-top:4px">
+                          <table width="640px;" cellspacing="0" cellpadding="0" style="margin:0 auto;width:600px;max-width:600px;margin-top:4px">
                             <tbody>
                             <tr>
                               <td align="left" valign="top" class="m_6870997060859637215container" style="color:#2c2c2c;line-height:20px;font-weight:300;background-color:transparent">
@@ -136,7 +171,7 @@
     </tr>
     <tr>
       <td>
-        <img src="{{ site }}/assets/email/footer.png" width="640px;"/>
+        <img src="{{ site }}/assets/email/footer.png" width="100%"/>
       </td>
     </tr>
     </tbody>

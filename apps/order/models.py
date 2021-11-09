@@ -273,6 +273,10 @@ class Order(AbstractOrder):
                                related_name='delhivery_consignments')
     waybill = models.CharField(null=True, max_length=64)
 
+    @property
+    def date_placed_date(self):
+        return self.date_placed.date()
+
     def payment_type_for_delhivery(self):
         # Prepaid / COD / Pickup / REPL
         if self.status in dict(settings.OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_AFTER_DELIVERY).keys():
