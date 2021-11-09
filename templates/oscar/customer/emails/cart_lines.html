@@ -72,6 +72,13 @@
                         <td align="right" width="34%"><p style="margin-top:0px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:10px"><span style="color:#3f3f3f;text-align:right">Delivery charges</span></p></td>
                         <td><p style="margin-top:0px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:10px"><span style="padding-right:5px">₨.{{ order.shipping_incl_tax }}</span></p></td>
                       </tr>
+                      {% else %}
+                      <tr>
+                        <td width="50%"></td>
+                        <td align="right" width="34%"><p style="margin-top:0px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:10px"><span style="color:#3f3f3f;text-align:right">Delivery charges</span></p></td>
+                        <td><p style="margin-top:0px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:10px"><span style="font-family:Arial;font-size:12px;color:#139b3b;font-weight:800">{{ order.status }}</span></p></td>
+                      </tr>
+
                       {% endif %}
                       <tr>
                         <td width="40%"></td>
