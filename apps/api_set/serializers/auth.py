@@ -61,7 +61,10 @@ class OtpSerializer(MobileNumberSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    token = TokenSerializer()
+    token = serializers.SerializerMethodField()
+
+    def get_token(self, instance):
+        return instance.token
 
     class Meta:
         model = User
