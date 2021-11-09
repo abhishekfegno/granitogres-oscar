@@ -14,6 +14,7 @@ from apps.order.models import Order, Line
 from apps.payment.refunds import RefundFacade
 from apps.payment.utils.cash_payment import Cash
 from apps.utils.utils import get_statuses
+from osc.config.oscar import OSCAR_ORDER_STATUS_PIPELINE
 
 
 class ProductListSerializerForLine(ProductListSerializer):
@@ -405,18 +406,33 @@ class OrderMoreDetailSerializer(serializers.ModelSerializer):
             else:
                 """
                 Placed to Cancelled.
+                
                 """
+                status_to_cancel = OSCAR_ORDER_STATUS_PIPELINE
+                for status_ in status_to_cancel:
+
+                    if status_ == instance.status:
+                        out.append({
+                            'old_status': instance.status,
+                            'new_status': OSCAR_ORDER_STATUS_PIPELINE[instance.status][-1],
+                            'date_created': instance.date_placed
+                        })
+
 
                 is_cod = instance.sources.all().select_related('source_type').last().source_type.name == Cash.name
                 if settings.ORDER_STATUS_PLACED not in init:
                     """
                     To add "Placed" for order status which do not have a "Placed" status in "status_changes".
                     """
+                    """ all status to canceled """
+
                     out.append({
                         'old_status': None,
                         'new_status': settings.ORDER_STATUS_PLACED,
                         'date_created': instance.date_placed,  # issue 2. date not comming
                     })
+                statuses = OSCAR_ORDER_STATUS_PIPELINE
+
                 out += list(init.values())
                 if not is_cod:
                     """ if Online Payment. """

@@ -15,7 +15,7 @@
                               <tr>
                               <td valign="middle" width="120" align="center" class="m_6870997060859637215link" style="padding-top:20px">
                                 <a style="color:#027cd8;text-decoration:none;outline:none;color:#fff;font-size:13px" href="#" target="_blank">
-                                  <img border="0" src="{{ site }}{{ line.product.primary_image.original.url }}" alt="HIGHWAY ENGINEERING, NM PUBLISHER,10th Ed" style="border:none;max-width:125px;max-height:125px" class="CToWUd">
+                                  <img border="0" src="{{ site }}{{ line.product.absolute_image_path }}" alt="HIGHWAY ENGINEERING, NM PUBLISHER,10th Ed" style="border:none;max-width:125px;max-height:125px" class="CToWUd">
                                 </a>
                               </td>
                               <td valign="top" align="left" style="padding-top:20px;padding-left:15px">
@@ -59,23 +59,25 @@
                 <tbody>
                 <tr style="color:#212121;display:block;margin:0 auto;clear:both">
                   <td align="left" valign="top" class="m_6870997060859637215container" style="color:#212121;display:block">
-                    <table width="100%" style="margin-bottom:0px;padding-top:20px;padding-bottom:20px;border-bottom:1px solid #f0f0f0">
+                    <table width="640px" style="margin-bottom:0px;padding-top:20px;padding-bottom:20px;border-bottom:1px solid #f0f0f0">
                       <tbody>
                       <tr>
                         <td width="40%"></td>
                         <td align="right" width="34%"><p style="margin-top:14px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:3px"><span style="color:#3f3f3f;text-align:right">Item(s) total</span></p></td>
-                        <td><p style="margin-top:14px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:3px"><span style="padding-right:0px">₨.  {{ order.basket_total_incl_tax }} </span></p></td>
+                        <td><p style="margin-top:14px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:3px"><span style="padding-right:5px">₨.  {{ order.basket_total_incl_tax }} </span></p></td>
                       </tr>
+                      {% if not order.shipping_incl_tax == 0.00 %}
                       <tr>
                         <td width="50%"></td>
                         <td align="right" width="34%"><p style="margin-top:0px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:10px"><span style="color:#3f3f3f;text-align:right">Delivery charges</span></p></td>
-                        <td><p style="margin-top:0px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:10px"><span style="padding-right:0px">₨.{{ order.shipping_incl_tax }}</span></p></td>
+                        <td><p style="margin-top:0px;font-family:Arial;font-size:12px;text-align:right;color:#3f3f3f;padding-top:0px;margin-top:0;margin-bottom:10px"><span style="padding-right:5px">₨.{{ order.shipping_incl_tax }}</span></p></td>
                       </tr>
+                      {% endif %}
                       <tr>
                         <td width="40%"></td>
                         <td align="right" width="34%"><p style="margin-top:0px;font-family:Arial;font-size:14px;text-align:right;color:#3f3f3f;line-height:14px;padding-top:0px;margin-bottom:0"><span style="color:#212121;text-align:right;font-weight:bold">Amount Payable on Delivery</span></p></td>
                         <td><p style="margin-top:0px;font-family:Arial;font-size:14px;text-align:right;color:#3f3f3f;padding-top:0px;margin-bottom:0">
-                          <span style="padding-right:0px;font-weight:bold">₨. {{ order.total_incl_tax }} </span></p></td>
+                          <span style="padding-right:5px;font-weight:bold">₨. {{ order.total_incl_tax }} </span></p></td>
                       </tr>
                       </tbody>
                     </table></td>
