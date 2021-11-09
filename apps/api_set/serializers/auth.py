@@ -1,5 +1,6 @@
 import re
 from oscar.core.compat import get_user_model
+from rest_auth.serializers import TokenSerializer
 from rest_framework import serializers
 
 from apps.api_set import app_settings
@@ -60,6 +61,7 @@ class OtpSerializer(MobileNumberSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    token = TokenSerializer()
 
     class Meta:
         model = User
