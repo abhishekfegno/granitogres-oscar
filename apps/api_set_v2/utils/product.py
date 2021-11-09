@@ -66,8 +66,11 @@ def get_optimized_product_dict(
     )).select_related(
         'product', 'product__product_class', 'product__parent', 'product__parent__product_class'
     ).prefetch_related('product__images', 'product__parent__images').order_by('to_first')
+
     if zone:
-        sr_set = sr_set.filter(partner__zone__id=zone)
+        sr_set = sr_set.filter(partner__zone_id=zone)
+    else:
+        sr_set = sr_set.none()
 
     if offset and limit:
         sr_set = sr_set[offset:limit]

@@ -171,8 +171,7 @@ def product_list(request, category='all', **kwargs):
             product_data = []
         params = {'search': _search, 'range': product_range, "category": cat, "pclass": _pclass}
         rc = recommended_class(queryset, **params)
-        # import pdb;pdb.set_trace()
-        
+
         cat_data = {}
         if cat:
             cat_data['seo_title'] = cat.seo_title
