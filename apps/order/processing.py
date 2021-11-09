@@ -274,7 +274,7 @@ class EventHandler(processing.EventHandler):
         if new_status == settings.ORDER_STATUS_PACKED:
             d = Delhivery()
             d.pack_order(order)
-            event_type = ShippingEventType.objects.get_or_create(code="packed", defaults={'Name': "Packed"})[0]
+            event_type = ShippingEventType.objects.get_or_create(code="packed", defaults={'name': "Packed"})[0]
         elif new_status == settings.ORDER_STATUS_CANCELED and old_status not in (
                 settings.ORDER_STATUS_PLACED, settings.ORDER_STATUS_CONFIRMED, settings.ORDER_STATUS_PACKED
         ):
