@@ -40,9 +40,10 @@ class Fast2SMS:
 
         querystring = {
             "authorization": settings.FAST_2_SMS_API_KEY,
-            "sender_id": getattr(settings, 'FAST_2_SMS_SENDER_ID', "SMSINI"),
+            # "sender_id": getattr(settings, 'FAST_2_SMS_SENDER_ID', "SMSINI"),
+            "sender_id": "TXTIND",
             "language": "english",
-            "route": "p",
+            "route": "v3",
             "numbers": phone_no,
             "message": message,
         }
@@ -56,9 +57,9 @@ class Fast2SMS:
 
         querystring = {
             "authorization": settings.FAST_2_SMS_API_KEY,
-            "sender_id": "BathxB",
+            "sender_id": "TXTIND",
             "language": "english",
-            "route": "qt",
+            "route": "v3",
             "numbers": phone_no,
             "message": settings.FAST_2_SMS_TEMPLATE_ID,
             "variables": "{BB}",
