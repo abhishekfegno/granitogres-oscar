@@ -1,7 +1,7 @@
 from django.conf import settings
 import requests
 
-FAST_2_SMS_BASE_URL = "https://www.fast2sms.com/dev/bulk"
+FAST_2_SMS_BASE_URL = "https://www.fast2sms.com/dev/bulkV2"
 
 
 def send_sms_for_order_status_change(order):
@@ -52,7 +52,7 @@ class Fast2SMS:
         return True
 
     def send_qt_sms(self, phone_no, message):
-        url = "https://www.fast2sms.com/dev/bulk"
+        url = self.url
 
         querystring = {
             "authorization": settings.FAST_2_SMS_API_KEY,
@@ -70,13 +70,18 @@ class Fast2SMS:
         return True
 
 
-def _send_p_sms(phone_no, message):
+def send_p_sms(phone_no, message):
     return Fast2SMS().send_p_sms(phone_no, message)
 
-######################################################################3
+
+def send_qt_sms(phone_no, message):
+    return Fast2SMS().send_qt_sms(phone_no, message)
 
 
-def send_p_sms(phone_no, message):
+######################################################################
+
+
+def _send_p_sms(phone_no, message):
     url = "https://www.fast2sms.com/dev/bulk"
 
     querystring = {
@@ -93,7 +98,7 @@ def send_p_sms(phone_no, message):
     return True
 
 
-def send_qt_sms(phone_no, message):
+def _send_qt_sms(phone_no, message):
     url = "https://www.fast2sms.com/dev/bulk"
 
     querystring = {
@@ -125,7 +130,7 @@ def send_otp(phone_no: str, otp):
         "route": "qt",
         "numbers": phone_no,
         "message": settings.FAST_2_SMS_TEMPLATE_ID,
-        "variables": "{BB}",
+        "variables": "{B    B}",
         "variables_values": otp
     }
     headers = {'cache-control': "no-cache"}

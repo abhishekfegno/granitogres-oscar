@@ -65,6 +65,8 @@ class EventHandler(processing.EventHandler):
 
             print(messages['body'])
 
+
+
     @transaction.atomic
     def handle_order_status_change(self, order: Order, new_status: str, note_msg=None, note_type='System'):
         """
@@ -86,6 +88,8 @@ class EventHandler(processing.EventHandler):
         self.handle_consignments(order, old_status, new_status)
         self.handle_refund(order, old_status, new_status)
         self.handle_delivery(order, old_status, new_status)
+        send_sms_for_order_status_change(order)
+
         try:
             OrderStatusPushNotification(order.user).send_status_update(order, new_status)
         except KeyError as e:
@@ -279,5 +283,5 @@ class EventHandler(processing.EventHandler):
             d = Delhivery()
             d.cancel_courier(order)
 
-        send_sms_for_order_status_change(order)
+        # send_sms_for_order_status_change(order)
 
