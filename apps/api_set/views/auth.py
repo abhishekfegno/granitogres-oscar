@@ -1,14 +1,10 @@
 import rest_auth.views
 from django.contrib.auth import get_user_model
-from django.utils.decorators import method_decorator
-from oscar.core.loading import get_model
 from oscarapi.basket import operations
 from oscarapi.utils.session import login_and_upgrade_session
-from rest_framework import permissions, authentication
-from rest_framework.authentication import SessionAuthentication
+from rest_framework import permissions
 from rest_framework.decorators import api_view
 from rest_framework.generics import RetrieveUpdateAPIView
-from rest_framework.renderers import JSONRenderer, BaseRenderer
 from rest_framework.response import Response
 # REGISTRATION URLS
 from rest_framework.views import APIView
@@ -16,7 +12,6 @@ from rest_framework import status
 
 from apps.api_set.serializers.auth import MobileNumberSerializer, OTP, OtpSerializer, UserSerializer
 from apps.api_set.serializers.basket import WncBasketSerializer
-from apps.api_set.views.orders import _login_required
 
 AWAITING_LENGTH = 8
 User = get_user_model()
