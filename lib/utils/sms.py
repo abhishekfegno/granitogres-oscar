@@ -41,9 +41,9 @@ class Fast2SMS:
         querystring = {
             "authorization": settings.FAST_2_SMS_API_KEY,
             # "sender_id": getattr(settings, 'FAST_2_SMS_SENDER_ID', "SMSINI"),
-            "sender_id": "TXTIND",
+            "sender_id": "CHKSMS",
             "language": "english",
-            "route": "v3",
+            "route": "p",
             "numbers": phone_no,
             "message": message,
         }
