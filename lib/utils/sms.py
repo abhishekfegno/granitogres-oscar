@@ -22,7 +22,9 @@ def send_sms_for_order_status_change(order):
     }).get(order.status))
     try:
         mob_no = ",".join([num[-10:] for num in order.user.mobile if num])
+        mob_no = mob_no.replace(",", "")
         if message and mob_no:
+            print("calling send_p_sms", message, mob_no)
             return send_p_sms(mob_no, message=message.format(order=order))
     except Exception as e:
         try:
@@ -42,14 +44,14 @@ class Fast2SMS:
             "authorization": settings.FAST_2_SMS_API_KEY,
             # "sender_id": getattr(settings, 'FAST_2_SMS_SENDER_ID', "SMSINI"),
             "sender_id": "TXTIND",
-            "language": "english",
+            # "language": "english",
             "route": "v3",
             "numbers": phone_no,
             "message": message,
         }
         headers = {'cache-control': "no-cache"}
         response = requests.request("GET", url, headers=headers, params=querystring)
-        print(response.text)
+        print(response.text, "$$$ sent $$$$")
         return True
 
     def send_qt_sms(self, phone_no, message):
@@ -57,12 +59,12 @@ class Fast2SMS:
 
         querystring = {
             "authorization": settings.FAST_2_SMS_API_KEY,
-            "sender_id": "TXTIND",
+            # "sender_id": "TXTIND",
+            "sender_id": settings.FAST_2_SMS_SENDER_ID,
             "language": "english",
-            "route": "v3",
+            "route": "dlt",
             "numbers": phone_no,
             "message": settings.FAST_2_SMS_TEMPLATE_ID,
-            "variables": "{BB}",
             "variables_values": "%s" % message
         }
         headers = {'cache-control': "no-cache"}
@@ -72,6 +74,7 @@ class Fast2SMS:
 
 
 def send_p_sms(phone_no, message):
+    print("calling fast 2 class")
     return Fast2SMS().send_p_sms(phone_no, message)
 
 
@@ -82,40 +85,42 @@ def send_qt_sms(phone_no, message):
 ######################################################################
 
 
-def _send_p_sms(phone_no, message):
-    url = "https://www.fast2sms.com/dev/bulk"
+# def _send_p_sms(phone_no, message):
+#     url = "https://www.fast2sms.com/dev/bulk"
+#
+#     querystring = {
+#         "authorization": settings.FAST_2_SMS_API_KEY,
+#         "sender_id": getattr(settings, 'FAST_2_SMS_SENDER_ID', "SMSINI"),
+#         "language": "english",
+#         "route": "p",
+#         "numbers": phone_no,
+#         "message": message,
+#     }
+#     headers = {'cache-control': "no-cache"}
+#     response = requests.request("GET", url, headers=headers, params=querystring)
+#     print(response.text)
+#     return True
+#
+#
+# def _send_qt_sms(phone_no, message):
+#     url = "https://www.fast2sms.com/dev/bulk"
+#
+#     querystring = {
+#         "authorization": settings.FAST_2_SMS_API_KEY,
+#         "sender_id": "BathxB",
+#         "language": "english",
+#         "route": "qt",
+#         "numbers": phone_no,
+#         "message": settings.FAST_2_SMS_TEMPLATE_ID,
+#         "variables": "{BB}",
+#         "variables_values": "%s" % message
+#     }
+#     headers = {'cache-control': "no-cache"}
+#     response = requests.request("GET", url, headers=headers, params=querystring)
+#     print(response.text)
+#     return True
 
-    querystring = {
-        "authorization": settings.FAST_2_SMS_API_KEY,
-        "sender_id": getattr(settings, 'FAST_2_SMS_SENDER_ID', "SMSINI"),
-        "language": "english",
-        "route": "p",
-        "numbers": phone_no,
-        "message": message,
-    }
-    headers = {'cache-control': "no-cache"}
-    response = requests.request("GET", url, headers=headers, params=querystring)
-    print(response.text)
-    return True
-
-
-def _send_qt_sms(phone_no, message):
-    url = "https://www.fast2sms.com/dev/bulk"
-
-    querystring = {
-        "authorization": settings.FAST_2_SMS_API_KEY,
-        "sender_id": "BathxB",
-        "language": "english",
-        "route": "qt",
-        "numbers": phone_no,
-        "message": settings.FAST_2_SMS_TEMPLATE_ID,
-        "variables": "{BB}",
-        "variables_values": "%s" % message
-    }
-    headers = {'cache-control': "no-cache"}
-    response = requests.request("GET", url, headers=headers, params=querystring)
-    print(response.text)
-    return True
+# ###################################################################################################3
 
 
 def format_otp_message(otp):
@@ -126,13 +131,13 @@ def send_otp(phone_no: str, otp):
 
     querystring = {
         "authorization": settings.FAST_2_SMS_API_KEY,
-        "sender_id": settings.FAST_2_SMS_SENDER_ID,
-        "language": "english",
-        "route": "qt",
+        # "sender_id": settings.FAST_2_SMS_SENDER_ID,
+        # "language": "english",
+        "route": "otp",
         "numbers": phone_no,
-        "message": settings.FAST_2_SMS_TEMPLATE_ID,
-        "variables": "{B    B}",
-        "variables_values": otp
+        # "message": settings.FAST_2_SMS_TEMPLATE_ID,
+        # "message": f"{otp} is your OTP to login to ABCHAUZ.COM",
+        "variables_values": f"Use {otp} to login at ABCHAUZ"
     }
     headers = {'cache-control': "no-cache"}
     try:
