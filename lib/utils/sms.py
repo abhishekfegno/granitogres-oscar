@@ -136,7 +136,8 @@ def send_otp(phone_no: str, otp):
         "route": "otp",
         "numbers": phone_no,
         # "message": settings.FAST_2_SMS_TEMPLATE_ID,
-        "variables_values": otp
+        # "message": f"{otp} is your OTP to login to ABCHAUZ.COM",
+        "variables_values": f"Use {otp} to login at ABCHAUZ"
     }
     headers = {'cache-control': "no-cache"}
     try:
