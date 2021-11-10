@@ -4,7 +4,7 @@ from typing import Any
 from django.utils.decorators import method_decorator
 from oscar_accounts.models import Transfer, Transaction
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.decorators import api_view
 from rest_framework.generics import ListAPIView, RetrieveAPIView, GenericAPIView, get_object_or_404, \
     RetrieveUpdateAPIView
@@ -47,7 +47,7 @@ class DeliveryBoyPermission(BasePermission):
 @method_decorator(_delivery_boy_login_required, 'dispatch')
 class OrdersListView(APIView):
     http_method_names = ['get', ]
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (TokenAuthentication, SessionAuthentication, )
     permission_classes = [DeliveryBoyPermission, ]
 
     def get(self, request, *args, **kwargs):
@@ -56,7 +56,7 @@ class OrdersListView(APIView):
 
 class ArchivedTripsListView(ListAPIView):
     serializer_class = ArchivedTripListSerializer
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (TokenAuthentication, SessionAuthentication, )
     permission_classes = [DeliveryBoyPermission, ]
 
     def get_queryset(self):
@@ -74,7 +74,7 @@ class ArchivedTripsListView(ListAPIView):
 
 class TripsDetailView(RetrieveUpdateAPIView):
     serializer_class = DeliveryTripSerializer
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (TokenAuthentication, SessionAuthentication, )
     permission_classes = [DeliveryBoyPermission, ]
 
     def get_queryset(self):
@@ -95,7 +95,7 @@ class ActiveTripView(GenericAPIView):
         400 : Invalid Action.
     """
     serializer_class = DeliveryTripSerializer
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (TokenAuthentication, SessionAuthentication, )
     permission_classes = [DeliveryBoyPermission, ]
 
     def post(self, request, *args, **kwargs):

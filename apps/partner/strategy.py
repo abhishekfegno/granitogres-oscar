@@ -61,7 +61,15 @@ class Selector(object):
     """
 
     def strategy(self, request=None, user=None, **kwargs):
-        return ABCHauzPricing(request=request, user=user, **kwargs)
+        zone = 0
+        if request.GET.get('pincode'):
+            from apps.availability.facade import ZoneFacade, get_zone_from_pincode
+            _zone = get_zone_from_pincode(request.GET.get('pincode'))
+            zone: int = _zone.id
+        if zone is None:
+            zone: int = request.session.get('zone')  # zone => Zone.pk
+
+        return ABCHauzPricing(request=request, user=user, zone=zone, **kwargs)
 
         # zone = kwargs.get('zone') or (request and request.session.get('zone'))
         #

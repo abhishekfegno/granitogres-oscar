@@ -22,6 +22,9 @@ class ZoneBasedStockRecord(object):
     def select_stockrecord(self, product, ):
         if product.selected_stock_record:
             return product.selected_stock_record
+        if self.kwargs.get('zone'):
+            self.zone_id = self.kwargs.get('zone')
+
         if self.zone_id is None and self.request is not None:
             self.zone_id = self.request.session.get('zone')
 

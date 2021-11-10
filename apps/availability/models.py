@@ -32,9 +32,10 @@ class PincodePartnerThroughModel(models.Model):
 
 class Zones(models.Model):
     name = models.CharField(max_length=128)
-    zone = models.PolygonField()
+    zone = models.PolygonField(null=True, blank=True)
     partner = models.ForeignKey('partner.Partner', related_name='zone', on_delete=models.CASCADE)
-    pincode = models.ManyToManyField('availability.PinCode', )
+    pincode = models.ManyToManyField('availability.PinCode', null=True, blank=True)
+    is_default_zone = models.BooleanField(default=False)
 
     def clean(self):
         # qs = Zones.objects.all()

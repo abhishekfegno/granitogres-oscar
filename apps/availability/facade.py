@@ -12,3 +12,8 @@ def get_facade():
 
 
 ZoneFacade = get_facade()
+
+
+def get_zone_from_pincode(_pincode):
+    facade_object = ZoneFacade(_pincode)
+    return facade_object.get_zone()

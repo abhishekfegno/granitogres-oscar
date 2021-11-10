@@ -31,7 +31,13 @@ def get_optimized_product_dict(
     stock record -> partner -> zone
     
     """
-    zone: int = request.session.get('zone')         # zone => Zone.pk
+    zone = None
+    if request.GET.get('pincode'):
+        from apps.availability.facade import ZoneFacade, get_zone_from_pincode
+        _zone = get_zone_from_pincode(request.GET.get('pincode'))
+        zone = _zone.id
+    if zone is None:
+        zone: int = request.session.get('zone')         # zone => Zone.pk
     if qs is not None:
         if not qs:
             return {}
@@ -67,12 +73,12 @@ def get_optimized_product_dict(
     )).select_related(
         'product', 'product__product_class', 'product__parent', 'product__parent__product_class'
     ).prefetch_related('product__images', 'product__parent__images').order_by('to_first')
-
+    _zones = []
     if zone:
         _zones = Zones.objects.filter(pk=zone).values_list('partner_id', flat=True)
-        sr_set = sr_set.filter(partner_id__in=_zones)
     else:
-        sr_set = sr_set.none()
+        _zones = Zones.objects.order_by('-is_default_zone').values_list('partner_id', flat=True)
+    sr_set = sr_set.filter(partner_id__in=_zones)
 
     if offset and limit:
         sr_set = sr_set[offset:limit]
@@ -94,20 +100,20 @@ def get_optimized_product_dict(
         elif sr.product.is_standalone:  # parent or standalone
             product_data[sr.product] = product_serializer_class(instance=sr.product, context=cxt).data
             product_data[sr.product]['variants'] = []
-    if not needs_stock:
-        for product in product_set:
-            if product.is_child:
-                if product.parent not in product_data:
-                    if product.parent not in product_data.keys():
-                        product_data[product.parent] = product_serializer_class(
-                            instance=product.parent, context=cxt).data
-                        product_data[product.parent]['variants'] = []
-                    product_data[product.parent]['variants'].append(
-                        product_serializer_class(instance=product, context=cxt).data)
-            elif product.is_standalone:  # parent or standalone
-                if product not in product_data:
-                    product_data[product] = product_serializer_class(instance=product, context=cxt).data
-                    product_data[product]['variants'] = []
+    # if not needs_stock:
+    #     for product in product_set:
+    #         if product.is_child:
+    #             if product.parent not in product_data:
+    #                 if product.parent not in product_data.keys():
+    #                     product_data[product.parent] = product_serializer_class(
+    #                         instance=product.parent, context=cxt).data
+    #                     product_data[product.parent]['variants'] = []
+    #                 product_data[product.parent]['variants'].append(
+    #                     product_serializer_class(instance=product, context=cxt).data)
+    #         elif product.is_standalone:  # parent or standalone
+    #             if product not in product_data:
+    #                 product_data[product] = product_serializer_class(instance=product, context=cxt).data
+    #                 product_data[product]['variants'] = []
     return product_data
 
 
