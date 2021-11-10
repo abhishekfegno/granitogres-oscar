@@ -43,7 +43,8 @@ class CustomSessionMiddleware(SessionMiddleware):
     def process_response(self, request, response):
         response = super(CustomSessionMiddleware, self).process_response(request, response)
         if settings.SESSION_COOKIE_NAME in response.cookies:
-            response.cookies[settings.SESSION_COOKIE_NAME]['secure'] = not ('//dev.' in request.META['HTTP_ORIGIN'])
+            # request.META['HTTP_ORIGIN'] to access request header.
+            response.cookies[settings.SESSION_COOKIE_NAME]['secure'] = True
             response.cookies[settings.SESSION_COOKIE_NAME]['samesite'] = 'None'
         return response
 
