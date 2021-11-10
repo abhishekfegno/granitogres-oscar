@@ -59,8 +59,8 @@ class Fast2SMS:
 
         querystring = {
             "authorization": settings.FAST_2_SMS_API_KEY,
-            # "sender_id": "TXTIND",
-            "sender_id": settings.FAST_2_SMS_SENDER_ID,
+            "sender_id": "TXTIND",
+            # "sender_id": settings.FAST_2_SMS_SENDER_ID,
             "language": "english",
             "route": "dlt",
             "numbers": phone_no,

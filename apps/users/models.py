@@ -188,7 +188,7 @@ class OTP(models.Model):
         return otp
 
     def send_message(self):
-        # return False
+        return False
         if app_settings.MOBILE_NUMBER_VALIDATOR['MAX_RETRIES'] > self.no_of_times_send:
             self.no_of_times_send += 1
             status = send_otp(phone_no=self.mobile_number, otp=self.code)  # returns a bool
