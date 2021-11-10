@@ -193,6 +193,7 @@ SITE_ID = 1
 
 AUTH_USER_MODEL = 'users.User'
 
+
 from .config.cache import *                 # noqa: F401,F404
 from .config.cors import *                 # noqa: F401,F404
 from .config.database import *              # noqa: F401,F404
@@ -213,6 +214,10 @@ from .config.templates import *             # noqa: F401,F404
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 62914560  # 60MB
 OSCAR_SAVE_SENT_EMAILS_TO_DB = True
+
+
+SESSION_COOKIE_DOMAIN = '.abchauz.com'
+BASKET_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN
 
 """
 Email : grocery@gmail.com

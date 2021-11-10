@@ -96,18 +96,19 @@ class ProductReviewListView(ListAPIView):
 
 class ProductReviewCreateView(CreateAPIView):
     serializer_class = ProductReviewCreateSerializer
-    queryset = ProductReview.objects.all()
+    queryset = ProductReview.objects.all().prefetch_related('images')
     parser_classes = [JSONParser, MultiPartParser, FormParser, ]
 
     def perform_create(self, serializer):
         super(ProductReviewCreateView, self).perform_create(serializer)
         image_ids = self.request.data.get('images')
-        image_ids and ProductReviewImage.objects.filter(id__in=image_ids).update(review=serializer.instance)
+        if image_ids:
+            pri = ProductReviewImage.objects.filter(id__in=image_ids).update(review=serializer.instance)
 
 
 class ProductReviewUpdateView(RetrieveUpdateAPIView):
     serializer_class = ProductReviewCreateSerializer
-    queryset = ProductReview.objects.all()
+    queryset = ProductReview.objects.all().prefetch_related('images')
     lookup_url_kwarg = 'review_pk'
     parser_classes = [JSONParser, MultiPartParser, FormParser, ]
 

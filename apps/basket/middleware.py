@@ -66,11 +66,6 @@ class BasketMiddleware:
 
     def process_response(self, request, response: HttpResponse):
         # Delete any surplus cookies
-        if request.is_ajax():
-            response.set_cookie('foo', 'bar', max_age=360)
-            response.cookies['foo']['secure'] = True
-            response.cookies['foo']['samesite'] = 'None'
-
         cookies_to_delete = getattr(request, 'cookies_to_delete', [])
         for cookie_key in cookies_to_delete:
             response.delete_cookie(cookie_key)
@@ -119,6 +114,7 @@ class BasketMiddleware:
 
         cookie = self.get_basket_hash(request.basket.id)
         response.set_cookie(cookie_key, cookie, max_age=55555)
+        response.cookies[cookie_key]['domain'] = settings.BASKET_COOKIE_DOMAIN
         response.cookies[cookie_key]['secure'] = True
         response.cookies[cookie_key]['samesite'] = 'None'
         # Check if we need to set a cookie. If the cookies is already available
