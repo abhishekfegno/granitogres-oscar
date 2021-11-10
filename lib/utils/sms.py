@@ -22,6 +22,7 @@ def send_sms_for_order_status_change(order):
     }).get(order.status))
     try:
         mob_no = ",".join([num[-10:] for num in order.user.mobile if num])
+        mob_no = mob_no.replace(",", "")
         if message and mob_no:
             print("calling send_p_sms", message, mob_no)
             return send_p_sms(mob_no, message=message.format(order=order))
