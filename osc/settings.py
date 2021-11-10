@@ -217,6 +217,7 @@ OSCAR_SAVE_SENT_EMAILS_TO_DB = True
 
 
 SESSION_COOKIE_DOMAIN = '.abchauz.com'
+BASKET_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN
 
 """
 Email : grocery@gmail.com
