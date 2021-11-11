@@ -5,16 +5,16 @@ FAST_2_SMS_TEMPLATE_ID = os.environ.get('FAST_2_SMS_TEMPLATE_ID')
 FAST_2_SMS_API_KEY = os.environ.get('FAST_2_SMS_API_KEY')
 
 SMS_MESSAGES = {
-    'ORDER_CONFIRMED': "CONFIRMED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is confirmed. \n"
+    'ORDER_CONFIRMED': "CONFIRMED: Your Order #{order.number} for {order.get_product} item(s) from Abchauz is confirmed. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    'ORDER_SHIPPED'   : "SHIPPED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is shipped. \n"
+    'ORDER_SHIPPED'   : "SHIPPED: Your Order #{order.number} for {order.get_product} item(s) from Abchauz is shipped. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    'ORDER_DELIVERED' : "DELIVERED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is delivered. \n"
+    'ORDER_DELIVERED' : "DELIVERED: Your Order #{order.number} for {order.get_product} item(s) from Abchauz is delivered. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    'ORDER_CANCELED' : "CANCELED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is canceled. \n"
+    'ORDER_CANCELED' : "CANCELED: Your Order #{order.number} for {order.get_product} item(s) from Abchauz is canceled. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'PAYMENT_RECEIVED': "RECEIVED: Your Payment of Rs.{order.total_incl_tax}/- against Order #{order.number} is RECEIVED.",

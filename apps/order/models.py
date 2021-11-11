@@ -279,7 +279,7 @@ class Order(AbstractOrder):
 
     def get_product(self):
         products = ""
-        for i in self.lines.all().valeus_list('product__title'):
+        for i in self.lines.all().values_list('product__title'):
             products += i[0]+","
         return products
 
