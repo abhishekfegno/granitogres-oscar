@@ -35,4 +35,4 @@ def _similarity_search(queryset, search, extends=True):
 
 
 def _simple_search(queryset, search, extends=True):
-    return Product.objects.filter(title__search=search).values_list('id', flat=True)
+    return Product.objects.filter(search_tags__search=search).values_list('id', flat=True)

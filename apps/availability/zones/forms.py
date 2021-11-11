@@ -19,15 +19,43 @@ class PolyWidget(floppyforms.gis.PolygonWidget, floppyforms.gis.BaseOsmWidget):
 
 class ZoneForm(forms.ModelForm):
 
-    zone = floppyforms.gis.PolygonField(widget=PolyWidget)
     name = forms.CharField()
-    pincode = forms.ModelMultipleChoiceField(queryset=PinCode.objects.filter(code__isnull=False))
+    zone = floppyforms.gis.PolygonField(
+        widget=PolyWidget,
+        required=False)
+    pincode = forms.ModelMultipleChoiceField(
+        queryset=PinCode.objects.filter(code__isnull=False),
+        required=False)
 
     class Meta:
         model = Zones
         fields = ('name', 'zone', 'partner', 'pincode')
 
 
+class ZoneGeolocationForm(ZoneForm):
+    pincode = None
+
+    class Meta:
+        model = Zones
+        fields = ('name', 'zone', 'partner', 'is_default_zone', )
+
+
+class ZonePincodeForm(ZoneForm):
+    zone = None
+
+    class Meta:
+        model = Zones
+        fields = ('name', 'pincode', 'partner', 'is_default_zone', )
+
+
+class ZoneFormSelector(object):
+
+    def select_form_class(self):
+        if settings.LOCATION_FETCHING_MODE == settings.PINCODE:
+            return ZonePincodeForm
+        if settings.LOCATION_FETCHING_MODE == settings.GEOLOCATION:
+            return ZoneGeolocationForm
+        return ZoneForm
 
 
 

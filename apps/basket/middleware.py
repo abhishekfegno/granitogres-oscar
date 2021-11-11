@@ -114,7 +114,7 @@ class BasketMiddleware:
 
         cookie = self.get_basket_hash(request.basket.id)
         response.set_cookie(cookie_key, cookie, max_age=55555)
-        response.cookies[cookie_key]['domain'] = settings.BASKET_COOKIE_DOMAIN
+        # response.cookies[cookie_key]['domain'] = settings.BASKET_COOKIE_DOMAIN
         response.cookies[cookie_key]['secure'] = True
         response.cookies[cookie_key]['samesite'] = 'None'
         # Check if we need to set a cookie. If the cookies is already available

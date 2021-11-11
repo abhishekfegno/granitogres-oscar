@@ -130,6 +130,8 @@ class Product(AbstractProduct):
     selected_stock_record = None
 
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True)
+    wordpress_product_id = models.IntegerField(blank=True, null=True)
+    wordpress_product_text = models.TextField(blank=True, null=True)
 
     # just cached pricing
     effective_price = models.FloatField(_('Effective Retail Price.'), null=True, blank=True)

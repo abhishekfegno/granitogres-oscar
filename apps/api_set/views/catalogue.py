@@ -12,9 +12,10 @@ from apps.api_set.serializers.catalogue import (
     CategorySerializer, ProductDetailWebSerializer, custom_ProductListSerializer, ProductAttributeValue
 )
 from apps.api_set.views.orders import _login_required
+from apps.api_set_v2.utils.filters import price_min_max_to_options
 from apps.order.models import Line
 
-from lib.product_utils import apply_search, recommended_class
+from lib.product_utils import apply_search, recommended_class, ClassRecommendation
 from apps.catalogue.models import Product, ProductAttribute, AttributeOption
 
 from lib import cache_key
@@ -111,65 +112,9 @@ def filter_options(request, pk):
     out = []
     for attr in attrs:
         _inner_out = {}
-        for value in attr.productattributevalue_set.filter(product_count__gt=0,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                           ).order_by('-product_count'):
+        for value in attr.productattributevalue_set.filter(
+                product_count__gt=0,
+        ).order_by('-product_count'):
             if value.value not in _inner_out:
                 _inner_out[value.value] = 0
             _inner_out[value.value] += value.product_count
@@ -184,7 +129,19 @@ def filter_options(request, pk):
         # values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text')
 
         out.append(val)
-    return Response({'results': out})
+    rec_out = ClassRecommendation().get_max_min(pclass=pk)
+    options = price_min_max_to_options(**rec_out)
+    return Response({
+        'results': out,
+        'price_range': {
+            'input_type': "select",
+            "options": {
+                "min_price": 0.0,
+                "max_price": 0.0,
+            }
+        },
+        "exclude_out_of_stock": True,
+    })
 
 
 def _sanitize(name):

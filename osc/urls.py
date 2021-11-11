@@ -77,8 +77,8 @@ urlpatterns = [
     # https://github.com/django-oscar/django-oscar-accounts
     path('dashboard/accounts/', apps.get_app_config('accounts_dashboard').urls),
 
-    path('catalogue/<slug:slug>'+'_<int:pk>/', ProductRedirectView.as_view(), name='product-detail-api'),###API of product detail
-    path('catalogue/', CatalogueRedirectView.as_view(), name='catalogue_redirect'),
+    # path('catalogue/<slug:slug>'+'_<int:pk>/', ProductRedirectView.as_view(), name='product-detail-api'),###API of product detail
+    # path('catalogue/', CatalogueRedirectView.as_view(), name='catalogue_redirect'),
 
     # path(r'dashboard/payments/cod/', include(cod_app.urls)),
     path('sitemap.xml', sitemap,

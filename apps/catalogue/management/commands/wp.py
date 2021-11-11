@@ -1,3 +1,4 @@
+import json
 import uuid
 
 import psycopg2
@@ -17,7 +18,24 @@ from apps.catalogue.models import Product, Category, ProductImage, ProductAttrib
 from apps.partner.models import Partner, StockRecord
 
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+    @classmethod
+    def eprint(cls, *args):
+        print(cls.FAIL, *args, cls.ENDC)
+
+
 def fetch_image(url: str, instance: models.Model, field: str, name: Optional[str] = None):
+    return instance
     try:
         print(url)
         conn = urllib3.PoolManager()
@@ -34,9 +52,16 @@ def fetch_image(url: str, instance: models.Model, field: str, name: Optional[str
         print((getattr(instance, field)).url)
         print(instance)
     except Exception as e:
-        print(e)
+        bcolors.eprint(e)
         print(url, instance, field, name)
     return instance
+
+
+struct = {
+    'variable': Product.PARENT,
+    'variation': Product.CHILD,
+    'simple': Product.STANDALONE,
+}
 
 
 def digit(val):
@@ -46,6 +71,118 @@ def digit(val):
     if type(val) is str and val.isdigit():
         return float(val)
     return 0.0
+
+COLOR_MAPPING = {
+    'WHITE': 'WHITE', 'GREY': 'GREY', 'PASTEL GREY': 'GREY', 'BLACK': 'BLACK', 'FOGGY GREY': 'GREY',
+    'PAPER COATING GRAY': 'GREY', 'BOURBON': 'BROWN', 'FIERY ORANGE': 'ORANGE', 'DOUBLE SPANISH WHITE': 'WHITE',
+    'POTTERS CLAY': 'BROWN', 'SADDLE BROWN': 'BROWN', 'PAARL': 'BROWN', 'DULL ORANGE': 'ORANGE', 'BULL SHOT': 'BROWN',
+    'REDDISH ORANGE': 'ORANGE', 'ROPE': 'BROWN', 'RICH GOLD': 'ORANGE', 'ALERT TAN': 'BROWN',
+    'BROWN': 'BROWN', 'BROWNISH RED': 'RED', 'PERU TAN': 'BROWN', 'CHELSEA GEM': 'BROWN', 'HALLOWEEN ORANGE': 'ORANGE',
+    'BURNT UMBER': 'BROWN', 'CHRISTINE': 'ORANGE', 'RODEO DUST': 'WHITE', 'YELLOW-BROWN': 'BROWN', 'GRAY': 'GRAY',
+    'BLUE': 'BLUE', 'RED': 'RED', 'GREEN': 'GREEN', 'WHITE AND GOLD SHADING': 'WHITE', 'SILVER': 'SILVER',
+    'BROWN AND WHITE': 'WHITE', 'WHITE AAND TEAK': 'WHITE', 'WHITE AND DARK BROWN': 'WHITE', 'OFF WHITE': 'WHITE',
+    'WOODEN FINISH': 'BROWN', 'HASH': 'HASH', 'MEROON SEAT, WOODEN COLOUR TABLE': 'BROWN'
+}
+
+MATERIAL_MAPPING = {
+    'METAL BODY AND GLASS TOP': 'METAL', 'WOODEN AND REXIN': 'WOOD', 'STEEL AND FABRIC': 'STEEL',
+    'STEEL AND REXIN': 'STEEL', 'METAL AND REXIN': 'METAL', 'TOP LAMINATED AND METAL LEGG': 'METAL',
+    'GLASS TOP AND ENGINEERED WOOD': 'WOOD', 'GLASS TOP AND METAL LEGG': 'METAL', 'RUB WOOD': 'WOOD',
+    'UPHOLSTERY FABRIC AND FRAME RUB WOOD': 'FABRIC', 'FIBER TOP AND METAL LEGG WITH SS COATING': 'FIBER',
+    'FIBER': 'FIBER', 'FIBER SEAT AND METAL FRAME': 'METAL', 'TOP MARBLE AND METAL FRAME': 'METAL',
+    'TOP GLASS AND METAL LEGG': 'METAL', 'STAINLESS STEEL': 'STEEL', 'TOP GLASS AND STAINLESS STEEL LEGG': 'GLASS',
+    'TOP GLASS AND ENGINEERED WOOD': 'WOOD', 'METAL LEGG AND WOODEN TOP': 'WOOD',
+    'METAL LEGG WITH SS COATING AND REXIN SEAT': 'METAL', 'METAL LEGG WITH WOODEN TOP': 'METAL', 'METAL': 'METAL',
+    'METAL LEGG WITH FIBER TOP': 'METAL', 'METAL LEGG WITH GLASS TOP': 'METAL', 'METAL LEGG WITH CLOTH SEAT': 'METAL',
+    'METAL TABLE WITH WOODEN TOP AND METAL CHAIR WITH REXIN SEAT': 'WOOD',
+    'WOODEN TOP AND METAL LEGG WITH SS COATING': 'WOOD', 'METAL TABLE WITH WOODEN TOP': 'WOOD',
+    'METAL CHAIR AND CUSHION FABRIC TOP': 'FABRIC', 'METAL TABLE WITH WOODEN TOP, WOODEN CHAIR WITH REXIN SEAT': 'METAL'
+}
+
+SIZE_MAPPING = {
+    '32x125 MM': '32 x 125 MM',
+    '457 x 406 x 203 MM (18"x16"x8")': '457 x 406 x 203 MM (18"x16"x8")',
+    '15 MMx150MM': '15 MMx150MM',
+    '15 MM': '15 MM',
+    '5/8"x61/4"': '5/8"x61/4"',
+    '6"x6"': '6"x6"',
+    '24"x18"x8"': '24"x18"x8"',
+    '31"x17"x9"': '31"x17"x9"',
+    '600 x 450 x 225 ( L x W x H )': '600 x 450 x 225 ( L x W x H )',
+    '7"': '7"',
+    '150 MM': '150 MM',
+    '4"x4"': '4"x4"', '22"': '22"',
+    '150 MMx150 MM': '150 MMx150 MM',
+    '18"x16" ( L x W ), 21"x18"( L x W ), 24"x18"( L x W )': '18"x16" ( L x W ), 21"x18"( L x W ), 24"x18"( L x W )',
+    '32 MMx125 MM': '32 MMx125 MM',
+    '21"x18"x8"': '21"x18"x8"',
+    '20"x17"x8"':'20"x17"x8"',
+    '18"x16"x8"':'18"x16"x8"',
+    '8"x8"':'8"x8"',
+    '15 MMx450 MM':'15 MMx450 MM',
+    '75 MM':'75 MM',
+    '80 MM':'80 MM',
+    '(12x5)':'(12x5)',
+    '18"':'18"',
+    '1 MTR':'1 MTR',
+    '20 MM':'20 MM',
+    '750 MM':'750 MM',
+    '1.5 FT':'1.5 FT',
+    '24"x18"x9"':'24"x18"x9"',
+    '40 MM':'40 MM',
+    '360x240 MM':'360x240 MM',
+    '17"x17"x8"':'17"x17"x8"',
+    '225 MM':'225 MM',
+    '460 x 410 x 200 MM ( L x W x H ), 560 x 420 x 210 MM ( L x W x H ), 600 x 450 x 225 ( L x W x H )':'460 x 410 x 200 MM ( L x W x H ), 560 x 420 x 210 MM ( L x W x H ), 600 x 450 x 225 ( L x W x H )',
+    '125 MM':'125 MM',
+    '(3x1)':    '(3x1)',
+    '300x300 MM':    '300x300 MM',
+    '32 MM':    '32 MM',
+    '15MMx450 MM':    '15MMx450 MM',
+    '32 MMx750 MM':    '32 MMx750 MM',
+    '17"x17"x8", 18"x16"x8", 20"x17"x8", 21"x17"x8", 21"x18"x8", 21"x18"x9", 24"x18"x8", 24"x18"x9", 30"x18"x8"':    '17"x17"x8", 18"x16"x8", 20"x17"x8", 21"x17"x8", 21"x18"x8", 21"x18"x9", 24"x18"x8", 24"x18"x9", 30"x18"x8"',
+    '1.1/2 MTR':    '1.1/2 MTR',
+    '400 MM':    '400 MM',
+    '21"x18"x9"':    '21"x18"x9"',
+    '12 MMx120 MM':    '12 MMx120 MM',
+    '22"x18"x8"':    '22"x18"x8"',
+    '125 MMx125 MM':    '125 MMx125 MM',
+    '1.5 MTR':    '1.5 MTR',
+    '18"x16" ( L x W )':    '18"x16" ( L x W )',
+    '36"x18"x8", 36"x20"x8", 40"x20"x8"': '36"x18"x8", 36"x20"x8", 40"x20"x8"', '40"x20"x8"':    '40"x20"x8"',
+    '100 MMx100 MM':    '100 MMx100 MM',
+    '24"x18"( L x W )':    '24"x18"( L x W )',
+    '2 FT':    '2 FT',
+    '4"X4"':    '4"X4"',
+    '200x200 MM':    '200x200 MM',
+    '17"x17"x8", 21"x17"x8", 21"x18"x8", 24"x18"x8", 27"x17"x9", 31"x17"x9"':    '17"x17"x8", 21"x17"x8", 21"x18"x8", 24"x18"x8", 27"x17"x9", 31"x17"x9"',
+    '21"x17"x8"':    '21"x17"x8"',
+    '15 MMx225 MM':    '15 MMx225 MM',
+    '15 MMx150 MM':    '15 MMx150 MM',
+    '700x480x520 MM':    '700x480x520 MM',
+    '36"x20"x8"':    '36"x20"x8"',
+    '12 MM': '12 MM', '32 MMx225 MM':    '32 MMx225 MM',
+    '800X480X520 MM':    '800X480X520 MM',
+    '800x480x520 MM':    '800x480x520 MM',
+    '65 MM':    '65 MM',
+    '36"x18"x8"':    '36"x18"x8"',
+    '6"':    '6"',
+    '460 x 410 x 200 MM ( L x W x H )':    '460 x 410 x 200 MM ( L x W x H )',
+    '25 MM':'25 MM', '560 x 420 x 210 MM ( L x W x H )': '560 x 420 x 210 MM ( L x W x H )',
+    '457 x 406 x 203 MM (18"x16"x8"), 20"16"x8", 21"x18"x8", 22"x18"x8", 24"x18"x9"': '457 x 406 x 203 MM (18"x16"x8"), 20"16"x8", 21"x18"x8", 22"x18"x8", 24"x18"x9"',
+    '18"x16"x8", 21"x18"x8", 24"x18"x9"':    '18"x16"x8", 21"x18"x8", 24"x18"x9"',
+    '9"':    '9"',
+    '20"16"x8"':    '20"16"x8"',
+    '12"':    '12"',
+    '100 MM':    '100 MM',
+    '27"x17"x9"':    '27"x17"x9"',
+    '8"':    '8"',
+    '50 MM':    '50 MM',
+    '200 MM':    '200 MM',
+    '24"':    '24"',
+    '21"x18"( L x W )':    '21"x18"( L x W )',
+    '10 MMx120 MM': '10 MMx120 MM',
+}
 
 
 class Command(BaseCommand):
@@ -207,6 +344,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('data_source_csv', type=str, help='please choose a path of images')
         parser.add_argument('--clear-db', action='store_true', help='do you want to clear current catalogue ?')
+        parser.add_argument('--test', action='store_true', help='ensure the test data.')
 
     parent = dict()
     parent_sku = dict()
@@ -248,6 +386,7 @@ class Command(BaseCommand):
             if line.get(key, '').lower() == 'group':
                 value_key = f'Attribute {i} value(s)'
                 name = line.get(value_key)
+
                 if not self.pc.get(name):
                     self.pc[name] = ProductClass.objects.get_or_create(name=name, defaults={'slug': slugify(name)})[0]
                 print(key, '=', self.pc[name])
@@ -286,26 +425,23 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         print(kwargs)
-        if kwargs['clear_db']:
+        if kwargs['test']:
+            self.test_data()
+            return
+        if kwargs['clear_db'] and not kwargs['test']:
             self.clear_data()
         fields = [f'Attribute {i} name' for i in range(1, 9)]
         filename = kwargs['data_source_csv']
-        struct = {
-            'variable': Product.PARENT,
-            'variation': Product.CHILD,
-            'simple': Product.STANDALONE,
-        }
         _cat = {}
         partner, _ = Partner.objects.get_or_create(name="ABC HAUZ")
-        write = 3
         with open(filename, 'r') as _fp:
             contents = csv.DictReader(_fp)
 
             for line in contents:
-                print("=" * 40)
-
-                print("Getting Product Class...")
                 product_class_instance = self.get_product_class(line)
+                if 'toilet' != product_class_instance.name.lower():
+                    continue
+
                 attrs, brand_name = self.get_attribute_dict(line, product_class_instance)
                 print("Enrolling Brand...")
                 brand = self.get_brand(brand_name)
@@ -341,13 +477,19 @@ class Command(BaseCommand):
                         saving_pc = None
                     else:
                         saving_pc = product_class_instance
+                    search_keywords = ""
+                    for attr, attr_data in attrs.items():
+                        search_keywords += attr_data['value'] + " "
 
                     p = Product.objects.create(
                         product_class=saving_pc,
                         structure=struct[line['Type']],
                         upc=line['SKU'] or str(uuid.uuid4()).split('-')[-1].upper(),
+                        wordpress_product_id=line.get('\ufeffID'),
+                        wordpress_product_text=json.dumps(line),
                         parent=_parent_obj or None,
                         title=line['Name'],
+                        search_tags=line['Name'] + ' ' + brand.name + " " + search_keywords.upper(),
                         slug=slugify(line['Name']),
                         description=slugify(line['Description']),
                         about=slugify(line['Short description']),
@@ -363,16 +505,16 @@ class Command(BaseCommand):
                     if cat_item:
                         p.categories.add(cat_item)
                 except psycopg2.errors.UniqueViolation as e:
-                    print(e)
+                    bcolors.eprint(e)
                     print(line)
                     continue
                 except IntegrityError as e:
-                    print(e)
+                    bcolors.eprint(e)
                     print(line)
                     continue
                 except AttributeError as e:
-                    print(e)
-                    print(line)
+                    bcolors.eprint(e)
+                    bcolors.eprint(line)
                     continue
                 print("Fetching Images...")
                 for img in line['Images'].split(','):
@@ -385,10 +527,23 @@ class Command(BaseCommand):
                 #         attr = self.get_attribute_field(line[f], self.get_suggested_field_type(f),
                 #                                         product_class_instance=product_class_instance)
                 #
+
                 for attr, attr_data in attrs.items():
-                    setattr(p.attr, attr.code, attr_data['value'])
-                    if attr.code == 'color':
-                        pass
+                    mapper = {}
+                    if attr.code in ['size']:
+                        mapper = SIZE_MAPPING
+                    elif attr.code in ['color', ]: 
+                        mapper = COLOR_MAPPING
+                    elif attr.code in ['material', ]: 
+                        mapper = MATERIAL_MAPPING
+
+                    if type(attr_data['value']) is str:
+                        value = attr_data['value'].upper()
+                    else:
+                        value = attr_data['value']
+
+                    setattr(p.attr, attr.code, mapper.get(value, value))
+                p.attr.save()
                 p.save()
                 if struct[line['Type']] == Product.PARENT:
                     print("Saving Parental details...")
@@ -424,11 +579,11 @@ class Command(BaseCommand):
         brand_name = None
         for same_attr_fields in fields:
             name, value, visibility, is_global, default = [line.get(f) for f in same_attr_fields]
-            if not name:
-                continue
-            if name.lower() == 'brand':
-                brand_name = value
-                continue
+            # if not name:
+            #     continue
+            # if name.lower() in ['brand', 'brand name']:
+            #     brand_name = value
+            #     continue
             attr_field = self.get_attribute_field(
                 name,
                 field_type=self.get_suggested_field_type(name),
@@ -457,6 +612,9 @@ class Command(BaseCommand):
         else:
             brand, _ = Brand.objects.get_or_create(name=brand_name)
         return brand
+
+    def test_data(self):
+        pass
 
 
 

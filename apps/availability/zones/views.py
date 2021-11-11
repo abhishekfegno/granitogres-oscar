@@ -6,7 +6,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .forms import ZoneForm
+from .forms import ZoneForm, ZoneFormSelector
 from .serializers import DeliverabilityCheckSerializer
 from ..base.facade import BaseZoneFacade
 from ..facade import ZoneFacade
@@ -21,7 +21,7 @@ class ZoneSelector(ListView):
 
 
 class ZoneUpdate(UpdateView):
-    form_class = ZoneForm
+    form_class = ZoneFormSelector().select_form_class()
     queryset = Zones.objects.all()
     template_name = 'availability/zones/form.html'
 
@@ -30,7 +30,7 @@ class ZoneUpdate(UpdateView):
 
 
 class ZoneCreate(CreateView):
-    form_class = ZoneForm
+    form_class = ZoneFormSelector().select_form_class()
     queryset = Zones.objects.all()
     template_name = 'availability/zones/form.html'
 
