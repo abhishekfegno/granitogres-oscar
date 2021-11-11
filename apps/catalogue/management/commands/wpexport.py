@@ -25,7 +25,7 @@ class Command(BaseCommand):
 
             print("Writing to sheet :: ", f'public/dataset/export/{pc}.csv')
             with open(f'public/dataset/export/{pc}.csv', 'w', newline='') as csvfile:
-                fieldnames = ['id', 'name', *[_attr_code for _attr_code in pa]]
+                fieldnames = ['id', 'name', 'structure', 'parent_id',  *[_attr_code for _attr_code in pa]]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
                 writer.writerows(out)
