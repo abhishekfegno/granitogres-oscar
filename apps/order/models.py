@@ -277,6 +277,7 @@ class Order(AbstractOrder):
     def date_placed_date(self):
         return self.date_placed.date()
 
+    @property
     def get_product(self):
         products = ""
         for i in self.lines.all().values_list('product__title'):
