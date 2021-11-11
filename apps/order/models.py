@@ -277,6 +277,12 @@ class Order(AbstractOrder):
     def date_placed_date(self):
         return self.date_placed.date()
 
+    def get_product(self):
+        products = ""
+        for i in self.lines.all().valeus_list('product__title'):
+            products += i[0]+","
+        return products
+
     def payment_type_for_delhivery(self):
         # Prepaid / COD / Pickup / REPL
         if self.status in dict(settings.OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_AFTER_DELIVERY).keys():
