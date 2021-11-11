@@ -14,7 +14,7 @@ SMS_MESSAGES = {
     'ORDER_DELIVERED' : "DELIVERED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is delivered. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    'ORDER_CANCELED' : "CANCELED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is confirmed. \n"
+    'ORDER_CANCELED' : "CANCELED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is canceled. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'PAYMENT_RECEIVED': "RECEIVED: Your Payment of Rs.{order.total_incl_tax}/- against Order #{order.number} is RECEIVED.",

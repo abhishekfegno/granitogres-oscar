@@ -99,6 +99,7 @@ def product_list(request, category='all', **kwargs):
     _range = request.GET.get('range')
     _pclass = request.GET.get('pclass')
     _pincode = request.GET.get('pincode')
+    _brand = request.GET.get('brand')
 
     page_number = int(request.GET.get('page', '1'))
     page_size = int(request.GET.get('page_size', str(settings.DEFAULT_PAGE_SIZE)))
@@ -147,6 +148,9 @@ def product_list(request, category='all', **kwargs):
     if _sort:
         _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
         queryset = apply_sort(queryset=queryset, sort=_sort)
+
+    if _brand:
+        queryset = queryset.filter(brand__name=_brand).select_related('Brand')
 
     def _inner():
         nonlocal queryset, page_number, title

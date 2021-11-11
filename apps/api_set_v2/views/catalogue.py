@@ -161,6 +161,16 @@ class ProductReviewImageCreateView(CreateAPIView):
         } for i in serializer.instances]
         return Response({"response": return_data}, status=status.HTTP_201_CREATED)
 
+    def perform_create(self, serializer):
+        out = []
+        for img in serializer.validated_data.values():
+            if not img: continue
+            ip = ProductReviewImage(original=img)
+            ip.original.save(img.name, img, save=True)
+            out.append(ip)
+        self.instances = ProductReviewImage.objects.bulk_create(out, ignore_conflicts=True)
+        return self.instances
+
 
 class ProductReviewImageDeleteView(DestroyAPIView):
     serializer_class = ProductReviewImageSerializer
