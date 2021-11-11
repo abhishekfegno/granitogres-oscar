@@ -284,6 +284,10 @@ class Order(AbstractOrder):
             products += i[0]+","
         return products
 
+    @property
+    def get_costlier(self):
+        return self.lines.all().order_by('-unit_price_incl_tax').first().title
+
     def payment_type_for_delhivery(self):
         # Prepaid / COD / Pickup / REPL
         if self.status in dict(settings.OSCAR_ADMIN_POSSIBLE_LINE_STATUSES_AFTER_DELIVERY).keys():
