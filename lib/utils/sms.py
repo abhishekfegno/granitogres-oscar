@@ -10,7 +10,7 @@ def send_sms_for_order_status_change(order):
         settings.ORDER_STATUS_CONFIRMED: 'ORDER_CONFIRMED',
         settings.ORDER_STATUS_PACKED: None,
         settings.ORDER_STATUS_SHIPPED: 'ORDER_SHIPPED',
-        settings.ORDER_STATUS_OUT_FOR_DELIVERY: None,
+        settings.ORDER_STATUS_OUT_FOR_DELIVERY: "OUT FOR DELIVERY",
         settings.ORDER_STATUS_DELIVERED: 'ORDER_DELIVERED',
         settings.ORDER_STATUS_RETURN_REQUESTED: None,
         settings.ORDER_STATUS_REFUND_APPROVED: 'RETURN_INITIATED',

@@ -11,6 +11,9 @@ SMS_MESSAGES = {
     'ORDER_SHIPPED'   : "SHIPPED: Your Order #{order.number} for {order.get_product} from Abchauz is shipped. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
+    "OUT FOR DELIVERY": "OUT FOR DELIVERY: Your Order #{order.number} for {order.get_product} from Abchauz is out for delivery. \n"
+                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
     'ORDER_DELIVERED' : "DELIVERED: Your Order #{order.number} for {order.get_product} from Abchauz is delivered. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
@@ -18,6 +21,7 @@ SMS_MESSAGES = {
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'PAYMENT_RECEIVED': "RECEIVED: Your Payment of Rs.{order.total_incl_tax}/- against Order #{order.number} is RECEIVED.",
+
     'PAYMENT_DECLINED': "DECLINED: Your Payment of Rs.{order.total_incl_tax}/- against Order #{order.number} is DECLINED.",
 
     'PAYMENT_REFUNDED': "REFUNDED: Your Payment of Rs.{refund_amount}/- against Order #{order.number} is Refunded.\n"
