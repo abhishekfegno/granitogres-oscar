@@ -106,7 +106,7 @@ def get_optimized_product_dict(
     #             if product.parent not in product_data:
     #                 if product.parent not in product_data.keys():
     #                     product_data[product.parent] = product_serializer_class(
-    #                         instance=product.parent, context=cxt).data
+    #                                                                         instance=product.parent, context=cxt).data
     #                     product_data[product.parent]['variants'] = []
     #                 product_data[product.parent]['variants'].append(
     #                     product_serializer_class(instance=product, context=cxt).data)

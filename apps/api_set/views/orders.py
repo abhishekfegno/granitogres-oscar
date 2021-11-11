@@ -98,8 +98,8 @@ def order_return_request(request, *a, **k):
     """
     #  Validations
     errors = {"errors": None}
-    if type(request.data.get('line_ids', None)) is not list:
-        errors['errors'] = "You have to select some lines!"
+    if not request.data.get('line_ids'):
+        errors['errors'] = "You have to select the product(s) !"
         return Response(errors, status=400)
 
     if not request.data.get('reason', None):

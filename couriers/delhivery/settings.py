@@ -2,11 +2,12 @@
 """
 Settings Available from Delhivery Accounts
 """
+from osc.config.base_dir import _is_env_set_as
 
 """
 Delhivery consider each account as CLIENT seperate for both testing and production,  
 """
-CLIENT = "CHIKAARA0053767"
+CLIENT = "ABC 0051799"
 STAGING_CLIENT = 'CHIKAARA0053767-B2C'
 
 
@@ -28,24 +29,24 @@ PRODUCTION_TOKEN = '8b77707d9dc27386ec4d07fe68e5e2d55e412ca6'
 We are setting Application Mode!  
 IN_PRODUCTION = True / False
 """
-IN_PRODUCTION = False
+IN_PRODUCTION = _is_env_set_as("DEBUG", False)
 
 
 """
 Just a name for reference
 """
-CLIENT_NAME = "Chikaara Cosmetics"
+CLIENT_NAME = CLIENT
 
 
 """
 Pickup Client Warehouse and Pickup Location Address!  
 """
-PICKUP = 'CHIKAARA 0053767'
-PICKUP_ADDRESS = "Chikaara Cosmetics, KRISHNA BUILDING8/376/C, " \
-         "FIRST FLOOR, PERUMBILISSERY JUNCTION, " \
-         "KODUNGALLUR ROAD, CHERPU. P.O. , Thrissur, 680561" \
-         "Kerala, India"
-
+PICKUP = "ABC Buildwares india Pvt. Ltd"
+#PICKUP_ADDRESS = "Chikaara Cosmetics, KRISHNA BUILDING8/376/C, " \
+#         "FIRST FLOOR, PERUMBILISSERY JUNCTION, " \
+#         "KODUNGALLUR ROAD, CHERPU. P.O. , Thrissur, 680561" \
+#       "Kerala, India"
+PICKUP_ADDRESS = "Kallupurakkal Building, Pookattupady Road Thrikkakara,,, Thrikkakara, Near SBI Unnichira"
 
 """
 Pickup Warehouse
@@ -56,8 +57,8 @@ PRODUCTION_PICKUP_WAREHOUSE = 'CHIKAARA0053767-B2C'
 """
 Account Holding Email and Mobile Phone
 """
-EMAIL = "chikaaracosmetics@gmail.com"
-MOBILE = "+919497396083"
+EMAIL = "Abchauzofficial@gmail.com"
+MOBILE = "+919633600524"
 
 
 """
@@ -71,17 +72,20 @@ We need unique names for Shipping Addresses! We are planning to generate it with
 """
 SHIPPING_ADDRESS_UNIQUE_SLUG = "shipping-address-{id}"
 
-
+""" city """
+CITY = "Ernakulam"
 """
+
 PINCODE of Warehouse, Completely dedicated to script! Used for creating return address!
 """
-PIN_CODE = '680561'
+# PIN_CODE = '680561'
+PIN_CODE = '682021'
 
 PICKUP_LOCATION = {
     "business_name": CLIENT_NAME,
-    "name": STAGING_CLIENT,
-    "address": ' KRISHNA BUILDING8/376/C, FIRST FLOOR, PERUMBILISSERY JUNCTION, KODUNGALLUR ROAD, CHERPU. P.O. , ',
-    "city": "Trissur",
+    "name": PICKUP,
+    "address": PICKUP_ADDRESS,
+    "city": CITY,
     "pin": PIN_CODE,
     "state": "Kerala",
     "country": "India",

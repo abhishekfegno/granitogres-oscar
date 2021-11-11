@@ -5,19 +5,23 @@ FAST_2_SMS_TEMPLATE_ID = os.environ.get('FAST_2_SMS_TEMPLATE_ID')
 FAST_2_SMS_API_KEY = os.environ.get('FAST_2_SMS_API_KEY')
 
 SMS_MESSAGES = {
-    'ORDER_CONFIRMED': "CONFIRMED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is confirmed. \n"
+    'ORDER_CONFIRMED': "CONFIRMED: Your Order #{order.number} for {order.get_product} from Abchauz is confirmed. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    'ORDER_SHIPPED'   : "SHIPPED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is shipped. \n"
+    'ORDER_SHIPPED'   : "SHIPPED: Your Order #{order.number} for {order.get_product} from Abchauz is shipped. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    'ORDER_DELIVERED' : "DELIVERED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is delivered. \n"
+    "OUT FOR DELIVERY": "OUT FOR DELIVERY: Your Order #{order.number} for {order.get_product} from Abchauz is out for delivery. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    'ORDER_CANCELED' : "CANCELED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is confirmed. \n"
+    'ORDER_DELIVERED' : "DELIVERED: Your Order #{order.number} for {order.get_product} from Abchauz is delivered. \n"
+                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+
+    'ORDER_CANCELED' : "CANCELED: Your Order #{order.number} for {order.get_product} from Abchauz is canceled. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'PAYMENT_RECEIVED': "RECEIVED: Your Payment of Rs.{order.total_incl_tax}/- against Order #{order.number} is RECEIVED.",
+
     'PAYMENT_DECLINED': "DECLINED: Your Payment of Rs.{order.total_incl_tax}/- against Order #{order.number} is DECLINED.",
 
     'PAYMENT_REFUNDED': "REFUNDED: Your Payment of Rs.{refund_amount}/- against Order #{order.number} is Refunded.\n"

@@ -217,15 +217,7 @@ class ProductReviewImageSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         pass
-        # out = []
-        # for img in validated_data.values():
-        #     if not img: continue
-        #     ip = ProductReviewImage(original=img)
-        #     ip.original.save(img.name, img, save=True)
-        #     out.append(ip)
-        # self.instances = ProductReviewImage.objects.bulk_create(out, ignore_conflicts=True)
-        # return self.instances
-    
+
     image_01 = serializers.ImageField(allow_null=True, required=False)
     image_02 = serializers.ImageField(allow_null=True, required=False)
     image_03 = serializers.ImageField(allow_null=True, required=False)
@@ -234,6 +226,7 @@ class ProductReviewImageSerializer(serializers.Serializer):
     image_06 = serializers.ImageField(allow_null=True, required=False)
     image_07 = serializers.ImageField(allow_null=True, required=False)
     image_08 = serializers.ImageField(allow_null=True, required=False)
+
 
 
 class ProductReviewListSerializer(serializers.ModelSerializer):

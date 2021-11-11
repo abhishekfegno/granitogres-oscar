@@ -21,7 +21,7 @@ class RequestPickUp(models.Model):
     def response_html(self) -> str:
         if self.response is None:
             return "-"
-        html = "<ol>{}</ol"
+        html = "<ol>{}</ol>"
         inner_html = ""
         for key, val in self.response.items():
             key = " ".join([(k[0].upper() + k[1:]) for k in key.split('_')])

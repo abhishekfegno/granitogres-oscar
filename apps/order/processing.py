@@ -87,7 +87,7 @@ class EventHandler(processing.EventHandler):
         self.pipeline_order_lines(order, new_status)
         self.handle_consignments(order, old_status, new_status)
         self.handle_refund(order, old_status, new_status)
-        self.handle_delivery(order, old_status, new_status)
+        # self.handle_delivery(order, old_status, new_status)
         send_sms_for_order_status_change(order)
 
         try:
@@ -273,15 +273,15 @@ class EventHandler(processing.EventHandler):
             lines_to_be_cancelled = all_lines.filter(status__in=get_statuses(128))
             self.cancel_stock_allocations(order, lines_to_be_cancelled)
 
-    def handle_delivery(self, order, old_status, new_status):
-        if new_status == settings.ORDER_STATUS_PACKED:
-            d = Delhivery()
-            d.pack_order(order)
-        elif new_status == settings.ORDER_STATUS_CANCELED and old_status not in (
-                settings.ORDER_STATUS_PLACED, settings.ORDER_STATUS_CONFIRMED, settings.ORDER_STATUS_PACKED
-        ):
-            d = Delhivery()
-            d.cancel_courier(order)
+    # def handle_delivery(self, order, old_status, new_status):
+    #     if new_status == settings.ORDER_STATUS_PACKED:
+    #         d = Delhivery()
+    #         d.pack_order(order)
+    #     elif new_status == settings.ORDER_STATUS_CANCELED and old_status not in (
+    #             settings.ORDER_STATUS_PLACED, settings.ORDER_STATUS_CONFIRMED, settings.ORDER_STATUS_PACKED
+    #     ):
+    #         d = Delhivery()
+    #         d.cancel_courier(order)
 
         # send_sms_for_order_status_change(order)
 

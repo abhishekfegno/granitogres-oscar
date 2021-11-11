@@ -10,7 +10,7 @@ def send_sms_for_order_status_change(order):
         settings.ORDER_STATUS_CONFIRMED: 'ORDER_CONFIRMED',
         settings.ORDER_STATUS_PACKED: None,
         settings.ORDER_STATUS_SHIPPED: 'ORDER_SHIPPED',
-        settings.ORDER_STATUS_OUT_FOR_DELIVERY: None,
+        settings.ORDER_STATUS_OUT_FOR_DELIVERY: "OUT FOR DELIVERY",
         settings.ORDER_STATUS_DELIVERED: 'ORDER_DELIVERED',
         settings.ORDER_STATUS_RETURN_REQUESTED: None,
         settings.ORDER_STATUS_REFUND_APPROVED: 'RETURN_INITIATED',
@@ -59,8 +59,8 @@ class Fast2SMS:
 
         querystring = {
             "authorization": settings.FAST_2_SMS_API_KEY,
-            # "sender_id": "TXTIND",
-            "sender_id": settings.FAST_2_SMS_SENDER_ID,
+            "sender_id": "TXTIND",
+            # "sender_id": settings.FAST_2_SMS_SENDER_ID,
             "language": "english",
             "route": "dlt",
             "numbers": phone_no,
