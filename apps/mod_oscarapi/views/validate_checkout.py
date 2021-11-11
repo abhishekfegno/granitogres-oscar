@@ -58,7 +58,7 @@ class CheckoutValidationView(OscarAPICheckoutView):
             result = basket.strategy.fetch_for_line(line)
             is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
             if not is_permitted:
-                msg = "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
+                msg = "This item is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
                     'title': line.product.get_title(),
                     'reason': reason,
                 }
