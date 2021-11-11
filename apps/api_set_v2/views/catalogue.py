@@ -158,7 +158,7 @@ class ProductReviewImageCreateView(CreateAPIView):
         return_data = [{
             'id': i.id,
             'original': request.build_absolute_uri(i.original.url),
-        } for i in serializer.instances]
+        } for i in self.instances]
         return Response({"response": return_data}, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
@@ -168,8 +168,8 @@ class ProductReviewImageCreateView(CreateAPIView):
             ip = ProductReviewImage(original=img)
             ip.original.save(img.name, img, save=True)
             out.append(ip)
-        self.instances = ProductReviewImage.objects.bulk_create(out, ignore_conflicts=True)
-        return self.instances
+        return ProductReviewImage.objects.bulk_create(out, ignore_conflicts=True)
+
 
 
 class ProductReviewImageDeleteView(DestroyAPIView):
