@@ -5,19 +5,19 @@ FAST_2_SMS_TEMPLATE_ID = os.environ.get('FAST_2_SMS_TEMPLATE_ID')
 FAST_2_SMS_API_KEY = os.environ.get('FAST_2_SMS_API_KEY')
 
 SMS_MESSAGES = {
-    'ORDER_CONFIRMED': "CONFIRMED: Your Order #{order.number} for {order.get_product} from Abchauz is confirmed. \n"
+    'ORDER_CONFIRMED': "CONFIRMED: Your Order #{order.number} containing {order.get_costlier} from Abchauz is confirmed. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    'ORDER_SHIPPED'   : "SHIPPED: Your Order #{order.number} for {order.get_product} from Abchauz is shipped. \n"
+    'ORDER_SHIPPED'   : "SHIPPED: Your Order #{order.number} containing {order.get_costlier} from Abchauz is shipped. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    "OUT FOR DELIVERY": "OUT FOR DELIVERY: Your Order #{order.number} for {order.get_product} from Abchauz is out for delivery. \n"
+    "OUT FOR DELIVERY": "OUT FOR DELIVERY: Your Order #{order.number} containing {order.get_costlier} from Abchauz is out for delivery. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    'ORDER_DELIVERED' : "DELIVERED: Your Order #{order.number} for {order.get_product} from Abchauz is delivered. \n"
+    'ORDER_DELIVERED' : "DELIVERED: Your Order #{order.number} containing {order.get_costlier} from Abchauz is delivered. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    'ORDER_CANCELED' : "CANCELED: Your Order #{order.number} for {order.get_product} from Abchauz is canceled. \n"
+    'ORDER_CANCELED' : "CANCELED: Your Order #{order.number} containing {order.get_costlier} from Abchauz is canceled. \n"
                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'PAYMENT_RECEIVED': "RECEIVED: Your Payment of Rs.{order.total_incl_tax}/- against Order #{order.number} is RECEIVED.",
@@ -33,7 +33,7 @@ SMS_MESSAGES = {
     'REPLACEMENT_INITIATED': "REPLACEMENT: Replacement Request against your Order #{order.number} is Initiated.\n"
                         "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
-    'RETURNED'         : "RETURND: Your Order #{order.number} is Returned.\n"
+    'RETURNED'         : "RETURNED: Your Order #{order.number} containing {order.get_costlier} is Returned.\n"
                         "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'RETURN_REJECTED' : "RETURN: Your Return Request Against Order #{order.number} could not be processed.\n"
