@@ -208,7 +208,7 @@ class CheckoutView(OscarAPICheckoutView):
             if not is_permitted:
                 # Create a meaningful message to return in the error response
                 # Translators: User facing error message in checkout
-                msg = "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
+                msg = "This item is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
                     'title': line.product.get_title(),
                     'reason': reason,
                 }
@@ -216,7 +216,7 @@ class CheckoutView(OscarAPICheckoutView):
             elif not is_permitted:
                 # Create a meaningful message to return in the error response
                 # Translators: User facing error message in checkout
-                msg = "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
+                msg = "This item is no longer available to buy (%(reason)s). Please adjust your basket to continue." % {
                     'title': line.product.get_title(),
                     'reason': reason,
                 }
