@@ -7,8 +7,8 @@ from lib.product_utils.filter import ProductClass
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        out = []
         for pc in ProductClass.objects.all().values_list('id', flat=True):
+            out = []
             pa = ProductAttribute.objects.filter(product_class=pc).values_list('code', flat=True)
             for p in Product.objects.all().filter(product_class=pc).prefetch_related('attributes'):
                 dataset = {
