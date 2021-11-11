@@ -168,8 +168,8 @@ class ProductReviewImageCreateView(CreateAPIView):
             ip = ProductReviewImage(original=img)
             ip.original.save(img.name, img, save=True)
             out.append(ip)
-        self.instances = ProductReviewImage.objects.bulk_create(out, ignore_conflicts=True)
-        return self.instances
+        instances = ProductReviewImage.objects.bulk_create(out, ignore_conflicts=True)
+        return instances
 
 
 class ProductReviewImageDeleteView(DestroyAPIView):
