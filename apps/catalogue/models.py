@@ -16,7 +16,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from oscar.apps.catalogue.abstract_models import (
     AbstractProduct, AbstractCategory, AbstractProductImage,
-    AbstractProductAttribute, AbstractProductRecommendation, AbstractOption, AbstractProductAttributeValue
+    AbstractProductAttribute, AbstractProductRecommendation, AbstractOption, AbstractProductAttributeValue,
+    AbstractProductClass
 )
 from oscar.apps.catalogue.reviews.abstract_models import AbstractProductReview
 from oscar.core.loading import get_model
@@ -316,6 +317,10 @@ class Product(AbstractProduct):
             for i in [1, 2, 3, 4]:
                 c_key = cache_key.product_list__key.format(1, settings.DEFAULT_PAGE_SIZE, category)
                 cache.delete(c_key)
+
+
+class ProductClass(AbstractProductClass):
+    pass
 
 
 class Category(AbstractCategory):
