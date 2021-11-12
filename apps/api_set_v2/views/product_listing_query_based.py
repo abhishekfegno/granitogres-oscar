@@ -142,8 +142,8 @@ def product_list(request, category='all', **kwargs):
     if _search:
         queryset = apply_search(queryset=queryset, search=_search, mode='_similarity')
         title = f"Search: '{_search}'"
-        # if queryset.count() < 5:
-        #     queryset |= apply_search(queryset=queryset, search=_search, mode='_simple',)
+        if queryset.count() < 5:
+            queryset |= apply_search(queryset=queryset, search=_search, mode='_simple',)
 
     if _sort:
         _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
