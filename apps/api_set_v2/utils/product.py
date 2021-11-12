@@ -93,7 +93,7 @@ def get_optimized_product_dict(
         sr.product.selected_stock_record = sr
         if sr.product.is_child:
             if sr.product.parent not in product_data.keys():
-                product_data[sr.product.parent] = product_serializer_class(instance=sr.product.parent, context=cxt).data
+                product_data[sr.product.parent] = product_serializer_class(instance=sr.product.parent, context={**cxt}).data
                 product_data[sr.product.parent]['variants'] = []
             product_data[sr.product.parent]['variants'].append(
                 product_serializer_class(instance=sr.product, context={'request': request}).data)
