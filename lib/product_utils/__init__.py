@@ -27,7 +27,6 @@ def brand_filter(queryset, brand_ids):
 def apply_filter(queryset, _filter, null_value_compatability='__'):
     """
     _filter:
-         # old => input = weight:25,30,35::minprice:25::maxprice:45::available_only:1::color=Red,Black,Blue::ram:4 GB,8 GB
          input = weight:25|30|35::minprice:25::maxprice:45::available_only:1::color=Red|Black|Blue::ram:4 GB|8 GB
          _flt = [
              weight__in : [25, 30, 35],
