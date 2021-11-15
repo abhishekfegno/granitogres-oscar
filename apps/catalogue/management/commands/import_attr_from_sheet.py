@@ -66,11 +66,6 @@ class Command(BaseCommand):
 
         if is_new_product:
             p = Product(title=name, structure=structure, product_class=product_class)
-            if structure == 'child':
-                print("new child created")
-                p = Product.objects.create(title=name, structure=structure)
-                _id = p.id
-            print("#00 new product", _id, p)
         else:
             print("existing.......", _id, structure)
             # import pdb;pdb.set_trace()
