@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "fegnodevelopments",
+  "private_key_id": "31659696681acc9f9f908dc160591b8e0a145bfe",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDXMcWAWsG5TGnG\n7bhEsV3HdmKMdKm9jrOdmqA9VZuBOHSP5YkEHS/qRXrP4nnMAHuV3Rw3oJym4xy1\ndrsVvW9hyuiUpRoIm57c6P3G2a44peynVwNBEpWSSeaKm0suLnzRtIVpx/0FVpKX\nGnr1zM3Etfcb3mLnyPjDz6Id9cphoIwQzgXeM579T6QvqBcyYEChYqevioRBBJ5A\n/Uobn9VVtQpxfDmnNYS2nCvM+eCkC+vCm0C6773bHNEW5JUkTmVObzVqCb9+SGaN\nMNHFF4rOSwx8UosOx6blOiiUdfUjQVbE/SrtP7a4/0+sODG2Qnf+hEZMPUDrF6xV\nHcvrAfNfAgMBAAECggEAFcB9rr49w72yGX4Q+LyW9qEEUB9AwxzoEf+9v8Vl/RdY\nTO1OPsC2ha81PUsutYy88UaS4hqVixb84WjZe1aVKiTpApF3wrP8SGcys8VwI2C+\nPaIBfbPjs5BNwef1nvrq+gWN0MX60O3Rzn1KPYtQp1gfXM1LYROC9cQIpo+gP+Lb\niN602AvlacnH+tiEuhH7bRiazySS+a6TONKsOqjZu/dQ9uYtoGvOhLUVKDX8ogfQ\nMawMKLcB/Yw2bQz01JNkIWhgpjft3sWfx9leJQDiZmqUPAJpce7mEi3kuuQJo2q9\nD/lFFtM5x+X314NKpUK8MqZJzqKmuDboXM/sIjYaIQKBgQD6aeJ9SwiH8WmlpB5K\nF+leufJ3yF/w5olbHlF8ryjqvHPvlu/AJg1lmhQy7Z3gK2bniT2f3k8ZAIejySQo\n5t1LZMga+kqsKbuhm4jPdnaluGrfwbYtwtWJhhWcjieSgifFmPmRyWqF8n0l5JRK\n82riYlmgtNoGBorJPHOcamzlPwKBgQDb/r/gWI4FdMWZlOPqzFYriblsBi7XW5S2\nm+InYASXSdGZXgL1GtkieRSkoriA2O3kJlflbRzR5EtATn2NoKceP6fV1sT3IaLV\nT5hbt0u57WV9/qhxTReAyAtfplxub9ow5oS+1X0E6MHSE7nYZxXmcHXUzGjM6noz\nFPGkJTLJ4QKBgQDB7LgisbX0mUdoqJVwad4nprcYfkuWYuJidzNB7OAyESlzlR8s\nXgun8E/ONOg7j0EM8+KOaPo2cYuZko53QnqEBZNWGRk1BMiy2aF0kNhHdG8Hw5tT\nCvyVmQopiIkq07L7OoGjnijpfKXgb4lMFgBjOykP5J6nZe+a8j7SFjUovwKBgQCR\nOptwfwVClNPdj2zmk/5Ov5yos2w4vzxtUHr7g2eEeDbmCCnrpM2y9Dusc79ZT9u7\nwZRE4MMlzI/g4+/+jw/D6EHj6OQeQRY9u03ZPie/lfhqNLL+GOZrHaRkgG6EeVKQ\n9ZysXkMp+n35MQx+z46lkZg34rlMjX4eOrVKp0PgAQKBgQC035Jiel3p2dbi/H17\nuSN6zTxBHtDptsvlwqA/nKm+U6AvkFWxZhfK3ymtSN/otk+D/eDa1iDE/G2ZEW5/\nCiEFUClCaCT/EqVtwniWRuXDqFoqbje0bgWbkDJ/SiSHebg16igfunzJegu91G7D\nWBjIspl/v+KZnEA/LdGyunRFgA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "fegno-sheets-access@fegnodevelopments.iam.gserviceaccount.com",
+  "client_id": "110828166388189942869",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/fegno-sheets-access%40fegnodevelopments.iam.gserviceaccount.com"
+}
