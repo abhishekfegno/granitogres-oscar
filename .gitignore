@@ -14,3 +14,4 @@ whoosh-index
 *.tar.bz2
 abchauz/*
 public/dataset/abchauz_wp/*
+dump.json
