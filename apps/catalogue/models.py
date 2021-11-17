@@ -61,6 +61,8 @@ class ProductAttribute(AbstractProductAttribute):
         choices=TYPE_CHOICES, default=TYPE_CHOICES[0][0],
         max_length=20, verbose_name=_("Type"))
 
+    is_new_product = models.BooleanField(default=False)
+
     def _validate_color(self, value):
         value = value.upper()
         valid = re.search(r'^#(?:[0-9A-F]{3}){1,2}$', value)
@@ -181,6 +183,9 @@ class Product(AbstractProduct):
         help_text=_("These are products that are recommended to accompany the "
                     "main product."))
     browsable = ProductManagerSelector().strategy()
+
+    is_new_product = models.BooleanField(default=False)
+
 
     def get_brand_name(self):
         instance = self
