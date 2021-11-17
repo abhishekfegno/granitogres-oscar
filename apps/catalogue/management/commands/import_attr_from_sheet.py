@@ -63,11 +63,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         workbook = client.open('HAUZ DATA SHEET')
-        for i in range(14, 18):
+        for i in range(6, 18):
             sheet = workbook.get_worksheet(i)     # copy of kitchen sink
-            print("=======================================")
-            print("Operating in ", sheet.title)
-            self.extract_sheet(sheet)
+            print ("=======================================")
+            print ("Operating in ", sheet.title)
+            if input("Do you want to proceed? ").lower() == "y":
+                self.extract_sheet(sheet)
 
     def set_product_from_row(self, row, product_class, utils):
         _id = row['id']
