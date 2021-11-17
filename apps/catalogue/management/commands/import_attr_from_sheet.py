@@ -47,7 +47,7 @@ class Command(BaseCommand):
     pc_mapper = {
         "Copy of Kitchen Sink": "Kitchen Sink"
     }
-    skippable_sheets = ['Kitchen Sink', 'categ']
+    skippable_sheets = ['Kitchen Sink', 'categ', 'Copy of Kitchen Sink']
 
     def extract_sheet(self, sheet):
         dataset = sheet.get_all_records()
