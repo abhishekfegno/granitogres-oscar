@@ -26,12 +26,13 @@ def list_api_formatter(request, paginator, page_obj, results=None, **kwargs):
     if page_obj.has_previous():
         params['page'] = page_obj.previous_page_number()
         prev_url = generate_path(request, **params)
-    out = paginator.get_paginated_response_context(results)
+    # out = paginator.get_paginated_response_context(results)
+    count = len(results)
     return OrderedDict([
-        ('count', out['count']),
-        ('next_url', out['next_url']),
-        ('prev_url', out['prev_url']),
-        ('results', out['results']),
+        ('count', count),
+        ('next_url', next_url),
+        ('prev_url', prev_url),
+        ('results', results),
         *kwargs.items()
     ])
 
