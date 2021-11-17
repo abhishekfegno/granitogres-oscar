@@ -52,8 +52,6 @@ class Command(BaseCommand):
     def extract_sheet(self, sheet):
         dataset = sheet.get_all_records()
         parent_products = {}
-        if sheet.title in self.skippable_sheets:
-            return
         pc_title = self.pc_mapper.get(sheet.title, sheet.title)
 
         pc, _ = ProductClass.objects.get_or_create(name=pc_title)
@@ -63,12 +61,17 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         workbook = client.open('HAUZ DATA SHEET')
-        for i in range(6, 18):
+        for i in range(0, 18):
             sheet = workbook.get_worksheet(i)     # copy of kitchen sink
-            print ("=======================================")
-            print ("Operating in ", sheet.title)
+            print("=======================================")
+            if sheet.title in self.skippable_sheets:
+                print("Skipping in ", sheet.title)
+                continue
+            print("Operating in ", sheet.title)
             if input("Do you want to proceed? ").lower() == "y":
                 self.extract_sheet(sheet)
+            else:
+                print("Skipping.... ")
 
     def set_product_from_row(self, row, product_class, utils):
         _id = row['id']
@@ -77,9 +80,9 @@ class Command(BaseCommand):
         if structure == 'standalone':
             print("  [*]  ", name)
         if structure == 'parent':
-            print("  [ ]  ", name)
+            print("  [-]  ", name)
         if structure == 'child':
-            print("      ==>  [*]  ", name)
+            print("   ----->  [*]  ", name)
         is_new_product = not _id or str(_id).startswith("#")
         if is_new_product:
             product: Product = self.get_product(row, product_class, utils)
@@ -180,6 +183,22 @@ class Command(BaseCommand):
         p.product_class = None
         for c in p.categories.all():
             p.categories.remove(c)
+        return p
+
+    def move_child_to_standalone(self, p: Product, row: dict, utils: dict):
+        p.structure = p.STANDALONE
+        for c in p.get_categories():
+            p.categories.add(c)
+        p.product_class = p.get_product_class()
+        p.parent_id = None
+        return p
+
+    def move_child_to_parent(self, p: Product, row: dict, utils: dict):
+        print(f"Trying to call move_child_to_parent({p}, {row}, <utils>) but failed!")
+        return p
+
+    def move_parent_to_standalone(self, p: Product, row: dict, utils: dict):
+        print(f"Trying to call move_parent_to_standalone({p}, {row}, <utils>) but failed!")
         return p
 
     @cached
