@@ -14,8 +14,9 @@ def generate_path(request, **kwargs):
     ))
 
 
-def list_api_formatter(request, page_obj, results=None, **kwargs):
+def list_api_formatter(request, paginator, results=None, **kwargs):
     next_url = prev_url = None
+    page_obj = paginator.page_obj
     if results is None:
         results = page_obj.object_list
     params = {k: request.GET.get(k) for k, v in request.GET.items()}
@@ -26,7 +27,7 @@ def list_api_formatter(request, page_obj, results=None, **kwargs):
     if page_obj.has_previous():
         params['page'] = page_obj.previous_page_number()
         prev_url = generate_path(request, **params)
-    out = page_obj.get_paginated_response_context(results)
+    out = paginator.get_paginated_response_context(results)
     return OrderedDict([
         ('count', out['count']),
         ('next_url', out['next_url']),
