@@ -184,7 +184,7 @@ def product_list(request, category='all', **kwargs):
             cat_data['seo_keywords'] = cat.seo_keywords
             cat_data['ogimage'] = request.build_absolute_uri(cat.ogimage.url) if cat.ogimage else None
         
-        return list_api_formatter(request, paginator=paginator, results=product_data, product_class=rc, title=title,
+        return list_api_formatter(request, paginator=paginator, page_obj=page_obj, results=product_data, product_class=rc, title=title,
                                   bread_crumps=get_breadcrumb(_search, cat, product_range), seo_fields=cat_data)
     return Response(_inner())
     # if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not any([_search, _filter, _sort, _offer_category, _range, ]):

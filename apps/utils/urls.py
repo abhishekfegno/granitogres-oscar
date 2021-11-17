@@ -14,9 +14,8 @@ def generate_path(request, **kwargs):
     ))
 
 
-def list_api_formatter(request, paginator, results=None, **kwargs):
+def list_api_formatter(request, paginator, page_obj, results=None, **kwargs):
     next_url = prev_url = None
-    page_obj = paginator.page_obj
     if results is None:
         results = page_obj.object_list
     params = {k: request.GET.get(k) for k, v in request.GET.items()}
