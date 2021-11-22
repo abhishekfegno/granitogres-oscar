@@ -64,7 +64,11 @@ class GetAttributes:
                             print(f"\tMismatch in attr values")
                             print(f"\t\t row['{attr}']: {row[attr]}")
                             print(f"\t\t p.attr.{attr}: {getattr(p.attr, attr)}")
-                            if getattr(p.attr, attr).upper() ==  row[attr].upper() or input("Wanna update database with new value ? ").upper() == "Y":
+                            if (
+                                    getattr(p.attr, attr).upper() == row[attr].upper()
+                                    or p.attr.brand == 'Generic'
+                                    or input("Wanna update database with new value ? ").upper() == "Y"
+                            ):
                                 setattr(p.attr, attr, row[attr])
                                 if attr in ['brand', 'brand_name']:
                                     if p.brand.name != row[attr]:
