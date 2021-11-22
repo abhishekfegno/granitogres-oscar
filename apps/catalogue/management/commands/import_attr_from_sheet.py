@@ -66,7 +66,7 @@ class GetAttributes:
                             print(f"\t\t p.attr.{attr}: {getattr(p.attr, attr)}")
                             if (
                                     getattr(p.attr, attr).upper() == row[attr].upper()
-                                    or p.attr.brand == 'Generic'
+                                    or (attr in ['brand', 'brand_name'] and getattr(p.attr, attr) == 'Generic')
                                     or input("Wanna update database with new value ? ").upper() == "Y"
                             ):
                                 setattr(p.attr, attr, row[attr])
