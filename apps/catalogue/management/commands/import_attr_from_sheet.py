@@ -303,7 +303,7 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
                 print("Skipping in ", sheet.title)
                 continue
             print("Operating in ", sheet.title)
-            self.extract_sheet(sheet)
+            # self.extract_sheet(sheet)
             if input("Do you want to proceed? ").lower() == "y":
                 self.extract_sheet(sheet)
             else:
