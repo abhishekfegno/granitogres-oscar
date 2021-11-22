@@ -66,6 +66,10 @@ class GetAttributes:
                             print(f"\t\t p.attr.{attr}: {getattr(p.attr, attr)}")
                             if input("Wanna update database with new value ? ").upper() == "Y":
                                 setattr(p.attr, attr, row[attr])
+                                if attr in ['brand', 'brand_name']:
+                                    if p.brand.name != row[attr]:
+                                        p.brand.name = row[attr]
+                                        p.brand.save()
                     else:
                         print(f"\tProduct has no attribute {attr}")
 
