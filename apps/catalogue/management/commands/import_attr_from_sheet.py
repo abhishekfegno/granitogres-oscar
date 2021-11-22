@@ -84,7 +84,8 @@ class GetAttributes:
                         print(f"\t\t p.attr.{attr}: {getattr(p.attr, attr)}")
                         self.analytics['attributes_mismatched'] += 1
                         if (
-                                getattr(p.attr, attr).upper() == row[attr].upper()
+                                getattr(p.attr, attr) == row[attr]
+                                or str(getattr(p.attr, attr)).upper() == str(row[attr]).upper()
                                 or (attr in ['brand', 'brand_name'] and getattr(p.attr, attr) == 'Generic')
                                 or input("Wanna update database with new value ? ").upper() == "Y"
                         ):
@@ -96,7 +97,7 @@ class GetAttributes:
                                     p.brand.save()
                             self.analytics['attributes_updated'] += 1
                     else:
-                        print("value set!")
+                        print("\t value set!", getattr(p.attr, attr))
                         self.analytics['attributes_correct'] += 1
 
                 else:
