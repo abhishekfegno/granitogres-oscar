@@ -73,6 +73,10 @@ class GetAttributes:
                             type=ProductAttribute.RICHTEXT,
                         )
                         p.attr = ProductAttributesContainer(product=p)
+                        p.attr.initialised = False
+                        pv = ProductAttributeValue(attribute=product_attr, product=p, )
+                        pv.value = row[attr]
+                        pv.save()
                         self.analytics['created_attributes'] += 1
                     if getattr(p.attr, attr) != row[attr]:
                         print(f"\tMismatch in attr values")
