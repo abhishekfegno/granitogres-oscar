@@ -304,10 +304,10 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
                 continue
             print("Operating in ", sheet.title)
             self.extract_sheet(sheet)
-            # if input("Do you want to proceed? ").lower() == "y":
-            #     self.extract_sheet(sheet)
-            # else:
-            #     print("Skipping.... ")
+            if input("Do you want to proceed? ").lower() == "y":
+                self.extract_sheet(sheet)
+            else:
+                print("Skipping.... ")
         print("=======================================")
         pprint(dict(self.analytics))
 
