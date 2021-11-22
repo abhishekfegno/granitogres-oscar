@@ -66,12 +66,11 @@ class GetAttributes:
             if attr not in self.ignorable_headers:
                 if row[attr]:
                     if not hasattr(p.attr, attr):
-                        product_attr = ProductAttribute.objects.create(
+                        product_attr = ProductAttribute.objects.get_or_create(
                             product_class=p.get_product_class(),
-                            name=attr,
                             code=attr,
-                            type=ProductAttribute.RICHTEXT,
-                        )
+                            defaults={'name': attr, "type": ProductAttribute.RICHTEXT},
+                        )[0]
                         p.attr = ProductAttributesContainer(product=p)
                         p.attr.initialised = False
                         pv = ProductAttributeValue(attribute=product_attr, product=p, )
@@ -281,7 +280,7 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
     pc_mapper = {
         "Copy of Kitchen Sink": "Kitchen Sink"
     }
-    skippable_sheets = ['Kitchen Sink', 'categ', 'Copy of Kitchen Sink']
+    skippable_sheets = ['Kitchen Sink', 'categ', ]
 
     def extract_sheet(self, sheet):
         dataset = sheet.get_all_records()
@@ -298,6 +297,7 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
         workbook = client.open('HAUZ DATA SHEET')
         for i in range(0, 18):
             sheet = workbook.get_worksheet(i)     # copy of kitchen sink
+
             print("=======================================")
             if sheet.title in self.skippable_sheets:
                 print("Skipping in ", sheet.title)
