@@ -99,7 +99,7 @@ class GetAttributes:
         try:
             return Product.objects.select_related('brand').filter(title=name, structure__in=['standalone', 'child']).get()
         except Exception as e:
-            if row['id'].isdigit():
+            if type(row['id']) is int:
                 try:
                     return Product.objects.select_related('brand').get(pk=int(row['id']))
                 except Exception as e:
