@@ -26,7 +26,7 @@ def memoize(func):
     return inner
 
 
-class Command(BaseCommand):
+class AttributeUtils:
 
     def gsheet_dict_reader(self, sheet):
         # sheet = self.get_data_from_gsheet()
@@ -44,35 +44,59 @@ class Command(BaseCommand):
                 index = dict_keys[key_index - 1]
                 row[index] = sheet.cell(col=key_index, row=1).value
             yield row
-    pc_mapper = {
-        "Copy of Kitchen Sink": "Kitchen Sink"
-    }
-    skippable_sheets = ['Kitchen Sink', 'categ', 'Copy of Kitchen Sink']
 
-    def extract_sheet(self, sheet):
-        dataset = sheet.get_all_records()
-        parent_products = {}
-        pc_title = self.pc_mapper.get(sheet.title, sheet.title)
 
-        pc, _ = ProductClass.objects.get_or_create(name=pc_title)
+class GetAttributes:
 
-        for row in dataset:
-            self.set_product_from_row(row, product_class=pc, utils={'parent_hash': parent_products})
+    ignorable_headers = ['id', 'name', 'structure', 'parent_id', 'category']
 
-    def handle(self, *args, **options):
-        workbook = client.open('HAUZ DATA SHEET')
-        for i in range(0, 18):
-            sheet = workbook.get_worksheet(i)     # copy of kitchen sink
-            print("=======================================")
-            if sheet.title in self.skippable_sheets:
-                print("Skipping in ", sheet.title)
-                continue
-            print("Operating in ", sheet.title)
-            if input("Do you want to proceed? ").lower() == "y":
-                self.extract_sheet(sheet)
+    def compare_attributes(self, row):
+        p = self.find_product(row)
+        if not p:
+            print("product not found for row: ", row)
+            return
+        print(f"Product {p} : ")
+        for attr in row:
+            if attr not in self.ignorable_headers:
+                if row[attr]:
+                    if hasattr(p.attr, attr):
+                        if getattr(p.attr, attr) != row[attr]:
+                            print(f"\tMismatch in attr values")
+                            print(f"\t\t row['{attr}']: {row[attr]}")
+                            print(f"\t\t p.attr.{attr}: {getattr(p.attr, attr)}")
+                            if input("Wanna update database with new value ? ").upper() == "Y":
+                                setattr(p.attr, attr, row[attr])
+                    else:
+                        print(f"\tProduct has no attribute {attr}")
+
+                else:
+                    print(f"\trow['{attr}'] is empty")
+
             else:
-                print("Skipping.... ")
+                print(f"\tSkipping {attr}")
+        if hasattr(p.attr, 'brand'):
+            p.attr.brand = p.brand.name
+        p.attr.save()
+        print("Cleaning up \n\n")
 
+    def find_product(self, row):
+        name = row['name']
+        try:
+            return Product.objects.select_related('brand').get(title=name)
+        except Exception as e:
+            print(e)
+            print(f"Product with title '{name}' not found")
+            _idef = '#'
+            while _idef:
+                _idef = input("Do you have an id to share?")
+                if _idef and _idef.isdigit():
+                    try:
+                        return Product.objects.select_related('brand').get(pk=_idef)
+                    except Exception as e:
+                        print(e)
+
+
+class SetAttributes:
     def set_product_from_row(self, row, product_class, utils):
         _id = row['id']
         name = row['name']
@@ -131,11 +155,12 @@ class Command(BaseCommand):
         brand, _ = Brand.objects.get_or_create(name=brand_name)
         return brand
 
+    ignorable_headers = ['id', 'name', 'structure', 'parent_id', 'category']
+
     def set_attrs(self, p, row, utils=None):
         product = p
-        ignorable_headers = ['id', 'name', 'structure', 'parent_id', 'category']
         for attr in row:
-            if attr not in ignorable_headers and row[attr]:
+            if attr not in self.ignorable_headers and row[attr]:
                 if not hasattr(p.attr, attr):
                     ProductAttribute.objects.create(
                         name=attr.replace('_', ' ').upper(), code=slugify(attr).replace('-', '_'),
@@ -205,4 +230,38 @@ class Command(BaseCommand):
     def set_category(self, row, p, utils=None):
         if row['category']:
             return create_from_breadcrumbs(row['category'])
+
+
+class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
+
+    pc_mapper = {
+        "Copy of Kitchen Sink": "Kitchen Sink"
+    }
+    skippable_sheets = ['Kitchen Sink', 'categ', 'Copy of Kitchen Sink']
+
+    def extract_sheet(self, sheet):
+        dataset = sheet.get_all_records()
+        parent_products = {}
+        pc_title = self.pc_mapper.get(sheet.title, sheet.title)
+
+        pc, _ = ProductClass.objects.get_or_create(name=pc_title)
+
+        for row in dataset:
+            # self.set_product_from_row(row, product_class=pc, utils={'parent_hash': parent_products})
+            self.compare_attributes(row)
+
+    def handle(self, *args, **options):
+        workbook = client.open('HAUZ DATA SHEET')
+        for i in range(0, 18):
+            sheet = workbook.get_worksheet(i)     # copy of kitchen sink
+            print("=======================================")
+            if sheet.title in self.skippable_sheets:
+                print("Skipping in ", sheet.title)
+                continue
+            print("Operating in ", sheet.title)
+            if input("Do you want to proceed? ").lower() == "y":
+                self.extract_sheet(sheet)
+            else:
+                print("Skipping.... ")
+
 

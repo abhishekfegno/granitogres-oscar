@@ -532,9 +532,9 @@ class Command(BaseCommand):
                     mapper = {}
                     if attr.code in ['size']:
                         mapper = SIZE_MAPPING
-                    elif attr.code in ['color', ]: 
+                    elif attr.code in ['color', ]:
                         mapper = COLOR_MAPPING
-                    elif attr.code in ['material', ]: 
+                    elif attr.code in ['material', ]:
                         mapper = MATERIAL_MAPPING
 
                     if type(attr_data['value']) is str:
