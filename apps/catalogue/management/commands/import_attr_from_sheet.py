@@ -78,10 +78,6 @@ class GetAttributes:
                         pv.value = row[attr]
                         pv.save()
                         self.analytics['created_attributes'] += 1
-                    try:
-                        a = getattr(p.attr, attr) != row[attr]
-                    except Exception as e:
-                        import pdb; pdb.set_trace()
                     if getattr(p.attr, attr) != row[attr]:
                         print(f"\tMismatch in attr values")
                         print(f"\t\t row['{attr}']: {row[attr]}")
@@ -99,6 +95,9 @@ class GetAttributes:
                                     self.analytics['brands_updated'] += 1
                                     p.brand.save()
                             self.analytics['attributes_updated'] += 1
+                    else:
+                        print("value set!")
+                        self.analytics['attributes_correct'] += 1
 
                 else:
                     self.analytics['attributes_empty'] += 1
