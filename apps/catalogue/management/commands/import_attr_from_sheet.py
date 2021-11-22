@@ -1,4 +1,7 @@
 import functools
+from collections import defaultdict
+from pprint import pprint
+
 from memoization import cached
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -49,46 +52,60 @@ class AttributeUtils:
 class GetAttributes:
 
     ignorable_headers = ['id', 'name', 'structure', 'parent_id', 'category']
+    analytics = defaultdict(lambda: 0)
 
     def compare_attributes(self, row):
         p = self.find_product(row)
         if not p:
             print("product not found for row: ", row)
+            self.analytics['product_not_found'] += 1
             return
         print(f"Product {p} : ")
         for attr in row:
+            self.analytics['rows'] += 1
             if attr not in self.ignorable_headers:
                 if row[attr]:
-                    if hasattr(p.attr, attr):
-                        if getattr(p.attr, attr) != row[attr]:
-                            print(f"\tMismatch in attr values")
-                            print(f"\t\t row['{attr}']: {row[attr]}")
-                            print(f"\t\t p.attr.{attr}: {getattr(p.attr, attr)}")
-                            if (
-                                    getattr(p.attr, attr).upper() == row[attr].upper()
-                                    or (attr in ['brand', 'brand_name'] and getattr(p.attr, attr) == 'Generic')
-                                    or input("Wanna update database with new value ? ").upper() == "Y"
-                            ):
-                                setattr(p.attr, attr, row[attr])
-                                if attr in ['brand', 'brand_name']:
-                                    if p.brand.name != row[attr]:
-                                        p.brand.name = row[attr]
-                                        p.brand.save()
-                    else:
-                        print(f"\tProduct has no attribute {attr}")
+                    if not hasattr(p.attr, attr):
+                        product_attr = ProductAttribute.objects.create(
+                            product_class=p.get_product_class(),
+                            name=attr,
+                            code=attr,
+                            type=ProductAttribute.RICHTEXT,
+                        )
+                        p.attr = ProductAttributesContainer(product=p)
+                        self.analytics['created_attributes'] += 1
+                    if getattr(p.attr, attr) != row[attr]:
+                        print(f"\tMismatch in attr values")
+                        print(f"\t\t row['{attr}']: {row[attr]}")
+                        print(f"\t\t p.attr.{attr}: {getattr(p.attr, attr)}")
+                        self.analytics['attributes_mismatched'] += 1
+                        if (
+                                getattr(p.attr, attr).upper() == row[attr].upper()
+                                or (attr in ['brand', 'brand_name'] and getattr(p.attr, attr) == 'Generic')
+                                or input("Wanna update database with new value ? ").upper() == "Y"
+                        ):
+                            setattr(p.attr, attr, row[attr])
+                            if attr in ['brand', 'brand_name']:
+                                if p.brand.name != row[attr]:
+                                    p.brand.name = row[attr]
+                                    self.analytics['brands_updated'] += 1
+                                    p.brand.save()
+                            self.analytics['attributes_updated'] += 1
 
                 else:
+                    self.analytics['attributes_empty'] += 1
                     print(f"\trow['{attr}'] is empty")
 
-            else:
-                print(f"\tSkipping {attr}")
         # if p.attr and hasattr(p.attr, 'brand'):
         #     p.attr.brand = p.brand.name
         # if p.attr and hasattr(p.attr, 'brand_name'):
         #     p.attr.brand_name = p.brand.name
         try:
             p.attr.save()
+            self.analytics['attr_saved'] += 1
         except Exception as e:
+            self.analytics['attr_exception'] += 1
+
             print(e)
             print("Error while saving attributes! Skipping ")
             input("")
@@ -282,5 +299,7 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
                 self.extract_sheet(sheet)
             else:
                 print("Skipping.... ")
+        print("=======================================")
+        pprint(dict(self.analytics))
 
 

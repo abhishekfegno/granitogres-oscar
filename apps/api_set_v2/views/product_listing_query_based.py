@@ -86,7 +86,7 @@ def product_list(request, category='all', **kwargs):
     q = " A search term "
     product_range = '<product-range-id>'
     sort = any one from ['relevancy', 'rating', 'newest', 'price-desc', 'price-asc', 'title-asc', 'title-desc']
-    filter = minprice:25::maxprice:45::available_only:1::color=Red,Black,Blue::weight:25,30,35::ram:4 GB,8 GB
+    filter = weight:25|30|35::minprice:25::maxprice:45::available_only:1::color=Red|Black|Blue::ram:4 GB|8 GB
         Where minprice, maxprice and  available_only are common for all.
         other dynamic parameters are available at  reverse('wnc-filter-options', kwarg={'pk': '<ProductClass: id>'})
     """
