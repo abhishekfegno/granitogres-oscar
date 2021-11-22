@@ -4,7 +4,7 @@ from .base_dir import BASE_DIR, _is_env_set_as
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/assets/'
+STATIC_URL = '/static/'
 MEDIA_URL = '/src/'
 
 
