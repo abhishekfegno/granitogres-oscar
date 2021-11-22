@@ -76,7 +76,13 @@ class GetAttributes:
                 print(f"\tSkipping {attr}")
         if hasattr(p.attr, 'brand'):
             p.attr.brand = p.brand.name
-        p.attr.save()
+        if hasattr(p.attr, 'brand_name'):
+            p.attr.brand_name = p.brand.name
+        try:
+            p.attr.save()
+        except Exception as e:
+            print(e)
+            print("Error while saving attributes! Skipping ")
         print("Cleaning up \n\n")
 
     def find_product(self, row):
