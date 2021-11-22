@@ -66,10 +66,11 @@ class GetAttributes:
             if attr not in self.ignorable_headers:
                 if row[attr]:
                     if not hasattr(p.attr, attr):
+                        naming = " ".join([a[0].upper() + a[1:].lower() for a in attr.split('_')])
                         product_attr = ProductAttribute.objects.get_or_create(
                             product_class=p.get_product_class(),
                             code=attr,
-                            defaults={'name': attr, "type": ProductAttribute.RICHTEXT},
+                            defaults={'name': naming, "type": ProductAttribute.RICHTEXT},
                         )[0]
                         p.attr = ProductAttributesContainer(product=p)
                         p.attr.initialised = False
