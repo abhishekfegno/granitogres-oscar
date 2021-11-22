@@ -97,18 +97,22 @@ class GetAttributes:
     def find_product(self, row):
         name = row['name']
         try:
-            return Product.objects.select_related('brand').get(title=name)
+            return Product.objects.select_related('brand').filter(title=name, structure__in=['standalone', 'child']).get()
         except Exception as e:
-            print(e)
-            print(f"Product with title '{name}' not found")
-            _idef = '#'
-            while _idef:
-                _idef = input("Do you have an id to share?")
-                if _idef and _idef.isdigit():
-                    try:
-                        return Product.objects.select_related('brand').get(pk=_idef)
-                    except Exception as e:
-                        print(e)
+            if row['id'].isdigit():
+                try:
+                    return Product.objects.select_related('brand').get(pk=int(row['id']))
+                except Exception as e:
+                    print(e)
+                    print(f"Product with title '{name}' or pk={row['id']} not found")
+                    _idef = '#'
+                    while _idef:
+                        _idef = input("Do you have an id to share?")
+                        if _idef and _idef.isdigit():
+                            try:
+                                return Product.objects.select_related('brand').get(pk=_idef)
+                            except Exception as e:
+                                print(e)
 
 
 class SetAttributes:
