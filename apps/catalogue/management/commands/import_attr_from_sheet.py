@@ -82,19 +82,19 @@ class GetAttributes:
                         print(f"\t\t row['{attr}']: {row[attr]}")
                         print(f"\t\t p.attr.{attr}: {getattr(p.attr, attr)}")
                         self.analytics['attributes_mismatched'] += 1
-                        if (
-                                getattr(p.attr, attr) == row[attr]
-                                or str(getattr(p.attr, attr)).upper() == str(row[attr]).upper()
-                                or (attr in ['brand', 'brand_name'] and getattr(p.attr, attr) == 'Generic')
-                                or input("Wanna update database with new value ? ").upper() == "Y"
-                        ):
-                            setattr(p.attr, attr, row[attr])
-                            if attr in ['brand', 'brand_name']:
-                                if p.brand.name != row[attr]:
-                                    p.brand.name = row[attr]
-                                    self.analytics['brands_updated'] += 1
-                                    p.brand.save()
-                            self.analytics['attributes_updated'] += 1
+                        # if (
+                        #         getattr(p.attr, attr) == row[attr]
+                        #         or str(getattr(p.attr, attr)).upper() == str(row[attr]).upper()
+                        #         or (attr in ['brand', 'brand_name'] and getattr(p.attr, attr) == 'Generic')
+                        #         or input("Wanna update database with new value ? ").upper() == "Y"
+                        # ):
+                        setattr(p.attr, attr, row[attr])
+                        if attr in ['brand', 'brand_name']:
+                            if p.brand.name != row[attr]:
+                                p.brand.name = row[attr]
+                                self.analytics['brands_updated'] += 1
+                                p.brand.save()
+                        self.analytics['attributes_updated'] += 1
                     else:
                         print("\t value set!", getattr(p.attr, attr))
                         self.analytics['attributes_correct'] += 1
@@ -303,10 +303,11 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
                 print("Skipping in ", sheet.title)
                 continue
             print("Operating in ", sheet.title)
-            if input("Do you want to proceed? ").lower() == "y":
-                self.extract_sheet(sheet)
-            else:
-                print("Skipping.... ")
+            self.extract_sheet(sheet)
+            # if input("Do you want to proceed? ").lower() == "y":
+            #     self.extract_sheet(sheet)
+            # else:
+            #     print("Skipping.... ")
         print("=======================================")
         pprint(dict(self.analytics))
 
