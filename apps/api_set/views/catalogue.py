@@ -155,9 +155,8 @@ def product_suggestions(request, **kwargs):
     out = {'results': [], 'class': None, }
 
     def _inner():
-        queryset = Product.objects.all().filter(structure__in=(Product.STANDALONE, Product.PARENT))
+        queryset = Product.objects.filter(is_public=True).filter(structure__in=(Product.STANDALONE, Product.PARENT))
         if _search:
-            Category.objects.filter()
             if len(_search) <= 2:
                 mode = '_simple'
             else:
