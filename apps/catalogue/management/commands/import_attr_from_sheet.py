@@ -15,7 +15,7 @@ from oscar.apps.catalogue.product_attributes import ProductAttributesContainer
 from apps.catalogue.models import Product, Category, ProductAttribute, ProductClass, ProductAttributeValue, Brand
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
 
-scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
+scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 creds = ServiceAccountCredentials.from_json_keyfile_name('keys/fegnodevelopments-31659696681a.json', scope)
 
 client = gspread.authorize(creds)
@@ -24,8 +24,17 @@ sheet = client.open('HAUZ DATA SHEET')  # 19
 
 
 def memoize(func):
+    out_map = {}
+
     def inner(*args, **kwargs):
-        return func(*args, **kwargs)
+        __key__ = ''
+        for arg in args:
+            __key__ += str(arg)
+        for kwarg in kwargs:
+            __key__ += kwarg + ':' + str(kwargs[kwarg])
+        if __key__ not in out_map:
+            out_map[__key__] = func(*args, **kwargs)
+        return out_map[__key__]
     return inner
 
 
@@ -52,17 +61,20 @@ class AttributeUtils:
 class GetAttributes:
 
     ignorable_headers = ['id', 'name', 'structure', 'parent_id', 'category']
-    analytics = defaultdict(lambda: 0)
+    analytics = defaultdict(lambda: defaultdict(lambda: 0))
+    reporting = defaultdict(list)
 
-    def compare_attributes(self, row):
+    def compare_attributes(self, row, pc_title):
         p = self.find_product(row)
         if not p:
             print("product not found for row: ", row)
-            self.analytics['product_not_found'] += 1
+            self.analytics[pc_title]['product_not_found'] += 1
+            self.reporting[pc_title].append(f"Product Not found : {row['name']}")
+
             return
         print(f"Product {p} : ")
         for attr in row:
-            self.analytics['rows'] += 1
+            self.analytics[pc_title]['rows'] += 1
             if attr not in self.ignorable_headers:
                 if row[attr]:
                     if not hasattr(p.attr, attr):
@@ -73,35 +85,38 @@ class GetAttributes:
                             defaults={'name': naming, "type": ProductAttribute.RICHTEXT},
                         )[0]
                         p.attr = ProductAttributesContainer(product=p)
-                        p.attr.initialised = False
                         pv = ProductAttributeValue(attribute=product_attr, product=p, )
                         pv.value = row[attr]
                         pv.save()
-                        self.analytics['created_attributes'] += 1
+                        self.analytics[pc_title]['created_attributes'] += 1
                     if getattr(p.attr, attr) != row[attr]:
+                        self.reporting[pc_title].append("Mismatch at ")
                         print(f"\tMismatch in attr values")
                         print(f"\t\t row['{attr}']: {row[attr]}")
                         print(f"\t\t p.attr.{attr}: {getattr(p.attr, attr)}")
-                        self.analytics['attributes_mismatched'] += 1
+                        self.analytics[pc_title]['attributes_mismatched'] += 1
+                        self.reporting[pc_title].append(f"Trying to update: (Product-{p.id}).{attr} => From {getattr(p.attr, attr)} TO {row[attr]}")
+
                         # if (
                         #         getattr(p.attr, attr) == row[attr]
                         #         or str(getattr(p.attr, attr)).upper() == str(row[attr]).upper()
                         #         or (attr in ['brand', 'brand_name'] and getattr(p.attr, attr) == 'Generic')
                         #         or input("Wanna update database with new value ? ").upper() == "Y"
                         # ):
+
                         setattr(p.attr, attr, row[attr])
+                        p.attr.save()
                         if attr in ['brand', 'brand_name']:
                             if p.brand.name != row[attr]:
                                 p.brand.name = row[attr]
-                                self.analytics['brands_updated'] += 1
+                                self.analytics[pc_title]['brands_updated'] += 1
                                 p.brand.save()
-                        self.analytics['attributes_updated'] += 1
+                        self.analytics[pc_title]['attributes_updated'] += 1
                     else:
-                        print("\t value set!", getattr(p.attr, attr))
-                        self.analytics['attributes_correct'] += 1
+                        self.analytics[pc_title]['attributes_correct'] += 1
 
                 else:
-                    self.analytics['attributes_empty'] += 1
+                    self.analytics[pc_title]['attributes_empty'] += 1
                     print(f"\trow['{attr}'] is empty")
 
         # if p.attr and hasattr(p.attr, 'brand'):
@@ -110,14 +125,14 @@ class GetAttributes:
         #     p.attr.brand_name = p.brand.name
         try:
             p.attr.save()
-            self.analytics['attr_saved'] += 1
+            self.analytics[pc_title]['attr_saved'] += 1
         except Exception as e:
-            self.analytics['attr_exception'] += 1
-
+            self.analytics[pc_title]['attr_exception'] += 1
             print(e)
             print("Error while saving attributes! Skipping ")
             input("")
-        print("Cleaning up \n\n")
+        # print("Cleaning up \n\n")
+        print("\n\n")
 
     def find_product(self, row):
         name = row['name']
@@ -292,7 +307,7 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
 
         for row in dataset:
             # self.set_product_from_row(row, product_class=pc, utils={'parent_hash': parent_products})
-            self.compare_attributes(row)
+            self.compare_attributes(row, pc_title)
 
     def handle(self, *args, **options):
         workbook = client.open('HAUZ DATA SHEET')
@@ -304,12 +319,19 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
                 print("Skipping in ", sheet.title)
                 continue
             print("Operating in ", sheet.title)
-            # self.extract_sheet(sheet)
-            if input("Do you want to proceed? ").lower() == "y":
-                self.extract_sheet(sheet)
-            else:
-                print("Skipping.... ")
+            self.extract_sheet(sheet)
+            # if input("Do you want to proceed? ").lower() == "y":
+            #     self.extract_sheet(sheet)
+            # else:
+            #     print("Skipping.... ")
         print("=======================================")
         pprint(dict(self.analytics))
+        pprint(dict(self.reporting))
+
+
+
+
+
+
 
 
