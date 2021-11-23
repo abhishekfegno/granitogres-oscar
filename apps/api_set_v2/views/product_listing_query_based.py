@@ -140,7 +140,11 @@ def product_list(request, category='all', **kwargs):
         queryset = apply_filter(queryset=queryset, _filter=_filter)
 
     if _search:
-        queryset = apply_search(queryset=queryset, search=_search, mode='_trigram')
+        if len(_search) <= 2:
+            mode = '_simple'
+        else:
+            mode = '_trigram'
+        queryset = apply_search(queryset=queryset, search=_search, mode=mode)
         title = f"Search: '{_search}'"
         if queryset.count() < 5:
             queryset |= apply_search(queryset=queryset, search=_search, mode='_simple',)

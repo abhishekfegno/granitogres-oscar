@@ -34,7 +34,7 @@ def _similarity_with_rank_search(queryset, search, extends=False):
     vector = SearchVector('search_tags', weight='B')
     return queryset.annotate(
         rank=SearchRank(vector, query),
-    ).filter(rank__gt=0.30).order_by('-rank')
+    ).filter(rank__gt=0.07).order_by('-rank')
 
 
 def _similarity_search(queryset, search, extends=True):
