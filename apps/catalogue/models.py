@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F
 from django.db.models.functions import Length
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
@@ -493,6 +493,22 @@ def clear_cache_category(sender, instance, **kwargs):
     cache.delete_pattern("apps.api_set_v2.views.index?zone=*")
 
 
+def reformat_value(sender, instance, **kwargs):
+    if instance.attribute and instance.attribute.type in ('text', 'richtext'):
+        instance.value = instance.value_as_text\
+            .replace('-', ' - ')\
+            .replace('-', ' - ')\
+            .replace('-', ' - ')\
+            .replace('\n', ' ')\
+            .replace('\t', ' ')\
+            .replace('&', ' & ')\
+            .replace('#', ' ')\
+            .replace('  ', ' ')\
+            .replace('  ', ' ')\
+            .replace('&', 'AND')\
+            .strip().upper()
+
 post_save.connect(clear_cache_category, sender=Category)
 post_save.connect(clear_cache_product, sender=Product)
+pre_save.connect(reformat_value, sender=ProductAttributeValue)
 
