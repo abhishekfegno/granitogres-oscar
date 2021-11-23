@@ -37,7 +37,7 @@ def orders(request, *a, **k):
         paginator = Paginator(queryset, page_size)  # Show 18 contacts per page.
         page_obj = paginator.get_page(page_number)
         product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
-        return Response(list_api_formatter(request, page_obj=page_obj, results=product_data))
+        return Response(list_api_formatter(request, paginator=paginator, page_obj=page_obj, results=product_data))
 
     return _inner()
 
