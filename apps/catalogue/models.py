@@ -332,11 +332,16 @@ class Product(AbstractProduct):
         if cat:
             cat = cat.all().first()
         cat_name = cat.full_name if cat else ''
+
+        _title = self.get_title() or ""
+        _bname = self.get_brand_name() or ""
+        _cname = cat_name or ""
+
         self.search_tags = (
-                (self.search_tags or "")
-                + " " + (self.get_title() or "")
-                + " " + (self.get_brand_name() or "")
-                + " " + (cat_name or "")
+                ((self.search_tags or '').replace(_title, '').replace(_bname, '').replace(_cname, '') or "")
+                + " " + _title
+                + " " + _bname
+                + " " + _cname
         )
 
     def save(self, *args, **kwargs):
