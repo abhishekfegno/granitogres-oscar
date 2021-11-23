@@ -363,6 +363,7 @@ class Category(AbstractCategory):
     exclude_in_listing = models.BooleanField(default=False)
 
     product_class = models.ForeignKey('catalogue.ProductClass', on_delete=models.SET_NULL, null=True, blank=True)
+    is_public = models.BooleanField(default=True)
 
     # search_tags = models.TextField(null=True, blank=True)
     seo_title = models.CharField(max_length=120, null=True, blank=True)

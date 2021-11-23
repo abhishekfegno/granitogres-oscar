@@ -29,7 +29,7 @@ Category = get_model('catalogue', 'Category')
 
 def __get_category_cached(request):
     def _inner():
-        queryset = Category.get_root_nodes().exclude(slug__in=[settings.FEATURED_CATEGORY_SLUG])
+        queryset = Category.get_root_nodes().exclude(slug__in=[settings.FEATURED_CATEGORY_SLUG]).filter(is_public=True)
         serializer_class = CategorySerializer
         return {
             'result': serializer_class(queryset, many=True, context={'request': request}).data
