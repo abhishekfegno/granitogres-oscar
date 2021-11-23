@@ -183,7 +183,7 @@ def product_suggestions(request, **kwargs):
             out['class'] = rc
     c_key = cache_key.product_suggestion__key.format(_search)
     out = cache_library(c_key, cb=_inner, ttl=180)
-    return Response(out)
+    return Response(_inner())
 
 
 def get_products(_filter=None, _exclude=None, max_count=30):
