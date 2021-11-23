@@ -3,6 +3,7 @@
 categories_list_cached__key = 'categories_list_cached'
 
 
+product_suggestion__key = 'product_suggestion__page:{}'
 product_list__key = 'product_list__page:{}__page_size:{}__category:{}'
 product_attribute__key = 'product_attribute:product_pk={}'.format      # call as product_attribute__key(product.id)
 

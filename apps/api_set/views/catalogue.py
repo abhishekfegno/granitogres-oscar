@@ -150,29 +150,32 @@ def _sanitize(name):
 
 @api_view()
 def product_suggestions(request, **kwargs):
-    queryset = Product.objects.all().filter(structure__in=(Product.STANDALONE, Product.PARENT))
     _search = request.GET.get('q')
     _max_size = 10
-    out = {'results': [],  'class': None, }
-    if _search:
-        Category.objects.filter()
-        queryset = apply_search(queryset=queryset, search=_search, mode='_simple',)
-        rc = recommended_class(queryset, search=_search)
-        queryset = queryset.values('id', 'title', 'slug', 'product_class_id', )[:_max_size*3]
-        _mapper = {}
-        _mapper_len = 1
-        for item in queryset:
-            if item['title'] not in _mapper:
-                # title = item['title']
-                item['title'] = _sanitize(item['title'])
-                _mapper[item['title']] = item
-                _mapper_len += 1
-            if _mapper_len > _max_size:
-                break
-        out['results'] = list(_mapper.values())
-        out['class'] = rc
+    out = {'results': [], 'class': None, }
 
-    return Response(out, status=(400 if len(out['results']) == 0 else 200))
+    def _inner():
+        queryset = Product.objects.all().filter(structure__in=(Product.STANDALONE, Product.PARENT))
+        if _search:
+            Category.objects.filter()
+            queryset = apply_search(queryset=queryset, search=_search, mode='_simple',)
+            rc = recommended_class(queryset, search=_search)
+            queryset = queryset.values('id', 'title', 'slug', 'product_class_id', )[:_max_size*3]
+            _mapper = {}
+            _mapper_len = 1
+            for item in queryset:
+                if item['title'] not in _mapper:
+                    # title = item['title']
+                    item['title'] = _sanitize(item['title'])
+                    _mapper[item['title']] = item
+                    _mapper_len += 1
+                if _mapper_len > _max_size:
+                    break
+            out['results'] = list(_mapper.values())
+            out['class'] = rc
+    c_key = cache_key.product_suggestion__key.format(_search)
+    out = cache_library(c_key, cb=_inner, ttl=180)
+    return Response(out)
 
 
 def get_products(_filter=None, _exclude=None, max_count=30):
