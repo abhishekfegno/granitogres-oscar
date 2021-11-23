@@ -181,8 +181,8 @@ def product_suggestions(request, **kwargs):
                     break
             out['results'] = list(_mapper.values())
             out['class'] = rc
-    c_key = cache_key.product_suggestion__key.format(_search)
-    out = cache_library(c_key, cb=_inner, ttl=180)
+    # c_key = cache_key.product_suggestion__key.format(_search)
+    # out = cache_library(c_key, cb=_inner, ttl=180)
     return Response(_inner())
 
 

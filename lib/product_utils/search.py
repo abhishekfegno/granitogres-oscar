@@ -15,7 +15,7 @@ def tag__combinations(search):
     search = search.lower()
     possible_tags = search.lower().split(' ')
     if len(possible_tags) < 3:
-        tags = possible_tags
+        tags = [search] + possible_tags
     else:
         # pre_tags = [list(map(list, combinations(possible_tags, i))) for i in range(len(possible_tags)-2, len(possible_tags) + 1)]
         no_of_words = len(possible_tags)
