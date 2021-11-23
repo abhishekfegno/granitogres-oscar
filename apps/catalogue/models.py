@@ -324,11 +324,9 @@ class Product(AbstractProduct):
                 cache.delete(c_key)
 
     def generate_search(self):
-        len_cat = self.get_categories()
-        cat = ''
-        if len_cat:
-            cat = len_cat[0].full_name
-        self.search_tags = (self.search_tags or "") + self.get_brand_name() + " " + cat
+        cat = self.get_categories().all().first()
+        cat_name = cat.full_name if cat else ''
+        self.search_tags = (self.search_tags or "") + self.get_brand_name() + " " + cat_name
 
     def save(self, *args, **kwargs):
         self.generate_search()
