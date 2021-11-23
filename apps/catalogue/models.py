@@ -499,9 +499,7 @@ def clear_cache_category(sender, instance, **kwargs):
 
 
 def reformat_value(sender, instance, **kwargs):
-    if instance.attribute and instance.attribute.type in ('text', 'richtext'):
-        instance.value = instance.value_as_text\
-            .replace('-', ' - ')\
+    _format = lambda string: string.replace('-', ' - ')\
             .replace('-', ' - ')\
             .replace('-', ' - ')\
             .replace('\n', ' ')\
@@ -512,6 +510,9 @@ def reformat_value(sender, instance, **kwargs):
             .replace('  ', ' ')\
             .replace('&', 'AND')\
             .strip().upper()
+
+    if instance.attribute and instance.attribute.type in ( instance.attribute.TEXT, instance.attribute.RICHTEXT):
+        instance.value = _format(instance.value)
 
 post_save.connect(clear_cache_category, sender=Category)
 post_save.connect(clear_cache_product, sender=Product)
