@@ -167,7 +167,7 @@ def product_suggestions(request, **kwargs):
                 queryset |= apply_search(queryset=queryset, search=_search, mode='_simple', )
 
             # queryset = apply_search(queryset=queryset, search=_search, mode='_simple',)
-            # rc = recommended_class(queryset, search=_search)
+            rc = recommended_class(queryset, search=_search)
             queryset = queryset.values('id', 'title', 'slug', 'product_class_id', )[:_max_size*3]
             _mapper = {}
             _mapper_len = 1
