@@ -324,6 +324,7 @@ class Product(AbstractProduct):
                 cache.delete(c_key)
 
     def generate_search(self):
+        print("generate_search", self.pk, self.get_title())
         if self.is_child and self.parent:
             cat = self.parent.categories
         else:
@@ -331,7 +332,12 @@ class Product(AbstractProduct):
         if cat:
             cat = cat.all().first()
         cat_name = cat.full_name if cat else ''
-        self.search_tags = (self.search_tags or "") + self.get_brand_name() + " " + cat_name
+        self.search_tags = (
+                (self.search_tags or "")
+                + " " + (self.get_title() or "")
+                + " " + (self.get_brand_name() or "")
+                + " " + (cat_name or "")
+        )
 
     def save(self, *args, **kwargs):
         self.generate_search()
