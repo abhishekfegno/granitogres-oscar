@@ -157,10 +157,7 @@ def product_suggestions(request, **kwargs):
     def _inner():
         queryset = Product.objects.filter(is_public=True).filter(structure__in=(Product.STANDALONE, Product.PARENT))
         if _search:
-            if len(_search) <= 2:
-                mode = '_simple'
-            else:
-                mode = '_trigram'
+            mode = '_trigram'
             queryset = apply_search(queryset=queryset, search=_search, mode=mode)
             if queryset.count() < 5:
                 queryset |= apply_search(queryset=queryset, search=_search, mode='_simple', )
