@@ -6,9 +6,25 @@ from django.contrib.postgres.search import TrigramSimilarity
 from itertools import combinations
 
 
+def _splitter(s, spl, ind):
+    index = [i for i, j in enumerate(s) if j == spl][ind-1]
+    return [s[:index], s[index+1:]]
+
+
 def tag__combinations(search):
-    tags = search.split(' ')
-    return [list(map(list, combinations(tags, i))) for i in range(len(tags) + 1)]
+    search = search.lower()
+    possible_tags = search.lower().split(' ')
+    if len(possible_tags) < 3:
+        tags = possible_tags
+    else:
+        # pre_tags = [list(map(list, combinations(possible_tags, i))) for i in range(len(possible_tags)-2, len(possible_tags) + 1)]
+        no_of_words = len(possible_tags)
+        except_last_2_words = _splitter(search, ' ', no_of_words-2)[0]
+        tags = [search, except_last_2_words]
+        for i in range(1, len(possible_tags)):
+            term = " ".join(possible_tags[i-1:i+2])
+            tags.append(term)
+    return list(set(tags))
 
 
 def _trigram_search(queryset, search, extends=True):

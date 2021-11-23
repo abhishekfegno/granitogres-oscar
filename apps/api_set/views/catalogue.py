@@ -158,8 +158,16 @@ def product_suggestions(request, **kwargs):
         queryset = Product.objects.all().filter(structure__in=(Product.STANDALONE, Product.PARENT))
         if _search:
             Category.objects.filter()
-            queryset = apply_search(queryset=queryset, search=_search, mode='_simple',)
-            rc = recommended_class(queryset, search=_search)
+            if len(_search) <= 2:
+                mode = '_simple'
+            else:
+                mode = '_trigram'
+            queryset = apply_search(queryset=queryset, search=_search, mode=mode)
+            if queryset.count() < 5:
+                queryset |= apply_search(queryset=queryset, search=_search, mode='_simple', )
+
+            # queryset = apply_search(queryset=queryset, search=_search, mode='_simple',)
+            # rc = recommended_class(queryset, search=_search)
             queryset = queryset.values('id', 'title', 'slug', 'product_class_id', )[:_max_size*3]
             _mapper = {}
             _mapper_len = 1
