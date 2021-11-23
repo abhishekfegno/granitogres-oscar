@@ -152,17 +152,17 @@ def _sanitize(name):
 def product_suggestions(request, **kwargs):
     _search = request.GET.get('q')
     _max_size = 10
-    out = {'results': [], 'class': None, }
 
     def _inner():
+        out = {'results': [], 'class': None, }
         queryset = Product.objects.filter(is_public=True).filter(structure__in=(Product.STANDALONE, Product.PARENT))
         if _search:
-            # mode = '_trigram'
-            # queryset = apply_search(queryset=queryset, search=_search, mode=mode)
-            # if queryset.count() < 5:
-            #     queryset |= apply_search(queryset=queryset, search=_search, mode='_simple', )
-
-            queryset = apply_search(queryset=queryset, search=_search, mode='_simple',)
+            if _search:
+                if len(_search) <= 2:
+                    mode = '_simple'
+                else:
+                    mode = '_trigram'
+                queryset = apply_search(queryset=queryset, search=_search, mode=mode)
             rc = recommended_class(queryset, search=_search)
             queryset = queryset.values('id', 'title', 'slug', 'product_class_id', )[:_max_size*3]
             _mapper = {}
@@ -177,6 +177,7 @@ def product_suggestions(request, **kwargs):
                     break
             out['results'] = list(_mapper.values())
             out['class'] = rc
+        return out
     # c_key = cache_key.product_suggestion__key.format(_search)
     # out = cache_library(c_key, cb=_inner, ttl=180)
     return Response(_inner())
