@@ -139,12 +139,12 @@ class Product(AbstractProduct):
     # just cached pricing
     effective_price = models.FloatField(_('Effective Retail Price.'), null=True, blank=True)
     retail_price = models.FloatField(_('Retail Price.'), null=True, blank=True)
+    search_tags = models.TextField(null=True, blank=True)
 
     # search_tags = models.TextField(null=True, blank=True)
     seo_title = models.CharField(max_length=120, null=True, blank=True)
     seo_description = models.CharField(max_length=255, null=True, blank=True)
     seo_keywords = models.CharField(max_length=255, null=True, blank=True)
-    search_tags = models.TextField(null=True, blank=True)
 
     about = models.TextField(null=True, blank=True)
     storage_and_uses = models.TextField(null=True, blank=True)
@@ -322,6 +322,17 @@ class Product(AbstractProduct):
             for i in [1, 2, 3, 4]:
                 c_key = cache_key.product_list__key.format(1, settings.DEFAULT_PAGE_SIZE, category)
                 cache.delete(c_key)
+
+    def generate_search(self):
+        len_cat = self.get_categories()
+        cat = ''
+        if len_cat:
+            cat = len_cat[0].full_name
+        self.search_tags = (self.search_tags or "") + self.get_brand_name() + " " + cat
+
+    def save(self, *args, **kwargs):
+        self.generate_search()
+        return super(Product, self).save(*args, **kwargs)
 
 
 class ProductClass(AbstractProductClass):

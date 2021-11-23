@@ -90,7 +90,6 @@ class GetAttributes:
                         pv.save()
                         self.analytics[pc_title]['created_attributes'] += 1
                     if getattr(p.attr, attr) != row[attr]:
-                        self.reporting[pc_title].append("Mismatch at ")
                         print(f"\tMismatch in attr values")
                         print(f"\t\t row['{attr}']: {row[attr]}")
                         print(f"\t\t p.attr.{attr}: {getattr(p.attr, attr)}")
