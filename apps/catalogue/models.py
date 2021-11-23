@@ -511,7 +511,7 @@ def reformat_value(sender, instance, **kwargs):
             .replace('&', 'AND')\
             .strip().upper()
 
-    if instance.attribute and instance.attribute.type in ( instance.attribute.TEXT, instance.attribute.RICHTEXT):
+    if instance.attribute and instance.attribute.type in (instance.attribute.TEXT, instance.attribute.RICHTEXT):
         instance.value = _format(instance.value)
 
 post_save.connect(clear_cache_category, sender=Category)

@@ -21,7 +21,7 @@ def _trigram_search(queryset, search, extends=True):
         rank=trigram_similarity,
     ).filter(
         rank__gt=0.07,
-    ).order_by('-similarity')
+    ).order_by('-rank')
 
 
 def _similarity_with_rank_search(queryset, search, extends=False):
