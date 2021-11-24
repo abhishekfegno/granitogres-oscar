@@ -1,5 +1,4 @@
 from django.core.cache import cache
-from django.db.models import When, Case, Value, IntegerField
 from oscar.apps.offer.models import ConditionalOffer, Range
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -14,11 +13,8 @@ from rest_framework.response import Response
 from apps.api_set.serializers.catalogue import (
     custom_ProductListSerializer
 )
-from apps.api_set_v2.serializers.catalogue import ProductSimpleListSerializer
 from apps.api_set_v2.utils.product import get_optimized_product_dict
-from apps.availability.models import Zones
 from apps.dashboard.custom.models import OfferBanner
-from apps.partner.models import StockRecord
 from lib.product_utils import category_filter, apply_filter, apply_search, apply_sort, recommended_class
 from apps.catalogue.models import Product, ProductClass
 from apps.utils.urls import list_api_formatter
@@ -168,40 +164,8 @@ def product_list(request, category='all', **kwargs):
 
     def _inner():
         nonlocal queryset, page_number, title
-        product_serializer_class: type = ProductSimpleListSerializer
-        product_set = queryset
-        zone = None
-        needs_stock = 1
-        if request.GET.get('pincode'):
-            from apps.availability.facade import ZoneFacade, get_zone_from_pincode
-            _zone = get_zone_from_pincode(request.GET.get('pincode'))
-            zone = _zone.id
-        if zone is None:
-            zone: int = request.session.get('zone')  # zone => Zone.pk
-        st_set_01 = StockRecord.objects.filter(
-            product__in=product_set, product__structure=Product.STANDALONE).values_list('id')
-        st_set_02 = StockRecord.objects.filter(
-            product__in=Product.objects.filter(parent__in=product_set),
-            product__structure=Product.CHILD).values_list('id')
-
-        sr_set = StockRecord.objects.filter(
-            id__in=(st_set_01 | st_set_02),
-            product__structure__in=[Product.CHILD, Product.STANDALONE],
-            num_in_stock__gte=1 if needs_stock else 0,
-        ).annotate(to_first=Case(
-            When(num_in_stock=0, then=Value(0)), default=Value(1), output_field=IntegerField()
-        )).select_related(
-            'product', 'product__product_class', 'product__parent', 'product__parent__product_class'
-        ).prefetch_related('product__images', 'product__parent__images').order_by('to_first')
-        _zones = []
-        if zone:
-            _zones = Zones.objects.filter(pk=zone).values_list('partner_id', flat=True)
-        else:
-            _zones = Zones.objects.order_by('-is_default_zone').values_list('partner_id', flat=True)
-        sr_set = sr_set.filter(partner_id__in=_zones)
-
         # queryset = queryset.browsable().base_queryset()
-        paginator = Paginator(sr_set, page_size)  # Show 18 contacts per page.
+        paginator = Paginator(queryset, page_size)  # Show 18 contacts per page.
         empty_list = False
         try:
             page_number = paginator.validate_number(page_number)
@@ -213,26 +177,11 @@ def product_list(request, category='all', **kwargs):
         page_obj = paginator.get_page(page_number)
         if not empty_list:
             from fuzzywuzzy import fuzz
-            # product_data = get_optimized_product_dict(qs=page_obj.object_list, request=request, ).values()
-            product_data = {}
-            cxt = {'request': request}
-            for sr in page_obj.object_list:
-                sr.product.selected_stock_record = sr
-                if sr.product.is_child:
-                    if sr.product.parent not in product_data.keys():
-                        product_data[sr.product.parent] = product_serializer_class(instance=sr.product.parent,
-                                                                                   context={**cxt}).data
-                        product_data[sr.product.parent]['variants'] = []
-                    product_data[sr.product.parent]['variants'].append(
-                        product_serializer_class(instance=sr.product, context={'request': request}).data)
-                elif sr.product.is_standalone:  # parent or standalone
-                    product_data[sr.product] = product_serializer_class(instance=sr.product, context=cxt).data
-                    product_data[sr.product]['variants'] = []
-
+            product_data = get_optimized_product_dict(qs=page_obj.object_list, request=request, ).values()
             # product_data = get_optimized_product_dict_for_listing(qs=page_obj.object_list, request=request, ).values()
             # product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
             if _search:
-                product_data = sorted(product_data.values(), key=lambda p: fuzz.token_sort_ratio(_search.lower(), p['title'].lower()), reverse=True)
+                product_data = sorted(product_data, key=lambda p: fuzz.token_sort_ratio(_search.lower(), p['title'].lower()), reverse=True)
 
         else:
             product_data = []
@@ -244,12 +193,9 @@ def product_list(request, category='all', **kwargs):
             cat_data['seo_keywords'] = cat.seo_keywords
             cat_data['ogimage'] = request.build_absolute_uri(cat.ogimage.url) if cat.ogimage else None
         
-        return list_api_formatter(request, paginator=paginator, page_obj=page_obj, results=product_data,
-                                  product_class=rc, title=title,
+        return list_api_formatter(request, paginator=paginator, page_obj=page_obj, results=product_data, product_class=rc, title=title,
                                   bread_crumps=get_breadcrumb(_search, cat, product_range), seo_fields=cat_data)
-
     return Response(_inner())
-
     # if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not any([_search, _filter, _sort, _offer_category, _range, ]):
     #     c_key = cache_key.product_list__key.format(page_number, page_size, category)
     #     out = cache_library(c_key, cb=_inner, ttl=180)

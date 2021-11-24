@@ -78,7 +78,7 @@ def get_optimized_product_dict(
         _zones = Zones.objects.filter(pk=zone).values_list('partner_id', flat=True)
     else:
         _zones = Zones.objects.order_by('-is_default_zone').values_list('partner_id', flat=True)
-    sr_set = sr_set.filter(partner_id__in=_zones)
+    sr_set = sr_set.filter(partner_id__in=_zones)[:limit]
 
     # if offset and limit:
     #     sr_set = sr_set[offset:limit]
@@ -89,7 +89,7 @@ def get_optimized_product_dict(
 
     product_data = {}
     cxt = {'request': request}
-    for sr in sr_set[:limit]:
+    for sr in sr_set:
         sr.product.selected_stock_record = sr
         if sr.product.is_child:
             if sr.product.parent not in product_data.keys():
