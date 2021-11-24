@@ -125,9 +125,7 @@ def filter_options(request, pk):
             'label': attr.name,
             'val': to_client_dict(_inner_out)
         }
-
         # values = attr.productattributevalue_set.exclude(value_text=None, product_count=0).order_by('value_text').distinct('value_text').values_list('value_text')
-
         out.append(val)
     rec_out = ClassRecommendation().get_max_min(pclass=pk)
     options = price_min_max_to_options(**rec_out)
@@ -157,13 +155,12 @@ def product_suggestions(request, **kwargs):
         out = {'results': [], 'class': None, }
         queryset = Product.objects.filter(is_public=True).filter(structure__in=(Product.STANDALONE, Product.PARENT))
         if _search:
-            if _search:
+            mode = '_simple'
+            if len(_search) <= 2:
                 mode = '_simple'
-                if len(_search) <= 2:
-                    mode = '_simple'
-                else:
-                    mode = '_trigram'
-                queryset = apply_search(queryset=queryset, search=_search, mode=mode)
+            else:
+                mode = '_trigram'
+            queryset = apply_search(queryset=queryset, search=_search, mode=mode)
             rc = recommended_class(queryset, search=_search)
             queryset = list(queryset.values('id', 'title', 'slug', 'product_class_id', )[:_max_size*3])
             if len(_search.split(' ')) <= 3:
