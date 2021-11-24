@@ -150,10 +150,10 @@ def product_list(request, category='all', **kwargs):
             mode = '_simple'
         else:
             mode = '_trigram'
-        queryset = apply_search(queryset=queryset, search=_search, mode=mode)
+        queryset = apply_search(queryset=queryset, search=_search, mode=mode)|apply_search(queryset=queryset, search=_search, mode='_trigram',)
         title = f"Search: '{_search}'"
-        if queryset.count() < 5:
-            queryset |= apply_search(queryset=queryset, search=_search, mode='_trigram',)
+        # if queryset.count() < 5:
+        #     queryset |= apply_search(queryset=queryset, search=_search, mode='_trigram',)
 
     if _sort:
         _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
@@ -178,6 +178,7 @@ def product_list(request, category='all', **kwargs):
         if not empty_list:
             from fuzzywuzzy import fuzz
             product_data = get_optimized_product_dict(qs=page_obj.object_list, request=request, ).values()
+            # product_data = get_optimized_product_dict_for_listing(qs=page_obj.object_list, request=request, ).values()
             # product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
             if _search:
                 product_data = sorted(product_data, key=lambda p: fuzz.token_sort_ratio(_search.lower(), p['title'].lower()), reverse=True)
@@ -194,7 +195,43 @@ def product_list(request, category='all', **kwargs):
         
         return list_api_formatter(request, paginator=paginator, page_obj=page_obj, results=product_data, product_class=rc, title=title,
                                   bread_crumps=get_breadcrumb(_search, cat, product_range), seo_fields=cat_data)
-    return Response(_inner())
+
+    def _inner_new():
+        nonlocal queryset, page_number, title
+
+        from fuzzywuzzy import fuzz
+        product_data = get_optimized_product_dict(qs=queryset, request=request, ).values()
+        if _search:
+            product_data = sorted(product_data,
+                                  key=lambda p: fuzz.token_sort_ratio(_search.lower(), p['title'].lower()),
+                                  reverse=True)
+
+        # queryset = queryset.browsable().base_queryset()
+        paginator = Paginator(product_data, page_size)  # Show 18 contacts per page.
+        empty_list = False
+        try:
+            page_number = paginator.validate_number(page_number)
+        except PageNotAnInteger:
+            page_number = 1
+        except EmptyPage:
+            page_number = paginator.num_pages
+            empty_list = True
+        page_obj = paginator.get_page(page_number)
+        if not empty_list:
+            product_data = page_obj.object_list
+        else:
+            product_data = []
+
+        cat_data = {}
+        if cat:
+            cat_data['seo_title'] = cat.seo_title
+            cat_data['seo_description'] = cat.seo_description
+            cat_data['seo_keywords'] = cat.seo_keywords
+            cat_data['ogimage'] = request.build_absolute_uri(cat.ogimage.url) if cat.ogimage else None
+
+        return list_api_formatter(request, paginator=paginator, page_obj=page_obj, results=product_data, product_class=rc, title=title,
+                                  bread_crumps=get_breadcrumb(_search, cat, product_range), seo_fields=cat_data)
+    return Response(_inner_new())
     # if page_size == settings.DEFAULT_PAGE_SIZE and page_number <= 4 and not any([_search, _filter, _sort, _offer_category, _range, ]):
     #     c_key = cache_key.product_list__key.format(page_number, page_size, category)
     #     out = cache_library(c_key, cb=_inner, ttl=180)

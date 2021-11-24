@@ -35,7 +35,6 @@ class bcolors:
 
 
 def fetch_image(url: str, instance: models.Model, field: str, name: Optional[str] = None):
-    return instance
     try:
         print(url)
         conn = urllib3.PoolManager()
