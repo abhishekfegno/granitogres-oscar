@@ -80,12 +80,12 @@ def get_optimized_product_dict(
         _zones = Zones.objects.order_by('-is_default_zone').values_list('partner_id', flat=True)
     sr_set = sr_set.filter(partner_id__in=_zones)
 
-    if offset and limit:
-        sr_set = sr_set[offset:limit]
-    elif limit:
-        sr_set = sr_set[:limit]
-    elif offset:
-        sr_set = sr_set[offset:]
+    # if offset and limit:
+    #     sr_set = sr_set[offset:limit]
+    # elif limit:
+    #     sr_set = sr_set[:limit]
+    # elif offset:
+    #     sr_set = sr_set[offset:]
 
     product_data = {}
     cxt = {'request': request}
