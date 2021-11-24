@@ -174,8 +174,11 @@ def product_list_pagination(request, category='all', **kwargs):
             _zones = Zones.objects.filter(pk=zone).values_list('partner_id', flat=True)
         else:
             _zones = Zones.objects.order_by('-is_default_zone').values_list('partner_id', flat=True)
-        _zones = _zones.first()
-        sr_set = StockRecord.objects.filter(partner_id__in=_zones, num_in_stock__gt=0).values_list('product_id', flat=True)
+
+        sr_set = StockRecord.objects.filter(
+            partner_id__in=_zones, num_in_stock__gt=0
+        ).values_list('product_id', flat=True)
+
         qs = Product.browsable.browsable().filter(pk__in=sr_set)
 
         # queryset = queryset.browsable().base_queryset()
