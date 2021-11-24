@@ -77,6 +77,7 @@ def apply_filter(queryset, _filter, null_value_compatability='__', product_class
 
     if exclude_out_of_stock:
         queryset = queryset.filter(effective_price__isnull=False)
+
     # product_class
     valid_attributes = set(filter_params.keys()).intersection(set(product_class.attributes.values_list('code', flat=True)))
     queryset = queryset.filter_by_attributes(**{key: val for key, val in filter_params.items() if key in valid_attributes})

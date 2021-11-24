@@ -16,7 +16,7 @@ from apps.api_set.serializers.catalogue import (
 from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.dashboard.custom.models import OfferBanner
 from lib.product_utils import category_filter, apply_filter, apply_search, apply_sort, recommended_class
-from apps.catalogue.models import Product
+from apps.catalogue.models import Product, ProductClass
 from apps.utils.urls import list_api_formatter
 from lib import cache_key
 from lib.cache import cache_library
@@ -112,7 +112,7 @@ def product_list(request, category='all', **kwargs):
 
     params = {'search': _search, 'range': product_range, "category": cat, "pclass": _pclass}
     rc = recommended_class(queryset, **params)
-    product_class = rc['product_classes']
+    product_class = ProductClass.objects.filter(pk=rc['id']).first()
     if _range:
         if type(_range) is int or _range.isdigit():
             params = {'id': _range}
