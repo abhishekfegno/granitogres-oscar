@@ -110,9 +110,6 @@ def product_list(request, category='all', **kwargs):
     product_range = None
     cat = None
 
-    params = {'search': _search, 'range': product_range, "category": cat, "pclass": _pclass}
-    rc = recommended_class(queryset, **params)
-    product_class = ProductClass.objects.filter(pk=rc['id']).first()
     if _range:
         if type(_range) is int or _range.isdigit():
             params = {'id': _range}
@@ -130,6 +127,10 @@ def product_list(request, category='all', **kwargs):
     elif category != _default_category:
         queryset, cat = category_filter(queryset=queryset, category_slug=category, return_as_tuple=True)
         title = cat.name
+
+    params = {'search': _search, 'range': product_range, "category": cat, "pclass": _pclass}
+    rc = recommended_class(queryset, **params)
+    product_class = ProductClass.objects.filter(pk=rc['id']).first()
 
     if only_favorite and request.user.is_authenticated:
         queryset = queryset.browsable.filter(id__in=request.user.product.all().values_list('id'))

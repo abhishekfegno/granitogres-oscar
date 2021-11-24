@@ -147,7 +147,7 @@ class ClassRecommendation(object):
             _pclass = kwargs['range'].classes.all().first()
             if _pclass:
                 return self.render(_pclass.id)
-        if 'category' in kwargs and kwargs['category'] and kwargs['category'].product_class_id:
+        if 'category' in kwargs and kwargs['category'] and kwargs['category'] and kwargs['category'].product_class_id:
             return self.render(kwargs['category'].product_class_id)
         if 'queryset' in kwargs:
             values = kwargs['queryset'].values('id', 'product_class', 'parent__product_class')
