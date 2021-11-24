@@ -35,6 +35,11 @@ from lib.cache import cache_library
 from sorl.thumbnail import ImageField
 
 
+# class SearchTag(models.Model):
+#     name = models.CharField(max_length=255, unique=True)
+#     term_type = models.CharField(max_length=20,)
+
+
 class ProductAttribute(AbstractProductAttribute):
     COLOR = "color"
     TYPE_CHOICES = (

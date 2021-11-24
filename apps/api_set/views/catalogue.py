@@ -16,7 +16,7 @@ from apps.api_set_v2.utils.filters import price_min_max_to_options
 from apps.order.models import Line
 
 from lib.product_utils import apply_search, recommended_class, ClassRecommendation
-from apps.catalogue.models import Product, ProductAttribute, AttributeOption
+from apps.catalogue.models import Product, ProductAttribute, AttributeOption, Brand
 
 from lib import cache_key
 from lib.cache import cache_library
@@ -164,7 +164,10 @@ def product_suggestions(request, **kwargs):
                     mode = '_trigram'
                 queryset = apply_search(queryset=queryset, search=_search, mode=mode)
             rc = recommended_class(queryset, search=_search)
-            queryset = queryset.values('id', 'title', 'slug', 'product_class_id', )[:_max_size*3]
+            queryset = list(queryset.values('id', 'title', 'slug', 'product_class_id', )[:_max_size*3])
+            if len(_search) < 2:
+                queryset = list(Category.objects.filter(name__icontains=_search).annotate(title=F('name')).values('id', 'title', 'product_class_id', )[:2]) + queryset
+                queryset = list(Brand.objects.filter(name__icontains=_search).annotate(title=F('name')).values('id', 'title', )[:2]) + queryset
             _mapper = {}
             _mapper_len = 1
             for item in queryset:
