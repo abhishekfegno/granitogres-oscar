@@ -7,6 +7,7 @@ from django.core.management import BaseCommand
 import gspread
 from django.template.defaultfilters import slugify
 from oauth2client.service_account import ServiceAccountCredentials
+from oscar.apps.catalogue.models import ProductCategory
 from oscar.apps.catalogue.product_attributes import ProductAttributesContainer
 
 from apps.catalogue.models import Product, Category, ProductAttribute, ProductClass, ProductAttributeValue, Brand
@@ -74,6 +75,7 @@ class RowHandler:
         if self.row['category'] and self.product.structure != Product.CHILD:
             category = create_from_breadcrumbs(self.row['category'])
             if category:
+                ProductCategory.objects.all().filter(product=self.product).delete()
                 self.product.categories.add(category)
                 return category
 
