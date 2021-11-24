@@ -68,3 +68,5 @@ def _simple_search(queryset, search, extends=True):
     for _tag in _tags:
         _search_vector |= Q(search_tags__icontains=_tag)
     return queryset.filter(_search_vector)
+
+# from lib.product_utils import search as pu
