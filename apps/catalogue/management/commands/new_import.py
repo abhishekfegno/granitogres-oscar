@@ -63,7 +63,9 @@ class RowHandler:
 
     def get_brand(self, brand_name):
         if brand_name:
-            brand, _ = Brand.objects.get_or_create(name=brand_name)
+            brand = Brand.objects.filter(name__iexact=brand_name).first()
+            if not brand:
+                brand, _ = Brand.objects.get_or_create(name=brand_name)
             return brand
 
     def set_category(self):
