@@ -145,10 +145,10 @@ def product_list(request, category='all', **kwargs):
 
     if _search:
         mode = '_simple'
-        if len(_search) <= 2:
-            mode = '_simple'
-        else:
-            mode = '_trigram'
+        # if len(_search) <= 2:
+        #     mode = '_simple'
+        # else:
+        #     mode = '_trigram'
         queryset = apply_search(queryset=queryset, search=_search, mode=mode)
         # queryset = apply_search(queryset=queryset, search=_search, mode=mode)
         title = f"Search: '{_search}'"

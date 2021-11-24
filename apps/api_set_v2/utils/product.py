@@ -100,20 +100,22 @@ def get_optimized_product_dict(
         elif sr.product.is_standalone:  # parent or standalone
             product_data[sr.product] = product_serializer_class(instance=sr.product, context=cxt).data
             product_data[sr.product]['variants'] = []
-    # if not needs_stock:
-    #     for product in product_set:
-    #         if product.is_child:
-    #             if product.parent not in product_data:
-    #                 if product.parent not in product_data.keys():
-    #                     product_data[product.parent] = product_serializer_class(
-    #                                                                         instance=product.parent, context=cxt).data
-    #                     product_data[product.parent]['variants'] = []
-    #                 product_data[product.parent]['variants'].append(
-    #                     product_serializer_class(instance=product, context=cxt).data)
-    #         elif product.is_standalone:  # parent or standalone
-    #             if product not in product_data:
-    #                 product_data[product] = product_serializer_class(instance=product, context=cxt).data
-    #                 product_data[product]['variants'] = []
+    # UNCHECKED TODAY!~
+
+    if not needs_stock:
+        for product in product_set:
+            if product.is_child:
+                if product.parent not in product_data:
+                    if product.parent not in product_data.keys():
+                        product_data[product.parent] = product_serializer_class(
+                                                                            instance=product.parent, context=cxt).data
+                        product_data[product.parent]['variants'] = []
+                    product_data[product.parent]['variants'].append(
+                        product_serializer_class(instance=product, context=cxt).data)
+            elif product.is_standalone:  # parent or standalone
+                if product not in product_data:
+                    product_data[product] = product_serializer_class(instance=product, context=cxt).data
+                    product_data[product]['variants'] = []
     return product_data
 
 
