@@ -43,7 +43,7 @@ class RowHandler:
         #     self.product = self.create_from_row()
         if not self.product.is_child:
             self.set_category()
-        else:
+        if not self.product.is_parent:
             self.set_attrs()
 
     def _log(self):
