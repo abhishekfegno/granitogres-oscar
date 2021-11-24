@@ -29,7 +29,8 @@ def list_api_formatter(request, paginator, page_obj, results=None, **kwargs):
     # out = paginator.get_paginated_response_context(results)
     count = len(results)
     return OrderedDict([
-        ('count', page_obj.count),
+        ('count', int(page_obj.count)),
+        ('num_pages', int(page_obj.num_pages)),
         ('next_url', next_url),
         ('prev_url', prev_url),
         ('results', results),
