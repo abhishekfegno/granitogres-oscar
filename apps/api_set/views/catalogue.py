@@ -158,10 +158,11 @@ def product_suggestions(request, **kwargs):
         queryset = Product.objects.filter(is_public=True).filter(structure__in=(Product.STANDALONE, Product.PARENT))
         if _search:
             if _search:
-                if len(_search) <= 2:
-                    mode = '_simple'
-                else:
-                    mode = '_trigram'
+                mode = '_simple'
+                # if len(_search) <= 2:
+                #     mode = '_simple'
+                # else:
+                #     mode = '_trigram'
                 queryset = apply_search(queryset=queryset, search=_search, mode=mode)
             rc = recommended_class(queryset, search=_search)
             queryset = list(queryset.values('id', 'title', 'slug', 'product_class_id', )[:_max_size*3])
