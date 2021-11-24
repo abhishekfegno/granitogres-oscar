@@ -192,7 +192,7 @@ def product_list_pagination(request, category='all', **kwargs):
             page_number = paginator.num_pages
             empty_list = True
         page_obj = paginator.get_page(page_number)
-
+        product_data = get_optimized_product_dict(qs=page_obj.object_list, request=request, ).values()
         cat_data = {}
         if cat:
             cat_data['seo_title'] = cat.seo_title
@@ -202,6 +202,6 @@ def product_list_pagination(request, category='all', **kwargs):
 
         return list_api_formatter(
             request, paginator=paginator, page_obj=page_obj,
-            results=qs, product_class=rc, title=title,
+            results=product_data, product_class=rc, title=title,
             bread_crumps=get_breadcrumb(_search, cat, product_range), seo_fields=cat_data)
     return Response(_inner())
