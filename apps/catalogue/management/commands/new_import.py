@@ -41,11 +41,6 @@ class RowHandler:
         # if self.is_product_saved():
         # else:
         #     self.product = self.create_from_row()
-        fcat = self.product.get_categories().first()
-        if fcat and self.product.structure != self.product.CHILD:
-            category = self.set_category()
-            if category:
-                self.product.categories.add(category)
         if not self.product.is_child:
             self.set_category()
         else:
@@ -75,7 +70,8 @@ class RowHandler:
         if self.row['category'] and self.product.structure != Product.CHILD:
             category = create_from_breadcrumbs(self.row['category'])
             if category:
-                ProductCategory.objects.all().filter(product=self.product).delete()
+                print(self.row['category'], category, sep="\t")
+                # ProductCategory.objects.all().filter(product=self.product).delete()
                 self.product.categories.add(category)
                 return category
 
