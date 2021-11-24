@@ -71,7 +71,7 @@ class RowHandler:
             category = create_from_breadcrumbs(self.row['category'])
             if category:
                 print(self.row['category'], category, sep="\t")
-                # ProductCategory.objects.all().filter(product=self.product).delete()
+                ProductCategory.objects.all().filter(product=self.product).delete()
                 self.product.categories.add(category)
                 return category
 
