@@ -49,7 +49,7 @@ class ABCHauzPricing(ZoneBasedStockRecord, StockRequired, FixedRateTax, Structur
     def availability_policy(self, product, stockrecord):
         if not stockrecord:
             return Unavailable()
-        if not product.get_product_class().track_stock:
+        if product.get_product_class() and not product.get_product_class().track_stock:
             return Available()
         else:
             return StockRequiredAvailability(stockrecord.net_stock_level)

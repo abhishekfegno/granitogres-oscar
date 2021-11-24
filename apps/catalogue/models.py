@@ -323,6 +323,8 @@ class Product(AbstractProduct):
                 cache.delete(c_key)
 
     def generate_search(self):
+        if self.pk is None:
+            return
         print("generate_search", self.pk, self.get_title())
         if self.is_child and self.parent:
             cat = self.parent.categories
