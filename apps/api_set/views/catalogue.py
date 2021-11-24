@@ -159,14 +159,14 @@ def product_suggestions(request, **kwargs):
         if _search:
             if _search:
                 mode = '_simple'
-                # if len(_search) <= 2:
-                #     mode = '_simple'
-                # else:
-                #     mode = '_trigram'
+                if len(_search) <= 2:
+                    mode = '_simple'
+                else:
+                    mode = '_trigram'
                 queryset = apply_search(queryset=queryset, search=_search, mode=mode)
             rc = recommended_class(queryset, search=_search)
             queryset = list(queryset.values('id', 'title', 'slug', 'product_class_id', )[:_max_size*3])
-            if len(_search) < 2:
+            if len(_search.split(' ')) < 2:
                 queryset = list(Category.objects.filter(name__icontains=_search).annotate(title=F('name')).values('id', 'title', 'product_class_id', )[:2]) + queryset
                 queryset = list(Brand.objects.filter(name__icontains=_search).annotate(title=F('name')).values('id', 'title', )[:2]) + queryset
             _mapper = {}
