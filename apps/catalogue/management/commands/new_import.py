@@ -24,7 +24,7 @@ sheet = client.open('HAUZ DATA SHEET')  # 19
 
 dbpids = Product.objects.all().values_list('pk', flat=True)
 
-
+_parent_products = {}
 class RowHandler:
     ignorable_row_headers = ["id", "name", "structure", "parent_id", "category"]
 
@@ -135,7 +135,7 @@ class RowHandler:
         product.save()
         print("New Product Created!")
         if product.structure == Product.PARENT:
-            self.parent_products[_id] = product
+            self.parent_products.update({_id:product})
         return product
 
     def set_attrs(self):
