@@ -150,21 +150,22 @@ class ClassRecommendation(object):
         if 'category' in kwargs and kwargs['category'] and kwargs['category'] and kwargs['category'].product_class_id:
             return self.render(kwargs['category'].product_class_id)
         if 'queryset' in kwargs:
-            values = kwargs['queryset'].values('id', 'product_class', 'parent__product_class')
-            struct = {}
-            max_id = None
-            max_count = 0
-            for item in values:
-                key = item['product_class'] or item['parent__product_class']
-                if key not in struct.keys():
-                    struct[key] = 1
-                else:
-                    struct[key] += 1
-                if max_count <= struct[key]:
-                    max_id = key
-                    max_count = struct[key]
-            if len(values) and max_count * 2.0 > len(values) or settings.DEBUG:  # at least 3/4th are of same class.
-                return self.render(max_id)
+            return self.render(_id=None, display_classes=True)
+            # values = kwargs['queryset'].values('id', 'product_class', 'parent__product_class')
+            # struct = {}
+            # max_id = None
+            # max_count = 0
+            # for item in values:
+            #     key = item['product_class'] or item['parent__product_class']
+            #     if key not in struct.keys():
+            #         struct[key] = 1
+            #     else:
+            #         struct[key] += 1
+            #     if max_count <= struct[key]:
+            #         max_id = key
+            #         max_count = struct[key]
+            # if len(values) and max_count * 2.0 > len(values) or settings.DEBUG:  # at least 3/4th are of same class.
+            #     return self.render(max_id)
 
         return self.render(_id=None, display_classes=True)
 
