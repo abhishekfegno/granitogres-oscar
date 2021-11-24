@@ -36,7 +36,7 @@ class RowHandler:
         self.product = None
         self.product = self.get_from_saved()
         if self.product is None:
-            print("Product Not Found! ", self.row['title'], self.row['id'])
+            print("Product Not Found! ", self.row['name'], self.row['id'])
             return
         # if self.is_product_saved():
         # else:
@@ -102,9 +102,13 @@ class RowHandler:
                                 return Product.objects.select_related('brand').get(pk=_idef)
                             except Exception as e:
                                 print(e)
+
         print(f"Found row['id'] => {row['id']} ; trying to create new.")
-        while input("Continue ? ") != "y":
-            return self.create_from_row()
+        inp = '#'
+        while inp:
+            inp = input("Continue ? ")
+            if inp == 'y':
+                return self.create_from_row()
 
     def create_from_row(self):
         row = self.row
