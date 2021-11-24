@@ -301,11 +301,10 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
         dataset = sheet.get_all_records()
         parent_products = {}
         pc_title = self.pc_mapper.get(sheet.title, sheet.title)
-
         pc, _ = ProductClass.objects.get_or_create(name=pc_title)
 
         for row in dataset:
-            # self.set_product_from_row(row, product_class=pc, utils={'parent_hash': parent_products})
+            self.set_product_from_row(row, product_class=pc, utils={'parent_hash': parent_products})
             self.compare_attributes(row, pc_title)
 
     def handle(self, *args, **options):
@@ -318,11 +317,11 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
                 print("Skipping in ", sheet.title)
                 continue
             print("Operating in ", sheet.title)
-            self.extract_sheet(sheet)
-            # if input("Do you want to proceed? ").lower() == "y":
-            #     self.extract_sheet(sheet)
-            # else:
-            #     print("Skipping.... ")
+            # self.extract_sheet(sheet)
+            if input("Do you want to proceed? ").lower() == "y":
+                self.extract_sheet(sheet)
+            else:
+                print("Skipping.... ")
         print("=======================================")
         pprint(dict(self.analytics))
         pprint(dict(self.reporting))
