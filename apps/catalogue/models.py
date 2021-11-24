@@ -186,7 +186,6 @@ class Product(AbstractProduct):
 
     is_new_product = models.BooleanField(default=False)
 
-
     def get_brand_name(self):
         instance = self
         return instance.brand.name if instance.brand else (

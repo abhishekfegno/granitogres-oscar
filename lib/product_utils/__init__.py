@@ -24,7 +24,7 @@ def brand_filter(queryset, brand_ids):
     return queryset.filter(brand__in=brand_ids)
 
 
-def apply_filter(queryset, _filter, null_value_compatability='__'):
+def apply_filter(queryset, _filter, null_value_compatability='__', product_class=None):
     """
     _filter:
          input = weight:25|30|35::minprice:25::maxprice:45::available_only:1::color=Red|Black|Blue::ram:4 GB|8 GB
@@ -77,11 +77,9 @@ def apply_filter(queryset, _filter, null_value_compatability='__'):
 
     if exclude_out_of_stock:
         queryset = queryset.filter(effective_price__isnull=False)
-
-    if exclude_out_of_stock:
-        queryset = queryset.filter(effective_price__isnull=False)
-
-    queryset = queryset.filter_by_attributes(**filter_params)
+    # product_class
+    valid_attributes = set(filter_params.keys()).intersection(set(product_class.attributes.values_list('code', flat=True)))
+    queryset = queryset.filter_by_attributes(**{key: val for key, val in filter_params.items() if key in valid_attributes})
     return queryset
 
 

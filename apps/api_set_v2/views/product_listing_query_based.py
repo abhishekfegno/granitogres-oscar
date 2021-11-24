@@ -109,6 +109,10 @@ def product_list(request, category='all', **kwargs):
     title = 'All'
     product_range = None
     cat = None
+
+    params = {'search': _search, 'range': product_range, "category": cat, "pclass": _pclass}
+    rc = recommended_class(queryset, **params)
+    product_class = rc['product_classes']
     if _range:
         if type(_range) is int or _range.isdigit():
             params = {'id': _range}
@@ -137,7 +141,7 @@ def product_list(request, category='all', **kwargs):
         """
         input = weight__in:25,30,35|price__gte:25|price__lte:45
         """
-        queryset = apply_filter(queryset=queryset, _filter=_filter)
+        queryset = apply_filter(queryset=queryset, _filter=_filter, product_class=product_class)
 
     if _search:
         if len(_search) <= 2:
@@ -178,8 +182,6 @@ def product_list(request, category='all', **kwargs):
 
         else:
             product_data = []
-        params = {'search': _search, 'range': product_range, "category": cat, "pclass": _pclass}
-        rc = recommended_class(queryset, **params)
 
         cat_data = {}
         if cat:
