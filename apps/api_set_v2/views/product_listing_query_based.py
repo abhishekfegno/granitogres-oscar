@@ -144,14 +144,15 @@ def product_list(request, category='all', **kwargs):
         queryset = apply_filter(queryset=queryset, _filter=_filter, product_class=product_class)
 
     if _search:
-        if len(_search) <= 2:
-            mode = '_simple'
-        else:
-            mode = '_trigram'
+        mode = '_simple'
+        # if len(_search) <= 2:
+        #     mode = '_simple'
+        # else:
+        #     mode = '_trigram'
         queryset = apply_search(queryset=queryset, search=_search, mode=mode)
         title = f"Search: '{_search}'"
-        if queryset.count() < 5:
-            queryset |= apply_search(queryset=queryset, search=_search, mode='_simple',)
+        # if queryset.count() < 5:
+        #     queryset |= apply_search(queryset=queryset, search=_search, mode='_simple',)
 
     if _sort:
         _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]

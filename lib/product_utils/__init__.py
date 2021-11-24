@@ -1,3 +1,5 @@
+import pdb
+
 from django.conf import settings
 from django.db.models import Q, F, Count, Max, Min, Case, When, CharField
 from oscar.core.loading import get_model
@@ -78,13 +80,9 @@ def apply_filter(queryset, _filter, null_value_compatability='__', product_class
     if exclude_out_of_stock:
         queryset = queryset.filter(effective_price__isnull=False)
 
-    # product_class
-    print("######### product_class")
-    print(list(filter_params.keys()))
-    print(list(product_class.attributes.values_list('code', flat=True)))
-
     valid_attributes = set(filter_params.keys()).intersection(set(product_class.attributes.values_list('code', flat=True)))
-    queryset = queryset.filter_by_attributes(**{key: val for key, val in filter_params.items() if key in valid_attributes})
+    kwargs = {key: val for key, val in filter_params.items() if key in valid_attributes}
+    queryset = queryset.filter_by_attributes(**kwargs)
     return queryset
 
 
