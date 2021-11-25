@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.db.models import F
 from oscar.apps.offer.models import ConditionalOffer, Range
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -150,10 +151,10 @@ def product_list(request, category='all', **kwargs):
             mode = '_simple'
         else:
             mode = '_trigram'
-        queryset = apply_search(queryset=queryset, search=_search, mode=mode) | apply_search(queryset=queryset, search=_search, mode='_trigram',)
+        queryset = apply_search(queryset=queryset, search=_search, mode="_simple")
+        __qs = apply_search(queryset=queryset, search=_search, mode='_trigram',)
+        queryset = queryset | __qs.annotate(priority=4)
         title = f"Search: '{_search}'"
-        # if queryset.count() < 5:
-        #     queryset |= apply_search(queryset=queryset, search=_search, mode='_trigram',)
 
     if _sort:
         _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
@@ -181,7 +182,7 @@ def product_list(request, category='all', **kwargs):
             # product_data = get_optimized_product_dict_for_listing(qs=page_obj.object_list, request=request, ).values()
             # product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
             if _search:
-                product_data = sorted(product_data, key=lambda p: fuzz.token_sort_ratio(_search.lower(), p['title'].lower()), reverse=True)
+                product_data = sorted(product_data, key=lambda p: fuzz.token_sort_ratio(_search.lower(), p['priority'].lower()), reverse=True)
 
         else:
             product_data = []

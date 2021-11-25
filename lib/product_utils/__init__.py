@@ -81,13 +81,9 @@ def apply_filter(queryset: QuerySet, _filter: str, null_value_compatability: str
 
     if exclude_out_of_stock:
         queryset = queryset.filter(effective_price__isnull=False)
-    print(f"Applying Filter!   => {_filter} => {queryset.count()}")
     valid_attributes = set(filter_params.keys()).intersection(set(product_class.attributes.values_list('code', flat=True)))
-    print(f"VALID ATTRIBUTES!  {valid_attributes}")
     kwargs = {key: val for key, val in filter_params.items() if key in valid_attributes}
-    print(f"VALID Kwargs!  {json.dumps(kwargs)}")
     queryset = queryset.filter_by_attributes(**kwargs)
-    print(f"QS COUNT!  {queryset.count()}")
     return queryset
 
 
