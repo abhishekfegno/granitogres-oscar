@@ -20,7 +20,11 @@ ProductClass = get_model('catalogue', 'ProductClass')
 
 def category_filter(queryset, category_slug, return_as_tuple=False):
     cat = get_object_or_404(Category, slug=category_slug)
-    out = [queryset.filter(productcategory__category__in=Category.objects.filter(path__startswith=cat.path)), cat]
+    cats = Category.objects.filter(path__startswith=cat.path)
+    pset = Product.objects.none()
+    for c in cats:
+        pset |= c.product_set.all()
+    out = [queryset & pset, cat]
     return out if return_as_tuple else out[0]
 
 
