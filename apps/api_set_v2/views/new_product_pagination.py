@@ -188,7 +188,7 @@ class ProductListAPIView(GenericAPIView):
                 self.queryset[:160],
                 key=lambda p: fuzz.token_sort_ratio(self.search.upper(), p.search_tags.upper()),
                 reverse=True
-            )) + self.queryset[160:]
+            )) + list(self.queryset[160:])
 
         elif self.sort:
             _sort = [SORT_BY_MAP[key] for key in self.sort.split(',') if key and key in SORT_BY_MAP.keys()]
