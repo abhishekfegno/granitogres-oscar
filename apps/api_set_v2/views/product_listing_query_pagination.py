@@ -158,12 +158,9 @@ def product_list_pagination(request, category='all', **kwargs):
         # if queryset.count() < 5:
         #     queryset |= apply_search(queryset=queryset, search=_search, mode='_trigram',)
 
-    if _sort:
-        _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
-        queryset = apply_sort(queryset=queryset, sort=_sort)
 
     def _inner():
-        nonlocal queryset, page_number, title
+        nonlocal queryset, page_number, title, _sort
         zone = None
         if request.GET.get('pincode'):
             from apps.availability.facade import get_zone_from_pincode
@@ -184,7 +181,14 @@ def product_list_pagination(request, category='all', **kwargs):
         sr_set = StockRecord.objects.filter(Q(
             product__product_class_id=11) | Q(product__parent__product_class_id=11),
             partner_id__in=_zones, num_in_stock__gt=0).values_list('product_id', flat=True)
-        qs = queryset.filter(pk__in=sr_set)
+        # qs = queryset.filter(pk__in=sr_set)
+        child_selections = Q(Q(structure=Product.CHILD)&Q(parent_id__in=sr_set))
+        parent_selections = Q(Q(structure=Product.STANDALONE)&Q(id__in=sr_set))
+        qs = Product.objects.filter(parent_selections|child_selections)
+
+        if _sort:
+            _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
+            qs = apply_sort(queryset=qs, sort=_sort)
 
         # queryset = queryset.browsable().base_queryset()
         paginator = Paginator(qs, page_size)  # Show 18 contacts per page.
