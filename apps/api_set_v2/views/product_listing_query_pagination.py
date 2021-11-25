@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.db.models import Q
 from oscar.apps.offer.models import ConditionalOffer, Range
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -138,7 +139,7 @@ def product_list_pagination(request, category='all', **kwargs):
         queryset = queryset.browsable.filter(id__in=request.user.product.all().values_list('id'))
 
     if _pclass and (_search or category == _default_category):
-        queryset = queryset.filter(product_class=_pclass)
+        queryset = queryset.filter(Q(product_class_id=_pclass)|Q(parent__product_class_id=_pclass))
 
     if _filter:
         """
