@@ -93,11 +93,11 @@ def product_list(request, category='all', **kwargs):
     elif category != 'all':
         queryset = category_filter(queryset=queryset, category_slug=category)
 
-    # if _filter:
-    #     """
-    #     input = weight__in:25,30,35|price__gte:25|price__lte:45
-    #     """
-    #     queryset = apply_filter(queryset=queryset, _filter=_filter)
+    if _filter:
+        """
+        input = weight__in:25,30,35|price__gte:25|price__lte:45
+        """
+        queryset = apply_filter(queryset=queryset, _filter=_filter)
 
     if _search:
         queryset = apply_search(queryset=queryset, search=_search)

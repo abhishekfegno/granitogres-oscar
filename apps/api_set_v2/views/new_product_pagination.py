@@ -85,7 +85,7 @@ class ProductListAPIView(GenericAPIView):
         # transform
         self.apply_primary_filter()
         self.find_recommended_class()
-        self.filter_favorite()
+        # self.filter_favorite()
         self.filter_product_class()
         self.apply_filter()
         self.apply_search()
@@ -134,7 +134,7 @@ class ProductListAPIView(GenericAPIView):
             self.queryset = self.queryset.filter(id__in=self.request.user.product.all().values_list('id'))
 
     def filter_product_class(self):
-        if self.product_class and (self.search or self.category == self.default_category):
+        if self.product_class and (self.search or self.filter or self.category == self.default_category):
             self.queryset = self.queryset.filter(
                 Q(product_class_id=self.pclass) | Q(parent__product_class_id=self.pclass))
 
