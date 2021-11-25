@@ -148,15 +148,13 @@ def product_list_pagination(request, category='all', **kwargs):
         queryset = apply_filter(queryset=queryset, _filter=_filter, product_class=product_class)
 
     if _search:
-        mode = '_simple'
-        if len(_search) <= 2:
-            mode = '_simple'
-        else:
-            mode = '_trigram'
-        queryset = apply_search(queryset=queryset, search=_search, mode=mode)|apply_search(queryset=queryset, search=_search, mode='_trigram',)
+        # mode = '_simple'
+        # if len(_search) <= 2:
+        #     mode = '_simple'
+        # else:
+        #     mode = '_trigram'
+        queryset = apply_search(queryset=queryset, search=_search, mode='_simple') | apply_search(queryset=queryset, search=_search, mode='_trigram',)
         title = f"Search: '{_search}'"
-        # if queryset.count() < 5:
-        #     queryset |= apply_search(queryset=queryset, search=_search, mode='_trigram',)
 
     def _inner():
         nonlocal queryset, page_number, title, _sort, _pclass
@@ -201,6 +199,14 @@ def product_list_pagination(request, category='all', **kwargs):
             empty_list = True
         page_obj = paginator.get_page(page_number)
         product_data = get_optimized_product_dict(qs=page_obj.object_list, request=request, ).values()
+        from fuzzywuzzy import fuzz
+        # product_data = get_optimized_product_dict_for_listing(qs=page_obj.object_list, request=request, ).values()
+        # product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
+        if _search:
+            product_data = sorted(product_data,
+                                  key=lambda p: fuzz.token_sort_ratio(_search.upper(), p['search_tags'].upper()),
+                                  reverse=True)
+
         cat_data = {}
         if cat:
             cat_data['seo_title'] = cat.seo_title
