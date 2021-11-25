@@ -139,7 +139,7 @@ def product_list_pagination(request, category='all', **kwargs):
         queryset = queryset.browsable.filter(id__in=request.user.product.all().values_list('id'))
 
     if _pclass and (_search or category == _default_category):
-        queryset = queryset.filter(Q(product_class_id=_pclass)|Q(parent__product_class_id=_pclass))
+        queryset = queryset.filter(Q(product_class_id=_pclass) | Q(parent__product_class_id=_pclass))
 
     if _filter:
         """
@@ -157,7 +157,6 @@ def product_list_pagination(request, category='all', **kwargs):
         title = f"Search: '{_search}'"
         # if queryset.count() < 5:
         #     queryset |= apply_search(queryset=queryset, search=_search, mode='_trigram',)
-
 
     def _inner():
         nonlocal queryset, page_number, title, _sort, _pclass
@@ -181,10 +180,10 @@ def product_list_pagination(request, category='all', **kwargs):
         sr_set = StockRecord.objects.filter(Q(
             product__product_class_id=_pclass) | Q(product__parent__product_class_id=_pclass),
             partner_id__in=_zones, num_in_stock__gt=0).values_list('product_id', flat=True)
-            
+
         child_selections = Q(Q(structure=Product.CHILD) & Q(parent_id__in=sr_set))
         parent_selections = Q(Q(structure=Product.STANDALONE) & Q(id__in=sr_set))
-        qs = Product.objects.filter(parent_selections | child_selections)
+        qs = queryset.filter(parent_selections | child_selections)
 
         if _sort:
             _sort = [SORT_BY_MAP[key] for key in _sort.split(',') if key and key in SORT_BY_MAP.keys()]
