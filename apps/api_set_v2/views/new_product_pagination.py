@@ -91,7 +91,7 @@ class ProductListAPIView(GenericAPIView):
         self.apply_search()
 
         # load
-        self.filter_stock()
+        # self.filter_stock()
         products_list = self.sort_products()
         self.paginate_dataset(products_list)
         serialized_products_list = self.load_paginated_data()
