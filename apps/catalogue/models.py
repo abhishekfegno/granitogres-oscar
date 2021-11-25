@@ -506,7 +506,7 @@ def clear_cache_category(sender, instance, **kwargs):
 
 
 def reformat_value(sender, instance, **kwargs):
-    _format = lambda string: string.replace('-', ' - ')\
+    _format = lambda string='': (string or '').replace('-', ' - ')\
             .replace('-', ' - ')\
             .replace('-', ' - ')\
             .replace('\n', ' ')\
