@@ -20,6 +20,7 @@ from apps.api_set.views.wishlist import wish_list
 from apps.api_set_v2.views.catalogue import *
 
 from apps.api_set_v2.views.index import index, offers, pincode_list
+from apps.api_set_v2.views.new_product_pagination import product_list_new_pagination
 from apps.api_set_v2.views.orders import orders_detail, reorder_to_current_basket, reorder_to_temporary_basket
 from apps.api_set_v2.views.orders import orders
 from apps.api_set_v2.views.product_listing_query_based import product_list
@@ -73,8 +74,8 @@ account_urlpatterns = [
 catalogue_urlpatterns = [
     path("catalogue/", include([
         path("c/", categories_list_cached, name="wnc-categories-list"),                                  # category
-        path("c/all/", product_list_pagination, name="wnc-all-product-list-v2"),                                    # category
-        path("c/<slug:category>/", product_list_pagination, name="wnc-category-product-list-v2"),                   # category
+        path("c/all/", product_list_new_pagination, name="wnc-all-product-list-v2"),                                    # category
+        path("c/<slug:category>/", product_list_new_pagination, name="wnc-category-product-list-v2"),                   # category
         path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),        # detail
         path("d/<slug:product>/reviews/", ProductReviewListView.as_view(), name="wnc-category-product-review-web-v2"),
         path("d/<slug:product>/mark_as_fav/", mark_as_fav, name="wnc-category-product-mark_as_fav-v2"),  # detail

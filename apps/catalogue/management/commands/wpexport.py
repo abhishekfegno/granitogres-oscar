@@ -24,7 +24,7 @@ class Command(BaseCommand):
                 out.append(dataset)
 
             print("Writing to sheet :: ", f'public/dataset/export-nov25/{pc.slug}.csv')
-            with open(f'public/dataset/export/{pc.slug}.csv', 'w', newline='') as csvfile:
+            with open(f'public/dataset/export-nov25/{pc.slug}.csv', 'w', newline='') as csvfile:
                 fieldnames = ['id', 'name', 'structure', 'parent_id',  *[_attr_code for _attr_code in pa]]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
