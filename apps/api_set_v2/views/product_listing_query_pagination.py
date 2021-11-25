@@ -179,7 +179,7 @@ def product_list_pagination(request, category='all', **kwargs):
             partner_id__in=_zones, num_in_stock__gt=0, product__in=queryset
         ).values_list('product_id', flat=True)
 
-        qs = Product.browsable.browsable().filter(pk__in=sr_set)
+        qs = queryset.filter(pk__in=sr_set)
 
         # queryset = queryset.browsable().base_queryset()
         paginator = Paginator(qs, page_size)  # Show 18 contacts per page.

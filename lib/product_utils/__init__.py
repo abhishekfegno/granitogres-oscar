@@ -1,9 +1,10 @@
 import json
 import logging
 import pdb
+from typing import Optional
 
 from django.conf import settings
-from django.db.models import Q, F, Count, Max, Min, Case, When, CharField
+from django.db.models import Q, F, Count, Max, Min, Case, When, CharField, QuerySet
 from oscar.core.loading import get_model
 from rest_framework.generics import get_object_or_404
 
@@ -28,7 +29,7 @@ def brand_filter(queryset, brand_ids):
     return queryset.filter(brand__in=brand_ids)
 
 
-def apply_filter(queryset, _filter, null_value_compatability='__', product_class=None):
+def apply_filter(queryset: QuerySet, _filter: str, null_value_compatability: str = '__', product_class: Optional[ProductClass] = None):
     """
     _filter:
          input = weight:25|30|35::minprice:25::maxprice:45::available_only:1::color=Red|Black|Blue::ram:4 GB|8 GB
