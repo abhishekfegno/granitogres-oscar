@@ -153,7 +153,8 @@ def product_list_pagination(request, category='all', **kwargs):
         #     mode = '_simple'
         # else:
         #     mode = '_trigram'
-        queryset = apply_search(queryset=queryset, search=_search, mode='_similarity_rank')  # | apply_search(queryset=queryset, search=_search, mode='_trigram',)
+        # #   mode = '_similarity_rank'
+        queryset = apply_search(queryset=queryset, search=_search, mode='_simple')  # | apply_search(queryset=queryset, search=_search, mode='_trigram',)
         title = f"Search: '{_search}'"
 
     def _inner():

@@ -7,7 +7,7 @@ from lib.product_utils.filter import ProductClass
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        for pc in ProductClass.objects.all().values_list('id', flat=True):
+        for pc in ProductClass.objects.all():
             out = []
             pa = ProductAttribute.objects.filter(product_class=pc).values_list('code', flat=True)
             for p in Product.objects.all().filter(product_class=pc).prefetch_related('attributes'):
@@ -23,8 +23,8 @@ class Command(BaseCommand):
                         dataset[_attr_code] = getattr(p.attr, _attr_code)
                 out.append(dataset)
 
-            print("Writing to sheet :: ", f'public/dataset/export/{pc}.csv')
-            with open(f'public/dataset/export/{pc}.csv', 'w', newline='') as csvfile:
+            print("Writing to sheet :: ", f'public/dataset/export-nov25/{pc.slug}.csv')
+            with open(f'public/dataset/export/{pc.slug}.csv', 'w', newline='') as csvfile:
                 fieldnames = ['id', 'name', 'structure', 'parent_id',  *[_attr_code for _attr_code in pa]]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
