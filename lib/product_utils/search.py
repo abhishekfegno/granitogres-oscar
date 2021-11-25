@@ -34,8 +34,8 @@ def _trigram_search(queryset, search, extends=True):
     for s in tag__combinations(search):
         query |= SearchQuery(s)
     return queryset.annotate(
-        rank=trigram_similarity,
-    ).filter(rank__gt=0.07).order_by('-rank')
+        similarity=trigram_similarity,
+    ).filter(similarity__gt=0.07).order_by('-similarity')
 
 
 def _similarity_with_rank_search(queryset, search, extends=False):
