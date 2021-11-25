@@ -153,7 +153,7 @@ def product_list_pagination(request, category='all', **kwargs):
         #     mode = '_simple'
         # else:
         #     mode = '_trigram'
-        queryset = apply_search(queryset=queryset, search=_search, mode='_simple')  # | apply_search(queryset=queryset, search=_search, mode='_trigram',)
+        queryset = apply_search(queryset=queryset, search=_search, mode='_similarity_rank')  # | apply_search(queryset=queryset, search=_search, mode='_trigram',)
         title = f"Search: '{_search}'"
 
     def _inner():
@@ -198,14 +198,11 @@ def product_list_pagination(request, category='all', **kwargs):
             page_number = paginator.num_pages
             empty_list = True
         page_obj = paginator.get_page(page_number)
+
         product_data = get_optimized_product_dict(qs=page_obj.object_list, request=request, ).values()
         from fuzzywuzzy import fuzz
-        # product_data = get_optimized_product_dict_for_listing(qs=page_obj.object_list, request=request, ).values()
-        # product_data = serializer_class(page_obj.object_list, many=True, context={'request': request}).data
         if _search:
-            product_data = sorted(product_data,
-                                  key=lambda p: fuzz.token_sort_ratio(_search.upper(), p['search_tags'].upper()),
-                                  reverse=True)
+            product_data = sorted(product_data, key=lambda p: fuzz.token_sort_ratio(_search.upper(), p['search_tags'].upper()), reverse=True)
 
         cat_data = {}
         if cat:

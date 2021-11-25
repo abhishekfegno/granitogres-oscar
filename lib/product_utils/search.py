@@ -1,4 +1,4 @@
-from django.db.models import F, Q
+from django.db.models import F, Q, Value
 
 from apps.catalogue.models import Category, Product
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
@@ -65,10 +65,11 @@ def _similarity_search(queryset, search, extends=True):
 def _simple_search(queryset, search, extends=True):
     _tags = tag__combinations(search)
     _search_vector = Q(search_tags__icontains=search)
-    qs = queryset.filter(_search_vector).annotate(priority=1)
+    qs = queryset.filter(_search_vector)
+
     for _tag in _tags:
         _search_vector |= Q(search_tags__icontains=_tag)
-    return qs | queryset.filter(_search_vector).annotate(priority=3)
+    return qs | queryset.filter(_search_vector)
 
 
 # from lib.product_utils import search as pu

@@ -1,5 +1,5 @@
 from django.core.cache import cache
-from django.db.models import F
+from django.db.models import F, Value
 from oscar.apps.offer.models import ConditionalOffer, Range
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -153,7 +153,7 @@ def product_list(request, category='all', **kwargs):
             mode = '_trigram'
         queryset = apply_search(queryset=queryset, search=_search, mode="_simple")
         __qs = apply_search(queryset=queryset, search=_search, mode='_trigram',)
-        queryset = queryset | __qs.annotate(priority=4)
+        queryset = queryset | __qs.annotate(priority=Value(4))
         title = f"Search: '{_search}'"
 
     if _sort:
