@@ -181,10 +181,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
         # ).data
 
     def get_crossselling(self, instance):
-        inst = instance.parent if instance.is_child else instance
-        # inst = instance
-
-        # from apps.api_set_v2.utils.product import get_optimized_product_dict
+        inst = instance.parent if instance.is_child and not instance.crossselling.all().exists() else instance
         return custom_ProductListSerializer(inst.crossselling.all(), self.context).data
 
         # from apps.api_set.serializers.catalogue import ProductSimpleListSerializer

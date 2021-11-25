@@ -5,6 +5,7 @@ from typing import Optional
 
 from django.conf import settings
 from django.db.models import Q, F, Count, Max, Min, Case, When, CharField, QuerySet
+from oscar.apps.catalogue.models import ProductCategory
 from oscar.core.loading import get_model
 from rest_framework.generics import get_object_or_404
 
@@ -20,8 +21,8 @@ ProductClass = get_model('catalogue', 'ProductClass')
 
 def category_filter(queryset, category_slug, return_as_tuple=False):
     cat = get_object_or_404(Category, slug=category_slug)
-    out = [queryset.filter(
-        productcategory__category__in=Category.objects.filter(path__startswith=cat.path)), cat]
+    id_set = ProductCategory.objects.filtet(category=Category.objects.filter(path__startswith=cat.path)).values_list('product_id')
+    out = [queryset.filter(Q(id__in=id_set) | Q(parent__in=id_set)), cat]
     return out if return_as_tuple else out[0]
 
 
