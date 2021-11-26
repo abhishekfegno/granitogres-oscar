@@ -327,7 +327,7 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
         pprint(dict(self.analytics))
         pprint(dict(self.reporting))
 
-    def ensure_category(self, row, product_class):
+    def ensure_category(self, row, product_class=None):
         _id = row['id']
         product: Product = Product.objects.filter(id=_id).first()
         if not product:
@@ -344,12 +344,13 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
         else:
             if product.categories.exist():
                 return
-
+        print(f"Trying to process {product} with  {row.get('category')}")
         category = self.set_category(row, None)
         if category:
             product.categories.add(category)
             print(f"{product} is added to caegory: {category}!")
-            print("===============================================")
+        print("===============================================")
+
 
 
 
