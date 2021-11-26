@@ -331,6 +331,7 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
     def ensure_category(self, row, product_class=None):
         _id = row['id']
         product: Optional[Product] = None
+        category = self.set_category(row, None)
         if _id and _id.isdigit():
             product = Product.objects.filter(id=_id).first()
         if not product:
@@ -348,11 +349,10 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
             if product.categories.all().exists():
                 return
         print(f"Trying to process {product} with  {row.get('category')}")
-        category = self.set_category(row, None)
-        if category:
+        if category and category is not product.categories.all().first():
             product.categories.add(category)
             print(f"{product} is added to caegory: {category}!")
-        print("===============================================")
+        print(" =============================================== ")
 
 
 
