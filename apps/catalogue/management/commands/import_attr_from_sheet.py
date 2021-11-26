@@ -344,17 +344,31 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
                 product: Product = product_set.first()
             else:
                 print(f"Trying to process {product} with  {row.get('category')} ")
-                for attr in row:
-                    if attr not in self.ignorable_headers and row[attr]:
-                        print(attr, row[attr], '\t\t')
+                max_count = 0
+                max_count_pdt = None
 
-                print(f"Currently running {row['id']}  => {row['name']} : {row['structure']} ")
-                print("Please select the exacct product id from the list.")
-                for _p in product_set:
-                    print(f"\t {_p.id}\t{_p.get_title()} ({_p.structure})")
-                print()
-                selection = input("Enter the ID OF Selected Product : ")
-                product: Product = product_set.filter(pk=selection).first()
+                for p in product_set:
+                    cnt = p.stockrecords.all().count()
+                    if cnt > max_count:
+                        max_count = cnt
+                        max_count_pdt = p
+                    elif cnt == max_count:
+                        max_count = 0
+                        max_count_pdt = None
+                if max_count_pdt is None:
+                    for attr in row:
+                        if attr not in self.ignorable_headers and row[attr]:
+                            print(attr, row[attr], '\t\t')
+
+                    print(f"Currently running {row['id']}  => {row['name']} : {row['structure']} ")
+                    print("Please select the exacct product id from the list.")
+                    for _p in product_set:
+                        print(f"\t {_p.id}\t{_p.get_title()} ({_p.structure})")
+                    print()
+                    selection = input("Enter the ID OF Selected Product : ")
+                    product = product_set.filter(pk=selection).first()
+                else:
+                    product = max_count_pdt
         else:
             if product.categories.all().exists():
                 return
