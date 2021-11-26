@@ -1,6 +1,7 @@
 import functools
 from collections import defaultdict
 from pprint import pprint
+from typing import Optional
 
 from memoization import cached
 
@@ -329,7 +330,9 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
 
     def ensure_category(self, row, product_class=None):
         _id = row['id']
-        product: Product = Product.objects.filter(id=_id).first()
+        product: Optional[Product] = None
+        if _id and _id.isdigit():
+            product = Product.objects.filter(id=_id).first()
         if not product:
             product_set = Product.objects.filter(title__icontains=row['name'], structure=row['structure'])
             if len(product_set) <= 1:
