@@ -332,7 +332,7 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
         _id = row['id']
         product: Optional[Product] = None
         category = self.set_category(row, None)
-        if _id and _id.isdigit():
+        if _id and isinstance(_id, (int, )):
             product = Product.objects.filter(id=_id).first()
         if not product:
             product_set = Product.objects.filter(title__icontains=row['name'], structure=row['structure'])
