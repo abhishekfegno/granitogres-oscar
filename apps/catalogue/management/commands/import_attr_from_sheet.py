@@ -155,7 +155,7 @@ class GetAttributes:
 
 
 class SetAttributes:
-    def set_product_from_row(self, row, product_class, utils):
+    def set_product_from_row(self, row, product_class, utils, ignore_creation=False):
         _id = row['id']
         name = row['name']
         structure = row['structure']
@@ -304,8 +304,9 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
         pc, _ = ProductClass.objects.get_or_create(name=pc_title)
 
         for row in dataset:
-            self.set_product_from_row(row, product_class=pc, utils={'parent_hash': parent_products})
-            self.compare_attributes(row, pc_title)
+            # self.set_product_from_row(row, product_class=pc, utils={'parent_hash': parent_products})
+            # self.compare_attributes(row, pc_title)
+            self.ensure_category(row, product_class=pc)
 
     def handle(self, *args, **options):
         workbook = client.open('HAUZ DATA SHEET')
@@ -326,6 +327,29 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
         pprint(dict(self.analytics))
         pprint(dict(self.reporting))
 
+    def ensure_category(self, row, product_class):
+        _id = row['id']
+        product: Product = Product.objects.filter(id=_id).first()
+        if not product:
+            product_set = Product.objects.filter(title__icontains=row['name'], structure=row['structure'])
+            if len(product_set) <= 1:
+                product: Product = product_set.first()
+            else:
+                print("Please select the exacct product id from the list.")
+                for _p in product_set:
+                    print(f"\t {_p.id}\t{_p.get_title()} ({_p.structure})")
+                print()
+                selection = input("Enter the ID OF Selected Product : ")
+                product: Product = product_set.filter(pk=selection).first()
+        else:
+            if product.categories.exist():
+                return
+
+        category = self.set_category(row, None)
+        if category:
+            product.categories.add(category)
+            print(f"{product} is added to caegory: {category}!")
+            print("===============================================")
 
 
 
