@@ -339,6 +339,7 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
             if len(product_set) <= 1:
                 product: Product = product_set.first()
             else:
+                print(f"Currently running {row['id']}  => {row['name']} : {row['structure']} ")
                 print("Please select the exacct product id from the list.")
                 for _p in product_set:
                     print(f"\t {_p.id}\t{_p.get_title()} ({_p.structure})")
