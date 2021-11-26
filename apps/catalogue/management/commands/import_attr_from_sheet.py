@@ -342,7 +342,7 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
                 selection = input("Enter the ID OF Selected Product : ")
                 product: Product = product_set.filter(pk=selection).first()
         else:
-            if product.categories.all().exist():
+            if product.categories.all().exists():
                 return
         print(f"Trying to process {product} with  {row.get('category')}")
         category = self.set_category(row, None)
