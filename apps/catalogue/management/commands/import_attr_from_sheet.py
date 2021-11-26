@@ -214,7 +214,7 @@ class SetAttributes:
         brand, _ = Brand.objects.get_or_create(name=brand_name)
         return brand
 
-    ignorable_headers = ['id', 'name', 'structure', 'parent_id', 'category']
+    ignorable_headers = ['id', 'name', 'structure', 'parent_id', 'category', 'id_old', 'parent_id_old']
 
     def set_attrs(self, p, row, utils=None):
         product = p
@@ -329,6 +329,10 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
         pprint(dict(self.reporting))
 
     def ensure_category(self, row, product_class=None):
+        if row['structure'] == 'child':
+            # ignore category for child.
+            return
+
         _id = row['id']
         product: Optional[Product] = None
         category = self.set_category(row, None)
@@ -349,7 +353,10 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
         else:
             if product.categories.all().exists():
                 return
-        print(f"Trying to process {product} with  {row.get('category')}")
+        print(f"Trying to process {product} with  {row.get('category')} ")
+        for attr in row:
+            if attr not in self.ignorable_headers and row[attr]:
+                print(attr, row[attr], '\t\t')
         if category and category is not product.categories.all().first():
             product.categories.add(category)
             print(f"{product} is added to caegory: {category}!")
