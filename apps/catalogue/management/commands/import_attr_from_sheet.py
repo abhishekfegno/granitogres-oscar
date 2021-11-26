@@ -343,6 +343,11 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
             if len(product_set) <= 1:
                 product: Product = product_set.first()
             else:
+                print(f"Trying to process {product} with  {row.get('category')} ")
+                for attr in row:
+                    if attr not in self.ignorable_headers and row[attr]:
+                        print(attr, row[attr], '\t\t')
+
                 print(f"Currently running {row['id']}  => {row['name']} : {row['structure']} ")
                 print("Please select the exacct product id from the list.")
                 for _p in product_set:
@@ -353,10 +358,6 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
         else:
             if product.categories.all().exists():
                 return
-        print(f"Trying to process {product} with  {row.get('category')} ")
-        for attr in row:
-            if attr not in self.ignorable_headers and row[attr]:
-                print(attr, row[attr], '\t\t')
         if category and category is not product.categories.all().first():
             product.categories.add(category)
             print(f"{product} is added to caegory: {category}!")
