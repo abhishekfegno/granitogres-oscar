@@ -144,6 +144,7 @@ class Product(AbstractProduct):
     # just cached pricing
     effective_price = models.FloatField(_('Effective Retail Price.'), null=True, blank=True)
     retail_price = models.FloatField(_('Retail Price.'), null=True, blank=True)
+    custom_search_tags = models.TextField(null=True, blank=True)
     search_tags = models.TextField(null=True, blank=True)
 
     # search_tags = models.TextField(null=True, blank=True)
@@ -344,7 +345,7 @@ class Product(AbstractProduct):
         _cname = cat_name or ""
 
         self.search_tags = (
-                ((self.search_tags or '').replace(_title, '').replace(_bname, '').replace(_cname, '') or "")
+                (self.custom_search_tags or "")
                 + " " + _title
                 + " " + _bname
                 + " " + _cname
