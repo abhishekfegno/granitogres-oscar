@@ -98,6 +98,8 @@ class ProductListAPIView(GenericAPIView):
         self.apply_search()
         out_log['6_apply_search'] = f"Now apply search = {self.queryset.count()}"
 
+        qs = Product.objects.filter()
+
         # load
         # # # self.filter_stock()       # will remove some products.
         products_list = self.sort_products()
@@ -245,19 +247,28 @@ class ProductListAPIView(GenericAPIView):
         cxt = {'request': self.request}
         for product in self.page_obj.object_list:
             # sr.product.selected_stock_record = sr
+            product_data[product] = product_serializer_class(instance=product, context=cxt).data
+            product_data[product]['variants'] = []
             if product.is_child:
-                if product.parent not in product_data.keys():
-                    product_data[product.parent] = product_serializer_class(
-                        instance=product.parent,
-                        context=cxt
-                    ).data
-                    product_data[product.parent]['variants'] = []
-                product_data[product.parent]['variants'].append(
-                    product_serializer_class(instance=product, context=cxt).data)
-            elif product.is_standalone:  # parent or standalone
-                product_data[product] = product_serializer_class(instance=product, context=cxt).data
-                product_data[product]['variants'] = []
+                product_data[product]['variants'] = product_serializer_class(product.children.all(), context=cxt, many=True).data
+                for p in product_data[product]['variants']:
+                    p['is_selected'] = p['id'] == product.id
         return product_data.values()
+        # for product in self.page_obj.object_list:
+        #     # sr.product.selected_stock_record = sr
+        #     if product.is_child:
+        #         if product.parent not in product_data.keys():
+        #             product_data[product.parent] = product_serializer_class(
+        #                 instance=product.parent,
+        #                 context=cxt
+        #             ).data
+        #             product_data[product.parent]['variants'] = []
+        #         product_data[product.parent]['variants'].append(
+        #             product_serializer_class(instance=product, context=cxt).data)
+        #     elif product.is_standalone:  # parent or standalone
+        #         product_data[product] = product_serializer_class(instance=product, context=cxt).data
+        #         product_data[product]['variants'] = []
+        # return product_data.values()
 
 product_list_new_pagination = ProductListAPIView.as_view()
 
