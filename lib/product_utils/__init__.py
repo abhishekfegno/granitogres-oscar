@@ -115,6 +115,8 @@ def apply_search(queryset, search: str, mode: str = '_trigram', extends: bool = 
 
 
 def apply_sort(queryset, sort=None):
+    if hasattr(queryset, "__is_ordered_at_search"):
+        return queryset
     if sort is not None:
         return queryset.order_by(*sort)
     return queryset

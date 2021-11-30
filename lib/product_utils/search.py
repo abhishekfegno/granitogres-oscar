@@ -1,3 +1,4 @@
+from django.db import models
 from django.db.models import F, Q, Value
 
 from apps.catalogue.models import Category, Product
@@ -69,7 +70,9 @@ def _simple_search(queryset, search, extends=True):
 
     for _tag in _tags:
         _search_vector |= Q(search_tags__icontains=_tag)
-    return qs | queryset.filter(_search_vector)
+    qs = (qs.annotate(rank=Value(1, output_field=models.IntegerField())) | queryset.filter(_search_vector).annotate(rank=Value(2, output_field=models.IntegerField()))).order_by('rank')
+    qs.__is_ordered_at_search = True
+    return qs
 
 
 # from lib.product_utils import search as pu

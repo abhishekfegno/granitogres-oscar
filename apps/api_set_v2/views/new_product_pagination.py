@@ -56,7 +56,7 @@ class ProductListAPIView(GenericAPIView):
     # Extracting Dataset
 
     def prepare_data(self, request):
-        self.base_queryset = Product.browsable.browsable()
+        self.base_queryset = Product.objects.all()
         self.default_category = 'all'
         self.queryset = self.base_queryset
         self.out = {}

@@ -70,8 +70,8 @@ class ProductManagerSelector:
 
     def strategy(self):
         if settings.LIST_PRODUCT_CHILD_ONLY:
-            return BrowsableProductManagerChildFocused()
-        return BrowsableProductManagerParentFocused()
+            return BrowsableProductManagerChildFocused()        # selected!
+        return BrowsableProductManagerParentFocused()           # future
 
 
 
