@@ -78,7 +78,7 @@ class ProductListAPIView(GenericAPIView):
         self.only_favorite = bool(request.GET.get('only_favorite', False))
 
     def get(self, request, category='all'):
-        out_log = {}
+        self.out_log = out_log = {}
         self.category = category
         # extract
         self.prepare_data(request)
@@ -98,8 +98,6 @@ class ProductListAPIView(GenericAPIView):
         self.apply_search()
         out_log['6_apply_search'] = f"Now apply search = {self.queryset.count()}"
 
-        qs = Product.objects.filter()
-
         # load
         # # # self.filter_stock()       # will remove some products.
         products_list = self.sort_products()
@@ -112,7 +110,7 @@ class ProductListAPIView(GenericAPIView):
 
         self.load_seo()
 
-        return Response(self.render_api(serialized_products_list, out_log=out_log))
+        return Response(self.render_api(serialized_products_list, out_log=self.out_log))
 
     # Transforming Dataset
 
@@ -245,14 +243,18 @@ class ProductListAPIView(GenericAPIView):
         product_serializer_class = ProductSimpleListSerializer
         product_data = {}
         cxt = {'request': self.request}
+        self.out_log['10_pagine'] = {}
+
         for product in self.page_obj.object_list:
             # sr.product.selected_stock_record = sr
-            product_data[product] = product_serializer_class(instance=product, context=cxt).data
+            self.out_log['10_pagine'][f"{product.slug}__{product.id}"] = {"text": "loading " + ("parent " if product.is_child else "self") }
+            product_data[product] = product_serializer_class(instance=product.parent if product.is_child else product, context=cxt).data
             product_data[product]['variants'] = []
             if product.is_child:
-                product_data[product]['variants'] = product_serializer_class(product.parent.children.all(), context=cxt, many=True).data
+                self.out_log['10_pagine'][f"{product.slug}__{product.id}"]['varient_count'] = product.parent.children.all().count()
+                product_data[product]['variants'] = [product_serializer_class(pdt, context=cxt).data for pdt in product.parent.children.all()]
                 for p in product_data[product]['variants']:
-                    p['is_selected'] = p['id'] == product.id
+                    p.update({"is_selected": p['id'] == product.id})
         return product_data.values()
         # for product in self.page_obj.object_list:
         #     # sr.product.selected_stock_record = sr
