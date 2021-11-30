@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db.models import Q
+from django.db import models
+from django.db.models import Q, Value
 from oscar.apps.basket.utils import ConditionalOffer
 from rest_framework.generics import GenericAPIView, get_object_or_404
 from rest_framework.response import Response
@@ -93,6 +94,9 @@ class ProductListAPIView(GenericAPIView):
         # self.filter_favorite()
         self.filter_product_class()
         out_log['4_pc_filter'] = f"Now rc filtering = {self.queryset.count()}"
+
+        self.queryset = self.queryset.annotate(rank=Value(5, output_field=models.IntegerField()))
+
         self.apply_filter()
         out_log['5_apply_filter'] = f"Now apply filter = {self.queryset.count()}"
         self.apply_search()
@@ -164,6 +168,7 @@ class ProductListAPIView(GenericAPIView):
                 queryset=self.queryset,
                 search=self.search,
                 mode='_simple')  # | apply_search(queryset=queryset, search=_search, mode='_trigram',)
+            self.queryset = self.queryset.order_by('rank')
             self.title = f"Search: '{self.search}'"
 
     # Load Dataset
@@ -246,6 +251,7 @@ class ProductListAPIView(GenericAPIView):
         self.out_log['10_pagine'] = {}
 
         for product in self.page_obj.object_list:
+
             # sr.product.selected_stock_record = sr
             self.out_log['10_pagine'][f"{product.slug}__{product.id}"] = {"text": "loading " + ("parent " if product.is_child else "self"), "struct": product.structure }
             product_data[product] = product_serializer_class(instance=product.parent if product.is_child else product, context=cxt).data
@@ -255,6 +261,10 @@ class ProductListAPIView(GenericAPIView):
                 parent = product.parent
             elif product.is_parent:
                 parent = product
+            if hasattr(product, "rank"):
+                product_data[product]['rank'] = getattr(product, "rank")
+            else:
+                product_data[product]['rank'] = 0
 
             if parent:
                 selected = False
@@ -271,6 +281,11 @@ class ProductListAPIView(GenericAPIView):
                             "review_count": p['review_count'],
                         })
                         selected = True
+                    if hasattr(product, "rank"):
+                        product_data[product]['rank'] = getattr(product, "rank")
+                    else:
+                        product_data[product]['rank'] = 0
+
                 if selected is False and product_data[product]['variants']:
                     product_data[product]['variants'][0]['is_selected'] = True
         return product_data.values()
