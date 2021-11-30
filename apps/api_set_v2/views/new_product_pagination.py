@@ -78,26 +78,36 @@ class ProductListAPIView(GenericAPIView):
         self.only_favorite = bool(request.GET.get('only_favorite', False))
 
     def get(self, request, category='all'):
+        out_log = {}
         self.category = category
         # extract
         self.prepare_data(request)
-
+        out_log['0_initial'] = "data prepared!"
+        out_log['1_prepare_data'] = "data prepared!"
         # transform
         self.apply_primary_filter()
+        out_log['2_primary_filter_applied'] = f"Now count {self.queryset.count()}"
         self.find_recommended_class()
+        out_log['3_rc'] = f"Now rc= {str(self.product_class)}"
+
         # self.filter_favorite()
         self.filter_product_class()
+        out_log['4_pc_filter'] = f"Now rc filtering = {self.queryset.count()}"
         self.apply_filter()
+        out_log['5_apply_filter'] = f"Now apply filter = {self.queryset.count()}"
         self.apply_search()
+        out_log['6_apply_search'] = f"Now apply search = {self.queryset.count()}"
 
         # load
         # # # self.filter_stock()       # will remove some products.
         products_list = self.sort_products()
+        out_log['7_apply_search'] = f"Now apply sort = {len(products_list)}"
         self.paginate_dataset(products_list)
+        out_log['8_paginated'] = f"Now apply sort = {len(products_list)}"
         serialized_products_list = self.load_paginated_data()
         self.load_seo()
 
-        return Response(self.render_api(serialized_products_list))
+        return Response(self.render_api(serialized_products_list, out_log=out_log))
 
     # Transforming Dataset
 
@@ -219,11 +229,11 @@ class ProductListAPIView(GenericAPIView):
             self.cat_data['seo_keywords'] = self.cat.seo_keywords
             self.cat_data['ogimage'] = self.request.build_absolute_uri(self.cat.ogimage.url) if self.cat.ogimage else None
 
-    def render_api(self, serialized_products_list):
+    def render_api(self, serialized_products_list, **kwargs):
         return list_api_formatter(
             self.request, paginator=self.i_paginator, page_obj=self.page_obj,
             results=serialized_products_list, product_class=self.rc, title=self.title,
-            bread_crumps=get_breadcrumb(self.search, self.cat, self.product_range), seo_fields=self.cat_data)
+            bread_crumps=get_breadcrumb(self.search, self.cat, self.product_range), seo_fields=self.cat_data, **kwargs)
 
     def load_paginated_data(self):
         # return ProductSimpleListSerializer(self.page_obj.object_list, context=self.request).data
