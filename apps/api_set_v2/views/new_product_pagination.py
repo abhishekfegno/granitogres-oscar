@@ -287,7 +287,7 @@ class ProductListAPIView(GenericAPIView):
                             "review_count": p['review_count'],
                         })
                         selected = True
-                    if hasattr(product, "rank"):
+                    if hasattr(product, "custom_ranking"):
                         product_data[product]['custom_ranking'] = getattr(product, "custom_ranking", 0)
                     else:
                         product_data[product]['custom_ranking'] = 0
