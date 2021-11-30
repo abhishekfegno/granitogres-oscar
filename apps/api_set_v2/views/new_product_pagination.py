@@ -247,7 +247,7 @@ class ProductListAPIView(GenericAPIView):
 
         for product in self.page_obj.object_list:
             # sr.product.selected_stock_record = sr
-            self.out_log['10_pagine'][f"{product.slug}__{product.id}"] = {"text": "loading " + ("parent " if product.is_child else "self") }
+            self.out_log['10_pagine'][f"{product.slug}__{product.id}"] = {"text": "loading " + ("parent " if product.is_child else "self"), "struct": product.structure }
             product_data[product] = product_serializer_class(instance=product.parent if product.is_child else product, context=cxt).data
             product_data[product]['variants'] = []
             if product.is_child:
