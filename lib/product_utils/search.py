@@ -65,7 +65,7 @@ def _similarity_search(queryset, search, extends=True):
 
 def _simple_search(queryset, search, extends=True):
     _tags = tag__combinations(search)
-    _search_vector = Q(search_tags__search=search)
+    _search_vector = Q(search_tags__search=search)|Q(search_tags__icontains=search)
     qs = queryset.filter(_search_vector)
 
     for _tag in _tags:
