@@ -104,7 +104,10 @@ class ProductListAPIView(GenericAPIView):
         out_log['7_apply_search'] = f"Now apply sort = {len(products_list)}"
         self.paginate_dataset(products_list)
         out_log['8_paginated'] = f"Now apply sort = {len(products_list)}"
+        out_log['8_paginated_obj_list'] = f"page_obj.object_list = {len(self.page_obj.object_list)}"
         serialized_products_list = self.load_paginated_data()
+        out_log['9_serialized_products_list_count'] = f"{len(serialized_products_list)}"
+
         self.load_seo()
 
         return Response(self.render_api(serialized_products_list, out_log=out_log))
@@ -209,17 +212,17 @@ class ProductListAPIView(GenericAPIView):
     def paginate_dataset(self, products_list):
         page_number = int(self.request.GET.get('page', '1'))
         page_size = int(self.request.GET.get('page_size', str(settings.DEFAULT_PAGE_SIZE)))
-        i_paginator = self.i_paginator = Paginator(object_list=products_list, per_page=page_size)  # Show 18 contacts per page.
+        self.i_paginator = Paginator(object_list=products_list, per_page=page_size)  # Show 18 contacts per page.
         self.i_paginator.display_page_controls = False
         self.empty_list = False
         try:
-            page_number = i_paginator.validate_number(page_number)
+            page_number = self.i_paginator.validate_number(page_number)
         except PageNotAnInteger:
             page_number = 1
         except EmptyPage:
-            page_number = i_paginator.num_pages
+            page_number = self.i_paginator.num_pages
             self.empty_list = True
-        self.page_obj = i_paginator.get_page(page_number)
+        self.page_obj = self.i_paginator.get_page(page_number)
 
     def load_seo(self):
         self.cat_data = {}
