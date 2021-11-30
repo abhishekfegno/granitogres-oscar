@@ -267,8 +267,8 @@ class ProductListAPIView(GenericAPIView):
                 parent = product.parent
             elif product.is_parent:
                 parent = product
-            if hasattr(product, "custom_ranking"):
-                product_data[product]['custom_ranking'] = getattr(product, "custom_ranking")
+            if hasattr(product, "rank"):
+                product_data[product]['custom_ranking'] = getattr(product, "rank")
             else:
                 product_data[product]['custom_ranking'] = 0
 
@@ -287,8 +287,8 @@ class ProductListAPIView(GenericAPIView):
                             "review_count": p['review_count'],
                         })
                         selected = True
-                    if hasattr(product, "custom_ranking"):
-                        product_data[product]['custom_ranking'] = getattr(product, "custom_ranking", 0)
+                    if hasattr(product, "rank"):
+                        product_data[product]['custom_ranking'] = getattr(product, "rank", 0)
                     else:
                         product_data[product]['custom_ranking'] = 0
 
