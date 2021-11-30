@@ -87,12 +87,13 @@ class ProductListAPIView(GenericAPIView):
         self.find_recommended_class()
         # self.filter_favorite()
         self.filter_product_class()
-        self.apply_filter()
-        self.apply_search()
+        # self.apply_filter()
+        # self.apply_search()
 
         # load
         # self.filter_stock()
         products_list = self.sort_products()
+        products_list = self.queryset
         self.paginate_dataset(products_list)
         serialized_products_list = self.load_paginated_data()
         self.load_seo()
@@ -183,13 +184,14 @@ class ProductListAPIView(GenericAPIView):
 
     def sort_products(self):
         if self.search:
-            from fuzzywuzzy import fuzz
-            return list(sorted(
-                self.queryset[:160],
-                key=lambda p: fuzz.token_sort_ratio(self.search.upper(), p.search_tags.upper()),
-                reverse=True
-            )) + list(self.queryset[160:])
-
+            # from fuzzywuzzy import fuzz
+            # return list(sorted(
+            #     self.queryset[:160],
+            #     key=lambda p: fuzz.token_sort_ratio(self.search.upper(), p.search_tags.upper()),
+            #     reverse=True
+            # )) + list(self.queryset[160:])
+            # return self.queryset
+            pass
         elif self.sort:
             _sort = [SORT_BY_MAP[key] for key in self.sort.split(',') if key and key in SORT_BY_MAP.keys()]
             qs = apply_sort(queryset=self.queryset, sort=_sort)
