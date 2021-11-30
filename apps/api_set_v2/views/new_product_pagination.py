@@ -172,7 +172,7 @@ class ProductListAPIView(GenericAPIView):
                 queryset=self.queryset,
                 search=self.search,
                 mode='_similarity_rank')  # | apply_search(queryset=queryset, search=_search, mode='_trigram',)
-            self.queryset = self.queryset.order_by('rank')
+            # self.queryset = self.queryset.order_by('rank')
             self.title = f"Search: '{self.search}'"
 
     # Load Dataset
