@@ -261,8 +261,16 @@ class ProductListAPIView(GenericAPIView):
                 self.out_log['10_pagine'][f"{product.slug}__{product.id}"]['varient_count'] = parent.children.all().count()
                 product_data[product]['variants'] = [product_serializer_class(pdt, context=cxt).data for pdt in parent.children.all()]
                 for p in product_data[product]['variants']:
-                    p.update({"is_selected": p['id'] == product.id})
-                    selected = True
+                    if p['id'] == product.id:
+                        p.update({"is_selected": p['id'] == product.id})
+                        product_data[product].update({
+                            "primary_image": p['primary_image'],
+                            "price": p['price'],
+                            "title": p['title'],
+                            "rating": p['rating'],
+                            "review_count": p['review_count'],
+                        })
+                        selected = True
                 if selected is False and product_data[product]['variants']:
                     product_data[product]['variants'][0]['is_selected'] = True
         return product_data.values()
