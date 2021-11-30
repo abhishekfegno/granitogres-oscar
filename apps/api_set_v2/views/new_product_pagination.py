@@ -288,9 +288,9 @@ class ProductListAPIView(GenericAPIView):
                         })
                         selected = True
                     if hasattr(product, "rank"):
-                        product_data[product]['rank'] = getattr(product, "rank")
+                        product_data[product]['custom_ranking'] = getattr(product, "custom_ranking", 0)
                     else:
-                        product_data[product]['rank'] = 0
+                        product_data[product]['custom_ranking'] = 0
 
                 if selected is False and product_data[product]['variants']:
                     product_data[product]['variants'][0]['is_selected'] = True
