@@ -87,13 +87,12 @@ class ProductListAPIView(GenericAPIView):
         self.find_recommended_class()
         # self.filter_favorite()
         self.filter_product_class()
-        # self.apply_filter()
-        # self.apply_search()
+        self.apply_filter()
+        self.apply_search()
 
         # load
-        # self.filter_stock()
+        # # # self.filter_stock()       # will remove some products.
         products_list = self.sort_products()
-        products_list = self.queryset
         self.paginate_dataset(products_list)
         serialized_products_list = self.load_paginated_data()
         self.load_seo()
