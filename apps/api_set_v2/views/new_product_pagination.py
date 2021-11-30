@@ -193,8 +193,7 @@ class ProductListAPIView(GenericAPIView):
             pass
         elif self.sort:
             _sort = [SORT_BY_MAP[key] for key in self.sort.split(',') if key and key in SORT_BY_MAP.keys()]
-            qs = apply_sort(queryset=self.queryset, sort=_sort)
-            return qs
+            self.queryset = apply_sort(queryset=self.queryset, sort=_sort)
         return self.queryset
 
     def paginate_dataset(self, products_list):
