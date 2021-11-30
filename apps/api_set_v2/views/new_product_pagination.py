@@ -250,7 +250,7 @@ class ProductListAPIView(GenericAPIView):
             product_data[product] = product_serializer_class(instance=product, context=cxt).data
             product_data[product]['variants'] = []
             if product.is_child:
-                product_data[product]['variants'] = product_serializer_class(product.children.all(), context=cxt, many=True).data
+                product_data[product]['variants'] = product_serializer_class(product.parent.children.all(), context=cxt, many=True).data
                 for p in product_data[product]['variants']:
                     p['is_selected'] = p['id'] == product.id
         return product_data.values()
