@@ -1,3 +1,5 @@
+from typing import Union, Any
+
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import models
@@ -20,6 +22,8 @@ from apps.utils.urls import list_api_formatter
 from lib.product_utils import category_filter, recommended_class, apply_filter, apply_search, apply_sort
 
 # sorting
+from lib.product_utils.search import tag__combinations
+
 RELEVANCY = "relevancy"
 TOP_RATED = "rating"
 NEWEST = "newest"
@@ -162,7 +166,7 @@ class ProductListAPIView(GenericAPIView):
             """
             self.queryset = apply_filter(queryset=self.queryset, _filter=self.filter, product_class=self.product_class)
 
-    def apply_search(self):
+    def apply_searchapply_search(self):
         if self.search:
             self.queryset = apply_search(
                 queryset=self.queryset,
@@ -201,14 +205,16 @@ class ProductListAPIView(GenericAPIView):
 
     def sort_products(self):
         if self.search:
-            # from fuzzywuzzy import fuzz
-            # return list(sorted(
-            #     self.queryset[:160],
-            #     key=lambda p: fuzz.token_sort_ratio(self.search.upper(), p.search_tags.upper()),
-            #     reverse=True
-            # )) + list(self.queryset[160:])
-            # return self.queryset
-            pass
+            combos = tag__combinations(self.search)
+            qs = self.queryset[:160]
+            for p in qs:
+                p.custom_ranking = 0
+                for term in combos:
+                    weight: Union[int, Any] = (term.count(' ') + 1) ** 2
+                    if term in p.search_tags:
+                        p.custom_ranking += weight
+            qs = list(sorted(qs, key=lambda p: p.custom_ranking, reverse=True))
+            return qs + list(self.queryset[160:])
         elif self.sort:
             _sort = [SORT_BY_MAP[key] for key in self.sort.split(',') if key and key in SORT_BY_MAP.keys()]
             self.queryset = apply_sort(queryset=self.queryset, sort=_sort)
