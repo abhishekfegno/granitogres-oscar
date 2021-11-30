@@ -166,7 +166,7 @@ class ProductListAPIView(GenericAPIView):
             """
             self.queryset = apply_filter(queryset=self.queryset, _filter=self.filter, product_class=self.product_class)
 
-    def apply_searchapply_search(self):
+    def apply_search(self):
         if self.search:
             self.queryset = apply_search(
                 queryset=self.queryset,
