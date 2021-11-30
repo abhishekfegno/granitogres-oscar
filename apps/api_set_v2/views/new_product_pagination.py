@@ -250,7 +250,13 @@ class ProductListAPIView(GenericAPIView):
             self.out_log['10_pagine'][f"{product.slug}__{product.id}"] = {"text": "loading " + ("parent " if product.is_child else "self"), "struct": product.structure }
             product_data[product] = product_serializer_class(instance=product.parent if product.is_child else product, context=cxt).data
             product_data[product]['variants'] = []
-            if product.parent:
+            parent = None
+            if product.is_child:
+                parent = product.parent
+            elif product.is_parent:
+                parent = product
+
+            if parent:
                 self.out_log['10_pagine'][f"{product.slug}__{product.id}"]['varient_count'] = product.parent.children.all().count()
                 product_data[product]['variants'] = [product_serializer_class(pdt, context=cxt).data for pdt in product.parent.children.all()]
                 for p in product_data[product]['variants']:
