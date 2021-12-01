@@ -11,13 +11,13 @@ class Command(BaseCommand):
             for c in p.children.all():
                 for attr in pc.attributes.all().values_list('code', flat=True):
                     if attr.endswith('_old') or attr == 'is_present': continue
-                    print(c, hasattr(p.attr, attr) and getattr(p.attr, attr))
                     if hasattr(p.attr, attr) and getattr(p.attr, attr):
                         if not hasattr(p.attr, attr):
                             ProductAttribute.objects.create(code=attr, name=attr, product_class=p.get_product_class())
                         if hasattr(p.attr, attr) or not getattr(c.attr, attr):
                             val = getattr(p.attr, attr)
                             setattr(c.attr, attr, val)
+                print(c, " Saving ... ")
                 c.attr.save()
 
 
