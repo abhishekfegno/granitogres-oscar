@@ -520,7 +520,7 @@ def reformat_value(sender, instance, **kwargs):
             .strip().upper()
 
     if instance.attribute and instance.attribute.type in (instance.attribute.TEXT, instance.attribute.RICHTEXT):
-        instance.value = _format(instance.value)
+        instance.value = _format(str(instance.value))
 
 post_save.connect(clear_cache_category, sender=Category)
 post_save.connect(clear_cache_product, sender=Product)
