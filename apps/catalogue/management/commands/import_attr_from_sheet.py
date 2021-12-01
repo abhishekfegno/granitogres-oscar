@@ -176,7 +176,7 @@ class SetAttributes:
                 fn_name = f"move_{product.structure.lower()}_to_{structure.lower()}"
                 fn = getattr(self, fn_name)
                 product = fn(product, row, utils)
-                product.title = title
+                product.title = name
         if product.structure == Product.PARENT:
             utils['parent_hash'][_id] = product
         if product.structure == Product.CHILD:
