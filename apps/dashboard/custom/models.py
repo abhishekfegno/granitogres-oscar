@@ -145,7 +145,7 @@ class TopCategory(AbstractCURDModel):
             'id': self.pk,
             'image': abs_img,
             'thumbnail': tmp_img,
-            'slug': self.slug,
+            'slug': self.product_range_id,
             'title': self.title,
             'range': self.product_range_id
         }
