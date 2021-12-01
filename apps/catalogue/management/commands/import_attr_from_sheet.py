@@ -176,6 +176,7 @@ class SetAttributes:
                 fn_name = f"move_{product.structure.lower()}_to_{structure.lower()}"
                 fn = getattr(self, fn_name)
                 product = fn(product, row, utils)
+                product.name = name
         if product.structure == Product.PARENT:
             utils['parent_hash'][_id] = product
         if product.structure == Product.CHILD:
@@ -306,8 +307,8 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
         pc, _ = ProductClass.objects.get_or_create(name=pc_title)
 
         for row in dataset:
-            # self.set_product_from_row(row, product_class=pc, utils={'parent_hash': parent_products})
-            self.compare_attributes(row, pc_title)
+            self.set_product_from_row(row, product_class=pc, utils={'parent_hash': parent_products})
+            # self.compare_attributes(row, pc_title)
             # self.ensure_category(row, product_class=pc)
 
     def handle(self, *args, **options):
