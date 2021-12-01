@@ -178,7 +178,10 @@ class SetAttributes:
                 product = fn(product, row, utils)
                 product.title = name
         if product.structure == Product.PARENT:
-            utils['parent_hash'][_id] = product
+            if _id:
+                utils['parent_hash'][_id] = product
+            else:
+                utils['parent_hash'][product.id] = product
         if product.structure == Product.CHILD:
             product.parent = utils['parent_hash'][row['parent_id']]
             product.save()
