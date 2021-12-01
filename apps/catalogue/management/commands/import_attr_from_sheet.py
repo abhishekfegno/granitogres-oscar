@@ -1,4 +1,5 @@
 import functools
+import sys
 from collections import defaultdict
 from pprint import pprint
 from typing import Optional
@@ -71,7 +72,6 @@ class GetAttributes:
             print("product not found for row: ", row)
             self.analytics[pc_title]['product_not_found'] += 1
             self.reporting[pc_title].append(f"Product Not found : {row['name']}")
-
             return
         print(f"Product {p} : ")
         for attr in row:
@@ -135,24 +135,25 @@ class GetAttributes:
         print("\n\n")
 
     def find_product(self, row):
-        name = row['name']
-        try:
-            return Product.objects.select_related('brand').filter(title=name, structure__in=['standalone', 'child']).get()
-        except Exception as e:
-            if type(row['id']) is int:
-                try:
-                    return Product.objects.select_related('brand').get(pk=int(row['id']))
-                except Exception as e:
-                    print(e)
-                    print(f"Product with title '{name}' or pk={row['id']} not found")
-                    _idef = '#'
-                    while _idef:
-                        _idef = input("Do you have an id to share?")
-                        if _idef and _idef.isdigit():
-                            try:
-                                return Product.objects.select_related('brand').get(pk=_idef)
-                            except Exception as e:
-                                print(e)
+        return Product.objects.select_related('brand').filter(pk=row['name']).first()
+        # name = row['name']
+        # try:
+        #     return Product.objects.select_related('brand').filter(title=name, structure__in=['standalone', 'child']).get()
+        # except Exception as e:
+        #     if type(row['id']) is int:
+        #         try:
+        #             return Product.objects.select_related('brand').get(pk=int(row['id']))
+        #         except Exception as e:
+        #             print(e)
+        #             print(f"Product with title '{name}' or pk={row['id']} not found")
+        #             _idef = '#'
+        #             while _idef:
+        #                 _idef = input("Do you have an id to share?")
+        #                 if _idef and _idef.isdigit():
+        #                     try:
+        #                         return Product.objects.select_related('brand').get(pk=_idef)
+        #                     except Exception as e:
+        #                         print(e)
 
 
 class SetAttributes:
@@ -306,8 +307,8 @@ class Command(AttributeUtils, GetAttributes, SetAttributes, BaseCommand):
 
         for row in dataset:
             # self.set_product_from_row(row, product_class=pc, utils={'parent_hash': parent_products})
-            # self.compare_attributes(row, pc_title)
-            self.ensure_category(row, product_class=pc)
+            self.compare_attributes(row, pc_title)
+            # self.ensure_category(row, product_class=pc)
 
     def handle(self, *args, **options):
         workbook = client.open('HAUZ DATA SHEET')

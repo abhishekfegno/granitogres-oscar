@@ -160,13 +160,6 @@ class RowHandler:
 
         product.save()
 
-    def batch_update(self, sheet):
-        sheet.batch_update([
-            {"range": "A8:C8",
-             "values": [["Texas", 5261485, 5261485]]},
-            {"range": "A9:C9",
-             "values": [["Wisconsin", 1630673, 1610065]]},
-        ])
 
 
 class Command(BaseCommand):
