@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import models
 from django.db.models import Q, Value
+from django.http import Http404
 from oscar.apps.basket.utils import ConditionalOffer
 from rest_framework.generics import GenericAPIView, get_object_or_404
 from rest_framework.response import Response
@@ -132,6 +133,8 @@ class ProductListAPIView(GenericAPIView):
         if product_range:
             self.title = product_range.name
             self.queryset = product_range.all_products().filter(is_public=True)
+        else:
+            raise Http404()
 
     def category_filter(self):
         self.queryset, self.cat = category_filter(queryset=self.queryset, category_slug=self.category, return_as_tuple=True)
