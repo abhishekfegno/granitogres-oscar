@@ -106,7 +106,7 @@ class ProductListAPIView(GenericAPIView):
         out_log['5_apply_filter'] = f"Now apply filter = {self.queryset.count()}"
         self.apply_search()
         out_log['6_apply_search'] = f"Now apply search = {self.queryset.count()}"
-        self.queryset = self.queryset.excldue(structure=Product.PARENT)
+        self.queryset = self.queryset.exclude(structure=Product.PARENT)
         # load
         # # # self.filter_stock()       # will remove some products.
         products_list = self.sort_products()
