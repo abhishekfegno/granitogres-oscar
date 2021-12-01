@@ -250,7 +250,7 @@ class SetAttributes:
     def move_standalone_to_parent(self, p, row, utils):
         self.remove_stock(p)
         p.structure = p.PARENT
-        p.attributesa.all().delete()
+        p.attributes.all().delete()
         utils['parent_hash'][row['id']] = p
         return p
 
