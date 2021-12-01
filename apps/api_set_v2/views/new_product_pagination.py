@@ -106,7 +106,7 @@ class ProductListAPIView(GenericAPIView):
         out_log['5_apply_filter'] = f"Now apply filter = {self.queryset.count()}"
         self.apply_search()
         out_log['6_apply_search'] = f"Now apply search = {self.queryset.count()}"
-
+        self.queryset = self.queryset.excldue(structure=Product.PARENT)
         # load
         # # # self.filter_stock()       # will remove some products.
         products_list = self.sort_products()
@@ -149,7 +149,9 @@ class ProductListAPIView(GenericAPIView):
             self.category_filter()
 
     def find_recommended_class(self):
-        params = {'search': self.search, 'range': self.product_range, "category": self.cat, "pclass": self.pclass}
+
+        params = {'search': self.search, 'range': self.product_range, "category": self.cat,
+                  "pclass": self.pclass, "preferred_cats": [self.cat, ]}
         self.rc = recommended_class(self.queryset, **params)
         self.product_class = ProductClass.objects.filter(pk=self.rc['id']).first()
 

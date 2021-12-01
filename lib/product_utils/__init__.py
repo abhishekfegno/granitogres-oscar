@@ -134,9 +134,15 @@ class ClassRecommendation(object):
             min_price=Min('price_excl_tax'),
         )
 
-    def render(self, _id,  display_classes=False):
+    def render(self, _id,  display_classes=False, preferred_cats=None):
         if display_classes:
             product_classes = ProductClass.objects.all().values('id', 'name')
+            net_cats = []
+            if preferred_cats:
+                for pcat in preferred_cats:
+                    net_cats.extend(pcat.get_descendants_and_self())
+                net_cats = filter(lambda x: x, [cat.product_class_id for cat in net_cats])
+                product_classes = product_classes.filter(id__in=list(net_cats))
         else:
             product_classes = []
         return {
@@ -158,7 +164,7 @@ class ClassRecommendation(object):
         if 'category' in kwargs and kwargs['category'] and kwargs['category'] and kwargs['category'].product_class_id:
             return self.render(kwargs['category'].product_class_id)
         if 'queryset' in kwargs:
-            return self.render(_id=None, display_classes=True)
+            return self.render(_id=None, display_classes=True, preferred_cats=kwargs.get('preferred_cats'))
             # values = kwargs['queryset'].values('id', 'product_class', 'parent__product_class')
             # struct = {}
             # max_id = None
@@ -186,7 +192,8 @@ def recommended_class(queryset, **kwargs):
         'range': kwargs.get('range'),
         'category': kwargs.get("category"),
         'pclass': kwargs.get('pclass'),
-        'queryset': queryset
+        'queryset': queryset,
+        'preferred_cats': kwargs.get('preferred_cats')
     }
     return ClassRecommendation().recommend(**params)
 
