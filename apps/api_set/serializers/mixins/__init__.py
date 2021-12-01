@@ -145,13 +145,14 @@ class ProductDetailSerializerMixin(object):
     def get_images(self, instance):
         images = instance.get_all_images()
         b = self.context['request'].build_absolute_uri
-        out =  [
+        out = [
             {
                 'web_desktop': b(img.thumbnail_web_desktop),
                 'web_zoom': b(img.thumbnail_web_zoom),
                 'mobile': b(img.thumbnail_mobile_detail),
             } for img in images
         ]
+
         if not out:
             out = [
                 {
@@ -160,6 +161,16 @@ class ProductDetailSerializerMixin(object):
                     'mobile': image_not_found(self.context['request']),
                 }
             ]
+            if instance.is_parent:
+                images = ProductImage.objects.filter(product__parent=instance).order_by('display_order')
+                out = [
+                    {
+                        'web_desktop': b(img.thumbnail_web_desktop),
+                        'web_zoom': b(img.thumbnail_web_zoom),
+                        'mobile': b(img.thumbnail_mobile_detail),
+                    } for img in images
+                ]
+
         return out
 
     def get_siblings(self, instance):
