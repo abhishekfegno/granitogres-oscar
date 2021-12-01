@@ -139,10 +139,13 @@ class ClassRecommendation(object):
             product_classes = ProductClass.objects.all().values('id', 'name')
             net_cats = []
             if preferred_cats:
-                preferred_cats = filter(lambda x: x, [cat.product_class_id for cat in net_cats])
-                for pcat in preferred_cats:
-                    net_cats.extend(pcat.get_descendants_and_self())
-                net_cats = filter(lambda x: x, [cat.product_class_id for cat in net_cats])
+                sub_cats = []
+                for cat in preferred_cats:
+                    if cat:
+                        sub_cats.extend(list(cat.get_descendants_and_self()))
+                for pcat in sub_cats:
+                    if pcat:
+                        net_cats.append(pcat.product_class_id)
                 product_classes = product_classes.filter(id__in=list(net_cats))
         else:
             product_classes = []
