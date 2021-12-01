@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import Q, Value
 from django.http import Http404
 from oscar.apps.basket.utils import ConditionalOffer
+from oscar.apps.offer.models import Range
 from rest_framework.generics import GenericAPIView, get_object_or_404
 from rest_framework.response import Response
 
@@ -17,7 +18,6 @@ from django.utils.translation import ugettext as _
 from apps.availability.models import Zones
 from apps.catalogue.models import Product, ProductClass
 from apps.dashboard.custom.models import OfferBanner
-from apps.dashboard.ranges.models import Range
 from apps.partner.models import StockRecord
 from apps.utils.urls import list_api_formatter
 from lib.product_utils import category_filter, recommended_class, apply_filter, apply_search, apply_sort

@@ -145,13 +145,22 @@ class ProductDetailSerializerMixin(object):
     def get_images(self, instance):
         images = instance.get_all_images()
         b = self.context['request'].build_absolute_uri
-        return [
+        out =  [
             {
                 'web_desktop': b(img.thumbnail_web_desktop),
                 'web_zoom': b(img.thumbnail_web_zoom),
                 'mobile': b(img.thumbnail_mobile_detail),
             } for img in images
         ]
+        if not out:
+            out = [
+                {
+                    'web_desktop': image_not_found(self.context['request']),
+                    'web_zoom': image_not_found(self.context['request']),
+                    'mobile': image_not_found(self.context['request']),
+                }
+            ]
+        return out
 
     def get_siblings(self, instance):
         if instance.is_child:
