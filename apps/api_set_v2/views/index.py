@@ -163,7 +163,7 @@ def index(request, *a, **k):
                 'model': 'image_gallery_x6',
                 'title': 'TOP CATEGORIES',
                 'slug': 'top-category',
-                'content': [tc.serialize(request) for tc in TopCategory.objects.all().order_by('-position')],
+                'content': [tc.serialize(request) for tc in TopCategory.objects.all().select_related('product_range').order_by('-position')],
                 'view_all': None,
                 'bg': '#fff',
                 'color': '#333',
