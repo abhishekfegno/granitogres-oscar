@@ -146,7 +146,8 @@ class ClassRecommendation(object):
                 for pcat in sub_cats:
                     if pcat:
                         net_cats.append(pcat.product_class_id)
-                product_classes = product_classes.filter(id__in=list(net_cats))
+                if net_cats and any(net_cats):
+                    product_classes = product_classes.filter(id__in=list(net_cats))
         else:
             product_classes = []
         return {
