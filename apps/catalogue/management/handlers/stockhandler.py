@@ -98,9 +98,9 @@ class Handler(object):
         partner_name = row['partner'].upper()
         stock_id = row['stock_id']
         stock: StockRecord = self.shared_memory['partner_stocks'][partner_name][stock_id]
-        if 'stock' in fields:
+        if 'stock' in fields and row['stock']:
             stock.num_in_stock = row['stock']
-        if 'price' in fields:
+        if 'price' in fields and row['online_price'] and row['retail_price']:
             stock.price_excl_tax = row['online_price']
             stock.price_retail = row['retail_price']
         stock.save()
