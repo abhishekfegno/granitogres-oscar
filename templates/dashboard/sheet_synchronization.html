@@ -1,0 +1,84 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load i18n %}
+{% load render_table from django_tables2 %}
+
+
+{% block title %}
+Sheet Synchronization | {{ block.super }}
+{% endblock %}
+{% block body_class %}Site Configuration{% endblock %}
+{% block navbar %}
+{% if not is_popup %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+{% block dashboard_nav %}
+{% if not is_popup %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li>
+        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+    </li>
+    <li class="active">Sheet Synchronization</li>
+</ul>
+{% endblock %}
+
+{% block header %}
+<div class="page-header">
+    <h1> Sheet Synchronization </h1>
+</div>
+{% endblock header %}
+
+{% block dashboard_content %}
+<div class="table-header">
+    <h2>Sheet Synchronization</h2>
+</div>
+<div class="well">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <form method="post" id="sync_db_to_sheet">
+                {% csrf_token %}
+                <input type="hidden" hidden name="update_sheet" value="sync_db_to_sheet" >
+                <button type="submit" class="btn btn-primary"> Synchronize Sheeet. </button>
+            </form>
+            <h6 class="text-title">Synchronize database to Google sheet.</h6>
+        </div>
+        <div class="col-md-4">
+            <form method="post" id="sync_stock_from_sheet_to_db">
+                {% csrf_token %}
+                <input type="hidden" hidden name="update_sheet" value="sync_stock_from_sheet_to_db" >
+                <button type="submit" class="btn btn-success"> Update Stock in DB. </button>
+            </form>
+            <h6>Update Stock form Sheet to DB</h6>
+        </div>
+        <div class="col-md-4">
+            <form method="post" id="sync_price_from_db_to_sheet">
+                {% csrf_token %}
+                <input type="hidden" hidden name="update_sheet" value="sync_price_from_db_to_sheet" >
+                <button type="submit" class="btn btn-warning"> Update Price in DB. </button>
+            </form>
+            <h6>Update Price form DB to Sheet </h6>
+        </div>
+    </div>
+</div>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    (function(){
+        var submit_handler = function (e) {
+          var form = e.target;
+            Swal.fire({
+              title: 'Synchronizing...',
+              didOpen: function() {Swal.showLoading()}
+            });
+        }
+        document.getElementById('sync_db_to_sheet').addEventListener("submit", submit_handler);
+        document.getElementById('sync_stock_from_sheet_to_db').addEventListener("submit", submit_handler);
+        document.getElementById('sync_price_from_db_to_sheet').addEventListener("submit", submit_handler);
+
+    })()
+</script>
+{% endblock dashboard_content %}

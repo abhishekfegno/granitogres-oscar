@@ -384,6 +384,8 @@ OSCAR_DASHBOARD_NAVIGATION = [
             # {'label': _('Time Slots'), 'url_name': 'timeslotconfiguration-list',
             #  'access_fn': admin_or_staff},
             # {'label': _('Shipping charges'), 'url_name': 'dashboard:shipping-method-list', },
+            {'label': _('Sync Stock Data'), 'url_name': 'dashboard-custom:sheet-synchronization',
+             'access_fn': admin_or_staff},
 
         ]
     # }, {

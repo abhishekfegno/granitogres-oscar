@@ -4,6 +4,7 @@ from pprint import pprint
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from apps.catalogue.models import ProductClass
+from apps.dashboard.custom.models import SiteConfig
 from apps.partner.models import Partner, StockRecord
 
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
@@ -20,8 +21,11 @@ class Handler(object):
         "Copy of Kitchen Sink": "Kitchen Sink",
     }
 
-    def __init__(self):
+    def __init__(self, sheet_id=None):
         self.write_mode: bool = False
+        self.allow_all: bool = False
+        self.sheet_id = sheet_id or SiteConfig.get_solo().sync_google_sheet_id
+
         self.shared_memory = {
             'partner_stocks': {},
             'partner': {},
@@ -32,42 +36,42 @@ class Handler(object):
         self.handle(update_sheet=False)
 
     def sync_db_to_sheet(self):
+        # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db, sync_price_from_db_to_sheet
         self.handle(update_sheet=True)
 
-    def handle(self, *args, **options):
-        self.write_mode = options['update_sheet']
-        workbook = client.open_by_key('1WIeWBr4rka0SDO32VOcDw_N8tttySqC4YjC0Gh9Zr3Q')
+    def sync_stock_from_sheet_to_db(self):
+        # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db,
+        self.handle(update_sheet=True, fields=("sheet", ))
+
+    def sync_price_from_db_to_sheet(self):
+        # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db,
+        self.handle(update_sheet=True, fields=("price", ))
+
+    def handle(self, update_sheet=False, fields=tuple(), allow_all=True):
+        self.write_mode = update_sheet
+        self.allow_all = allow_all
+        workbook = client.open_by_key(self.sheet_id)
         sheets = workbook.worksheets()
         for sheet in sheets:
-            print(" =============================================== ")
             if sheet.title in self.skippable_sheets:
-                print("Skipping in ", sheet.title)
                 continue
-            print("Operating in ", sheet.title)
-            # self.extract_sheet(sheet)
-            if input("Do you want to proceed? ").lower() == "y":
-                self.extract_sheet(sheet)
-            else:
-                print("Skipping.... ")
-        print(" =============================================== ")
+            self.extract_sheet(sheet, fields=fields)
         pprint(dict(self.analytics))
         pprint(dict(self.reporting))
 
-    def extract_sheet(self, sheet):
+    def extract_sheet(self, sheet, fields):
         parent_products = {}
-
         pc_title = self.pc_mapper.get(sheet.title, sheet.title)
         pc, _ = ProductClass.objects.get_or_create(name=pc_title)
         if self.write_mode:
             self.update_row(sheet, pc)
         else:
-
             dataset = sheet.get_all_records()
             self.shared_memory['updater'] = dict()
             self.shared_memory['partner'] = dict()
             self.shared_memory['read_stock_and_price'] = {}
             for row in dataset:
-                self.read_stock_and_price(row)
+                self.read_stock_and_price(row, fields=fields)
 
     def update_row(self, worksheet, pc):
         out = [
@@ -89,14 +93,16 @@ class Handler(object):
             self.shared_memory['partner_stocks'][name.upper()] = {s.id: s for s in partner.stockrecords.all()}
         return self.shared_memory['partner'][name.upper()]
 
-    def read_stock_and_price(self, row) -> None:
+    def read_stock_and_price(self, row, fields) -> None:
         partner: Partner = self.get_partner(name=row['partner'].upper())
         partner_name = row['partner'].upper()
         stock_id = row['stock_id']
         stock: StockRecord = self.shared_memory['partner_stocks'][partner_name][stock_id]
-        stock.num_in_stock = row['stock']
-        stock.price_excl_tax = row['online_price']
-        stock.price_retail = row['retail_price']
+        if 'stock' in fields:
+            stock.num_in_stock = row['stock']
+        if 'price' in fields:
+            stock.price_excl_tax = row['online_price']
+            stock.price_retail = row['retail_price']
         stock.save()
 
 

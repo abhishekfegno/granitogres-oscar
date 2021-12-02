@@ -333,6 +333,10 @@ class SocialMediaPost(AbstractCURDModel):
 
 class SiteConfig(SingletonModel):
     site_name = models.CharField(max_length=256, default="Grocery Store")
+
+    sync_google_sheet_id = models.CharField(max_length=256, default="1WIeWBr4rka0SDO32VOcDw_N8tttySqC4YjC0Gh9Zr3Q")
+
+
     MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY = models.PositiveSmallIntegerField(
         default=settings.MINIMUM_BASKET_AMOUNT_FOR_FREE_DELIVERY,
         help_text="MINIMUM BASKET AMOUNT FOR FREE DELIVERY")

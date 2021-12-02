@@ -1,10 +1,13 @@
 import errno
 import os
 
+from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.urls import path, include, reverse
-from django.views.generic import TemplateView, UpdateView
+from django.shortcuts import redirect
+from django.urls import path, include, reverse, reverse_lazy
+from django.views.generic import TemplateView, UpdateView, FormView
 
+from apps.catalogue.management.handlers.stockhandler import Handler
 from apps.dashboard.custom.models import models_list, SiteConfig
 from apps.dashboard.custom.views.general import DashboardBlockList, DashboardCustomCreate, DashboardCustomDetail, \
     DashboardCustomDelete
@@ -43,6 +46,37 @@ class Rzp(TemplateView):
         return HttpResponseRedirect(reverse('dashboard-custom:rzp'))
 
 
+class UpdateSheetSynchronization(TemplateView):
+    template_name = "dashboard/sheet_synchronization.html"
+    success_url = reverse_lazy('dashboard-custom:sheet-synchronization')
+
+    def get_context_data(self, **kwargs):
+        return super(UpdateSheetSynchronization, self).get_context_data(config=SiteConfig().get_solo(), **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        caller_function = request.POST.get('update_sheet', None)
+        try:
+            handler = Handler()
+            getattr(handler, caller_function)()
+            # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db, sync_price_from_db_to_sheet
+        except Exception as e:
+            messages.error(self.request, "Something went wrong! " + str(e))
+        else:
+            self.get_proper_message(caller_function)
+        return redirect(self.get_success_url())
+
+    def get_proper_message(self, caller_function):
+        msg = {
+            "sync_sheet_with_db": "Sheet has been Updated Successfully!",
+            "sync_stock_from_sheet_to_db": "New Stock counts has been Updated to Database!",
+            "sync_price_from_db_to_sheet": "New Price changes has been Updated to Database!",
+        }.get(caller_function)
+        messages.success(self.request, msg)
+
+    def get_success_url(self):
+        return self.success_url
+
+
 def view_set(slug, l=None, c=None, r=None, d=None):
     c = c or {}
     r = r or {}
@@ -71,6 +105,7 @@ urlpatterns = [
                                        path('<int:pk>/delete/', OfferBannerDelete.as_view(), name='dashboard-offer-banner-delete'),
                                    ])),
                                    path('site-configuration', UpdateSiteConfig.as_view(), name="site-config"),
+                                   path('sheet-synchronization', UpdateSheetSynchronization.as_view(), name="sheet-synchronization"),
                                ] + referrers)),
     path('rzp/', Rzp.as_view(), name='rzp'),
 ]
