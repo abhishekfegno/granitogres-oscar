@@ -109,7 +109,7 @@ class CatalogueData(object):
         structure = {'variable': Product.PARENT, 'variation': Product.CHILD, 'simple': Product.STANDALONE}[d['Type'].lower().strip()]
         pdt = Product(
             wordpress_product_text=d['ID'],
-            wordpress_product_id=d['Woo_ID'],
+            wordpress_product_id=d['WOO_ID'],
             structure=structure,
             upc=d['SKU'],
             parent=self.parent_product_queue[d['Parent']] if structure == Product.CHILD else None,
@@ -201,7 +201,7 @@ class Command(BaseCommand):
     readable_sheets = ["One Piece Toilet"]
     sheet_id = "19BFSfp95v1JxirCc03Hh6HWcLrCM7GCumVd9YezcXjE"  # ABC HAUZ Product Data OSCAR
     fields = (
-        "ID", "Woo_ID", "Type", "SKU", "Name", "Published", "Is_featured", "Visibility_in_catalog",
+        "ID", "WOO_ID", "Type", "SKU", "Name", "Published", "Is_featured", "Visibility_in_catalog",
         "Short_description", "Description", "Date_sale_price_starts", "Date_sale_price_ends", "Tax_status",
         "Tax_class", "In_stock", "Stock", "Low_stock_amount", "Sold_individually", "Weight(kg)", "Length(mm)",
         "Width(mm)", "Height(mm)", "Allow_customer_reviews", "Purchase_note", "Sale_price", "Regular_price",
