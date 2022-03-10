@@ -13,7 +13,7 @@ from django.utils.functional import lazy
 from django.utils.text import slugify
 from oauth2client.service_account import ServiceAccountCredentials
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
-from apps.catalogue.models import ProductClass, ProductAttribute, Product, ProductImage, ProductAttributeValue
+from apps.catalogue.models import ProductClass, ProductAttribute, Product, ProductImage, ProductAttributeValue, Category
 from apps.partner.models import StockRecord, Partner
 import pickle
 
@@ -221,7 +221,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.clear_db()
-        workbook = get_workbook(self.sheet_id, specific_sheets=['One Piece Toilet'])
+        workbook = get_workbook(self.sheet_id)
+        # workbook = get_workbook(self.sheet_id, specific_sheets=['One Piece Toilet'])
         for sheet_title, dataset in workbook:
             pc, created_attrs = prepare_product_class_data_from_datasheet(sheet_title, dataset)
             self.extract_sheet(sheet_title, dataset, pc=pc, attrs=created_attrs)
@@ -232,6 +233,7 @@ class Command(BaseCommand):
             CatalogueData(row, sheet_name=sheet_title, pc=pc, attrs=attrs).save()
 
     def clear_db(self):
+        Category.objects.all().delete()
         Product.objects.all().delete()
         ProductClass.objects.all().delete()
         ProductAttribute.objects.all().delete()
