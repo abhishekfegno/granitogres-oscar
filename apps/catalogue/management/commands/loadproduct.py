@@ -111,7 +111,7 @@ class CatalogueData(object):
             wordpress_product_text=d['ID'],
             wordpress_product_id=d['WOO_ID'],
             structure=structure,
-            upc=d['SKU'],
+            upc=d['SKU'] + '_' + d['ID'],
             parent=self.parent_product_queue[d['Parent']] if structure == Product.CHILD else None,
             title=d['Name'],
             seo_title=d['Name'],
