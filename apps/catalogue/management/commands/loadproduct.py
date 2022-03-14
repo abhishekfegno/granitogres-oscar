@@ -102,12 +102,7 @@ class CatalogueData(object):
         self.cat_info = catinfo
 
     def save(self, commit=False):
-        categories = []
         d = self.d
-        for cat_bread in self.d['Categories'].split(','):
-            category = create_from_breadcrumbs(cat_bread)
-            categories.append(category)
-
         structure = {
             'variable': Product.PARENT, 'variation': Product.CHILD, 'simple': Product.STANDALONE
         }[d['Type'].lower().strip()]
@@ -147,13 +142,7 @@ class CatalogueData(object):
             self.add_stock(pdt)
 
         if p or s:
-            cats = []
-            if p:
-                cats = self.cat_info[d['Parent']]
-            elif s:
-                cats = self.cat_info[d['ID']]
-            else:
-                pass
+            cats = self.cat_info.get(d['ID'], list())
             for cat in cats:
                 pdt.categories.add(cat)
 
@@ -211,7 +200,7 @@ def get_workbook(sheet_id, specific_sheets=None):
 def cache_all_categories(dataset):
     product_data_cat_map = {}
     for row in dataset:
-        structure = row['Type'].lower().strip()
+        structure = row['Type'].lower().strip().replace('&amp;', '&')
         cats = [
             create_from_breadcrumbs(c)
             for c in row['Categories'].split(',')
