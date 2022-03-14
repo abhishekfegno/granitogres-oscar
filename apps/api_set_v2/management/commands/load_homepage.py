@@ -289,8 +289,8 @@ class Command(BaseCommand):
         r = Range(slug="under-500", name="Under 500", is_public=True)
         r.save()
         ind = 0
-        for pdt in StockRecord.objects.filter(price_excl_tax__lte=500).select_related('product'):
-            r.add_product(pdt, ind)
+        for sr in StockRecord.objects.filter(price_excl_tax__lte=500).select_related('product'):
+            r.add_product(sr.product, ind)
         OfferBox.objects.create(
             image='price/under-500-200x200.png',
             product_range=r,
@@ -301,8 +301,8 @@ class Command(BaseCommand):
         r = Range(slug="500-2000", name="500 to 2000", is_public=True)
         r.save()
         ind = 0
-        for pdt in StockRecord.objects.filter(price_excl_tax__range=(500, 2_000)).select_related('product'):
-            r.add_product(pdt, ind)
+        for sr in StockRecord.objects.filter(price_excl_tax__range=(500, 2_000)).select_related('product'):
+            r.add_product(sr.product, ind)
         OfferBox.objects.create(
             image='price/500-to-2000-200x200.png',
             product_range=r,
@@ -313,8 +313,8 @@ class Command(BaseCommand):
         r = Range(slug="2000-7000", name="2000 to 7000", is_public=True)
         r.save()
         ind = 0
-        for pdt in StockRecord.objects.filter(price_excl_tax__range=(2_000, 7_000)).select_related('product'):
-            r.add_product(pdt, ind)
+        for sr in StockRecord.objects.filter(price_excl_tax__range=(2_000, 7_000)).select_related('product'):
+            r.add_product(sr.product, ind)
         OfferBox.objects.create(
             image='price/2000-to-7000-200x200.png',
             product_range=r,
@@ -324,8 +324,8 @@ class Command(BaseCommand):
         r = Range(slug="7000-15000", name="7000 to 15000", is_public=True)
         r.save()
         ind = 0
-        for pdt in StockRecord.objects.filter(price_excl_tax__range=(7_000, 15_000)).select_related('product'):
-            r.add_product(pdt, ind)
+        for sr in StockRecord.objects.filter(price_excl_tax__range=(7_000, 15_000)).select_related('product'):
+            r.add_product(sr.product, ind)
         OfferBox.objects.create(
             image='price/7000-to-15000-200x200.png',
             product_range=r,
@@ -336,8 +336,8 @@ class Command(BaseCommand):
         r = Range(slug="15000-", name="15000 and Above", is_public=True)
         r.save()
         ind = 0
-        for pdt in StockRecord.objects.filter(price_excl_tax__gte=15_000).select_related('product'):
-            r.add_product(pdt, ind)
+        for sr in StockRecord.objects.filter(price_excl_tax__gte=15_000).select_related('product'):
+            r.add_product(sr.product, ind)
         OfferBox.objects.create(
             image='price/15000-200x200.png',
             product_range=r,
