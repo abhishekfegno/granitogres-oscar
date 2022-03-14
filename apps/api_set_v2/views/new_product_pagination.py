@@ -316,6 +316,7 @@ class ProductListAPIView(GenericAPIView):
         #         product_data[product]['variants'] = []
         # return product_data.values()
 
+
 product_list_new_pagination = ProductListAPIView.as_view()
 
 
