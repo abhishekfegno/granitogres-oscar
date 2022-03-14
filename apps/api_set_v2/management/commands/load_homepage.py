@@ -32,6 +32,20 @@ class Command(BaseCommand):
 
     def set_banners(self):
         #  BANNER 1 - Bathroom Accessories
+        Range.objects.filter(
+            slug__in=[
+                'bathroom_accessories',
+                'kitchen_sink',
+                'furniture',
+                'decor_artestic',
+                'decor_latest',
+                'furniture_top_categories',
+                'surface_top_categories',
+                'faucets_top_categories',
+                'kitchen_sink_top_categories',
+                'bathroom_top_categories',
+            ]
+        ).delete()
         rng, created = Range.objects.get_or_create(name="HOMEPAGE - Bathroom Accessories", slug="bathroom_accessories", is_public=True)
         ct: Category = Category.objects.get(name="Accessories")
         for cat in ct.get_descendants_and_self():
@@ -135,7 +149,7 @@ class Command(BaseCommand):
         )
 
         # Top categories :: 6
-        rng, created = Range.objects.get_or_create(name="TopCategories - Elegant Bathroom Accessories", slug="kitchen_sink_top_categories", is_public=True)
+        rng, created = Range.objects.get_or_create(name="TopCategories - Elegant Bathroom Accessories", slug="bathroom_top_categories", is_public=True)
         # ct: Category = Category.objects.get(name="Art Basins")
         rng.included_categories.add(ct)
         TopCategory.objects.create(
@@ -146,6 +160,7 @@ class Command(BaseCommand):
         )
 
     def set_listing_range_products(self):
+
         exclusive_products_slug = 'exclusive-products'
         exclusive_products, _created = Range.objects.get_or_create(
             slug=exclusive_products_slug,
@@ -262,6 +277,15 @@ class Command(BaseCommand):
         )
 
     def offer_boxes(self):
+        Range.objects.filter(
+            slug__in=[
+                'under-500',
+                '500-2000',
+                '2000-7000',
+                '7000-15000',
+                '15000-',
+            ]
+        ).delete()
         r = Range(slug="under-500", name="Under 500", is_public=True)
         r.save()
         ind = 0
@@ -323,21 +347,29 @@ class Command(BaseCommand):
 
     def set_instagram_page(self):
         SocialMediaPost.objects.create(
+            position=1,
+            title='ins01',
             banner="insta/ins01.jpg",
             social_media_url="https://www.instagram.com/p/Cac4zFzvVis/",
         )
 
         SocialMediaPost.objects.create(
+            position=2,
+            title='ins02',
             banner="insta/ins02.jpg",
             social_media_url="https://www.instagram.com/p/Cayvrj7P_FB/",
         )
 
         SocialMediaPost.objects.create(
+            position=3,
+            title='ins03',
             banner="insta/ins03.jpg",
             social_media_url="https://www.instagram.com/p/CaR4pCkqjyE/",
         )
 
         SocialMediaPost.objects.create(
+            position=4,
+            title='ins04',
             banner="insta/ins04.jpg",
             social_media_url="https://www.instagram.com/p/CaR4pCkqjyE/",
         )
