@@ -87,7 +87,7 @@ class Command(BaseCommand):
         TopCategory.objects.create(
             position=5,
             title="Explore the latest decor items",
-            banner="collections/decor-new.jpg",
+            image="collections/decor-new.jpg",
             product_range=rng
         )
         # Top categories :: 2
@@ -97,7 +97,7 @@ class Command(BaseCommand):
         TopCategory.objects.create(
             position=10,
             title="Let your furniture evolve",
-            banner="collections/Furniture-new-1.jpg",
+            image="collections/Furniture-new-1.jpg",
             product_range=rng
         )
 
@@ -108,7 +108,7 @@ class Command(BaseCommand):
         TopCategory.objects.create(
             position=15,
             title="Rich and Conventional Surface",
-            banner="collections/Tiles-Category.jpg",
+            image="collections/Tiles-Category.jpg",
             product_range=rng
         )
 
@@ -119,7 +119,7 @@ class Command(BaseCommand):
         TopCategory.objects.create(
             position=20,
             title="Exciting Deals on Branded Faucets",
-            banner="collections/faucet-Category.jpg",
+            image="collections/faucet-Category.jpg",
             product_range=rng
         )
 
@@ -130,7 +130,7 @@ class Command(BaseCommand):
         TopCategory.objects.create(
             position=25,
             title="Amazing offers in Kitchen Sink",
-            banner="collections/kitchen-new.jpg",
+            image="collections/kitchen-new.jpg",
             product_range=rng
         )
 
@@ -141,7 +141,7 @@ class Command(BaseCommand):
         TopCategory.objects.create(
             position=3,
             title="Elegant Bathroom Accessories",
-            banner="collections/Bathroom-new.jpg",
+            image="collections/Bathroom-new.jpg",
             product_range=rng
         )
 
