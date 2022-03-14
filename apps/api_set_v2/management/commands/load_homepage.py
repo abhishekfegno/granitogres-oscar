@@ -272,7 +272,7 @@ class Command(BaseCommand):
             position=1,
             title='Best Bathroom Accessories',
             product_range=_range,
-            banner='fullwidth/bathroom-accessories-new.jpg',
+            banner='fullwidth/banner-2.png',
             type=InAppBanner.SLIDER_BANNER,
         )
 
