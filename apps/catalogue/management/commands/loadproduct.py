@@ -197,7 +197,7 @@ def get_workbook(sheet_id, specific_sheets=None):
             yield sheet.title, sheet.get_all_records()
 
 
-def cache_all_categories(dataset):
+def cache_all_categories(pc, dataset):
     product_data_cat_map = {}
     for row in dataset:
         structure = row['Type'].lower().strip().replace('&amp;', '&')
@@ -205,6 +205,10 @@ def cache_all_categories(dataset):
             create_from_breadcrumbs(c)
             for c in row['Categories'].split(',')
         ]
+        for c in cats:
+            if c.product_class is None:
+                c.product_class = pc
+                c.save()
         if structure == "variation":
             key = row['Parent']
         elif structure == "simple":
@@ -249,7 +253,7 @@ class Command(BaseCommand):
             # memory.rollback()
 
     def extract_sheet(self, sheet_title, dataset, pc, attrs):
-        catinfo = cache_all_categories(dataset)
+        catinfo = cache_all_categories(pc, dataset)
         for row in dataset:
             CatalogueData(row, sheet_name=sheet_title, pc=pc, attrs=attrs, catinfo=catinfo).save()
 
