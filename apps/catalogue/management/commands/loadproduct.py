@@ -94,19 +94,19 @@ class CatalogueData(object):
     end_product_queue = []
     stock_queue = []
 
-    def __init__(self, dataset, sheet_name, pc, attrs):
+    def __init__(self, dataset, sheet_name, pc, attrs, catinfo):
         self.d = dataset
         self.class_name = sheet_name
         self.pc = pc
         self.attrs = attrs
+        self.cat_info = catinfo
 
     def save(self, commit=False):
         d = self.d
-        categories = []
-        for cat_bread in self.d['Categories'].split(','):
-            category = create_from_breadcrumbs(cat_bread)
-            categories.append(category)
-        structure = {'variable': Product.PARENT, 'variation': Product.CHILD, 'simple': Product.STANDALONE}[d['Type'].lower().strip()]
+        structure = {
+            'variable': Product.PARENT, 'variation': Product.CHILD, 'simple': Product.STANDALONE
+        }[d['Type'].lower().strip()]
+
         pdt = Product(
             wordpress_product_text=d['ID'],
             wordpress_product_id=d['WOO_ID'],
@@ -142,8 +142,10 @@ class CatalogueData(object):
             self.add_stock(pdt)
 
         if p or s:
-            for cat in categories:
+            cats = self.cat_info.get(d['ID'], list())
+            for cat in cats:
                 pdt.categories.add(cat)
+
         if p or s or c:
             self.add_attributes(pdt)
         if d['Images']:
@@ -195,6 +197,28 @@ def get_workbook(sheet_id, specific_sheets=None):
             yield sheet.title, sheet.get_all_records()
 
 
+def cache_all_categories(pc, dataset):
+    product_data_cat_map = {}
+    for row in dataset:
+        structure = row['Type'].lower().strip().replace('&amp;', '&')
+        cats = [
+            create_from_breadcrumbs(c)
+            for c in row['Categories'].split(',')
+        ]
+        for c in cats:
+            if c.product_class is None:
+                c.product_class = pc
+                c.save()
+        if structure == "variation":
+            key = row['Parent']
+        elif structure == "simple":
+            key = row['ID']
+        else:
+            continue
+        product_data_cat_map[key] = cats
+    return product_data_cat_map
+
+
 class Command(BaseCommand):
     analytics = defaultdict(lambda: defaultdict(lambda: 0))
     reporting = defaultdict(list)
@@ -229,8 +253,9 @@ class Command(BaseCommand):
             # memory.rollback()
 
     def extract_sheet(self, sheet_title, dataset, pc, attrs):
+        catinfo = cache_all_categories(pc, dataset)
         for row in dataset:
-            CatalogueData(row, sheet_name=sheet_title, pc=pc, attrs=attrs).save()
+            CatalogueData(row, sheet_name=sheet_title, pc=pc, attrs=attrs, catinfo=catinfo).save()
 
     def clear_db(self):
         Category.objects.all().delete()
