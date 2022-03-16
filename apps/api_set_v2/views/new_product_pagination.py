@@ -1,29 +1,55 @@
+import timeit
+from django.core.cache import cache
 from typing import Union, Any
-
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db import models
-from django.db.models import Q, Value
+from django.db import models, connection
+from django.db.models import Q, Value, Prefetch
 from django.http import Http404
-from oscar.apps.basket.utils import ConditionalOffer
 from oscar.apps.offer.models import Range
 from rest_framework.generics import GenericAPIView, get_object_or_404
 from rest_framework.response import Response
 
 from apps.api_set_v2.serializers.catalogue import ProductSimpleListSerializer
-from apps.api_set_v2.utils.product import get_optimized_product_dict
 from apps.api_set_v2.views.product_listing_query_pagination import get_breadcrumb
 from django.utils.translation import ugettext as _
 
 from apps.availability.models import Zones
 from apps.catalogue.models import Product, ProductClass
-from apps.dashboard.custom.models import OfferBanner
 from apps.partner.models import StockRecord
 from apps.utils.urls import list_api_formatter
 from lib.product_utils import category_filter, recommended_class, apply_filter, apply_search, apply_sort
 
-# sorting
+from factory.django import get_model
+from oscar.apps.offer.models import ConditionalOffer
+from oscar.apps.search.signals import user_search
+from oscar.core.loading import get_class
+from rest_framework.decorators import api_view
+from rest_framework.generics import get_object_or_404, GenericAPIView
+from rest_framework.response import Response
+from apps.api_set.serializers.catalogue import (
+    custom_ProductListSerializer
+)
+from apps.api_set_v2.utils.product import get_optimized_product_dict
+from apps.availability.models import Zones
+from apps.dashboard.custom.models import OfferBanner
+from apps.partner.models import StockRecord
+from lib.product_utils import category_filter, apply_filter, apply_search, apply_sort, recommended_class
+from apps.catalogue.models import Product
+from apps.utils.urls import list_api_formatter
+from lib import cache_key
+from lib.cache import cache_library
 from lib.product_utils.search import tag__combinations
+
+
+get_product_search_handler_class = get_class(
+    'catalogue.search_handlers', 'get_product_search_handler_class')
+
+_ = lambda x: x
+
+Category = get_model('catalogue', 'Category')
+
+# sorting
 
 RELEVANCY = "relevancy"
 TOP_RATED = "rating"
@@ -54,23 +80,37 @@ FILTER_BY_CHOICES = [
 ]
 
 
+def send_user_search(request, query):
+    # Raise a signal for other apps to hook into for analytics
+    Category.objects.filter(name__icontains=query.lower()).update(search_count=F('search_count')+1)
+    #
+
+
 class ProductListAPIView(GenericAPIView):
     queryset = Product.browsable.browsable()
     # pagination_class = Paginator
     i_paginator = None
 
     # Extracting Dataset
+    def prepare_product(self, qs):
+        # return qs.select_related(
+        #     'product_class',
+        #     'parent__categories', 'parent__attributes', 'parent__attribute_values', 'parent__images',
+        # ).prefetch_related(
+        #     'categories', 'children', 'attributes', 'images', 'attribute_values',
+        #     'children__parent', 'children__attributes',  'children__images',
+        # )
+        return qs.select_related('product_class', 'parent__brand', 'parent__product_class').prefetch_related(
+            'categories',
+            Prefetch('children', queryset=Product.objects.all().select_related(
+                'product_class', 'parent__brand', 'parent__product_class'
+            ).prefetch_related(
+                'attributes', 'images', 'attribute_values'
+            )),
+            'attributes', 'images', 'attribute_values'
+        )
 
     def prepare_data(self, request):
-        self.base_queryset = Product.objects.all()
-        self.default_category = 'all'
-        self.queryset = self.base_queryset
-        self.out = {}
-        self.title = 'All'
-        self.product_range = None
-        self.cat = None
-        self.rc = None
-        self.page_obj = None
         self.sort = request.GET.get('sort')
         self.search = request.GET.get('q')
         self.filter = request.GET.get('filter')
@@ -83,43 +123,94 @@ class ProductListAPIView(GenericAPIView):
         self.page_size = int(request.GET.get('page_size', str(settings.DEFAULT_PAGE_SIZE)))
         self.only_favorite = bool(request.GET.get('only_favorite', False))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.qcount = {}
+        self.base_queryset = Product.objects.all()
+        self.default_category = 'all'
+        self.queryset = self.base_queryset
+        self.out = {}
+        self.title = 'All'
+        self.product_range = None
+        self.cat = None
+        self.rc = None
+        self.page_obj = None
+
+    def log_qc(self, log_point, reset=True):
+        cnt = len(connection.queries)
+        self.qcount[log_point] = {
+            'crossed': cnt,
+            "delta": cnt - self.prev_qc
+        }
+        if reset:
+            self.prev_qc = cnt
+
     def get(self, request, category='all'):
         self.out_log = out_log = {}
         self.category = category
+        self.prev_qc = 0
+        self.initial_qc = len(connection.queries)
+
         # extract
         self.prepare_data(request)
         out_log['0_initial'] = "data prepared!"
         out_log['1_prepare_data'] = "data prepared!"
+        self.log_qc('01_initial')
+
         # transform
         self.apply_primary_filter()
         out_log['2_primary_filter_applied'] = f"Now count {self.queryset.count()}"
+        self.log_qc('04_pc_filter')
         self.find_recommended_class()
         out_log['3_rc'] = f"Now rc= {str(self.product_class)}"
+        self.log_qc('04_pc_filter')
 
         # self.filter_favorite()
         self.filter_product_class()
         out_log['4_pc_filter'] = f"Now rc filtering = {self.queryset.count()}"
+        self.log_qc('04_pc_filter')
 
-        self.queryset = self.queryset.annotate(rank=Value(5, output_field=models.IntegerField()))
+        self.queryset = self.queryset.annotate(rank=Value(5, output_field=models.IntegerField())).select_related('product_class')
 
         self.apply_filter()
         out_log['5_apply_filter'] = f"Now apply filter = {self.queryset.count()}"
+        self.log_qc('05_apply_filter')
+        # displayable_qs = self.queryset.exclude(structure=Product.PARENT)
+        # child_qs = Product.objects.filter(parent_id__in=self.queryset.filter(structure=Product.PARENT).values_list('id'))
+        # self.queryset = displayable_qs | child_qs
         self.apply_search()
         out_log['6_apply_search'] = f"Now apply search = {self.queryset.count()}"
-        self.queryset = self.queryset.exclude(structure=Product.PARENT)
-        # load
-        # # # self.filter_stock()       # will remove some products.
-        products_list = self.sort_products()
-        out_log['7_apply_search'] = f"Now apply sort = {len(products_list)}"
+        self.log_qc('06_apply_search with ' + str(self.queryset.count()) + " items.")
+        q2 = self.queryset.values_list('id', 'parent_id')
+        considered_parent_id = []
+        allowed_ids = []
+        for _id, parent_id in q2:
+            if parent_id is None:
+                allowed_ids.append(_id)
+            if parent_id not in considered_parent_id:
+                allowed_ids.append(_id)
+                considered_parent_id.append(parent_id)
+        self.queryset = self.queryset.filter(id__in=allowed_ids)
+        out_log['6.5_apply_search'] = f"Now apply search = {self.queryset.count()}"
+        self.log_qc('06.5_apply_search with ' + str(self.queryset.count()) + " items.")
+        # self.queryset = self.queryset.exclude(structure=Product.PARENT)   TODO: uncomment
+        products_list = self.sort_products()        # TODO: uncomment
+        # products_list = self.queryset             # TODO: comment this line
+        out_log['7_apply_sort'] = f"Now apply sort = {len(products_list)}"
+        self.log_qc('07_apply_sort')
         self.paginate_dataset(products_list)
         out_log['8_paginated'] = f"Now apply sort = {len(products_list)}"
+        self.log_qc('08_paginated')
         out_log['8_paginated_obj_list'] = f"page_obj.object_list = {len(self.page_obj.object_list)}"
         serialized_products_list = self.load_paginated_data()
         out_log['9_serialized_products_list_count'] = f"{len(serialized_products_list)}"
-
+        self.log_qc('09_serialized_products_list_count')
         self.load_seo()
-
-        return Response(self.render_api(serialized_products_list, out_log=self.out_log))
+        self.log_qc('10_seo')
+        if self.search and len(self.search) > 3:
+            send_user_search(request, self.search)
+        response = self.render_api(serialized_products_list, out_log=self.out_log, qcount=self.qcount)
+        return Response(response)
 
     # Transforming Dataset
 
@@ -181,28 +272,10 @@ class ProductListAPIView(GenericAPIView):
             self.title = f"Search: '{self.search}'"
 
     # Load Dataset
-    def get_partners(self):
-        zone = None
-        if self.request.GET.get('pincode'):
-            from apps.availability.facade import get_zone_from_pincode
-            _zone = get_zone_from_pincode(self.request.GET.get('pincode'))
-            zone = _zone.id
-        if zone is None:
-            zone: int = self.request.session.get('zone')  # zone => Zone.pk
-        if zone:
-            partner_ids = Zones.objects.filter(pk=zone).values_list('partner_id', flat=True)
-        else:
-            partner_ids = Zones.objects.order_by('-is_default_zone').values_list('partner_id', flat=True)
-        return partner_ids
-
     def stocked_products(self):
-        partner_ids = self.get_partners()
-
-        stk_qs = StockRecord.objects.filter(
-            partner_id__in=partner_ids, num_in_stock__gt=0,
-        ).values_list('product_id', flat=True)
-        child_selections = Q(Q(structure=Product.CHILD) & Q(parent_id__in=stk_qs))
-        parent_selections = Q(Q(structure=Product.STANDALONE) & Q(id__in=stk_qs))
+        stk_qs = StockRecord.objects.filter(num_in_stock__gt=0).values_list('product_id', flat=True)
+        child_selections = Q(Q(structure=Product.CHILD) & Q(id__in=stk_qs))
+        parent_selections    = Q(Q(structure=Product.STANDALONE) & Q(id__in=stk_qs))
         return self.queryset.filter(parent_selections | child_selections)
 
     def filter_stock(self):
