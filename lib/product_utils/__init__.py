@@ -35,14 +35,15 @@ def brand_filter(queryset, brand_ids):
 def apply_filter(queryset: QuerySet, _filter: str, null_value_compatability: str = '__', product_class: Optional[ProductClass] = None):
     """
     _filter:
+         # old => input = weight:25,30,35::minprice:25::maxprice:45::available_only:1::color=Red,Black,Blue::ram:4 GB,8 GB
          input = weight:25|30|35::minprice:25::maxprice:45::available_only:1::color=Red|Black|Blue::ram:4 GB|8 GB
          _flt = [
-             weight__in : [25, 30, 35],
+             weight__in : 25|35|45
              minprice : 25,
              maxprice : 45,
              available_only : 1
-             color: [Red,Black,Blue]
-             ram:[4 GB,8 GB]
+             color: Red|Black|Blue
+             ram:4 GB|8 GB
          ]
     """
     filter_values_set = _filter.split('::')
@@ -85,10 +86,12 @@ def apply_filter(queryset: QuerySet, _filter: str, null_value_compatability: str
 
     if exclude_out_of_stock:
         queryset = queryset.filter(effective_price__isnull=False)
-    if product_class:
-        valid_attributes = set(filter_params.keys()).intersection(set(product_class.attributes.values_list('code', flat=True)))
-        kwargs = {key: val for key, val in filter_params.items() if key in valid_attributes}
-        queryset = queryset.filter_by_attributes(**kwargs)
+    # if product_class:
+    #     valid_attributes = set(filter_params.keys()).intersection(set(product_class.attributes.values_list('code', flat=True)))
+    #     kwargs = {key: val for key, val in filter_params.items() if key in valid_attributes}
+
+    if filter_params:
+        queryset = queryset.filter_by_attributes(**filter_params)
     return queryset
 
 
