@@ -20,6 +20,6 @@ class RazorPayFacade(AbstractFacade):
     def charge(self,
                order_number, total_amount_incl_tax, token, currency=settings.PAYMENT_CURRENCY,
                description=None, metadata=None, **kwargs):
-        return self.session.payment.capture(token, "5000")
+        return self.session.payment.capture(token, total_amount_incl_tax)
 
 

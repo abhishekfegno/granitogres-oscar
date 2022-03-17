@@ -16,6 +16,7 @@ from .models import Order, PaymentEventType, ShippingEventType
 from ..payment import refunds
 from ..payment.refunds import RefundFacade
 from ..payment.utils.cash_payment import Cash
+from ..payment.utils.razorpay_payment import RazorPay
 from ..utils.email_notifications import EmailNotification
 from ..utils.pushnotifications import OrderStatusPushNotification, PushNotification
 from ..utils.utils import get_statuses
@@ -89,9 +90,11 @@ class EventHandler(processing.EventHandler):
         self.handle_refund(order, old_status, new_status)
         # self.handle_delivery(order, old_status, new_status)
         send_sms_for_order_status_change(order)
-        # if new_status == settings.ORDER_STATUS_CONFIRMED:
-        #     source = RefundFacade().get_sources_model_from_order(order)
-        #
+        if new_status == settings.ORDER_STATUS_CONFIRMED:
+            source, source_type_name = RefundFacade().get_source_n_method(order)
+            rzp = RazorPay()
+            rzp
+            source_type_name
         #     if source and source.source_type.name == 'razorpay':
         #         return {
         #             'payment_type': source.source_type.name,
