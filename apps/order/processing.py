@@ -89,7 +89,18 @@ class EventHandler(processing.EventHandler):
         self.handle_refund(order, old_status, new_status)
         # self.handle_delivery(order, old_status, new_status)
         send_sms_for_order_status_change(order)
-
+        # if new_status == settings.ORDER_STATUS_CONFIRMED:
+        #     source = RefundFacade().get_sources_model_from_order(order)
+        #
+        #     if source and source.source_type.name == 'razorpay':
+        #         return {
+        #             'payment_type': source.source_type.name,
+        #             'amount_debited': source.amount_debited,
+        #             'is_paid': source.source_type.code.lower() != 'cash',
+        #             'amount_refunded': source.amount_refunded,
+        #             'amount_available_for_refund': source.amount_available_for_refund,
+        #             'reference': source.reference,
+        #         }
         try:
             OrderStatusPushNotification(order.user).send_status_update(order, new_status)
         except KeyError as e:
