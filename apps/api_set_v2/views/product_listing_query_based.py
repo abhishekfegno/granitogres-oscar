@@ -1,37 +1,31 @@
-import timeit
+from django.db import models, connection
 
-from django.core.cache import cache
-from django.db import connection, models
-from django.db.models import F, Value, Prefetch, Q
+from lib.product_utils.search import tag__combinations
+
+from django.db.models import Q, Value, Prefetch, F
 from django.dispatch import receiver
 from django.http import Http404
-from oscar.apps.analytics.models import ProductRecord, UserProductView
-from oscar.apps.analytics.receivers import _update_counter, UserRecord
+from oscar.apps.analytics.models import ProductRecord, UserRecord, UserProductView
+from oscar.apps.analytics.receivers import _update_counter
 from oscar.apps.catalogue.signals import product_viewed
-from oscar.apps.offer.models import ConditionalOffer, Range
+from oscar.apps.offer.models import Range
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 from factory.django import get_model
 from oscar.apps.offer.models import ConditionalOffer
-from oscar.apps.search.signals import user_search
 from oscar.core.loading import get_class
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404, GenericAPIView
 from rest_framework.response import Response
 
-from apps.api_set.serializers.catalogue import (
-    custom_ProductListSerializer
-)
 from apps.api_set_v2.serializers.catalogue import ProductSimpleListSerializer
 from apps.api_set_v2.utils.product import get_optimized_product_dict
-from apps.availability.models import Zones
 from apps.dashboard.custom.models import OfferBanner
 from apps.partner.models import StockRecord
 from lib.product_utils import category_filter, apply_filter, apply_search, apply_sort, recommended_class
 from apps.catalogue.models import Product, ProductClass
 from apps.utils.urls import list_api_formatter
-from lib import cache_key
 from lib.cache import cache_library
 
 get_product_search_handler_class = get_class(
@@ -107,7 +101,6 @@ def receive_product_view(sender, product, user, **kwargs):
         UserProductView.objects.create(product=product, user=user)
 
 
-
 @api_view()
 def product_list(request, category='all', **kwargs):
     """
@@ -116,7 +109,7 @@ def product_list(request, category='all', **kwargs):
     q = " A search term "
     product_range = '<product-range-id>'
     sort = any one from ['relevancy', 'rating', 'newest', 'price-desc', 'price-asc', 'title-asc', 'title-desc']
-    filter = weight:25|30|35::minprice:25::maxprice:45::available_only:1::color=Red|Black|Blue::ram:4 GB|8 GB
+    filter = minprice:25::maxprice:45::available_only:1::color=Red,Black,Blue::weight:25,30,35::ram:4 GB,8 GB
         Where minprice, maxprice and  available_only are common for all.
         other dynamic parameters are available at  reverse('wnc-filter-options', kwarg={'pk': '<ProductClass: id>'})
     """
@@ -586,6 +579,7 @@ class ProductListAPIView(GenericAPIView):
         #         product_data[product] = product_serializer_class(instance=product, context=cxt).data
         #         product_data[product]['variants'] = []
         # return product_data.values()
+
 
 product_list_new_pagination = ProductListAPIView.as_view()
 
