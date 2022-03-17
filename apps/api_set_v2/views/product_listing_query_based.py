@@ -566,9 +566,9 @@ class ProductListAPIView(GenericAPIView):
                     min_price_val = float('inf')
                     min_price_index = 0
                     for variant in product_data[product]['variants']:
-                        # if variant['price'] < min_price_val:
-                        #     min_price_val = variant['price']
-                        #     min_price_index = ind
+                        if variant['price']['effective_price'] < min_price_val:
+                            min_price_val = variant['price']
+                            min_price_index = ind
                         ind += 1
                     product_data[product]['variants'][min_price_index]['is_selected'] = True
         return product_data.values()
