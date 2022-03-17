@@ -7,7 +7,7 @@ from django.utils.module_loading import import_string
 from oscar.apps.checkout.mixins import OrderPlacementMixin, CommunicationEventType
 from oscar.apps.customer.alerts.utils import Dispatcher
 from oscar.apps.order import processing
-from apps.payment.models import SourceType
+from apps.payment.models import SourceType, Source
 from oscar.core.loading import get_model
 
 from couriers.delhivery.facade import Delhivery
@@ -91,19 +91,15 @@ class EventHandler(processing.EventHandler):
         # self.handle_delivery(order, old_status, new_status)
         send_sms_for_order_status_change(order)
         if new_status == settings.ORDER_STATUS_CONFIRMED:
+            Source()
             source, source_type_name = RefundFacade().get_source_n_method(order)
-            rzp = RazorPay()
-            rzp
-            source_type_name
-        #     if source and source.source_type.name == 'razorpay':
-        #         return {
-        #             'payment_type': source.source_type.name,
-        #             'amount_debited': source.amount_debited,
-        #             'is_paid': source.source_type.code.lower() != 'cash',
-        #             'amount_refunded': source.amount_refunded,
-        #             'amount_available_for_refund': source.amount_available_for_refund,
-        #             'reference': source.reference,
-        #         }
+            if source:
+                rzp = RazorPay()
+                if source_type_name == rzp.name:
+                    response = rzp.client.payment.fetch(source.reference)
+                    if response['status'] == 'authorized':
+                        rzp.client.payment.capure(source.reference, response['amount'])
+
         try:
             OrderStatusPushNotification(order.user).send_status_update(order, new_status)
         except KeyError as e:
