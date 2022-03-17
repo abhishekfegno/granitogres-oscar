@@ -91,7 +91,7 @@ class ProductReviewListView(ListAPIView):
     serializer_class = ProductReviewListSerializer
 
     def get_queryset(self):
-        return ProductReview.objects.filter(product_id=self.kwargs['product']).prefetch_related('images')
+        return ProductReview.objects.exclude(title='', body='', image__isnull=True).filter(product_id=self.kwargs['product']).prefetch_related('images')
 
 
 class ProductReviewCreateView(CreateAPIView):
