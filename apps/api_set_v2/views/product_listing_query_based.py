@@ -562,7 +562,15 @@ class ProductListAPIView(GenericAPIView):
                         product_data[product]['custom_ranking'] = 0
 
                 if selected is False and product_data[product]['variants']:
-                    product_data[product]['variants'][0]['is_selected'] = True
+                    ind = 0
+                    min_price_val = float('inf')
+                    min_price_index = 0
+                    for variant in product_data[product]['variants']:
+                        if variant['price'] < min_price_val:
+                            min_price_val = variant['price']
+                            min_price_index = ind
+                        ind += 1
+                    product_data[product]['variants'][min_price_index]['is_selected'] = True
         return product_data.values()
         # for product in self.page_obj.object_list:
         #     # sr.product.selected_stock_record = sr
