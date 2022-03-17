@@ -82,8 +82,8 @@ FILTER_BY_CHOICES = [
 
 def send_user_search(request, query):
     # Raise a signal for other apps to hook into for analytics
-    Category.objects.filter(name__icontains=query.lower()).update(search_count=models.F('search_count')+1)
-    #
+    # Category.objects.filter(name__icontains=query.lower()).update(search_count=models.F('search_count')+1)
+    pass
 
 
 class ProductListAPIView(GenericAPIView):
