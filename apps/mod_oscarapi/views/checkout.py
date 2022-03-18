@@ -27,6 +27,9 @@ from ..serializers.checkout import (
 )
 from ...api_set.views.orders import _login_required
 from ...basket.models import Basket
+from ...checkout.collector import Casher
+from ...checkout.payment_view_mixins.cod_view import CodPaymentMixin
+from ...checkout.payment_view_mixins.razor_pay_view import RazorPayPaymentMixin
 from ...order.models import TimeSlot
 from ...payment import refunds
 from ...shipping.repository import Repository
@@ -47,7 +50,7 @@ def _login_and_location_required(func):
 
 
 @method_decorator(_login_required, name="dispatch")
-class CheckoutView(OscarAPICheckoutView):
+class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
     __doc__ = """
     Prepare an order for checkout.
 
@@ -324,6 +327,7 @@ class CheckoutView(OscarAPICheckoutView):
         # Send order_placed signal
         order_placed.send(sender=self, order=order, user=request.user, request=request)
 
+
         # Save payment steps into session for processing
         previous_states = utils.list_payment_method_states(request)
         new_states = self._record_payments(
@@ -345,6 +349,8 @@ class CheckoutView(OscarAPICheckoutView):
                 'failed_order': o_ser.data,
             }, status=status.HTTP_406_NOT_ACCEPTABLE)
 
+        ord_sers = []  # must be sent as checkout response
+        ord_statuses = []
         # Return order data
         data = o_ser.data
         data['errors'] = None
@@ -359,7 +365,44 @@ class CheckoutView(OscarAPICheckoutView):
             'is_next': bool(slot),
             'index': slot and slot.index,
         }
-        return Response(o_ser.data)
+        ord_sers.append(data)
+        ord_statuses.append(order.status)
+
+        _status = settings.ORDER_STATUS_PLACED
+        # self.handle_payment_for_orders(orders, order_total=total_amt.incl_tax, payment_data=sample_data['payment'])
+
+        try:
+            self.handle_payment_for_orders(order, order_total=total_amt.incl_tax, payment_data=sample_data['payment'])
+        except Exception as e:
+            print("handle_payment_for_orders >> ", e)
+
+            order.set_status(settings.ORDER_STATUS_PAYMENT_DECLINED)
+            # return Response({"errors": "Payment Declined"})
+            return Response({"errors": "Payment Declined %s" % str(e)})
+
+        print("------------------ 10 ")
+        b_ser = WncBasketSerializer(basket, context={'request': request})
+
+        if settings.ORDER_STATUS_PAYMENT_DECLINED in ord_statuses:
+            basket.thaw()
+            return Response({
+                'errors': _status,
+                'new_basket': b_ser.data,
+                'orders': ord_sers,
+            }, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        return Response({
+            'status': _status,
+            'new_basket': b_ser.data,
+            'orders': ord_sers,
+        }, status=status.HTTP_201_CREATED)
+
+        # return Response(data)
+    def handle_payment_for_orders(self, order, order_total, payment_data):
+        # orders = [order for order in orders]
+        order_total = float(order_total)
+        casher = Casher(payment_data)
+        casher.collect(order_total, order)
 
     def post(self, request, format=None):
         try:
