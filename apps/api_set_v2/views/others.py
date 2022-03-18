@@ -39,7 +39,6 @@ class SendEmail(APIView):
         """
         out = {'status': 'failed'}
         body = normalize(request)
-        import pdb;pdb.set_trace()
         recep = [settings.WEBSITE_EMAIL_RECEIVER, ]
 
         from datetime import datetime
