@@ -331,11 +331,17 @@ class SocialMediaPost(AbstractCURDModel):
         }
 
 
+class NewsLetter(models.Model):
+    email = models.EmailField()
+
+    def __str__(self):
+        return self.email
+
+
 class SiteConfig(SingletonModel):
     site_name = models.CharField(max_length=256, default="Grocery Store")
 
     sync_google_sheet_id = models.CharField(max_length=256, default="1WIeWBr4rka0SDO32VOcDw_N8tttySqC4YjC0Gh9Zr3Q")
-
 
     MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY = models.PositiveSmallIntegerField(
         default=settings.MINIMUM_BASKET_AMOUNT_FOR_FREE_DELIVERY,
@@ -368,6 +374,11 @@ class SiteConfig(SingletonModel):
     home_seo_image = models.ImageField(null=True, blank=True)
     home_seo_image_alt = models.CharField(max_length=255, null=True, blank=True)
     home_seo_footer = RichTextField(null=True, blank=True)
+
+    contact_us_emails = models.CharField(max_length=512, default="abchauzdigital@gmail.com",
+                                         help_text="You can have comma seperated email to send to multiple email address.")
+
+
 
     @property
     def expected_out_for_delivery_delay(self):
