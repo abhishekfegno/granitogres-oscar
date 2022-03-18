@@ -1,6 +1,7 @@
 import pprint
 from collections import Iterable
 
+from django.db import transaction
 from django.db.models import F
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -164,6 +165,7 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
     serializer_class = CheckoutSerializer
     order_object = None
 
+    @transaction.atomic
     def post_format(self, request, format=None):
         # Wipe out any previous state data
         utils.clear_consumed_payment_method_states(request)
