@@ -92,7 +92,6 @@ class Razorpay(BasePaymentMethod):
 
         source_type, __ = SourceType.objects.get_or_create(name=PAYMENT_METHOD_RAZORPAY)
         total = kwargs.get('total')
-        payment_gateway_response = kwargs.get('payment_gateway_response')
         source = Source.objects.create(
             source_type=source_type,
             currency=settings.PAYMENT_CURRENCY,
@@ -101,10 +100,9 @@ class Razorpay(BasePaymentMethod):
             reference=reference,
             order=order
         )
-        if payment_gateway_response:
-            payment_gateway_response.sources.add(source)
-        self.add_payment_event(PAYMENT_EVENT_PURCHASE, order.total_incl_tax)
 
+        self.add_payment_event(PAYMENT_EVENT_PURCHASE, order.total_incl_tax)
+        return source
 
 MAP = {
     'cash': Cash,
@@ -146,7 +144,6 @@ class Casher:
         if order:
 
             response = self.payment_object.collect(net_payment, payment_data=payment_data)
-
             pgr = PaymentGateWayResponse.objects.create(
                 transaction_id=response.get('id'),
                 amount=net_payment,
@@ -155,16 +152,13 @@ class Casher:
                 order=order
             )
 
-            self.payment_object.record_payment(
+            source = self.payment_object.record_payment(
                 order, net_payment, reference=response.get('id', '-'),
-                # order_group_number=order.order_group.number,
                 order_number=order.id,
-                # net_amt=net_payment,
-                # order_total=order.total_incl_tax
-                # **kwargs
                 payment_gateway_response=pgr            # as kwargs
             )
-
+            pgr.source = source
+            pgr.save()
 
 
 
