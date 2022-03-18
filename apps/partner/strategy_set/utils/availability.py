@@ -1,3 +1,4 @@
+from django.conf import settings
 from oscar.apps.partner.availability import Unavailable, StockRequired
 from oscar.core.loading import get_class
 from django.utils.translation import gettext_lazy as _
@@ -15,8 +16,9 @@ class LoginRequiredToPurchase(StockRequired):
 
     def is_purchase_permitted(self, quantity):
         resp = super(LoginRequiredToPurchase, self).is_purchase_permitted(quantity)
-        if resp[0] is True and self.request.user.is_anonymous:
-            return False, _("login required")
+        if resp[0] is True:
+            if self.request.user.is_anonymous:
+                return False, _("login required")
         return resp
 
     @property
