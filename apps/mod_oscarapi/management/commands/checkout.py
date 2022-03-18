@@ -118,7 +118,7 @@ class Command(BaseCommand):
         if response.status_code == 200:
             print("Logged in as : ", user.get_short_name(), "[", user.username, "]")
             self.s = s
-            if response.headers['X-Geo-Location-ID'] == 'None':
+            if response.headers.get('X-Geo-Location-ID') == 'None':
                 self.s.get(self.BASE_URL)
             return
         else:
