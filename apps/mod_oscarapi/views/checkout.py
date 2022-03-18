@@ -377,7 +377,7 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
 
             order.set_status(settings.ORDER_STATUS_PAYMENT_DECLINED)
             # return Response({"errors": "Payment Declined"})
-            return Response({"errors": e}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({"errors": str(e)}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         print("------------------ 10 ")
         b_ser = WncBasketSerializer(basket, context={'request': request})
