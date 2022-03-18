@@ -273,11 +273,11 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
             "payment": {
                 "cash": {
                     "enabled": data.get('payment') == 'cash',
-                    "amount": total_amt.incl_tax if data.get('payment') == 'cash' else 0,
+                    "amount": float(total_amt.incl_tax) if data.get('payment') == 'cash' else 0,
                 },
                 "razor_pay": {
                     "enabled": data.get('payment') == 'razor_pay',
-                    "amount": total_amt.incl_tax if data.get('payment') == 'razor_pay' else 0,
+                    "amount": float(total_amt.incl_tax) if data.get('payment') == 'razor_pay' else 0,
                     "razorpay_payment_id": data.get('razorpay_payment_id')
                 }
             }
