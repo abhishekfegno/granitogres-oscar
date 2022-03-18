@@ -328,25 +328,25 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
         order_placed.send(sender=self, order=order, user=request.user, request=request)
 
         # Save payment steps into session for processing
-        previous_states = utils.list_payment_method_states(request)
-        new_states = self._record_payments(
-            previous_states=previous_states,
-            request=request,
-            order=order,
-            methods=c_ser.fields['payment'].methods,
-            data=c_ser.validated_data['payment'])
-        utils.set_payment_method_states(order, request, new_states)
+        # previous_states = utils.list_payment_method_states(request)
+        # new_states = self._record_payments(
+        #     previous_states=previous_states,
+        #     request=request,
+        #     order=order,
+        #     methods=c_ser.fields['payment'].methods,
+        #     data=c_ser.validated_data['payment'])
+        # utils.set_payment_method_states(order, request, new_states)
 
         o_ser = OrderSerializer(order, context={'request': request})
 
-        if order.status == settings.ORDER_STATUS_PAYMENT_DECLINED:
-            basket = order_to_basket(order, request=request)
-            b_ser = WncBasketSerializer(basket, context={'request': request})
-            return Response({
-                'errors': "Payment Declined!",
-                'new_basket': b_ser.data,
-                'failed_order': o_ser.data,
-            }, status=status.HTTP_406_NOT_ACCEPTABLE)
+        # if order.status == settings.ORDER_STATUS_PAYMENT_DECLINED:
+        #     basket = order_to_basket(order, request=request)
+        #     b_ser = WncBasketSerializer(basket, context={'request': request})
+        #     return Response({
+        #         'errors': "Payment Declined!",
+        #         'new_basket': b_ser.data,
+        #         'failed_order': o_ser.data,
+        #     }, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         ord_sers = []  # must be sent as checkout response
         ord_statuses = []
@@ -377,7 +377,7 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
 
             order.set_status(settings.ORDER_STATUS_PAYMENT_DECLINED)
             # return Response({"errors": "Payment Declined"})
-            return Response({"errors": "Payment Declined %s" % str(e)})
+            return Response({"errors": str(e)}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         print("------------------ 10 ")
         b_ser = WncBasketSerializer(basket, context={'request': request})
