@@ -327,7 +327,6 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
         # Send order_placed signal
         order_placed.send(sender=self, order=order, user=request.user, request=request)
 
-
         # Save payment steps into session for processing
         # previous_states = utils.list_payment_method_states(request)
         # new_states = self._record_payments(
@@ -399,7 +398,6 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
 
         # return Response(data)
     def handle_payment_for_orders(self, order, order_total, payment_data):
-        # orders = [order for order in orders]
         order_total = float(order_total)
         casher = Casher(payment_data)
         casher.collect(order_total, order)

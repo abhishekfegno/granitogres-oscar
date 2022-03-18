@@ -47,7 +47,7 @@ class BasePaymentMethod:
 
 
 class Cash(BasePaymentMethod):
-    def collect(self, net_amount, payment_data):
+    def collect(self, net_amount, payment_data, * args, **kwargs):
         print("Assuming COD HAS BEEN DONE")
         return {}
 
@@ -81,6 +81,7 @@ class Razorpay(BasePaymentMethod):
             net_amount = int(round(net_amount*100))
         print(net_amount)
         return RazorPayFacade().charge(
+            None,
             net_amount,
             token=payment_data[RAZOR_PAY_TOKEN],
             # description=self.payment_description(order_number, total, **kwargs),
