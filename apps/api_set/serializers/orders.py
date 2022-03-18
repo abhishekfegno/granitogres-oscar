@@ -31,7 +31,7 @@ class LineDetailSerializer(serializers.ModelSerializer):
     def get_has_reviewed(self, instance):
         from apps.catalogue.reviews.models import ProductReview
         if instance.order.status in (
-            settings.ORDER_STATUS__DELIVERED
+            settings.ORDER_STATUS_DELIVERED
         ):
             return ProductReview.objects.filter(product_id=instance.product_id, user=self.context['request'].user).exists()
         # returning True as default!
