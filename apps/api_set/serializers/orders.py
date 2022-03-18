@@ -30,7 +30,13 @@ class LineDetailSerializer(serializers.ModelSerializer):
 
     def get_has_reviewed(self, instance):
         from apps.catalogue.reviews.models import ProductReview
-        return ProductReview.objects.filter(product_id=instance.product_id, user=self.context['request'].user).exists()
+        if instance.order.status in (
+            settings.ORDER_STATUS_DELIVERED
+        ):
+            return ProductReview.objects.filter(product_id=instance.product_id, user=self.context['request'].user).exists()
+        # returning True as default!
+        # this doesn't mean user has reviewed, but helps not to review on non delivered or return triggered orders.
+        return True
 
     def get_product(self, instance):
         return custom_ProductListSerializer([instance.product], context=self.context, ignore_child_image=False).data

@@ -36,7 +36,7 @@ def _trigram_search(queryset, search, extends=True):
         query |= SearchQuery(s)
     return queryset.annotate(
         similarity=trigram_similarity,
-    ).filter(similarity__gt=0.25).order_by('-similarity')
+    ).filter(Q(similarity__gt=0.25)|Q(search_tags__icontains=search)).order_by('-similarity')
 
 
 def _similarity_with_rank_search(queryset, search, extends=False):

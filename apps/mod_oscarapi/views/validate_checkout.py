@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db.models import F
 from django.utils.decorators import method_decorator
 from oscarapi.basket.operations import assign_basket_strategy
@@ -57,6 +58,10 @@ class CheckoutValidationView(OscarAPICheckoutView):
         for line in basket.all_lines():
             result = basket.strategy.fetch_for_line(line)
             is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
+            if is_permitted:
+                if line.quantity > settings.OSCAR_MAX_PER_LINE_QUANTITY:
+                    is_permitted, reason = False, f"You cannot buy more than {settings.OSCAR_MAX_PER_LINE_QUANTITY} items of {line.product.title}."
+
             if not is_permitted:
                 msg = "This item is no longer available to buy." % {
                     'title': line.product.get_title(),
