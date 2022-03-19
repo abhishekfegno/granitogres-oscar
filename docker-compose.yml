@@ -1,0 +1,61 @@
+
+services: 
+  nginx: 
+    build: ./nginx 
+    ports:
+      - 1339:80 
+    volumes: 
+      - static_volume:/home/app/microservice/static 
+    depends_on:
+      - web 
+    restart: "on-failure" # restart service when it fails
+  web: 
+    build: . 
+    command: sh -c "python manage.py makemigrations &&
+                    python manage.py migrate &&
+                    gunicorn osc.wsgi:application --bind 0.0.0.0:${APP_PORT}" # Django commands to run app using gunicorn
+    volumes:
+      - .:/microservice 
+      - static_volume:/home/app/microservice/static
+    env_file: 
+      - .env 
+    image: microservice_app 
+
+    expose: 
+      - ${APP_PORT} 
+    restart: "on-failure"
+    depends_on: 
+      - db
+  db: 
+    image: postgres:11-alpine
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data/
+    environment: 
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - PGPORT=${DB_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+    restart: "on-failure"
+  redis:  
+    image: redis
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379"
+    container_name: redis 
+
+    environment:
+       RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
+       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER} 
+       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    depends_on: # can only start if web service is running
+       - web
+
+
+volumes:
+  postgres_data:
+  static_volume:
+  redis:
+  rabbitmq_logs:
+

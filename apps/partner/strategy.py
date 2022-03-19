@@ -62,7 +62,7 @@ class Selector(object):
 
     def strategy(self, request=None, user=None, **kwargs):
         zone = 0
-        if request.GET.get('pincode'):
+        if request and request.GET.get('pincode'):
             from apps.availability.facade import ZoneFacade, get_zone_from_pincode
             _zone = get_zone_from_pincode(request.GET.get('pincode'))
             zone: int = _zone.id

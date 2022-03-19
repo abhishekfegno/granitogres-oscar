@@ -35,14 +35,15 @@ def brand_filter(queryset, brand_ids):
 def apply_filter(queryset: QuerySet, _filter: str, null_value_compatability: str = '__', product_class: Optional[ProductClass] = None):
     """
     _filter:
+         # old => input = weight:25,30,35::minprice:25::maxprice:45::available_only:1::color=Red,Black,Blue::ram:4 GB,8 GB
          input = weight:25|30|35::minprice:25::maxprice:45::available_only:1::color=Red|Black|Blue::ram:4 GB|8 GB
          _flt = [
-             weight__in : [25, 30, 35],
+             weight__in : 25|35|45
              minprice : 25,
              maxprice : 45,
              available_only : 1
-             color: [Red,Black,Blue]
-             ram:[4 GB,8 GB]
+             color: Red|Black|Blue
+             ram:4 GB|8 GB
          ]
     """
     filter_values_set = _filter.split('::')
@@ -65,6 +66,10 @@ def apply_filter(queryset: QuerySet, _filter: str, null_value_compatability: str
             filter_params[set_key(k, v)] = set_value(k, v)
 
     price_from = price_to = None
+    if 'price' in filter_params.keys() and filter_params['price'] != null_value_compatability:
+        price = filter_params.pop('price')
+        price = map(int, price.split('-'))
+        queryset = queryset.filter(effective_price__range=price)
 
     if 'minprice' in filter_params.keys() and filter_params['minprice'] == null_value_compatability:
         price_from = filter_params.pop('minprice')
@@ -85,10 +90,12 @@ def apply_filter(queryset: QuerySet, _filter: str, null_value_compatability: str
 
     if exclude_out_of_stock:
         queryset = queryset.filter(effective_price__isnull=False)
-    if product_class:
-        valid_attributes = set(filter_params.keys()).intersection(set(product_class.attributes.values_list('code', flat=True)))
-        kwargs = {key: val for key, val in filter_params.items() if key in valid_attributes}
-        queryset = queryset.filter_by_attributes(**kwargs)
+    # if product_class:
+    #     valid_attributes = set(filter_params.keys()).intersection(set(product_class.attributes.values_list('code', flat=True)))
+    #     kwargs = {key: val for key, val in filter_params.items() if key in valid_attributes}
+
+    if filter_params:
+        queryset = queryset.filter_by_attributes(**filter_params)
     return queryset
 
 
@@ -118,7 +125,12 @@ def apply_sort(queryset, sort=None):
     if hasattr(queryset, "__is_ordered_at_search"):
         return queryset
     if sort is not None:
-        return queryset.order_by(*sort)
+        if sort == '-effective_price':
+            return queryset.order_by(F('effective_price').desc())
+        elif sort == 'effective_price':
+            return queryset.order_by(F('effective_price').asc())
+        else:
+            return queryset.order_by(*sort)
     return queryset
 
 
@@ -156,40 +168,62 @@ class ClassRecommendation(object):
             'product_classes': product_classes
         }
 
+    def re_recommend_for_search_only(self, queryset, **kwargs):
+        rendered_out = self._compute_with_qs_count(queryset=queryset)
+        return rendered_out or self.render(_id=None, display_classes=True)
+
+    def _compute_with_qs_count(self, queryset):
+        qs = queryset.all()
+        # values = qs.values('id', 'product_class', 'parent__product_class')
+        values = qs.annotate(
+            # pc=
+        )
+
+        struct = {}
+        max_id = None
+        max_count = 0
+        for item in values:
+            key = item['product_class'] or item['parent__product_class']
+            if key not in struct.keys():
+                struct[key] = 1
+            else:
+                struct[key] += 1
+            if max_count <= struct[key]:
+                max_id = key
+                max_count = struct[key]
+        query_count = len(values)
+        if query_count and max_count * 2.0 > query_count or settings.DEBUG:  # at least 3/4th are of same class.
+            return self.render(max_id)
+
     def recommend(self, **kwargs):
         recommended_pclass = None   # to fill if in case of any secondary priority
+
         if 'pclass' in kwargs and kwargs['pclass']:
-            return self.render(kwargs['pclass'])
+            return self.render(kwargs['pclass'], display_classes=True)
+
         if 'search' in kwargs and kwargs['search']:
-            pass
+            return self.render(kwargs['pclass'], display_classes=True)
+
         if 'range' in kwargs and kwargs['range']:
             _pclass = kwargs['range'].classes.all().first()
             if _pclass:
                 return self.render(_pclass.id)
-        if 'category' in kwargs and kwargs['category'] and kwargs['category'] and kwargs['category'].product_class_id:
+
+        if 'category' in kwargs and kwargs['category'] and kwargs['category'].product_class_id:
             return self.render(kwargs['category'].product_class_id)
-        if 'queryset' in kwargs:
-            return self.render(_id=None, display_classes=True, preferred_cats=kwargs.get('preferred_cats'))
-            # values = kwargs['queryset'].values('id', 'product_class', 'parent__product_class')
-            # struct = {}
-            # max_id = None
-            # max_count = 0
-            # for item in values:
-            #     key = item['product_class'] or item['parent__product_class']
-            #     if key not in struct.keys():
-            #         struct[key] = 1
-            #     else:
-            #         struct[key] += 1
-            #     if max_count <= struct[key]:
-            #         max_id = key
-            #         max_count = struct[key]
-            # if len(values) and max_count * 2.0 > len(values) or settings.DEBUG:  # at least 3/4th are of same class.
-            #     return self.render(max_id)
 
-        return self.render(_id=None, display_classes=True)
+        if 'queryset' in kwargs and 'search' not in kwargs:
+            """
+            there should be queryset;
+            there should not be search (because search is computed later);
+            """
+            rendered_out = self._compute_with_qs_count(kwargs['queryset'], )
+            if rendered_out:
+                return rendered_out
+        return self.render(_id=None, display_classes=True, preferred_cats=kwargs.get('preferred_cats'))
 
 
-def recommended_class(queryset, **kwargs):
+def recommended_class(queryset, re_recommend=False, **kwargs):
 
     # Computation in python. Query optimization verified! average of 5-18 iterations and 8 query hits
     params = {
@@ -200,6 +234,8 @@ def recommended_class(queryset, **kwargs):
         'queryset': queryset,
         'preferred_cats': kwargs.get('preferred_cats')
     }
+    if re_recommend:
+        return ClassRecommendation().re_recommend_for_search_only(**params)
     return ClassRecommendation().recommend(**params)
 
 

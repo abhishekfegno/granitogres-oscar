@@ -4,7 +4,7 @@
 import os
 
 
-RAZOR_PAY_LIVE_MODE = os.environ.get("STRIPE_LIVE_MODE", 'off').lower() in ('true', 'on')
+RAZOR_PAY_LIVE_MODE = os.environ.get("RAZOR_PAY_LIVE_MODE", 'off').lower() in ('true', 'on')
 
 RAZOR_PAY_EMAIL = os.environ.get("RAZOR_PAY_EMAIL")
 RAZOR_PAY_MERCHANT_ID = os.environ["RAZOR_PAY_MERCHANT_ID"]

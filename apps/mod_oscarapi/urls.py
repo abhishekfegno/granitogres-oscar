@@ -6,6 +6,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
 from apps.mod_oscarapi.views.basic import RangeCreate
+from apps.mod_oscarapi.views.checkout import CheckoutView
 from apps.mod_oscarapi.views.root import api_root
 from apps.mod_oscarapi.views.validate_checkout import CheckoutValidationView
 
@@ -84,7 +85,6 @@ LoginView = get_api_class("views.login", "LoginView")
 )
 
 (
-    CheckoutView,
     OrderList,
     OrderDetail,
     OrderLineList,
@@ -95,7 +95,6 @@ LoginView = get_api_class("views.login", "LoginView")
 ) = get_api_classes(
     "views.checkout",
     [
-        "CheckoutView",
         "OrderList",
         "OrderDetail",
         "OrderLineList",

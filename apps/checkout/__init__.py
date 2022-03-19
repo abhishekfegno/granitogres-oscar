@@ -3,3 +3,6 @@ PAYMENT_METHOD_STRIPE = 'Stripe'
 STRIPE_EMAIL = 'stripeEmail'
 STRIPE_TOKEN = 'stripeToken'
 RAZOR_PAY_TOKEN = 'razorpay_payment_id'
+
+PAYMENT_METHOD_RAZORPAY = 'Razorpay'
+PAYMENT_METHOD_CASH = 'Cash'

@@ -1,12 +1,13 @@
 from django.conf import settings
+from oscar.apps.payment.models import SourceType
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
 from apps.checkout.facade.razorpay import RazorPayFacade as Facade
 
 from apps.checkout import forms, RAZOR_PAY_TOKEN, PAYMENT_METHOD_STRIPE, PAYMENT_EVENT_PURCHASE
+from apps.payment.utils.razorpay_payment import RazorPay
 
-SITE_NAME = 'WoodN\'Cart'
-SourceType = get_model('payment', 'SourceType')
+SITE_NAME = 'ABC Hauz'
 Source = get_model('payment', 'Source')
 
 
@@ -34,7 +35,7 @@ class RazorPayPaymentMixin(object):
             metadata=self.payment_metadata(order_number, total, **kwargs) # noqa:
         )
 
-        source_type, __ = SourceType.objects.get_or_create(name=PAYMENT_METHOD_STRIPE)
+        source_type, __ = SourceType.objects.get_or_create(name=RazorPay.name, code=RazorPay.code)
         source = Source(
             source_type=source_type,
             currency=settings.PAYMENT_CURRENCY,

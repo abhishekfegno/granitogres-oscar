@@ -7,7 +7,7 @@ from apps.checkout.facade.abstract_facade import AbstractFacade
 class RazorPayFacade(AbstractFacade):
     def __init__(self):
         super().__init__()
-        self.session = razorpay.Client(auth=(settings.RAZOR_PAY_PUBLIC_KEY, settings.RAZOR_PAY_SECRET_KEY))
+        # self.session = razorpay.Client(auth=(settings.RAZOR_PAY_PUBLIC_KEY, settings.RAZOR_PAY_SECRET_KEY))
 
     @staticmethod
     def get_friendly_decline_message(error):
@@ -20,6 +20,8 @@ class RazorPayFacade(AbstractFacade):
     def charge(self,
                order_number, total_amount_incl_tax, token, currency=settings.PAYMENT_CURRENCY,
                description=None, metadata=None, **kwargs):
-        return self.session.payment.capture(token, "5000")
+        # return self.session.payment.capture(token, total_amount_incl_tax)
+        s = razorpay.Client(auth=(settings.RAZOR_PAY_PUBLIC_KEY, settings.RAZOR_PAY_SECRET_KEY))
+        return s.payment.capture(token, total_amount_incl_tax)
 
 

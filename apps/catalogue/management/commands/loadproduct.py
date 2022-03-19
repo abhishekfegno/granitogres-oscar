@@ -13,7 +13,7 @@ from django.utils.functional import lazy
 from django.utils.text import slugify
 from oauth2client.service_account import ServiceAccountCredentials
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
-from apps.catalogue.models import ProductClass, ProductAttribute, Product, ProductImage, ProductAttributeValue
+from apps.catalogue.models import ProductClass, ProductAttribute, Product, ProductImage, ProductAttributeValue, Category
 from apps.partner.models import StockRecord, Partner
 import pickle
 
@@ -94,32 +94,32 @@ class CatalogueData(object):
     end_product_queue = []
     stock_queue = []
 
-    def __init__(self, dataset, sheet_name, pc, attrs):
+    def __init__(self, dataset, sheet_name, pc, attrs, catinfo):
         self.d = dataset
         self.class_name = sheet_name
         self.pc = pc
         self.attrs = attrs
+        self.cat_info = catinfo
 
     def save(self, commit=False):
         d = self.d
-        categories = []
-        for cat_bread in self.d['Categories'].split(','):
-            category = create_from_breadcrumbs(cat_bread)
-            categories.append(category)
-        structure = {'variable': Product.PARENT, 'variation': Product.CHILD, 'simple': Product.STANDALONE}[d['Type'].lower().strip()]
+        structure = {
+            'variable': Product.PARENT, 'variation': Product.CHILD, 'simple': Product.STANDALONE
+        }[d['Type'].lower().strip()]
+
         pdt = Product(
             wordpress_product_text=d['ID'],
-            wordpress_product_id=d['Woo_ID'],
+            wordpress_product_id=d['WOO_ID'],
             structure=structure,
-            upc=d['SKU'],
+            upc=f"{d['SKU']}_{d['ID']}",
             parent=self.parent_product_queue[d['Parent']] if structure == Product.CHILD else None,
             title=d['Name'],
             seo_title=d['Name'],
             is_public=bool(d['Published']),
             slug=slugify(d['Name']),
             description=d['Description'],
-            seo_description=d['Description'],
-            seo_keywords=d['Description'],
+            seo_description=d['Description'][:254],
+            seo_keywords=d['Description'][:254],
             custom_search_tags=d['Tags'],
             product_class=self.pc,
             length=d['Length(mm)'] or 0,
@@ -142,8 +142,10 @@ class CatalogueData(object):
             self.add_stock(pdt)
 
         if p or s:
-            for cat in categories:
+            cats = self.cat_info.get(d['ID'], list())
+            for cat in cats:
                 pdt.categories.add(cat)
+
         if p or s or c:
             self.add_attributes(pdt)
         if d['Images']:
@@ -195,13 +197,35 @@ def get_workbook(sheet_id, specific_sheets=None):
             yield sheet.title, sheet.get_all_records()
 
 
+def cache_all_categories(pc, dataset):
+    product_data_cat_map = {}
+    for row in dataset:
+        structure = row['Type'].lower().strip().replace('&amp;', '&')
+        cats = [
+            create_from_breadcrumbs(c)
+            for c in row['Categories'].split(',')
+        ]
+        for c in cats:
+            if c.product_class is None:
+                c.product_class = pc
+                c.save()
+        if structure == "variation":
+            key = row['Parent']
+        elif structure == "simple":
+            key = row['ID']
+        else:
+            continue
+        product_data_cat_map[key] = cats
+    return product_data_cat_map
+
+
 class Command(BaseCommand):
     analytics = defaultdict(lambda: defaultdict(lambda: 0))
     reporting = defaultdict(list)
     readable_sheets = ["One Piece Toilet"]
     sheet_id = "19BFSfp95v1JxirCc03Hh6HWcLrCM7GCumVd9YezcXjE"  # ABC HAUZ Product Data OSCAR
     fields = (
-        "ID", "Woo_ID", "Type", "SKU", "Name", "Published", "Is_featured", "Visibility_in_catalog",
+        "ID", "WOO_ID", "Type", "SKU", "Name", "Published", "Is_featured", "Visibility_in_catalog",
         "Short_description", "Description", "Date_sale_price_starts", "Date_sale_price_ends", "Tax_status",
         "Tax_class", "In_stock", "Stock", "Low_stock_amount", "Sold_individually", "Weight(kg)", "Length(mm)",
         "Width(mm)", "Height(mm)", "Allow_customer_reviews", "Purchase_note", "Sale_price", "Regular_price",
@@ -221,6 +245,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.clear_db()
+        # workbook = get_workbook(self.sheet_id)
         workbook = get_workbook(self.sheet_id, specific_sheets=['One Piece Toilet'])
         for sheet_title, dataset in workbook:
             pc, created_attrs = prepare_product_class_data_from_datasheet(sheet_title, dataset)
@@ -228,10 +253,12 @@ class Command(BaseCommand):
             # memory.rollback()
 
     def extract_sheet(self, sheet_title, dataset, pc, attrs):
+        catinfo = cache_all_categories(pc, dataset)
         for row in dataset:
-            CatalogueData(row, sheet_name=sheet_title, pc=pc, attrs=attrs).save()
+            CatalogueData(row, sheet_name=sheet_title, pc=pc, attrs=attrs, catinfo=catinfo).save()
 
     def clear_db(self):
+        Category.objects.all().delete()
         Product.objects.all().delete()
         ProductClass.objects.all().delete()
         ProductAttribute.objects.all().delete()

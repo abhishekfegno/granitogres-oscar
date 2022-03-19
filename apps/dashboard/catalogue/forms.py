@@ -34,7 +34,7 @@ class ProductForm(base_forms.ProductForm):
         model = Product
         fields = [
             'title', 'upc', 'description', 'is_public', 'is_discountable', 'structure',
-            'tax', 'brand', 'other_product_info',
+            'tax', 'other_product_info',
             'weight', 'length', 'width', 'height',
             'crossselling',
             'search_tags', 'seo_title', 'seo_description', 'seo_keywords',
