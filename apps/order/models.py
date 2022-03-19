@@ -344,7 +344,7 @@ class TimeSlot(models.Model):
             print("lock released")
         else:
             print("cant access lock even after timeout")
-        return cls.slots_available_for_delivery()
+        return cls.slots_available_for_delivery(n)
 
 
 class Order(AbstractOrder):
