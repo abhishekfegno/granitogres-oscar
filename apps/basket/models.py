@@ -109,6 +109,9 @@ class Basket(AbstractBuyNowBasket):
         return [r.recommendation for r in self.primary_recommendations
                                               .select_related('recommendation').all()]
 
+    def is_frozen(self):
+        return self.status == self.FROZEN
+
 from oscar.apps.basket.models import *  # noqa isort:skip
 
 
