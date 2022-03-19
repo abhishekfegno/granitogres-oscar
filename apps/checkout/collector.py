@@ -1,5 +1,7 @@
 import math
 from django.conf import settings
+from django.utils import timezone
+
 from apps.payment.models import SourceType
 from apps.payment.models import Source
 
@@ -62,6 +64,7 @@ class Cash(BasePaymentMethod):
             amount_allocated=net_amount,
             amount_debited=0,
             order=order,
+            created_on=timezone.now(),
             reference=reference)
         self.add_payment_event(PAYMENT_EVENT_PURCHASE, order.total_incl_tax, reference=reference)
 
