@@ -229,4 +229,17 @@ WEBSITE_EMAIL_RECEIVER = "abchauzdigital@gmail.com"
 """
 
 
+ADMINS = [
+    "jerinisready@gmail.com",
+    "abhishek@fegno.com"
+]
+
+MANAGERS = [
+    "manoj@fegno.com"
+    "jerinisready@gmail.com",
+]
+
+
+
+
 
