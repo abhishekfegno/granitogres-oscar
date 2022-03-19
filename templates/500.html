@@ -4,22 +4,19 @@
     <meta charset="UTF-8">
     <title>Title</title>
   <style>
-    html,
-body {
+html, body {
   width: 100%;
   height: 100;
   margin: 0;
   padding: 0;
   font-family: 'Limelight', cursive;
   color: #38434A;
-}
-.background {
+} .background {
   position: absolute;
   left: 50%;
   bottom: 0;
   transform: translateX(-50%);
-}
-.background::before {
+} .background::before {
   display: block;
   content: '';
   position: absolute;
@@ -31,8 +28,7 @@ body {
   background: #EEE8E0;
   border-radius: 50%;
   z-index: -1;
-}
-.background::after {
+} .background::after {
   display: block;
   content: '';
   position: absolute;
@@ -44,8 +40,7 @@ body {
   background: #F3F2EE;
   border-radius: 50%;
   z-index: -2;
-}
-.door {
+} .door {
   position: relative;
   width: 180px;
   height: 300px;
@@ -57,8 +52,7 @@ body {
   line-height: 3;
   text-align: center;
   text-shadow: 0 2px #F5AE4E;
-}
-.door::before {
+} .door::before {
   display: block;
   content: '';
   position: absolute;
@@ -68,8 +62,7 @@ body {
   height: 25px;
   background: #1D2528;
   border-radius: 50%;
-}
-.door::after {
+} .door::after {
   display: block;
   content: '';
   position: absolute;
@@ -79,33 +72,28 @@ body {
   height: 10px;
   background: #49555B;
   border-radius: 5px;
-}
-.rug {
+} .rug {
   width: 180px;
   border-bottom: 120px solid #CF352C;
   border-left: 50px solid transparent;
   border-right: 50px solid transparent;
-}
-.rug::before {
+} .rug::before {
   display: block;
   content: '';
   position: relative;
   width: 100%;
   height: 10px;
   background: #9C0502;
-}
-.foreground {
+} .foreground {
   position: absolute;
   left: 50%;
   bottom: 0;
   transform: translateX(-50%);
-}
-.bouncer {
+} .bouncer {
   position: relative;
   left: -130px;
   transition: left 1.5s;
-}
-.bouncer .head {
+} .bouncer .head {
   position: relative;
   left: 10px;
   margin-bottom: 10px;
@@ -115,8 +103,7 @@ body {
   border-radius: 15px;
   border-top-left-radius: 30px;
   border-top-right-radius: 30px;
-}
-.bouncer .head::before {
+} .bouncer .head::before {
   display: block;
   content: '';
   position: absolute;
@@ -129,16 +116,14 @@ body {
   border-top-left-radius: 30px;
   border-bottom-right-radius: 15px;
   z-index: 10;
-}
-.bouncer .head .neck {
+} .bouncer .head .neck {
   position: absolute;
   bottom: -15px;
   width: 48px;
   height: 30px;
   background: #FFB482;
   z-index: 5;
-}
-.bouncer .head .neck::before {
+} .bouncer .head .neck::before {
   display: block;
   content: '';
   position: absolute;
@@ -150,22 +135,18 @@ body {
   border-right: 15px solid rgba(0, 0, 0, 0.3);
   border-top: 2px solid rgba(0, 0, 0, 0.3);
   border-bottom: 2px solid transparent;
-}
-.bouncer .head .eye {
+} .bouncer .head .eye {
   position: absolute;
   top: 40px;
   width: 5px;
   height: 5px;
   background: #1D2528;
   border-radius: 50%;
-}
-.bouncer .head .eye.left {
+} .bouncer .head .eye.left {
   right: 5px;
-}
-.bouncer .head .eye.right {
+} .bouncer .head .eye.right {
   right: 30px;
-}
-.bouncer .head .eye::before {
+} .bouncer .head .eye::before {
   display: block;
   content: '';
   position: relative;
@@ -176,8 +157,7 @@ body {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 5px;
   transition: bottom 0.5s;
-}
-.bouncer .head .ear {
+} .bouncer .head .ear {
   position: relative;
   top: 40px;
   left: -10px;
@@ -185,8 +165,7 @@ body {
   height: 20px;
   background: #FFB482;
   border-radius: 50%;
-}
-.bouncer .head .ear::before {
+} .bouncer .head .ear::before {
   display: block;
   content: '';
   position: relative;
@@ -196,8 +175,7 @@ body {
   height: 10px;
   background: #FFF;
   border-radius: 50%;
-}
-.bouncer .head .ear::after {
+} .bouncer .head .ear::after {
   display: block;
   content: '';
   position: relative;
@@ -211,16 +189,14 @@ body {
   border-radius: 50%;
   transform: rotate(-10deg);
   z-index: 10;
-}
-.bouncer .body {
+} .bouncer .body {
   position: relative;
   width: 110px;
   height: 270px;
   background: #1D2528;
   border-top-right-radius: 45px;
   border-top-left-radius: 15px;
-}
-.bouncer .body::before {
+} .bouncer .body::before {
   display: block;
   content: '';
   position: relative;
@@ -229,8 +205,7 @@ body {
   height: 110px;
   background: #FFF;
   border-top-right-radius: 42px;
-}
-.bouncer .body::after {
+} .bouncer .body::after {
   display: block;
   content: '';
   position: absolute;
@@ -243,8 +218,7 @@ body {
   border-bottom-right-radius: 100px;
   border-bottom-left-radius: 10px;
   z-index: 15;
-}
-.bouncer .arm {
+} .bouncer .arm {
   position: absolute;
   top: 105px;
   left: -20px;
@@ -257,8 +231,7 @@ body {
   transform-origin: top center;
   z-index: 20;
   transition: transform 1s;
-}
-.bouncer .arm::before {
+} .bouncer .arm::before {
   display: block;
   content: '';
   position: absolute;
@@ -267,27 +240,22 @@ body {
   height: 60px;
   background: #FFB482;
   border-radius: 50%;
-}
-.poles {
+} .poles {
   position: absolute;
   left: 50%;
   bottom: 0;
   transform: translateX(-25%);
-}
-.poles .pole {
+} .poles .pole {
   position: absolute;
   bottom: 0;
   width: 15px;
   height: 135px;
   background: #F5AE4E;
-}
-.poles .pole.left {
+} .poles .pole.left {
   left: 200px;
-}
-.poles .pole.right {
+} .poles .pole.right {
   right: 200px;
-}
-.poles .pole::before {
+} .poles .pole::before {
   display: block;
   content: '';
   position: absolute;
@@ -299,8 +267,7 @@ body {
   background: #F5AE4E;
   border-radius: 50%;
   box-shadow: inset 0 -2px #DF9D41;
-}
-.poles .pole::after {
+} .poles .pole::after {
   display: block;
   content: '';
   position: absolute;
@@ -312,8 +279,7 @@ body {
   background: #F5AE4E;
   border-radius: 4px;
   box-shadow: 0 2px #DF9D41;
-}
-.poles .rope {
+} .poles .rope {
   position: absolute;
   top: -110px;
   left: -218px;
@@ -326,21 +292,17 @@ body {
   box-shadow: 0 2px #9C0502;
   box-sizing: border-box;
   transition: width 1.5s;
-}
-.hover:hover .bouncer {
+} .hover:hover .bouncer {
   left: 130px;
-}
-.hover:hover .arm {
+} .hover:hover .arm {
   transform: rotate(-42deg);
-}
-.hover:hover .rope {
+} .hover:hover .rope {
   width: 435px;
-}
-.hover:hover .eye::before {
+} .hover:hover .eye::before {
   bottom: 4px;
 }
 
-  </style>
+</style>
 </head>
 <body>
 <div class='hover'>
@@ -366,7 +328,7 @@ body {
     </div>
   </div>
 </div>
-  <script>(function(){ var courtsy="https://codepen.io/cassidoo/pen/rZQQrj"  })</script>
+<script>(function(){ var courtsy = "https://codepen.io/cassidoo/pen/rZQQrj"  })</script>
 
 </body>
 </html>
