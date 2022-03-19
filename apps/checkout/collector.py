@@ -64,11 +64,10 @@ class Cash(BasePaymentMethod):
             amount_allocated=net_amount,
             amount_debited=0,
             order=order,
-            created_on=timezone.now(),
             reference=reference)
         self.add_payment_event(PAYMENT_EVENT_PURCHASE, order.total_incl_tax, reference=reference)
 
-        COD.objects.create(order=order, amount=order.total_incl_tax)
+        COD.objects.create(order=order, amount=order.total_incl_tax,             created_on=timezone.now(),)
         return source
 
 
