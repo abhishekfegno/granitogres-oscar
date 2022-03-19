@@ -56,7 +56,6 @@ class Cash(BasePaymentMethod):
         total_incl_tax = round(order.total_incl_tax, 2)
         print(net_amount, order.total_incl_tax)
         source_type, __ = SourceType.objects.get_or_create(name=PAYMENT_METHOD_CASH)
-        payment_gateway_response = kwargs.get('payment_gateway_response')
         source = Source.objects.create(
             source_type=source_type,
             currency=settings.PAYMENT_CURRENCY,
@@ -64,12 +63,10 @@ class Cash(BasePaymentMethod):
             amount_debited=0,
             order=order,
             reference=reference)
-        if payment_gateway_response:
-            payment_gateway_response.sources.add(source)
-
         self.add_payment_event(PAYMENT_EVENT_PURCHASE, order.total_incl_tax, reference=reference)
 
         COD.objects.create(order=order, amount=order.total_incl_tax)
+        return source
 
 
 class Razorpay(BasePaymentMethod):
@@ -157,8 +154,9 @@ class Casher:
                 order_number=order.id,
                 payment_gateway_response=pgr            # as kwargs
             )
-            pgr.source = source
-            pgr.save()
+            if source:
+                pgr.source = source
+                pgr.save()
 
 
 
