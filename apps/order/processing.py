@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+import sentry_sdk
 from django.conf import settings
 from django.db import models, transaction
 from django.utils.module_loading import import_string
@@ -57,16 +58,21 @@ class EventHandler(processing.EventHandler):
                 user = order.user
 
             opm.request = FakeReq()
-            opm.send_confirmation_message(order, order_code)
+            try:
+                opm.send_confirmation_message(order, order_code)
+            except Exception as err:
+                sentry_sdk.capture_exception(err)
+                print(err)
             print(order, order_code)
-            ctx = opm.get_message_context(order, order_code)
-            # messages = CommunicationEventType.objects.get_and_render(order_code, ctx)
-            comm_type = CommunicationEventType(code=order_code)
-            messages = comm_type.get_messages(ctx)
-
-            print(messages['body'])
-
-
+            try:
+                ctx = opm.get_message_context(order, order_code)
+                # messages = CommunicationEventType.objects.get_and_render(order_code, ctx)
+                comm_type = CommunicationEventType(code=order_code)
+                messages = comm_type.get_messages(ctx)
+                print(messages['body'])
+            except Exception as err:
+                sentry_sdk.capture_exception(err)
+                print(err)
 
     @transaction.atomic
     def handle_order_status_change(self, order: Order, new_status: str, note_msg=None, note_type='System'):
