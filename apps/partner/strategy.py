@@ -29,7 +29,7 @@ class AbchauzIndiaFixedRateTax(FixedRateTax):
         tax = (stockrecord.price_excl_tax * rate).quantize(exponent)
         return TaxInclusiveSellingOrientedFixedPrice(
             currency=stockrecord.price_currency,
-            incl_tax=stockrecord.price_excl_tax,
+            incl_tax=stockrecord.price_excl_tax + tax,
             tax=tax)
 
     def parent_pricing_policy(self, product, children_stock):
@@ -45,7 +45,7 @@ class AbchauzIndiaFixedRateTax(FixedRateTax):
 
         return TaxInclusiveSellingOrientedFixedPrice(
             currency=stockrecord.price_currency,
-            incl_tax=stockrecord.price_excl_tax,
+            incl_tax=stockrecord.price_excl_tax + tax,
             tax=tax)
 
 
