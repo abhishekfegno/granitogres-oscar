@@ -25,7 +25,7 @@ class OwnDeliveryKerala(methods.FixedPrice):
     def calculate(self, basket, *args, **kwargs):
         configuration = SiteConfig.get_solo()
         if basket.total_incl_tax < configuration.MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY:
-            charge = Decimal(str(configuration.MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY))
+            charge = Decimal(str(configuration.DELIVERY_CHARGE_FOR_FREE_DELIVERY))
             return prices.Price(
                 currency=basket.currency,
                 excl_tax=charge,

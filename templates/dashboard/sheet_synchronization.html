@@ -52,7 +52,7 @@ Sheet Synchronization | {{ block.super }}
             <form method="post" id="sync_stock_from_sheet_to_db">
                 {% csrf_token %}
                 <input type="hidden" hidden name="update_sheet" value="sync_stock_from_sheet_to_db" >
-                <button type="submit" class="btn btn-success"> Update Stock in DB. </button>
+                <button type="submit" class="btn btn-success"> Update Stock to DB. </button>
                 <small class="text-muted"> This will Update your stock on database from sheet..  </small>
             </form>
             <h6>Update Stock form Sheet to DB</h6>
@@ -60,11 +60,11 @@ Sheet Synchronization | {{ block.super }}
         <div class="col-md-3">
             <form method="post" id="sync_stock_from_db_to_sheet">
                 {% csrf_token %}
-                <input type="hidden" hidden name="update_sheet" value="sync_stock_from_sheet_to_db" >
-                <button type="submit" class="btn btn-success"> Update Sheet to DB. </button>
+                <input type="hidden" hidden name="update_sheet" value="sync_stock_from_db_to_sheet" >
+                <button type="submit" class="btn btn-success"> Update Stock to Sheet. </button>
                 <small class="text-muted"> This will Update your stock on sheet from database..  </small>
             </form>
-            <h6>Update Stock form Sheet to DB</h6>
+            <h6>Update Stock to Sheet from Database.</h6>
         </div>
         <div class="col-md-3">
             <form method="post" id="sync_price_from_db_to_sheet">
@@ -100,7 +100,6 @@ Sheet Synchronization | {{ block.super }}
         document.getElementById('sync_db_to_sheet').addEventListener("submit", submit_handler);
         document.getElementById('sync_stock_from_sheet_to_db').addEventListener("submit", submit_handler);
         document.getElementById('sync_price_from_db_to_sheet').addEventListener("submit", submit_handler);
-
     })()
 </script>
 {% endblock dashboard_content %}

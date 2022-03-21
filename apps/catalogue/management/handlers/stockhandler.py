@@ -43,7 +43,6 @@ class Handler(object):
 
     # Commented because of action is vulnurable to business ideas.
     # def sync_sheet_to_db(self):
-    #     # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db, sync_price_from_db_to_sheet
     #     self.handle(update_sheet=False)
 
     def sync_stock_from_sheet_to_db(self):
