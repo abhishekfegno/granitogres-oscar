@@ -56,12 +56,14 @@ def home(request, *a, **k):
     if basket is None:
         basket = request.basket or None
     b_count = basket.num_lines if basket else 0
-    slots = TimeSlot.get_upcoming_slots()
+
     return Response({
         "user": user,
         "cart_item_count": b_count,
         "zone_facade": ZoneFacade.face(request),
-        'slots': [slot.to_dict(is_next=index == 0) for index, slot in enumerate(slots)],
+        'slots': [
+            # slot.to_dict(is_next=index == 0) for index, slot in enumerate(TimeSlot.get_upcoming_slots())
+        ],
         "environment": {
             'LOCATION_FETCHING_MODE': settings.LOCATION_FETCHING_MODE
         },
@@ -85,8 +87,10 @@ def index(request, *a, **k):
             'middle': [{
                 'banner': request.build_absolute_uri(ob.banner.url),
                 'product_range': ob.product_range_id
-            } for ob in OfferBanner.objects.filter(**{'display_area': OfferBanner.HOME_PAGE,
-                                                      'position': slot}).order_by('-id')],
+            } for ob in OfferBanner.objects.filter(**{
+                'display_area': OfferBanner.HOME_PAGE,
+                'position': slot}).order_by('-id')
+            ],
             'bottom': categories[index + 3:index + 5],
         })
         index += 5
