@@ -23,13 +23,13 @@ def category_filter(queryset, category_slug, return_as_tuple=False):
     cats = Category.objects.filter(path__startswith=cat.path)
     pset = Product.objects.none()
     for c in cats:
-        pset |= c.product_set.all()
+        pset |= c.product_set.all().filter(is_public=True)
     out = [queryset & pset, cat]
     return out if return_as_tuple else out[0]
 
 
 def brand_filter(queryset, brand_ids):
-    return queryset.filter(brand__in=brand_ids)
+    return queryset.filter(brand__in=brand_ids).filter(is_public=True)
 
 
 def apply_filter(queryset: QuerySet, _filter: str, null_value_compatability: str = '__', product_class: Optional[ProductClass] = None):
