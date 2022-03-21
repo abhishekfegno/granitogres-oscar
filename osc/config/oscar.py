@@ -110,19 +110,19 @@ OSCAR_USER_CANCELLABLE_ORDER_STATUS = (
 
 EMAIL_MESSAGES = {
     'CONFIRMED': "CONFIRMED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is confirmed. \n"
-                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+                 "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'SHIPPED'   : "SHIPPED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is shipped. \n"
-                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+                  "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'PLACED'   : "PLACED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is placed. \n"
-                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+                 "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'DELIVERED' : "DELIVERED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is delivered. \n"
-                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+                  "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'CANCELED' : "CANCELED: Your Order #{order.number} for {order.num_lines} item(s) from Abchauz is confirmed. \n"
-                       "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+                 "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'PAYMENT_RECEIVED': "RECEIVED: Your Payment of Rs.{order.total_incl_tax}/- against Order #{order.number} is RECEIVED.",
     'PAYMENT_DECLINED': "DECLINED: Your Payment of Rs.{order.total_incl_tax}/- against Order #{order.number} is DECLINED.",
@@ -134,16 +134,16 @@ EMAIL_MESSAGES = {
                         "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'REPLACEMENT_INITIATED': "REPLACEMENT: Replacement Request against your Order #{order.number} is Initiated.\n"
-                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+                             "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'RETURNED'         : "RETURND: Your Order #{order.number} is Returned.\n"
-                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+                         "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'RETURN_REJECTED' : "RETURN: Your Return Request Against Order #{order.number} could not be processed.\n"
                         "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 
     'CANCELED': "ITEM CANCEL: {line.product.title} Has been Cancelled from Order #{order.number}.\n"
-                        "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
+                "For more details: https://www.abchauz.com/u/o/{order.number}/{order.id}/",
 }
 
 OSCAR_SEND_EMAIL_ORDER_STATUS = (
@@ -388,53 +388,53 @@ OSCAR_DASHBOARD_NAVIGATION = [
              'access_fn': admin_or_staff},
 
         ]
-    # }, {
-    #     'label': _('Logistics'),
-    #     'icon': 'icon-double-angle-down',
-    #     'children': [
-    #         {'label': _('Upcomming Time Slots'), 'url_name': 'logistics:scheduledtimeslot-list',
-    #          'access_fn': admin_or_staff},
-    #
-    #         {'label': _('Delivery Agents'), 'url_name': 'logistics:dashboard-delivery-boy-list',
-    #          'access_fn': admin_or_staff},
-    #
-    #         {'label': _('Create Trip'), 'url_name': 'logistics:new-trip',
-    #          'access_fn': admin_or_staff},
-    #
-    #         {'label': _('Planned Trips'), 'url_name': 'logistics:planned-trips',
-    #          'access_fn': admin_or_staff},
-    #
-    #         {'label': _('Active Trips'), 'url_name': 'logistics:active-trips',
-    #          'access_fn': admin_or_staff},
-    #
-    #         {'label': _('Delivered Trips'), 'url_name': 'logistics:delivered-trips',
-    #          'access_fn': admin_or_staff,
-    #          },
-    #         {'label': _('Cancelled Trips'), 'url_name': 'logistics:cancelled-trips',
-    #          'access_fn': admin_or_staff,
-    #          },
-    #     ],
-    # }, {
-    #     'label': 'Accounts',
-    #     'icon': 'icon-globe',
-    #     'children': [
-    #         {
-    #             'label': 'Accounts',
-    #             'url_name': 'accounts_dashboard:accounts-list',
-    #         },
-    #         {
-    #             'label': 'Transfers',
-    #             'url_name': 'accounts_dashboard:transfers-list',
-    #         },
-    #         {
-    #             'label': 'Deferred income report',
-    #             'url_name': 'accounts_dashboard:report-deferred-income',
-    #         },
-    #         {
-    #             'label': 'Profit/loss report',
-    #             'url_name': 'accounts_dashboard:report-profit-loss',
-    #         },
-    #     ]
+        # }, {
+        #     'label': _('Logistics'),
+        #     'icon': 'icon-double-angle-down',
+        #     'children': [
+        #         {'label': _('Upcomming Time Slots'), 'url_name': 'logistics:scheduledtimeslot-list',
+        #          'access_fn': admin_or_staff},
+        #
+        #         {'label': _('Delivery Agents'), 'url_name': 'logistics:dashboard-delivery-boy-list',
+        #          'access_fn': admin_or_staff},
+        #
+        #         {'label': _('Create Trip'), 'url_name': 'logistics:new-trip',
+        #          'access_fn': admin_or_staff},
+        #
+        #         {'label': _('Planned Trips'), 'url_name': 'logistics:planned-trips',
+        #          'access_fn': admin_or_staff},
+        #
+        #         {'label': _('Active Trips'), 'url_name': 'logistics:active-trips',
+        #          'access_fn': admin_or_staff},
+        #
+        #         {'label': _('Delivered Trips'), 'url_name': 'logistics:delivered-trips',
+        #          'access_fn': admin_or_staff,
+        #          },
+        #         {'label': _('Cancelled Trips'), 'url_name': 'logistics:cancelled-trips',
+        #          'access_fn': admin_or_staff,
+        #          },
+        #     ],
+        # }, {
+        #     'label': 'Accounts',
+        #     'icon': 'icon-globe',
+        #     'children': [
+        #         {
+        #             'label': 'Accounts',
+        #             'url_name': 'accounts_dashboard:accounts-list',
+        #         },
+        #         {
+        #             'label': 'Transfers',
+        #             'url_name': 'accounts_dashboard:transfers-list',
+        #         },
+        #         {
+        #             'label': 'Deferred income report',
+        #             'url_name': 'accounts_dashboard:report-deferred-income',
+        #         },
+        #         {
+        #             'label': 'Profit/loss report',
+        #             'url_name': 'accounts_dashboard:report-profit-loss',
+        #         },
+        #     ]
     }]
 
 

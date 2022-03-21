@@ -152,7 +152,8 @@ def order_return_request(request, *a, **k):
 def order_cancel_request(request, *a, **k):
     """
     POST {
-        "reason": "some reason"
+        "reason": "some reason",
+        "line_ids": []
     }
     """
     #  Validations

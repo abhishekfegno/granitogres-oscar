@@ -1,6 +1,7 @@
 import pprint
 from collections import Iterable
 
+from django.db import transaction
 from django.db.models import F
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -164,6 +165,7 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
     serializer_class = CheckoutSerializer
     order_object = None
 
+    @transaction.atomic
     def post_format(self, request, format=None):
         # Wipe out any previous state data
         utils.clear_consumed_payment_method_states(request)
@@ -294,7 +296,8 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
                         _error = str(error_text[0]) if error_text and isinstance(error_text, Iterable) else str(
                             error_text)
                 string += f"{key_str}:{_error}\n"
-
+            if basket.is_frozen():
+                basket.thaw()
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
         # location = shipping_address.location
         # if not location:
@@ -374,16 +377,19 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
             self.handle_payment_for_orders(order, order_total=total_amt.incl_tax, payment_data=sample_data['payment'])
         except Exception as e:
             print("handle_payment_for_orders >> ", e)
+            if basket.is_frozen():
+                basket.thaw()
 
             order.set_status(settings.ORDER_STATUS_PAYMENT_DECLINED)
             # return Response({"errors": "Payment Declined"})
-            return Response({"errors": str(e)}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({"errors": "#####" + str(e)}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         print("------------------ 10 ")
         b_ser = WncBasketSerializer(basket, context={'request': request})
 
         if settings.ORDER_STATUS_PAYMENT_DECLINED in ord_statuses:
-            basket.thaw()
+            if basket.is_frozen():
+                basket.thaw()
             return Response({
                 'errors': _status,
                 'new_basket': b_ser.data,

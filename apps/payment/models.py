@@ -34,7 +34,7 @@ class PaymentGateWayResponse(models.Model):
         (REFUND, REFUND),
         (OTHERS, OTHERS),
     ), default=PURCHASE)
-    source = models.ForeignKey('payment.Source', on_delete=models.PROTECT)
+    source = models.ForeignKey('payment.Source', on_delete=models.SET_NULL, blank=True, null=True)
     order = models.ForeignKey('order.Order', on_delete=models.SET_NULL, blank=True, null=True)
     amount = models.FloatField()
     response = HStoreField(null=True)

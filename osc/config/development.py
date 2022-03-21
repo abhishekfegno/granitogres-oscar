@@ -81,7 +81,12 @@ REST_SESSION_LOGIN = True
 
 
 EMAIL_BACKEND = "sgbackend.SendGridBackend"
-SENDGRID_API_KEY = "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"
+SENDGRID_API_KEY = "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"
+DEFAULT_FROM_EMAIL = 'abchauzdigital@gmail.com'
+"""
+password: adminabchauz@303
+"""
+
 
 FEATURED_CATEGORY_SLUG = 'featured'
 

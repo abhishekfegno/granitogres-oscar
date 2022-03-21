@@ -1,11 +1,12 @@
 import datetime
-from django.db import models
+from threading import Lock
+
 from dateutil.utils import today
 from django.conf import settings
 from django.contrib.gis.db.models import PointField
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
-from django.db.models import Case, PositiveSmallIntegerField
+from django.core.exceptions import ValidationError, MultipleObjectsReturned
+from django.db.models import Case, PositiveSmallIntegerField, Prefetch
 from django.db.models.signals import post_save
 from django.utils import timezone
 from django.utils.functional import cached_property, lazy
@@ -68,7 +69,7 @@ class TimeSlotConfiguration(models.Model):
         return cls._date_to_index(week=cls.SATURDAY, h=23, m=59, s=59)
 
     @classmethod
-    def _date_to_index(cls, week, h, m, s):
+    def _date_to_index(cls, week, h, m, s=0):
         return (week - 1) * 86400 + (h * 3600) + (m * 60) + s
 
     @classmethod
@@ -130,7 +131,9 @@ class TimeSlot(models.Model):
     config = models.ForeignKey(TimeSlotConfiguration, on_delete=models.SET_NULL, null=True)
     slot = models.TextField(help_text="Text Representation of configuration")
     start_date = models.DateField(help_text="Delivery Starting Date")
-    index = models.PositiveIntegerField(help_text="Slot Index")
+    index = models.BigIntegerField(help_text="Slot Index")
+
+    __timeslot_generator_concurrency_lock = Lock()
 
     def __str__(self):
         return self.slot
@@ -169,17 +172,27 @@ class TimeSlot(models.Model):
             self.__orders = self.orders.all().count()
         return self.__orders
 
+    _free_slot_qs = ...
+
     @classmethod
-    def free_slots(cls):
+    def append_free_slot(cls, slot):
+        slot.ord_count = 0
+        # if cls._free_slot_qs
+        cls._free_slot_qs = ...          #.append(slot)
+
+    @classmethod
+    def free_slots(cls, force=False):
         """
         Slots that are free for delivery
         """
+        if cls._free_slot_qs is ...:
+            cls._free_slot_qs = cls.objects.annotate(ord_count=models.Count('orders')).filter(
+                start_date__gte=today(),
+                config__is_active=True,
+                config__deliverable_no_of_orders__gt=models.F('ord_count'),
+            ).prefetch_related(Prefetch('config')).order_by('index')
 
-        return cls.objects.annotate(ord_count=models.Count('orders')).filter(
-            start_date__gte=today(),
-            config__is_active=True,
-            config__deliverable_no_of_orders__gt=models.F('ord_count'),
-        ).select_related('config').order_by('index')
+        return cls._free_slot_qs
 
     @property
     def max_datetime_to_order(self):
@@ -190,13 +203,21 @@ class TimeSlot(models.Model):
 
         return starting_dt - datetime.timedelta(minutes=self.config.orders_prepare_delay + 1)
 
-    def next_slot(self):
-        next_conf = TimeSlotConfiguration.indexed_config().filter(index__gt=self.config.index).first()
-        if next_conf is None:
-            next_conf = TimeSlotConfiguration.indexed_config().first()
-        # if next_conf is None:
-        #     raise AlertException("You haven't added any TimeSlotConfiguration!")
-        return next_conf
+    @classmethod
+    def next_slot_from_request(cls, request):
+
+        return cls.next_slot()
+
+    @classmethod
+    def next_slot(cls, ):
+        slots = TimeSlot.get_upcoming_slots()
+        slots_ = [slot.to_dict(is_next=index == 0) for index, slot in enumerate(slots)]
+        return slots_
+
+    @classmethod
+    def upcoming_slots_for_request(cls, request):
+
+        return cls.get_upcoming_slots()
 
     @property
     def order_starting_datetime(self):
@@ -207,12 +228,12 @@ class TimeSlot(models.Model):
         ), timezone.get_default_timezone())
 
     @classmethod
-    def slots_available_for_delivery(cls):
+    def slots_available_for_delivery(cls, n, force=False):
         """
         Deliverable slots which are capable to hold more orders after now!
         """
         time_now = timezone.localtime(timezone.now())
-        slots = [slot for slot in cls.free_slots() if (slot.max_datetime_to_order > time_now)]
+        slots = [slot for slot in cls.free_slots(force=force) if (slot.max_datetime_to_order > time_now)]
         return slots
 
     @classmethod
@@ -220,50 +241,110 @@ class TimeSlot(models.Model):
         """
         Fetching all already prepared slot!
         """
-        available_slots = cls.slots_available_for_delivery()
-        needed_slots = n - len(available_slots)
-        if needed_slots <= 0:
-            return available_slots
-        all_slots = list(cls.free_slots())
-        latest_slot = all_slots[-1] if all_slots else None
-        if latest_slot:
-            curr_date = latest_slot.start_date
-        else:
-            curr_date = today()
-        config_index = 0
-        configurations = list(TimeSlotConfiguration.picked_index_config())
-        print(config_index, len(configurations))
-        # import pdb;pdb.set_trace
-        while needed_slots > 0:
-            config = configurations[config_index % len(configurations)]
-            config_index += 1
-            has_config = lambda slot: slot.config == config and slot.start_date >= curr_date
 
-            if not any(filter(has_config, all_slots)):
+        """some of the intermediate slots might become over booked. so we are picking only available slots"""
+        available_slots = cls.slots_available_for_delivery(n, force=True)
+        needed_slots: int = n - len(available_slots)  # so we needed {needed_slots} more slots.
+        print(f"""so we need {needed_slots} slots more.""")  # docstring
+        if needed_slots <= 0:
+            print("All slots are available in  DB.")
+            return available_slots
+        print("waiting for lock")
+        if cls.__timeslot_generator_concurrency_lock.acquire(blocking=False):        # max timeout 5 seconds
+            """
+            Locking the scenario so that only one request can generate slots at a time.
+            using threading.Lock() for that.
+            refer: https://docs.python.org/3/library/threading.html#threading.Lock.acquire
+            """
+            print("lock aquired")
+            """We need to generate more slots. So lets pickup all the slots regardless of they are filled or not."""
+            print('... all_slots')
+            all_slots = cls.free_slots()     # so we needed {needed_slots} more slots.
+            print('... latest_slot')
+            latest_slot = list(all_slots)[-1] if all_slots else None
+            if latest_slot:
+                curr_date = latest_slot.start_date
+            else:
+                curr_date = today()
+            print('... curr_date')
+            config_index = 0
+
+            configurations = list(TimeSlotConfiguration.picked_index_config())
+            print('... got configurations')
+            if len(configurations) == 0:
+                cls.__timeslot_generator_concurrency_lock.release()
+                raise Exception(f"No Slot Configurations has been set. please create one ")
+
+            # needed_slots = 5
+
+            while needed_slots > 0:
+                """Planning to generate each slot as required."""
+                print(f'...... {needed_slots} > inloop')
+                config = configurations[config_index % len(configurations)]
+                print(f'...... {needed_slots} > got config')
+                config_index += 1
+                has_config = lambda slot: slot.config == config and slot.start_date >= curr_date
+
+                print(f'...... {needed_slots} > got has_config={has_config}')
+                # if not all(filter(has_config, all_slots)):
                 curr_week_day: int = (curr_date.toordinal() % 7) + 1
                 week_sum = int(config_index // len(configurations)) * 7
                 days_to_next_slot: int = config.week_day_code - curr_week_day + week_sum
+                print(f'...... {needed_slots} > has config for some thing')
 
                 dt = datetime.datetime(
                     year=curr_date.year, month=curr_date.month, day=curr_date.day,
                     hour=config.start_time.hour, minute=config.start_time.minute, second=config.start_time.second,
                 ) + datetime.timedelta(days=days_to_next_slot)
-                latest_slot, created = cls.objects.get_or_create(
-                    start_date=dt.date(),
-                    config=config,
-                    defaults={
-                        'slot': f"{dt} - {str(config)}",
-                        "index": int(datetime.datetime.timestamp(dt)) - 1625054000
-                        # subtracting with timestamp at time of development to make index simpler
-                    }
-                )
+
+                print(f'...... {needed_slots} > dt={dt}')
+                # subtracting with timestamp at time of development to make index simpler
+                index = (datetime.datetime.timestamp(dt)) - 1625054000
+                slot = f"{dt} - {str(config)}"
+                start_date = dt.date()
+
+                try:
+                    latest_slot, created = cls.objects.get_or_create(
+                        start_date=start_date,
+                        config=config,
+                        defaults={
+                            'slot': slot,
+                            "index": index
+                        }
+                    )
+                    print(f'...... {needed_slots} > try >  latest_slot={latest_slot}, created={created}')
+
+                    # cls._free_slot_qs = ...     # reseting __free_slot_qs
+                    if created:
+                        print("Generated New ", latest_slot)
+                    else:
+                        print("Acquiring slot from db", latest_slot)
+                except MultipleObjectsReturned as more:
+                    print(
+                        more,
+                        f"\n>>> Multiple slots returned while trying to generate "
+                        f"TimeSlot(start_date=<{start_date}>, config=<{config}>)",
+                    )         # error
+                    latest_slot = cls.objects.filter(start_date=start_date, config=config).last()
+                    print("Acquiring slot from db", latest_slot)
+                    cls.objects.filter(start_date=start_date, config=config).exclude(pk=latest_slot.pk).delete()
+                    created = False
+                cls.append_free_slot(latest_slot)
+                curr_date = latest_slot.start_date
+
                 if created:
                     needed_slots -= 1
                     if needed_slots <= 0:
-                        return cls.slots_available_for_delivery()
-                curr_date = latest_slot.start_date
-
-        return cls.slots_available_for_delivery()
+                        print(f'...... {needed_slots} > created >  breaking')
+                        break
+                # else:
+                #     print('aaaaaaaaa')
+                #     print(has_config, all_slots, [(has_config(c)) for c in all_slots])
+            cls.__timeslot_generator_concurrency_lock.release()
+            print("lock released")
+        else:
+            print("cant access lock even after timeout")
+        return cls.slots_available_for_delivery(n)
 
 
 class Order(AbstractOrder):

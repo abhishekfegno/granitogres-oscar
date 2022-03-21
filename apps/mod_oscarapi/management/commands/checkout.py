@@ -118,7 +118,7 @@ class Command(BaseCommand):
         if response.status_code == 200:
             print("Logged in as : ", user.get_short_name(), "[", user.username, "]")
             self.s = s
-            if response.headers['X-Geo-Location-ID'] == 'None':
+            if response.headers.get('X-Geo-Location-ID') == 'None':
                 self.s.get(self.BASE_URL)
             return
         else:
@@ -211,7 +211,6 @@ class Command(BaseCommand):
         req_body = {
             "basket": f"https://store.demo.fegno.com/api/v1/baskets/{basket.id}/",
             "basket_id": basket.id,
-            # "total": float(basket.total_incl_tax),
             "notes": "Some Notes for address as string.",
             "phone_number": "+919497270863",
             "shipping_address": uad.id,
