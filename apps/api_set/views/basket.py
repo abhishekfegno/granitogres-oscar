@@ -18,16 +18,17 @@ def get_basket(request):
     # import pdb;pdb.set_trace()
     try:
         print("########## Point 04")
-        TimeSlot.get_upcoming_slots()
+        # TimeSlot.get_upcoming_slots()
         print("########## Point 05")
     except ZeroDivisionError:
         print("########## Point 06")
         return Response(out)
     print("########## Point 07")
-    upcoming_slots = [slot.to_dict() for slot in TimeSlot.get_upcoming_slots()]
+    # upcoming_slots = [slot.to_dict() for slot in TimeSlot.get_upcoming_slots()]
     # import pdb;pdb.set_trace()
-    upcoming_slots[0]['is_next'] = True
-    out["available_deliveries"] = upcoming_slots
+    # upcoming_slots[0]['is_next'] = True
+    # out["available_deliveries"] = upcoming_slots
+    out["available_deliveries"] = []
     print("########## Point 08")
     return Response(out)
 
