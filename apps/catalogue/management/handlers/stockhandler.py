@@ -1,3 +1,4 @@
+import math
 from collections import defaultdict
 from pprint import pprint
 
@@ -40,13 +41,26 @@ class Handler(object):
         # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db, sync_price_from_db_to_sheet
         self.handle(update_sheet=True)
 
+    # Commented because of action is vulnurable to business ideas.
+    # def sync_sheet_to_db(self):
+    #     # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db, sync_price_from_db_to_sheet
+    #     self.handle(update_sheet=False)
+
     def sync_stock_from_sheet_to_db(self):
         # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db,
-        self.handle(update_sheet=True, fields=("stock", ))
+        self.handle(update_sheet=False, fields=("stock", ))
+
+    def sync_stock_from_db_to_sheet(self):
+        # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db,
+        self.handle(update_sheet=False, fields=("stock", ))
 
     def sync_price_from_db_to_sheet(self):
         # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db,
         self.handle(update_sheet=True, fields=("price", ))
+
+    def sync_price_from_sheet_to_db(self):
+        # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db,
+        self.handle(update_sheet=False, fields=("price", ))
 
     def handle(self, update_sheet=False, fields=tuple(), allow_all=True):
         self.write_mode = update_sheet
@@ -76,12 +90,15 @@ class Handler(object):
 
     def update_row(self, worksheet, pc):
         out = [
-            ["partner",	"stock_id",	"product_id",	"product",	"stock",	"online_price",	"retail_price"]
+            ["partner",	"stock_id",	'partner_sku',	"product_id", "product",	"stock",	"online_price",	"retail_price"]
         ]
         qs = StockRecord.objects.filter(product__product_class=pc).order_by('id')
         count = qs.count()
+        sr: StockRecord
         for sr in qs:
-            out.append([sr.partner.name, sr.id, sr.product_id, sr.product.get_title(), sr.num_in_stock, sr.price_excl_tax, sr.price_retail])
+            out.append(
+                [sr.partner.name, sr.id, sr.partner_sku, sr.product_id, sr.product.get_title(), sr.num_in_stock, sr.cost_price, sr.price_retail]
+            )
         worksheet.clear()
         worksheet.update(f'A1:G{count+1}', out)
 
@@ -102,7 +119,8 @@ class Handler(object):
         if 'stock' in fields and row['stock']:
             stock.num_in_stock = row['stock']
         if 'price' in fields and row['online_price'] and row['retail_price']:
-            stock.price_excl_tax = row['online_price']
+            stock.cost_tax = row['online_price']                                            # assuming incl tax is entered
+            stock.price_excl_tax = float(math.floor(stock.cost_price * 100 / (100 + stock.product.tax)))
             stock.price_retail = row['retail_price']
         stock.save()
 

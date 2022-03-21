@@ -38,27 +38,49 @@ Sheet Synchronization | {{ block.super }}
 </div>
 <div class="well">
     <div class="row">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <form method="post" id="sync_db_to_sheet">
                 {% csrf_token %}
                 <input type="hidden" hidden name="update_sheet" value="sync_db_to_sheet" >
                 <button type="submit" class="btn btn-primary"> Synchronize Sheeet. </button>
+                <small class="text-muted"> This will Update both your price and stock from your database to  sheet..  </small>
+
             </form>
             <h6 class="text-title">Synchronize database to Google sheet.</h6>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <form method="post" id="sync_stock_from_sheet_to_db">
                 {% csrf_token %}
                 <input type="hidden" hidden name="update_sheet" value="sync_stock_from_sheet_to_db" >
                 <button type="submit" class="btn btn-success"> Update Stock in DB. </button>
+                <small class="text-muted"> This will Update your stock on database from sheet..  </small>
             </form>
             <h6>Update Stock form Sheet to DB</h6>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <form method="post" id="sync_stock_from_db_to_sheet">
+                {% csrf_token %}
+                <input type="hidden" hidden name="update_sheet" value="sync_stock_from_sheet_to_db" >
+                <button type="submit" class="btn btn-success"> Update Sheet to DB. </button>
+                <small class="text-muted"> This will Update your stock on sheet from database..  </small>
+            </form>
+            <h6>Update Stock form Sheet to DB</h6>
+        </div>
+        <div class="col-md-3">
             <form method="post" id="sync_price_from_db_to_sheet">
                 {% csrf_token %}
                 <input type="hidden" hidden name="update_sheet" value="sync_price_from_db_to_sheet" >
-                <button type="submit" class="btn btn-warning"> Update Price in DB. </button>
+                <button type="submit" class="btn btn-warning"> Update Price on Sheet. </button>
+                <small class="text-muted"> This will Update your price on sheet from database.  </small>
+            </form>
+            <h6>Update Price form DB to Sheet </h6>
+        </div>
+        <div class="col-md-3">
+            <form method="post" id="sync_price_from_sheet_to_db">
+                {% csrf_token %}
+                <input type="hidden" hidden name="update_sheet" value="sync_price_from_sheet_to_db" >
+                <button type="submit" class="btn btn-warning"> Update Price on DB. </button>
+                <small class="text-muted"> This will Update your price on database from sheet..  </small>
             </form>
             <h6>Update Price form DB to Sheet </h6>
         </div>
