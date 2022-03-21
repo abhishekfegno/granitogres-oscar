@@ -42,7 +42,7 @@ class Handler(object):
 
     def sync_stock_from_sheet_to_db(self):
         # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db,
-        self.handle(update_sheet=True, fields=("sheet", ))
+        self.handle(update_sheet=True, fields=("stock", ))
 
     def sync_price_from_db_to_sheet(self):
         # caller_function can be: sync_db_to_sheet, sync_stock_from_sheet_to_db,
