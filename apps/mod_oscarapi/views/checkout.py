@@ -320,7 +320,7 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
             # if order.slot is None and slots:
             #     order.slot = slots[0]
             #     order.save()
-            # slot_changed = data.get('slot') == order.slot_id
+            # slot_ rchanged = data.get('slot') == order.slot_id
         self.order_object = order
         request.session[CHECKOUT_ORDER_ID] = order.id
 

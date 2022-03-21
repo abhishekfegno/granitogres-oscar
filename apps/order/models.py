@@ -243,6 +243,7 @@ class TimeSlot(models.Model):
         """
 
         """some of the intermediate slots might become over booked. so we are picking only available slots"""
+        return []
         available_slots = cls.slots_available_for_delivery(n, force=True)
         needed_slots: int = n - len(available_slots)  # so we needed {needed_slots} more slots.
         print(f"""so we need {needed_slots} slots more.""")  # docstring
