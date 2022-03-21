@@ -310,7 +310,7 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
         # Save Order
         order = c_ser.save()
         slot_changed = None
-        if settings.TIME_SLOT_ENABLED:
+        # if settings.TIME_SLOT_ENABLED:
             # slots = TimeSlot.get_upcoming_slots()
             # if data.ge1t('slot'):
             #     for slot in slots:
