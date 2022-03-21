@@ -231,7 +231,7 @@ class OTP(models.Model):
 
         self.user = User.objects.create_user(
             username=self.mobile_number,
-            email=f"{self.mobile_number}@grocery.app",
+            email=f"{self.mobile_number}@abchauz.app",
             is_delivery_boy=True if self.is_delivery_boy_request else None
         )
         self.user.set_unusable_password()
@@ -243,4 +243,4 @@ class OTP(models.Model):
 @receiver(pre_save, sender=User)
 def update_email(sender, instance, **kwargs):
     if not instance.email:
-        instance.email = f"{instance.username}@grocery.app"
+        instance.email = f"{instance.username}@abchauz.app"

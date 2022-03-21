@@ -157,7 +157,17 @@ def index(request, *a, **k):
                 'is_public': True,
             }
         )
-        pd = lambda *args, **kwargs: list(get_optimized_product_dict(*args, **kwargs).values())
+        # pd = lambda *args, **kwargs: list(get_optimized_product_dict(*args, **kwargs).values())
+
+        def sorting_fun(item):
+            if not item['price']['variants']:
+                return item['price']['price']['net_stock_level']
+            return sorted(item['price']['variants'], key=lambda variant: variant['price']['net_stock_level'], reverse=True)[0]['price']['net_stock_level']
+
+        def pd(*args, **kwargs):
+            data = list(sorted(get_optimized_product_dict(*args, **kwargs).values(), key=sorting_fun, reverse=True))
+            return data
+
         out['content'] = [
             {
                 'model': 'image_gallery_x6',
