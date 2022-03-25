@@ -17,6 +17,7 @@ from apps.availability.models import PinCode
 from apps.catalogue.models import Category, Product
 from apps.dashboard.custom.models import HomePageMegaBanner, InAppBanner, OfferBanner, TopCategory, OfferBox, \
     InAppFullScreenBanner, InAppSliderBanner, SocialMediaPost, SiteConfig
+from apps.partner.models import StockRecord
 from apps.utils import banner_not_found
 from lib.cache import cache_library
 
@@ -109,6 +110,7 @@ def index(request, *a, **k):
             'product_range': banner.product_range.slug
         } for banner in HomePageMegaBanner.objects.filter(product_range__isnull=False).order_by('-position')]
         # out['content'] = get_home_content(request)
+        pids = StockRecord.objects.all().values_list('product_id', flat=True)
         exclusive_products_slug = 'exclusive-products'
         exclusive_products, _created = Range.objects.get_or_create(
             slug=exclusive_products_slug,
@@ -157,16 +159,7 @@ def index(request, *a, **k):
                 'is_public': True,
             }
         )
-        # pd = lambda *args, **kwargs: list(get_optimized_product_dict(*args, **kwargs).values())
-
-        def sorting_fun(item):
-            if not item['price']['variants']:
-                return item['price']['price']['net_stock_level']
-            return sorted(item['price']['variants'], key=lambda variant: variant['price']['net_stock_level'], reverse=True)[0]['price']['net_stock_level']
-
-        def pd(*args, **kwargs):
-            data = list(sorted(get_optimized_product_dict(*args, **kwargs).values(), key=sorting_fun, reverse=True))
-            return data
+        pd = lambda *args, **kwargs: list(get_optimized_product_dict(*args, **kwargs).values())
 
         out['content'] = [
             {
@@ -183,7 +176,7 @@ def index(request, *a, **k):
                 'id': exclusive_products.id,
                 'title': exclusive_products.name,
                 'slug': exclusive_products.slug,
-                'content': pd(request, qs=exclusive_products.all_products(), limit=8, ),
+                'content': pd(request, qs=exclusive_products.all_products().filter(Q(id__in=pids)|Q(parent_id__in=pids), is_public=True), limit=8, ),
                 'view_all': exclusive_products.slug,
                 'bg': '#f5f6fa',
                 'color': '#555',
@@ -192,7 +185,7 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': furniture_for_your_home.name,
                 'slug': furniture_for_your_home.slug,
-                'content': pd(request, qs=furniture_for_your_home.all_products(), limit=8, ),
+                'content': pd(request, qs=furniture_for_your_home.all_products().filter(Q(id__in=pids)|Q(parent_id__in=pids), is_public=True), limit=8, ),
                 'view_all': exclusive_products.slug,
                 'bg': '#f5f6fa',
                 'color': '#555',
@@ -210,7 +203,7 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': jambo_offer.name,
                 'slug': jambo_offer.slug,
-                'content': pd(request, qs=jambo_offer.all_products(), limit=8, ),
+                'content': pd(request, qs=jambo_offer.all_products().filter(Q(id__in=pids)|Q(parent_id__in=pids), is_public=True), limit=8, ),
                 'view_all': jambo_offer.slug,
                 'bg': '#f5f6fa',
                 'color': '#333',
@@ -237,7 +230,7 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': picked_for_you.name,
                 'slug': picked_for_you.slug,
-                'content': pd(request, qs=picked_for_you.all_products(), limit=8, ),
+                'content': pd(request, qs=picked_for_you.all_products().filter(Q(id__in=pids)|Q(parent_id__in=pids), is_public=True), limit=8, ),
                 'view_all': picked_for_you.slug,
                 'bg': '#f5f6fa',
                 'color': '#555',
@@ -246,7 +239,7 @@ def index(request, *a, **k):
                 'model': 'slider',
                 'title': customer_favorites.name,
                 'slug': customer_favorites.slug,
-                'content': pd(request, qs=customer_favorites.all_products(), limit=8, ),
+                'content': pd(request, qs=customer_favorites.all_products().filter(Q(id__in=pids)|Q(parent_id__in=pids), is_public=True), limit=8, ),
                 'view_all': customer_favorites.slug,
                 'bg': '#f5f6fa',
                 'color': '#555',

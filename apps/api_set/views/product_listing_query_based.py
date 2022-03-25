@@ -108,7 +108,7 @@ def product_list(request, category='all', **kwargs):
 
     def _inner():
         nonlocal queryset, page_number
-        queryset = queryset.browsable().base_queryset()
+        queryset = queryset.browsable().base_queryset().filter(is_public=True)
         paginator = Paginator(queryset, page_size)  # Show 18 contacts per page.
         empty_list = False
         try:
