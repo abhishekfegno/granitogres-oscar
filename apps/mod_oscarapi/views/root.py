@@ -48,6 +48,9 @@ def PUBLIC_APIS(r, f):
                 ("v1", reverse("wnc-all-product-list", request=r, format=f)),
                 ("v2", reverse("wnc-all-product-list-v2", request=r, format=f)),
             ])),
+            ("Products for Google Merchant", collections.OrderedDict([
+                ("v2", reverse("product_list_google_merchant")),
+            ])),
             ("Products for Category API", collections.OrderedDict([
                 ("v1", reverse("wnc-category-product-list", request=r, format=f, kwargs={"category": 'fruit'})),
                 ("v2", reverse("wnc-category-product-list-v2", request=r, format=f, kwargs={"category": 'fruit'})),
