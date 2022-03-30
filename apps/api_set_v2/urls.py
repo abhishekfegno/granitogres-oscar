@@ -18,6 +18,7 @@ from apps.api_set.views.orders import order_cancel_request, order_return_request
 from apps.api_set.views.public import cancel_reasons_list, availability, return_reasons_list
 from apps.api_set.views.wishlist import wish_list
 from apps.api_set_v2.views.catalogue import *
+from apps.api_set_v2.views.google_merchant_format import product_list_google_merchant
 
 from apps.api_set_v2.views.index import index, offers, pincode_list
 from apps.api_set_v2.views.new_product_pagination import product_list_new_pagination
@@ -78,6 +79,7 @@ catalogue_urlpatterns = [
     path("catalogue/", include([
         path("c/", categories_list_cached, name="wnc-categories-list"),                                  # category
         path("c/all/", product_list_new_pagination, name="wnc-all-product-list-v2"),                                    # category
+        path("google_merchant_format/", product_list_google_merchant, name="product_list_google_merchant"),                                    # category
         path("c/<slug:category>/", product_list_new_pagination, name="wnc-category-product-list-v2"),                   # category
         path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),        # detail
         path("d/<slug:product>/reviews/", ProductReviewListView.as_view(), name="wnc-category-product-review-web-v2"),
