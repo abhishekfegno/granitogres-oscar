@@ -7,6 +7,7 @@ from django.shortcuts import redirect
 from django.urls import path, include, reverse, reverse_lazy
 from django.views.generic import TemplateView, UpdateView, FormView
 
+from apps.api_set_v2.views.google_merchant_format import call_merchant
 from apps.catalogue.management.handlers.stockhandler import Handler
 from apps.dashboard.custom.models import models_list, SiteConfig
 from apps.dashboard.custom.views.general import DashboardBlockList, DashboardCustomCreate, DashboardCustomDetail, \
@@ -104,6 +105,7 @@ urlpatterns = [
                                        path('<int:pk>/', OfferBannerDetail.as_view(), name='dashboard-offer-banner-detail'),
                                        path('<int:pk>/delete/', OfferBannerDelete.as_view(), name='dashboard-offer-banner-delete'),
                                    ])),
+                                   path("google_merchant_format/", call_merchant, name="product_list_google_merchant"),
                                    path('site-configuration', UpdateSiteConfig.as_view(), name="site-config"),
                                    path('sheet-synchronization', UpdateSheetSynchronization.as_view(), name="sheet-synchronization"),
                                ] + referrers)),
