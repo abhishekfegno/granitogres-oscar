@@ -441,6 +441,20 @@ class ProductImage(AbstractProductImage):
         return image_not_found()
 
 
+class Product360Image(models.Model):
+    image = models.ImageField(upload_to='product360/', null=True, blank=True)
+    product = models.ManyToManyField(Product, through='ImageVector', null=True, blank=True)
+
+
+class ImageVector(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    image = models.ForeignKey(Product360Image, on_delete=models.CASCADE)
+    x_vector = models.CharField(max_length=100, null=True, blank=True)
+    y_vector = models.CharField(max_length=100, null=True, blank=True)
+    width = models.CharField(max_length=100, null=True, blank=True)
+    height = models.CharField(max_length=100, null=True, blank=True)
+
+
 class SearchResponses(models.Model):
     """
     Not Using. Generated to use with Autosuggestion and mappng search with a type.

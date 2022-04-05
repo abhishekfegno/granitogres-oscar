@@ -18,7 +18,7 @@ from apps.api_set.views.orders import order_cancel_request, order_return_request
 from apps.api_set.views.public import cancel_reasons_list, availability, return_reasons_list
 from apps.api_set.views.wishlist import wish_list
 from apps.api_set_v2.views.catalogue import *
-from apps.api_set_v2.views.google_merchant_format import , call_merchant
+from apps.api_set_v2.views.google_merchant_format import call_merchant
 
 from apps.api_set_v2.views.index import index, offers, pincode_list
 from apps.api_set_v2.views.new_product_pagination import product_list_new_pagination

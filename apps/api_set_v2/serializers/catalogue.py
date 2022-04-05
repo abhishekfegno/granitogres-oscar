@@ -208,6 +208,13 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
         return
 
 
+class Prodcut360ImageSerializer(serializers.Serializer):
+    image = serializers.ImageField(allow_null=True, required=False)
+
+    def create(self, validated_data):
+        pass
+
+
 class ProductReviewImageSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
@@ -224,7 +231,6 @@ class ProductReviewImageSerializer(serializers.Serializer):
     image_06 = serializers.ImageField(allow_null=True, required=False)
     image_07 = serializers.ImageField(allow_null=True, required=False)
     image_08 = serializers.ImageField(allow_null=True, required=False)
-
 
 
 class ProductReviewListSerializer(serializers.ModelSerializer):
