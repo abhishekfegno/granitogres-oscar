@@ -79,6 +79,8 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
     # brand = serializers.SlugRelatedField(read_only=True, slug_field='name')
     breadcrumb = serializers.SerializerMethodField()
 
+    cimage = serializers.SerializerMethodField()
+
     def get_breadcrumb(self, instance):
         cat = instance.categories.order_by('-depth').first()
         if cat:
@@ -124,6 +126,9 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             "slug": pc.slug,
         }
 
+    def get_cimage(self, instance):
+        return instance.product360image_set.all()
+
     class Meta:
         model = Product
         fields = (
@@ -152,6 +157,8 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
             'breadcrumb',
             'upselling',
             'crossselling',
+
+            'cimage',
         )
 
     def get_recommended_products(self, instance):

@@ -11,8 +11,8 @@ from rest_framework.response import Response
 
 from apps.api_set.views.orders import _login_required
 from apps.api_set_v2.serializers.catalogue import ProductDetailWebSerializer, ProductReviewListSerializer, \
-    ProductReviewCreateSerializer, ProductReviewImageSerializer
-from apps.catalogue.models import Product
+    ProductReviewCreateSerializer, ProductReviewImageSerializer, Prodcut360ImageSerializer
+from apps.catalogue.models import Product, Product360Image
 # from apps.catalogue.models import ProductReview
 from apps.catalogue.reviews.models import ProductReview, ProductReviewImage, Vote
 
@@ -170,6 +170,31 @@ class ProductReviewImageCreateView(CreateAPIView):
             out.append(ip)
         return ProductReviewImage.objects.bulk_create(out, ignore_conflicts=True)
 
+
+class Prodcut360ImageCreateView(CreateAPIView):
+    serializer_class = Prodcut360ImageSerializer
+    queryset = Product360Image.objects.all()
+    http_method_names = ['post']
+    parser_classes = [MultiPartParser, FormParser, ]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data,  context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=True)
+        instances = self.perform_create(serializer)
+        return_data = [{
+            'id': i.id,
+            'image': request.build_absolute_uri(i.image.url),
+        } for i in instances]
+        return Response({"response": return_data}, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        out = []
+        for img in serializer.validated_data.values():
+            if not img: continue
+            ip = Product360Image(image=img)
+            ip.image.save(img.name, img, save=True)
+            out.append(ip)
+        return Product360Image.objects.bulk_create(out, ignore_conflicts=True)
 
 
 class ProductReviewImageDeleteView(DestroyAPIView):

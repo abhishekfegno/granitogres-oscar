@@ -97,6 +97,7 @@ catalogue_urlpatterns = [
             path('image/', include([
                 path("create/", ProductReviewImageCreateView.as_view(), name="wnc-category-product-review-image-create-web-v2"),
                 path("<int:image_id>/delete/", ProductReviewImageDeleteView.as_view(), name="wnc-category-product-review-image-delete-web-v2"),
+                path("create/360/image/", Prodcut360ImageCreateView.as_view(), name="wnc-category-product-review-image-360-create-web-v2"),
             ])),
 
         ]))
