@@ -223,6 +223,12 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 'url_name': 'dashboard:catalogue-class-list',
             },
             {
+                'label': _('360 Images'),
+                'url_name': 'dashboard:catalogue-product360-list',
+                'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff,
+
+            },
+            {
                 'label': _('Products'),
                 'url_name': 'dashboard:catalogue-product-list',
             },
@@ -233,6 +239,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
             {
                 'label': _('Brands'),
                 'url_name': 'dashboard:catalogue-brand-list',
+                'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff,
             },
             {
                 'label': _('Ranges'),

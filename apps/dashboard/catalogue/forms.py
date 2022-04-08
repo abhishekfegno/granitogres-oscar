@@ -9,7 +9,7 @@ from oscar.apps.dashboard.catalogue import forms as base_forms
 # Product = get_model('catalogue', 'Product')
 from treebeard.forms import movenodeform_factory
 
-from apps.catalogue.models import ProductAttribute, Category, Product
+from apps.catalogue.models import ProductAttribute, Category, Product, Product360Image
 
 
 class ColorFormField(ColorField):
@@ -55,3 +55,15 @@ CategoryForm = movenodeform_factory(
     Category,
     fields=['name', 'description', 'image', 'icon', 'product_class'])
 
+
+class Product360ImageForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.fields['image'].label = '360Image'
+        self.fields['title'].label = 'Title'
+        self.fields['description'].label = 'Description'
+
+    class Meta:
+        model = Product360Image
+        fields = ('image', 'title', 'description', 'product')

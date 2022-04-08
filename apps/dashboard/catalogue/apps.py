@@ -1,14 +1,26 @@
 import oscar.apps.dashboard.catalogue.apps as apps
 from django.conf.urls import url
+from django.urls import path, include
 
 
 class CatalogueDashboardConfig(apps.CatalogueDashboardConfig):
     name = 'apps.dashboard.catalogue'
+    permissions_map = _map = {
+        'catalogue-product': (['is_staff'], ['partner.dashboard_access']),
+        'catalogue-product-create': (['is_staff'], ['partner.dashboard_access']),
+        'catalogue-product-list': (['is_staff'], ['partner.dashboard_access']),
+        'catalogue-product-delete': (['is_staff'], ['partner.dashboard_access']),
+        'catalogue-product-lookup': (['is_staff'], ['partner.dashboard_access']),
+    }
 
     def ready(self):
         super().ready()
-        from apps.dashboard.catalogue.views import CategoryUpdateView, CategoryCreateView
-        from apps.dashboard.catalogue.views import BrandListView, BrandCreateView, BrandUpdateView, BrandDeleteView
+        from apps.dashboard.catalogue.views import (
+            CategoryUpdateView, CategoryCreateView,
+            BrandListView, BrandCreateView, BrandUpdateView, BrandDeleteView,
+            Product360ImageDeleteView, Product360ImageListView,
+            Product360ImageCreateView, Product360ImageUpdateView
+        )
 
         self.category_create_view = CategoryCreateView
         self.category_update_view = CategoryUpdateView
@@ -24,19 +36,38 @@ class CatalogueDashboardConfig(apps.CatalogueDashboardConfig):
         self.brand_update_view = BrandUpdateView
         self.brand_delete_view = BrandDeleteView
 
+        self.product_360_list_view = Product360ImageListView
+        self.product_360_create_view = Product360ImageCreateView
+        self.product_360_update_view = Product360ImageUpdateView
+        self.product_360_delete_view = Product360ImageDeleteView
+
     def get_urls(self):
         processed_urls = super(CatalogueDashboardConfig, self).get_urls()
         urls = [
-            url(r'^brands/$', self.brand_list_view.as_view(),
-                name='catalogue-brand-list'),
-            url(r'^brands/create/$', self.brand_create_view.as_view(),
-                name='catalogue-brand-create'),
-            url(r'^brands/(?P<pk>\d+)/update/$',
-                self.brand_update_view.as_view(),
-                name='catalogue-brand-update'),
-            url(r'^brands/(?P<pk>\d+)/delete/$',
-                self.brand_delete_view.as_view(),
-                name='catalogue-brand-delete'),
+            path('brands/', include([
+                url(r'^$', self.brand_list_view.as_view(),
+                    name='catalogue-brand-list'),
+                url(r'^create/$', self.brand_create_view.as_view(),
+                    name='catalogue-brand-create'),
+                url(r'^(?P<pk>\d+)/update/$',
+                    self.brand_update_view.as_view(),
+                    name='catalogue-brand-update'),
+                url(r'^(?P<pk>\d+)/delete/$',
+                    self.brand_delete_view.as_view(),
+                    name='catalogue-brand-delete'),
+            ])),
+            path('product-360/', include([
+                url(r'^$', self.product_360_list_view.as_view(),
+                    name='catalogue-product360-list'),
+                url(r'^create/$', self.product_360_create_view.as_view(),
+                    name='catalogue-product360-create'),
+                url(r'^(?P<pk>\d+)/update/$',
+                    self.product_360_update_view.as_view(),
+                    name='catalogue-product360-update'),
+                url(r'^(?P<pk>\d+)/delete/$',
+                    self.product_360_delete_view.as_view(),
+                    name='catalogue-product360-delete'),
+            ]))
         ]
         return processed_urls + self.post_process_urls(urls)
 

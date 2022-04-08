@@ -1,0 +1,34 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load i18n %}
+{% load render_table from django_tables2 %}
+
+{% block body_class %}{{ block.super }} brand{% endblock %}
+
+{% block title %}
+    {% trans x_title %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+        <li class="active">{% trans x_title %}</li>
+    </ul>
+{% endblock %}
+
+{% block header %}
+    <div class="page-header">
+        <a href="{% url 'dashboard:catalogue-product360-create' %}" class="btn btn-primary btn-lg pull-right"><i class="icon-plus"></i> {{x_title}}</a>
+        <h1>{% trans x_title %}</h1>
+    </div>
+{% endblock header %}
+
+{% block dashboard_content %}
+
+    {% render_table product_360 %}
+
+    {% if not object_list %}
+        <p>There are no {{x_title}} Available.</p>
+    {% endif %}
+{% endblock dashboard_content %}
