@@ -69,7 +69,7 @@ account_urlpatterns = [
     path("auth/", include(v1__registration_apis)),
     path('rest-auth/registration/', include('rest_auth.registration.urls')),
     path('rest-auth/', include('rest_auth.urls')),
-    path('account/', include('allauth.urls')),
+    # path('account/', include('allauth.urls')),
     url(r'^accounts-rest/registration/account-confirm-email/(?P<key>.+)/$', confirm_email,
         name='account_confirm_email'),
 ]
