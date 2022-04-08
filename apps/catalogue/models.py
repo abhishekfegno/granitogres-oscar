@@ -442,17 +442,22 @@ class ProductImage(AbstractProductImage):
 
 
 class Product360Image(models.Model):
+    title = models.CharField(max_length=50, null=True, blank=True)
+    description = models.CharField(max_length=100, null=True, blank=True)
     image = models.ImageField(upload_to='product360/', null=True, blank=True)
-    product = models.ManyToManyField(Product, through='ImageVector', null=True, blank=True)
+    product = models.ManyToManyField(Product, through='ImageVector', through_fields=('image', 'product'), null=True, blank=True)
+
+    def __str__(self):
+        return self.title
 
 
 class ImageVector(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     image = models.ForeignKey(Product360Image, on_delete=models.CASCADE)
-    x_vector = models.CharField(max_length=100, null=True, blank=True)
-    y_vector = models.CharField(max_length=100, null=True, blank=True)
-    width = models.CharField(max_length=100, null=True, blank=True)
-    height = models.CharField(max_length=100, null=True, blank=True)
+    x_vector = models.FloatField(default=0.0)
+    y_vector = models.FloatField(default=0.0)
+    width = models.FloatField(default=0.0)
+    height = models.FloatField(default=0.0)
 
 
 class SearchResponses(models.Model):
