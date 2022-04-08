@@ -1,4 +1,4 @@
-from allauth.account.views import confirm_email
+# from allauth.account.views import confirm_email
 from django.conf.urls import url
 from django.views.decorators.cache import never_cache
 from django.views.generic import RedirectView
@@ -67,11 +67,11 @@ home_urlpatterns = [
 
 account_urlpatterns = [
     path("auth/", include(v1__registration_apis)),
-    path('rest-auth/registration/', include('rest_auth.registration.urls')),
-    path('rest-auth/', include('rest_auth.urls')),
+    # path('rest-auth/registration/', include('rest_auth.registration.urls')),
+    # path('rest-auth/', include('rest_auth.urls')),
     # path('account/', include('allauth.urls')),
-    url(r'^accounts-rest/registration/account-confirm-email/(?P<key>.+)/$', confirm_email,
-        name='account_confirm_email'),
+    # url(r'^accounts-rest/registration/account-confirm-email/(?P<key>.+)/$', confirm_email,
+    #     name='account_confirm_email'),
 ]
 
 

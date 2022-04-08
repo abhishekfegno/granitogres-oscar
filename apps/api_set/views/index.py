@@ -3,7 +3,7 @@ import random
 from collections import defaultdict, OrderedDict
 from datetime import timedelta
 
-from allauth.account.models import EmailAddress
+# from allauth.account.models import EmailAddress
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.db import models

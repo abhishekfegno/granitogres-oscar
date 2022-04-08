@@ -3,7 +3,7 @@ from django.conf.urls import url
 from django.http import JsonResponse
 from django.urls import path, include
 
-from allauth.account.views import confirm_email
+# from allauth.account.views import confirm_email
 
 from apps.api_set.views.basket import get_basket
 from apps.api_set.views.catalogue import (
@@ -53,11 +53,11 @@ home_urlpatterns = [
 ]
 
 account_urlpatterns = [
-    path('v1/rest-auth/registration/', include('rest_auth.registration.urls')),
-    path('v1/rest-auth/', include('rest_auth.urls')),
-    path('account/', include('allauth.urls')),
-    url(r'^accounts-rest/registration/account-confirm-email/(?P<key>.+)/$', confirm_email,
-        name='account_confirm_email'),
+    # path('v1/rest-auth/registration/', include('rest_auth.registration.urls')),
+    # path('v1/rest-auth/', include('rest_auth.urls')),
+    # path('account/', include('allauth.urls')),
+    # url(r'^accounts-rest/registration/account-confirm-email/(?P<key>.+)/$', confirm_email,
+    #     name='account_confirm_email'),
 ]
 
 catalogue_urlpatterns = [
