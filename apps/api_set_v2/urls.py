@@ -1,9 +1,9 @@
-# from allauth.account.views import confirm_email
+from allauth.account.views import confirm_email
 from django.conf.urls import url
 from django.views.decorators.cache import never_cache
 from django.views.generic import RedirectView
 
-# from apps.api_set.urls import *
+from apps.api_set.urls import *
 from django.urls import path, include
 # Loading V1 Apis In order to patch
 from apps.api_set.urls import configuration
@@ -19,6 +19,7 @@ from apps.api_set.views.public import cancel_reasons_list, availability, return_
 from apps.api_set.views.wishlist import wish_list
 from apps.api_set_v2.views.catalogue import *
 from apps.api_set_v2.views.google_merchant_format import call_merchant
+from apps.api_set_v2.views.granitogrescatalogue import ProductListView, ProductDetailview
 
 from apps.api_set_v2.views.index import index, offers, pincode_list
 from apps.api_set_v2.views.new_product_pagination import product_list_new_pagination
@@ -67,11 +68,11 @@ home_urlpatterns = [
 
 account_urlpatterns = [
     path("auth/", include(v1__registration_apis)),
-    # path('rest-auth/registration/', include('rest_auth.registration.urls')),
-    # path('rest-auth/', include('rest_auth.urls')),
-    # path('account/', include('allauth.urls')),
-    # url(r'^accounts-rest/registration/account-confirm-email/(?P<key>.+)/$', confirm_email,
-    #     name='account_confirm_email'),
+    path('rest-auth/registration/', include('rest_auth.registration.urls')),
+    path('rest-auth/', include('rest_auth.urls')),
+    path('account/', include('allauth.urls')),
+    url(r'^accounts-rest/registration/account-confirm-email/(?P<key>.+)/$', confirm_email,
+        name='account_confirm_email'),
 ]
 
 
@@ -80,6 +81,11 @@ catalogue_urlpatterns = [
         path("c/", categories_list_cached, name="wnc-categories-list"),                                  # category
         path("c/all/", product_list_new_pagination, name="wnc-all-product-list-v2"),                     # category
         # path("google_merchant_format/", product_list_google_merchant, name="product_list_google_merchant"),
+        path("product/list/", ProductListView.as_view(), name="product_list_granito"),
+        path("product/detail/<str:slug>/", ProductDetailview.as_view(), name="product_detail_granito"),
+
+
+
         path("google_merchant_format/", call_merchant, name="product_list_google_merchant"),             # category
         path("c/<slug:category>/", product_list_new_pagination, name="wnc-category-product-list-v2"),    # category
         path("d/<slug:product>/", product_detail_web, name="wnc-category-product-detail-web-v2"),        # detail

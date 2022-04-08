@@ -61,7 +61,7 @@ urlpatterns = [
     path('api/v2/', include('oscarapi.urls')),
     path('api/v2/buy-now/', include('apps.buynow.urls')),
 
-    # path('api/', include('apps.api_set.urls')),                                      # prone to versioning
+    path('api/', include('apps.api_set.urls')),                                      # prone to versioning
     path('api/v2/', include('apps.api_set_v2.urls')),                                # prone to versioning
 
     path('api/v1/', include('apps.logistics.apis')),                                 # prone to versioning

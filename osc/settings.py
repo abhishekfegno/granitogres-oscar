@@ -97,8 +97,8 @@ INSTALLED_APPS = [
     'oscar.apps.dashboard.communications.apps.CommunicationsDashboardConfig',
     'oscar.apps.dashboard.shipping.apps.ShippingDashboardConfig',
 
-    # 'allauth',
-    # 'allauth.account',
+    'allauth',
+    'allauth.account',
 
     'rest_auth',
     'rest_auth.registration',
