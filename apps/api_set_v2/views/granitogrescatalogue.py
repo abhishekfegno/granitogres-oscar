@@ -52,7 +52,8 @@ class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldM
             "categories",
             # "product_class",
             # "images",
-            "price",
+            "effective_price",
+            # "price",
             # "options",
             # "variants",
             # "siblings",
@@ -93,7 +94,7 @@ class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixi
     class Meta:
         model = Product
         fields = (
-            'id', 'title', 'structure', 'primary_image', 'price', 'weight', 'url', 'rating', 'review_count', 'brand',
+            'id', 'title', 'structure', 'primary_image', "effective_price", 'weight', 'url', 'rating', 'review_count', 'brand',
             'search_tags')
 
 
