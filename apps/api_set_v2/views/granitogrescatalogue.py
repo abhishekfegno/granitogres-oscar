@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin
 from apps.catalogue.models import Product
+from apps.utils import dummy_purchase_info_lite_as_dict, purchase_info_lite_as_dict
 
 
 class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldMixin, ProductDetailSerializerMixin,
@@ -13,9 +14,25 @@ class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldM
 
     upselling = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
+    price = serializers.SerializerMethodField()
 
     def get_cimage(self, instance):
         return instance.product360image_set.all()
+
+    def get_price(self, product):
+        key = 'ProductPriceFieldMixinLite__{0}__{1}'
+
+        def _inner():
+            if product.is_parent:
+                return dummy_purchase_info_lite_as_dict(availability=False, availability_message='')
+            purchase_info = get_purchase_info(product, request=self.context['request'])  # noqa: mixin ensures
+            addittional_informations = {
+                "availability": bool(purchase_info.availability.is_available_to_buy),
+                "availability_message": purchase_info.availability.short_message,
+            }
+            return purchase_info_lite_as_dict(purchase_info, **addittional_informations)
+
+        return _inner()
 
     class Meta:
         model = Product
@@ -52,6 +69,24 @@ class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldM
 
 class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixinLite,
                                   serializers.ModelSerializer):
+
+    price = serializers.SerializerMethodField()
+
+    def get_price(self, product):
+        key = 'ProductPriceFieldMixinLite__{0}__{1}'
+
+        def _inner():
+            if product.is_parent:
+                return dummy_purchase_info_lite_as_dict(availability=False, availability_message='')
+            purchase_info = get_purchase_info(product, request=self.context['request'])  # noqa: mixin ensures
+            addittional_informations = {
+                "availability": bool(purchase_info.availability.is_available_to_buy),
+                "availability_message": purchase_info.availability.short_message,
+            }
+            return purchase_info_lite_as_dict(purchase_info, **addittional_informations)
+
+        return _inner()
+
     class Meta:
         model = Product
         fields = (
