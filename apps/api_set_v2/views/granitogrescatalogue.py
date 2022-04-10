@@ -16,6 +16,7 @@ class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldM
     upselling = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
     price = serializers.SerializerMethodField()
+    cimage = serializers.SerializerMethodField()
 
     def get_cimage(self, instance):
         return instance.product360image_set.all()
@@ -50,7 +51,7 @@ class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldM
             "attributes",
             "categories",
             # "product_class",
-            "images",
+            # "images",
             "price",
             # "options",
             # "variants",
@@ -72,6 +73,7 @@ class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixi
                                   serializers.ModelSerializer):
 
     price = serializers.SerializerMethodField()
+    primary_image = serializers.SerializerMethodField()
 
     def get_price(self, product):
         key = 'ProductPriceFieldMixinLite__{0}__{1}'
