@@ -7,7 +7,7 @@ from rest_framework import serializers
 from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin
 from apps.catalogue.models import Product
 from apps.utils import dummy_purchase_info_lite_as_dict, purchase_info_lite_as_dict
-from apps.utils import get_purchase_info, purchase_info_as_dict, purchase_info_lite_as_dict, image_not_found,
+from apps.utils import get_purchase_info, purchase_info_as_dict, purchase_info_lite_as_dict, image_not_found
 
 
 class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldMixin, ProductDetailSerializerMixin,
