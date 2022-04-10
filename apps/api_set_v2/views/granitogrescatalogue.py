@@ -13,7 +13,7 @@ from apps.utils import get_purchase_info, purchase_info_as_dict, purchase_info_l
 class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldMixin, ProductDetailSerializerMixin,
                                  serializers.ModelSerializer):
 
-    upselling = serializers.SerializerMethodField()
+    # upselling = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
     price = serializers.SerializerMethodField()
     cimage = serializers.SerializerMethodField()
