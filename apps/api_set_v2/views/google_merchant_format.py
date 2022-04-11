@@ -135,6 +135,4 @@ class MerchantListModelViewSet(GenericAPIView):
         return Response({"message": message})
 
 
-
-
 call_merchant = MerchantListModelViewSet.as_view()

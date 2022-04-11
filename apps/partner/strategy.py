@@ -3,14 +3,15 @@ import math
 from oscar.apps.partner.availability import Unavailable, Available, Base
 from oscar.apps.partner.prices import FixedPrice, TaxInclusiveFixedPrice
 from oscar.apps.partner.strategy import UK, UseFirstStockRecord, StockRequired, FixedRateTax, Structured, \
-    StockRequiredAvailability, PurchaseInfo, UnavailablePrice
+    StockRequiredAvailability, PurchaseInfo, UnavailablePrice, NoTax
+from oscar.core.utils import get_default_currency
 
 from apps.availability.models import Zones
 from apps.partner.prices import TaxInclusiveSellingOrientedFixedPrice
 from apps.partner.strategy_set.strategies import ZoneBasedIndianPricingStrategy
 from decimal import Decimal as D
 
-from apps.partner.strategy_set.utils.stock_records import ZoneBasedStockRecord
+from apps.partner.strategy_set.utils.stock_records import ZoneBasedStockRecord, MinimumPriceStockRecord
 
 
 class AbchauzIndiaFixedRateTax(FixedRateTax):
@@ -122,39 +123,61 @@ class ABCHauzPricing(ZoneBasedStockRecord, StockRequired, AbchauzIndiaFixedRateT
                 return MessagedUnavailable(message)
 
 
+class GranitogresPricing(UseFirstStockRecord, FixedRateTax, Structured):
+    rate = D('0.18')  # Subclass and specify the correct rate
+
+    def __init__(self, request=None, user=None, **kwargs):
+        super().__init__(request)
+        self.user = user or self.user
+        self.kwargs = kwargs
+
+    def availability_policy(self, product, stockrecord):
+        return Available()
+
+    def parent_availability_policy(self, product, children_stock):
+        return Available()
+
+    def pricing_policy(self, product, stockrecord):
+        rate = self.get_rate(product, stockrecord)
+        exponent = self.get_exponent(stockrecord)
+        tax = (stockrecord.price_excl_tax * rate).quantize(exponent)
+        return TaxInclusiveSellingOrientedFixedPrice(
+            currency=get_default_currency(),
+            incl_tax=int(math.floor(stockrecord.price_excl_tax + tax)),
+            tax=tax)
+
+    def fetch_for_product(self, product, stockrecord=None):
+        """
+        Return the appropriate ``PurchaseInfo`` instance.
+        This method is not intended to be overridden.
+        """
+
+        if stockrecord is None:
+            stockrecord = self.select_stockrecord(product)
+
+        pinfo = PurchaseInfo(
+            price=self.pricing_policy(product, stockrecord),
+            availability=self.availability_policy(product, stockrecord),
+            stockrecord=stockrecord)
+        return pinfo
+
+    def fetch_for_parent(self, product):
+        # Select children and associated stockrecords
+        children_stock = self.select_children_stockrecords(product)
+        return PurchaseInfo(
+            price=self.parent_pricing_policy(product, children_stock),
+            availability=self.parent_availability_policy(
+                product, children_stock),
+            stockrecord=None)
+
+
 class Selector(object):
     """
     Custom selector to return a Indian-specific strategy that charges GST
     """
 
     def strategy(self, request=None, user=None, **kwargs):
-        zone = 0
-        if request and request.GET.get('pincode'):
-            from apps.availability.facade import ZoneFacade, get_zone_from_pincode
-            _zone = get_zone_from_pincode(request.GET.get('pincode'))
-            zone: int = _zone.id
-        if zone is None:
-            zone: int = request.session.get('zone')  # zone => Zone.pk
-
-        return ABCHauzPricing(request=request, user=user, zone=zone, **kwargs)
-
-        # zone = kwargs.get('zone') or (request and request.session.get('zone'))
-        #
-        # # TODO: FOR DEBUGGING PURPOSES
-        # if not zone:
-        #     zone = Zones.objects.filter().last()
-        #     if zone:
-        #         zone = zone.id
-        #         if request:
-        #             request.session['zone'] = zone
-        # if not zone and (not request and user):
-        #     last_location = user.location_set.filter(is_active=True).last()
-        #     if last_location and last_location.zone_id:
-        #         zone = last_location.zone_id
-        #         request.session['zone'] = zone
-        #
-        # return ZoneBasedIndianPricingStrategy(zone, request=request, user=user, **kwargs)
-        #
+        return GranitogresPricing(request=request, user=user, **kwargs)
 
 
 

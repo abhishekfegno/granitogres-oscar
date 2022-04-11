@@ -12,7 +12,7 @@ class RfqSerializer(serializers.ModelSerializer):
         req = self.context['request']
         return super(RfqSerializer, self).save(
             basket=req.basket,
-            user=req.basket,
+            user=req.user,
             **kwargs)
 
     class Meta:
