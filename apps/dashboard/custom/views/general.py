@@ -8,7 +8,8 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, UpdateView, DeleteView
 
-from apps.dashboard.custom.models import OfferBanner, models_list
+from apps.dashboard.custom.forms import BrochureForm
+from apps.dashboard.custom.models import OfferBanner, models_list, Brochure
 
 
 class ModelSelectorMixin(object):
@@ -99,7 +100,15 @@ def resolve_enquiry(request, pk):
     return redirect(to='dashboard-custom:dashboard-enquiries-list')
 
 
+class BrochureCreateView(CreateView):
+    template_name = 'oscar/dashboard/catalogue/brochure_add.html'
+    model = Brochure
+    form_class = BrochureForm
 
-
+    def post(self, request, *args, **kwargs):
+        form = self.form_class
+        if form.is_valid():
+            form.save()
+        return super().post(request, *args, **kwargs)
 
 

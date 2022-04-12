@@ -397,6 +397,10 @@ class SiteConfig(SingletonModel):
         return timedelta(minutes=self.DEFAULT_PERIOD_OF_PICKUP)
 
 
+class Brochure(models.Model):
+    name = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='brochures/', null=True, blank=True)
+
 # class FAQ(AbstractCURDModel):
 #     referrer = 'faq'
 #

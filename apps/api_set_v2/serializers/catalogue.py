@@ -11,6 +11,7 @@ from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin, Pr
 from apps.catalogue.models import Category, Product
 # from apps.catalogue.models import ProductReview
 from apps.catalogue.reviews.models import ProductReview, ProductReviewImage
+from apps.dashboard.custom.models import Brochure
 from apps.users.models import User
 from drf_extra_fields.fields import Base64ImageField
 
@@ -302,3 +303,9 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
             'id', 'score', 'title', 'body', 'user', 'order_line', 'product', 'images',
             # "image_01", 'image_02', 'image_03', 'image_04', 'image_05', 'image_06', 'image_07', 'image_08',
         )
+
+
+class BrochureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Brochure
+        fields = ('name', 'image')

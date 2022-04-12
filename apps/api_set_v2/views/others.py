@@ -1,14 +1,15 @@
 from django.conf import settings
 from django.core.mail import send_mail
 from rest_framework import serializers
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
 from django.conf import settings
 
-from apps.dashboard.custom.models import NewsLetter
+from apps.api_set_v2.serializers.catalogue import BrochureSerializer
+from apps.dashboard.custom.models import NewsLetter, Brochure
 
 normalize = lambda request: request.POST if request.POST.keys() else (request.data if request.data.keys() else  request.query_params)
 
@@ -59,3 +60,11 @@ class SendEmail(APIView):
         out['status'] = 'email_sent'
         out['mail_content'] = str(_)
         return Response(out)
+
+
+class BrochureListView(GenericAPIView):
+    queryset = Brochure.objects.all()
+    serializer_class = BrochureSerializer
+
+    def get(self, request, *args, **kwargs):
+        return super().get(*args, **kwargs)

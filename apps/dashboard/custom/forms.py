@@ -1,5 +1,6 @@
 from django import forms
 
+from apps.dashboard.custom.models import Brochure
 from apps.users.models import User
 
 
@@ -16,7 +17,10 @@ class DeliveryBoyRegistrationForm(forms.Form):
         return mobile
 
 
-
+class BrochureForm(forms.ModelForm):
+    class Meta:
+        model = Brochure
+        fields = ('name', 'image')
 
 
 
