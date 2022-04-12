@@ -18,7 +18,8 @@ load_dotenv()
 
 SECRET_KEY = '@sjw(#19ix-we_-0ijndhsw4x)53vccyxx%y0xl4u$tsr*&h5b'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,www.abchauz.com,abchauz.com,devserver.abchauz.com').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS',
+                               'granitogres.demo.fegno.com,localhost,www.abchauz.com,abchauz.com,devserver.abchauz.com').split(',')
 
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
