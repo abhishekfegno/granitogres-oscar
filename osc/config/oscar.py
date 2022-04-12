@@ -361,6 +361,12 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 'label': _('Reviews'),
                 'url_name': 'dashboard:reviews-list',
             },
+            {
+                'label': _('Brochure'),
+                'url_name': 'dashboard-custom:dashboard-brochure-create',
+                'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff,
+
+            }
         ]
     },
     # {

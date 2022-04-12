@@ -20,7 +20,7 @@ class DeliveryBoyRegistrationForm(forms.Form):
 class BrochureForm(forms.ModelForm):
     class Meta:
         model = Brochure
-        fields = ('name', 'image')
+        fields = ('name', 'image', 'file')
 
 
 

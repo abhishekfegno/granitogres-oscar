@@ -308,4 +308,4 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
 class BrochureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brochure
-        fields = ('name', 'image')
+        fields = ('name', 'image', 'file')

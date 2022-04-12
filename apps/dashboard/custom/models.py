@@ -400,6 +400,7 @@ class SiteConfig(SingletonModel):
 class Brochure(models.Model):
     name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='brochures/', null=True, blank=True)
+    file = models.FileField(upload_to='brochures/pdf', null=True, blank=True)
     type = models.CharField(max_length=50, choices=(('brochure', 'Brochure'),
                                      ('catelogue', 'Catelogue')
                                      ), null=True, blank=True)

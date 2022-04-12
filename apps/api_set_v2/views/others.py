@@ -65,6 +65,7 @@ class SendEmail(APIView):
 class BrochureListView(GenericAPIView):
     queryset = Brochure.objects.all()
     serializer_class = BrochureSerializer
+    success_url = 'dashboard:brochure-create'
 
     def get(self, request, *args, **kwargs):
         serializer = self.serializer_class(self.get_queryset(), many=True)
