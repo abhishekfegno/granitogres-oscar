@@ -1,9 +1,11 @@
 import pprint
+import random
 from collections import Iterable
 
 from django.db import transaction
 from django.db.models import F
 from django.http import JsonResponse
+from django.utils.datetime_safe import datetime
 from django.utils.decorators import method_decorator
 from django.conf import settings
 from oscarapi.permissions import IsOwner
@@ -50,7 +52,6 @@ def _login_and_location_required(func):
     return _wrapper
 
 
-@method_decorator(_login_required, name="dispatch")
 class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
     __doc__ = """
     Prepare an order for checkout.
@@ -59,20 +60,20 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
     POST 
     # COD
     {
-        "basket": f"https://store.demo.fegno.com/api/v1/baskets/{basket.id}/",
-        "basket_id": basket.id,
-        # "total": float(basket.total_incl_tax),
-        "notes": "Some Notes for address as string.",
-        "phone_number": "+919497270863",
-        "shippingcode": <"self-shipping"|"express-delivery">,
-        "shipping_address": (User Address ID),
-        "billing_address": (User Address ID),
-        "payment": cash,
-        "slot": slot.id,
-    }
+    "basket": f"https://grantiogres.demo.fegno.com/api/v1/baskets/{basket.id}/",
+    "basket_id": 123,
+    "notes": "Some Notes for address as string.",
+    "phone_number": "+919497270863",
+    "email": "hello@granitogres.com",
+    "first_name": "Some name ",
+    "last_name": "Some last name ",
+    "pincode": "682030",
+    "place name": "edappally, kochi",        
+    "state": "Kerala",         
+ }
     # Prepaid
     {
-        "basket": f"https://store.demo.fegno.com/api/v1/baskets/{basket.id}/",
+        "basket": f"https://grantiogres.demo.fegno.com/api/v1/baskets/{basket.id}/",
         "basket_id": basket.id,
         # "total": float(basket.total_incl_tax),
         "notes": "Some Notes for address as string.",
@@ -89,7 +90,7 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
     POST(basket, shipping_address,
     [total, shipping_method_code, shipping_charge, billing_address]):
     {
-        "basket":"https://store.demo.fegno.com/api/v1/baskets/8853/",
+        "basket":"https://grantiogres.demo.fegno.com/api/v1/baskets/8853/",
         "guest_email":"",
         "total":5413.13,
         "shipping_method_code":"free_shipping",
@@ -125,7 +126,7 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
             "postcode":"689544",
             "phone_number":"+919446600863",
             "notes":"",
-            "country":"https://store.demo.fegno.com/api/v1/countries/IN/"
+            "country":"http://grantiogres.demo.fegno.com/api/v1/countries/IN/"
         },
         "payment":{
             "cash": {
@@ -180,58 +181,63 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
         if basket.is_empty:
             return Response({'errors': "Basket is Empty!"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        shipping_address = UserAddress.objects.filter(user=user, pk=data.get('shipping_address')).first()
-        if shipping_address is None:
-            return Response({'errors': "User Address for shipping does not exists"},
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
+        # shipping_address = UserAddress.objects.filter(user=user, pk=data.get('shipping_address')).first()
+        # if shipping_address is None:
+        #     return Response({'errors': "User Address for shipping does not exists"},
+        #                     status=status.HTTP_406_NOT_ACCEPTABLE)
+        #
+        # billing_address = UserAddress.objects.filter(user=user, pk=data.get('billing_address')).first()
+        # if billing_address is None:
+        #     return Response({'errors': "User Address for billing does not exists"},
+        #                     status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        billing_address = UserAddress.objects.filter(user=user, pk=data.get('billing_address')).first()
-        if billing_address is None:
-            return Response({'errors': "User Address for billing does not exists"},
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
+        ship = Repository().get_default_shipping_method(basket)
+        # try:
+        #     ship = None
+        #     shippingcode = data.get('shippingcode', 'self-shipping')
+        #     for repo in Repository().get_available_shipping_methods(basket, user=user, shipping_addr=None,
+        #                                                             request=request, ):
+        #         if repo.code == shippingcode:
+        #             ship = repo
+        #         break
+        #     if ship is None:
+        #         methods_are = ", ".join([r.code for r in Repository().get_available_shipping_methods(basket)])
+        #         return Response(
+        #             {'errors': f"Please Choose a valid Shipping Method! (Allowed methods are: {methods_are})"},
+        #             status=status.HTTP_406_NOT_ACCEPTABLE)
+        # except serializers.ValidationError:
+        #     return Response({'errors': "User Address for billing does not exists"},
+        #                     status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        try:
-            ship = None
-            shippingcode = data.get('shippingcode', 'self-shipping')
-            for repo in Repository().get_available_shipping_methods(basket, user=user, shipping_addr=shipping_address,
-                                                                    request=request, ):
-                if repo.code == shippingcode:
-                    ship = repo
-                break
-            if ship is None:
-                methods_are = ", ".join([r.code for r in Repository().get_available_shipping_methods(basket)])
-                return Response(
-                    {'errors': f"Please Choose a valid Shipping Method! (Allowed methods are: {methods_are})"},
-                    status=status.HTTP_406_NOT_ACCEPTABLE)
-        except serializers.ValidationError:
-            return Response({'errors': "User Address for billing does not exists"},
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
-        basket_errors = []
-        for line in basket.all_lines():
-            result = basket.strategy.fetch_for_line(line)
-            is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
-            if not is_permitted:
-                # Create a meaningful message to return in the error response
-                # Translators: User facing error message in checkout
-                msg = "This item is no longer available to buy." % {
-                    'title': line.product.get_title(),
-                    'reason': reason,
-                }
-                basket_errors.append(msg)
-            elif not is_permitted:
-                # Create a meaningful message to return in the error response
-                # Translators: User facing error message in checkout
-                msg = "This item is no longer available to buy." % {
-                    'title': line.product.get_title(),
-                    'reason': reason,
-                }
-                basket_errors.append(msg)
-        if basket_errors:
-            return Response({'errors': "\n".join(basket_errors)}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        """ now every item can be baught. """
+        # basket_errors = []
+        # for line in basket.all_lines():
+        #     result = basket.strategy.fetch_for_line(line)
+        #     is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
+        #     if not is_permitted:
+        #         # Create a meaningful message to return in the error response
+        #         # Translators: User facing error message in checkout
+        #         msg = "This item is no longer available to buy." % {
+        #             'title': line.product.get_title(),
+        #             'reason': reason,
+        #         }
+        #         basket_errors.append(msg)
+        #     elif not is_permitted:
+        #         # Create a meaningful message to return in the error response
+        #         # Translators: User facing error message in checkout
+        #         msg = "This item is no longer available to buy." % {
+        #             'title': line.product.get_title(),
+        #             'reason': reason,
+        #         }
+        #         basket_errors.append(msg)
+        # if basket_errors:
+        #     return Response({'errors': "\n".join(basket_errors)}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         shipping_cost: prices.Price = ship.calculate(basket)
         # total_amt = float(basket.total_incl_tax + shipping_cost.incl_tax)
         total_amt = OrderTotalCalculator(request=request).calculate(basket, shipping_cost)
+        random_id = datetime.now().timestamp()
         sample_data = {
             "basket": request.build_absolute_uri(reverse("basket-detail", kwargs={'pk': basket.pk})),
             # "total": total_amt.incl_tax,
@@ -243,45 +249,46 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
                 "tax": 0.0
             },
             "shipping_address": {
-                "title": shipping_address.title,
-                "first_name": shipping_address.first_name,
-                "last_name": shipping_address.last_name,
-                "line1": shipping_address.line1,
-                "line2": shipping_address.line2,
-                "line3": shipping_address.line3,
-                "line4": shipping_address.line4,
-                "state": shipping_address.state,
-                "postcode": shipping_address.postcode,
-                "address_type": shipping_address.address_type,
-                "phone_number": data.get('phone_number') or f"+91 {request.user.username}",
+                "title": "Mr",
+                "first_name": data.get('first_name', '-'),
+                "last_name": data.get('last_name', '-'),
+                "line1": f'line01 - {random_id}',
+                "line2": f'line02 - {random_id}',
+                "line3": f'line03 - {random_id}',
+                "line4": f'line04 - {random_id}',
+                "state": data.get('state', '(hopefully kerala)'),
+                "postcode": data.get('pincode', '670000'),
+                "address_type": '',
+                "phone_number": data.get('phone_number'),
                 "notes": data.get('notes'),
-                "country": request.build_absolute_uri(f"/api/v1/countries/{shipping_address.country.pk}/"),
-                "location": f'POINT({shipping_address.location.x} {shipping_address.location.y})' if shipping_address.location else None
+                "country": request.build_absolute_uri(f"/api/v1/countries/IN/"),
+                "location": None
             },
             "billing_address": {
-                "title": shipping_address.title,
-                "first_name": shipping_address.first_name,
-                "last_name": shipping_address.last_name,
-                "line1": shipping_address.line1,
-                "line2": shipping_address.line2,
-                "line3": shipping_address.line3,
-                "line4": shipping_address.line4,
-                "state": shipping_address.state,
-                "postcode": shipping_address.postcode,
-                "phone_number": data.get('phone_number') or f"+91 {request.user.username}",
+                "title": "Mr",
+                "first_name": data.get('first_name', '-'),
+                "last_name": data.get('last_name', '-'),
+                "line1": f'line01 - {random_id}',
+                "line2": f'line02 - {random_id}',
+                "line3": f'line03 - {random_id}',
+                "line4": f'line04 - {random_id}',
+                "state": data.get('state', '(hopefully kerala)'),
+                "postcode": data.get('pincode', '670000'),
+                "address_type": '',
+                "phone_number": data.get('phone_number'),
                 "notes": data.get('notes'),
-                "country": request.build_absolute_uri(f"/api/v1/countries/{shipping_address.country.pk}/")
+                "country": request.build_absolute_uri(f"/api/v1/countries/IN/"),
             },
             "payment": {
                 "cash": {
                     "enabled": data.get('payment') == 'cash',
-                    "amount": float(total_amt.incl_tax) if data.get('payment') == 'cash' else 0,
+                    "amount": float(total_amt.incl_tax) # if data.get('payment') == 'cash' else 0,
                 },
-                "razor_pay": {
-                    "enabled": data.get('payment') == 'razor_pay',
-                    "amount": float(total_amt.incl_tax) if data.get('payment') == 'razor_pay' else 0,
-                    "razorpay_payment_id": data.get('razorpay_payment_id')
-                }
+                # "razor_pay": {
+                #     "enabled": data.get('payment') == 'razor_pay',
+                #     "amount": float(total_amt.incl_tax) if data.get('payment') == 'razor_pay' else 0,
+                #     "razorpay_payment_id": data.get('razorpay_payment_id')
+                # }
             }
         }
         c_ser = self.get_serializer(data=sample_data)
@@ -357,16 +364,16 @@ class CheckoutView(CodPaymentMixin, RazorPayPaymentMixin, OscarAPICheckoutView):
         data = o_ser.data
         data['errors'] = None
         data['slot_changed'] = slot_changed
-        slot = order.slot
-        data['slot'] = {
-            'pk': slot and slot.pk,
-            'start_time': slot and slot.config.start_time,
-            'end_time': slot and slot.config.end_time,
-            'start_date': slot and slot.start_date,
-            'max_datetime_to_order': slot and slot.max_datetime_to_order,
-            'is_next': bool(slot),
-            'index': slot and slot.index,
-        }
+        # slot = order.slot
+        # data['slot'] = {
+        #     'pk': slot and slot.pk,
+        #     'start_time': slot and slot.config.start_time,
+        #     'end_time': slot and slot.config.end_time,
+        #     'start_date': slot and slot.start_date,
+        #     'max_datetime_to_order': slot and slot.max_datetime_to_order,
+        #     'is_next': bool(slot),
+        #     'index': slot and slot.index,
+        # }
         ord_sers.append(data)
         ord_statuses.append(order.status)
 

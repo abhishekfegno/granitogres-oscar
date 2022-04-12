@@ -23,13 +23,13 @@ class OwnDeliveryKerala(methods.FixedPrice):
     name = _("Own Delivery")
 
     def calculate(self, basket, *args, **kwargs):
-        configuration = SiteConfig.get_solo()
-        if basket.total_incl_tax < configuration.MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY:
-            charge = Decimal(str(configuration.DELIVERY_CHARGE_FOR_FREE_DELIVERY))
-            return prices.Price(
-                currency=basket.currency,
-                excl_tax=charge,
-                incl_tax=charge)
+        # configuration = SiteConfig.get_solo()
+        # if basket.total_incl_tax < configuration.MIN_BASKET_AMOUNT_FOR_FREE_DELIVERY:
+        #     charge = Decimal(str(configuration.DELIVERY_CHARGE_FOR_FREE_DELIVERY))
+        #     return prices.Price(
+        #         currency=basket.currency,
+        #         excl_tax=charge,
+        #         incl_tax=charge)
         return prices.Price(
             currency=basket.currency,
             excl_tax=Decimal('0.0'),
@@ -55,7 +55,7 @@ class Repository(CoreRepository):
     Oscar's default behaviour is to only have one.
     """
 
-    methods = [OwnDeliveryKerala(), ExpressDelivery()]  # init shipping method to default hand delivery
+    methods = [OwnDeliveryKerala(), ]  # init shipping method to default hand delivery
 
     def get_available_shipping_methods(self, basket, user=None, shipping_addr=None, request=None, **kwargs):
         return self.methods
