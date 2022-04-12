@@ -366,7 +366,15 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 'url_name': 'dashboard-custom:dashboard-brochure-create',
                 'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff,
 
-            }
+            },
+            {
+                'label': _('Gallery'),
+                'url_name': 'dashboard-custom:dashboard-gallery-create',
+                'access_fn': lambda user, url_name, url_args, url_kwargs: user.is_staff,
+
+            },
+
+
         ]
     },
     # {

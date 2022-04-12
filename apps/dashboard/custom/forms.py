@@ -1,6 +1,6 @@
 from django import forms
 
-from apps.dashboard.custom.models import Brochure
+from apps.dashboard.custom.models import Brochure, Gallery, Album
 from apps.users.models import User
 
 
@@ -22,5 +22,17 @@ class BrochureForm(forms.ModelForm):
         model = Brochure
         fields = ('name', 'image', 'file')
 
+
+class GalleryForm(forms.ModelForm):
+    album_images = forms.ChoiceField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['album_images'].queryset = Album.objects.all()
+        self.fields['album_images'].required = False
+
+    class Meta:
+        model = Gallery
+        fields = ('title', 'description', 'image', 'album_images')
 
 

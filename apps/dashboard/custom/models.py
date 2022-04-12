@@ -408,6 +408,19 @@ class Brochure(models.Model):
     def __str__(self):
         return self.name
 
+
+class Gallery(models.Model):
+    title = models.CharField(max_length=100, blank=True, null=True)
+    description = models.CharField(max_length=100, blank=True, null=True)
+    image = models.ImageField(upload_to='gallery/', blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+
+
+class Album(models.Model):
+    gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, blank=True, null=True)
+    image = models.ImageField(upload_to='gallery/albums/', blank=True, null=True)
 # class FAQ(AbstractCURDModel):
 #     referrer = 'faq'
 #

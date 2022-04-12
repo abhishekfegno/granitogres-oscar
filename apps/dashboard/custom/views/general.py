@@ -8,8 +8,8 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, UpdateView, DeleteView
 
-from apps.dashboard.custom.forms import BrochureForm
-from apps.dashboard.custom.models import OfferBanner, models_list, Brochure
+from apps.dashboard.custom.forms import BrochureForm, GalleryForm
+from apps.dashboard.custom.models import OfferBanner, models_list, Brochure, Gallery
 
 
 class ModelSelectorMixin(object):
@@ -113,3 +113,14 @@ class BrochureCreateView(CreateView):
         return super().post(request, *args, **kwargs)
 
 
+class GalleryCreateView(CreateView):
+    template_name = 'oscar/dashboard/catalogue/brochure_add.html'
+    model = Gallery
+    form_class = GalleryForm
+    success_url = 'dashboard-custom:dashboard-gallery-create'
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(self.request.POST, self.request.FILES)
+        if form.is_valid():
+            form.save()
+        return super().post(request, *args, **kwargs)

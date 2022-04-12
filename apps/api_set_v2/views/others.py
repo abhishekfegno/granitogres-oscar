@@ -8,8 +8,8 @@ from rest_framework.permissions import AllowAny
 
 from django.conf import settings
 
-from apps.api_set_v2.serializers.catalogue import BrochureSerializer
-from apps.dashboard.custom.models import NewsLetter, Brochure
+from apps.api_set_v2.serializers.catalogue import BrochureSerializer, GallerySerializer
+from apps.dashboard.custom.models import NewsLetter, Brochure, Gallery
 
 normalize = lambda request: request.POST if request.POST.keys() else (request.data if request.data.keys() else  request.query_params)
 
@@ -66,6 +66,16 @@ class BrochureListView(GenericAPIView):
     queryset = Brochure.objects.all()
     serializer_class = BrochureSerializer
     success_url = 'dashboard:brochure-create'
+
+    def get(self, request, *args, **kwargs):
+        serializer = self.serializer_class(self.get_queryset(), context={'request': request}, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GalleryListView(GenericAPIView):
+    queryset = Gallery.objects.all()
+    serializer_class = GallerySerializer
+    success_url = 'dashboard:gallery-create'
 
     def get(self, request, *args, **kwargs):
         serializer = self.serializer_class(self.get_queryset(), context={'request': request}, many=True)

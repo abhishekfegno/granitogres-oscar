@@ -19,8 +19,9 @@ class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldM
     cimage = serializers.SerializerMethodField()
 
     def get_cimage(self, instance):
-        return instance.product360image_set.all()
-    #
+        d = {instance.product360image_set.all().values('id', 'image')}
+        return d
+
     # def get_price(self, product):
     #     key = 'ProductPriceFieldMixinLite__{0}__{1}'
     #

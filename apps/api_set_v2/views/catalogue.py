@@ -184,17 +184,26 @@ class Prodcut360ImageCreateView(CreateAPIView):
         return_data = [{
             'id': i.id,
             'image': request.build_absolute_uri(i.image.url),
+            # 'product': (i.product.all().values_list('id', flat=True))
         } for i in instances]
         return Response({"response": return_data}, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
         out = []
-        for img in serializer.validated_data.values():
-            if not img: continue
-            ip = Product360Image(image=img)
-            ip.image.save(img.name, img, save=True)
+        # import pdb;pdb.set_trace()
+        img = serializer.validated_data.get('image')
+        id = serializer.validated_data.get('product_id')
+        try:
+            p = Product.objects.get(id=id)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        if img and p:
+            ip = Product360Image.objects.create(image=img)
+            ip.product.add(p)
+            ip.save()
             out.append(ip)
-        return Product360Image.objects.bulk_create(out, ignore_conflicts=True)
+
+        return out
 
 
 class ProductReviewImageDeleteView(DestroyAPIView):

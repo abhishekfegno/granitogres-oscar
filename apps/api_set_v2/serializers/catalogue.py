@@ -11,7 +11,7 @@ from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin, Pr
 from apps.catalogue.models import Category, Product
 # from apps.catalogue.models import ProductReview
 from apps.catalogue.reviews.models import ProductReview, ProductReviewImage
-from apps.dashboard.custom.models import Brochure
+from apps.dashboard.custom.models import Brochure, Gallery, Album
 from apps.users.models import User
 from drf_extra_fields.fields import Base64ImageField
 
@@ -128,7 +128,9 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
         }
 
     def get_cimage(self, instance):
-        return instance.product360image_set.all()
+        d = {instance.product360image_set.all().values('id', 'image')}
+        # print(d)
+        return d
 
     class Meta:
         model = Product
@@ -218,6 +220,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
 
 class Prodcut360ImageSerializer(serializers.Serializer):
     image = serializers.ImageField(allow_null=True, required=False)
+    product_id = serializers.CharField(max_length=10, allow_null=True, required=False)
 
     def create(self, validated_data):
         pass
@@ -320,3 +323,21 @@ class BrochureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brochure
         fields = ('name', 'image', 'file')
+
+
+class AlbumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Album
+        fields = ('gallery', 'image')
+
+
+class GallerySerializer(serializers.ModelSerializer):
+    album = serializers.SerializerMethodField()
+
+    def get_album(self, instance):
+        queryset = Album.objects.filter(gallery=instance)
+        return AlbumSerializer(queryset, many=True).data
+
+    class Meta:
+        model = Gallery
+        fields = ('title', 'description', 'image', 'album')
