@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.mail import send_mail
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.generics import CreateAPIView, GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -67,4 +67,5 @@ class BrochureListView(GenericAPIView):
     serializer_class = BrochureSerializer
 
     def get(self, request, *args, **kwargs):
-        return super().get(*args, **kwargs)
+        serializer = self.serializer_class(self.get_queryset(), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

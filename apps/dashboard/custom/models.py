@@ -400,6 +400,12 @@ class SiteConfig(SingletonModel):
 class Brochure(models.Model):
     name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='brochures/', null=True, blank=True)
+    type = models.CharField(max_length=50, choices=(('brochure', 'Brochure'),
+                                     ('catelogue', 'Catelogue')
+                                     ), null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 # class FAQ(AbstractCURDModel):
 #     referrer = 'faq'
