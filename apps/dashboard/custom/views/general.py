@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, UpdateView, DeleteView
 
-from apps.dashboard.custom.forms import BrochureForm, GalleryForm
+from apps.dashboard.custom.forms import BrochureForm, GalleryForm, AlbumFormset
 from apps.dashboard.custom.models import OfferBanner, models_list, Brochure, Gallery
 
 
@@ -119,8 +119,18 @@ class GalleryCreateView(CreateView):
     form_class = GalleryForm
     success_url = 'dashboard-custom:dashboard-gallery-create'
 
+    def get_context_data(self):
+        cxt = super().get_context_data()
+        cxt['formset'] = AlbumFormset
+        print(cxt)
+        return cxt
+
     def post(self, request, *args, **kwargs):
         form = self.form_class(self.request.POST, self.request.FILES)
-        if form.is_valid():
-            form.save()
+        formset = AlbumFormset(self.request.POST, self.request.FILES)
+        if form.is_valid() and formset.is_valid():
+            instance = form.save(commit=False)
+            for form in formset:
+                form.gallery = instance
+                form.save()
         return super().post(request, *args, **kwargs)
