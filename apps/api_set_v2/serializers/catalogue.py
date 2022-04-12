@@ -306,6 +306,17 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
 
 
 class BrochureSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    file = serializers.SerializerMethodField()
+
+    def get_image(self, instance):
+        img = instance.image
+        return self.context['request'].build_absolute_uri(img.url)
+
+    def get_file(self, instance):
+        file = instance.file
+        return self.context['request'].build_absolute_uri(file.url)
+
     class Meta:
         model = Brochure
         fields = ('name', 'image', 'file')

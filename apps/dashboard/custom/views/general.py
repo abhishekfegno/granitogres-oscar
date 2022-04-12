@@ -104,9 +104,10 @@ class BrochureCreateView(CreateView):
     template_name = 'oscar/dashboard/catalogue/brochure_add.html'
     model = Brochure
     form_class = BrochureForm
+    success_url = 'dashboard-custom:dashboard-brochure-create'
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class
+        form = self.form_class(self.request.POST, self.request.FILES)
         if form.is_valid():
             form.save()
         return super().post(request, *args, **kwargs)
