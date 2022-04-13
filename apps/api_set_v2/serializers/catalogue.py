@@ -322,7 +322,7 @@ class BrochureSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Brochure
-        fields = ('name', 'image', 'file')
+        fields = ('name', 'image', 'file', 'type')
 
 
 class AlbumSerializer(serializers.ModelSerializer):
