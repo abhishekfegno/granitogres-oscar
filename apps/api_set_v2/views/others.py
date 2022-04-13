@@ -68,7 +68,7 @@ class BrochureListView(GenericAPIView):
     success_url = 'dashboard:brochure-create'
 
     def get(self, request, *args, **kwargs):
-        type = self.kwargs.get('type')
+        type = self.request.GET.get('type')
         serializer = self.serializer_class(self.get_queryset().filter(type=type), context={'request': request}, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
