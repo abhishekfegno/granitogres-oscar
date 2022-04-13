@@ -106,6 +106,11 @@ class BrochureCreateView(CreateView):
     form_class = BrochureForm
     success_url = 'dashboard-custom:dashboard-brochure-create'
 
+    def get_context_data(self):
+        cxt = super().get_context_data()
+        cxt['brochure'] = Brochure.objects.all()
+        return cxt
+
     def post(self, request, *args, **kwargs):
         form = self.form_class(self.request.POST, self.request.FILES)
         if form.is_valid():
@@ -114,17 +119,15 @@ class BrochureCreateView(CreateView):
 
 
 class GalleryCreateView(CreateView):
-    template_name = 'oscar/dashboard/catalogue/brochure_add.html'
+    template_name = 'oscar/dashboard/catalogue/gallery_add.html'
     model = Gallery
     form_class = GalleryForm
     success_url = 'dashboard-custom:dashboard-gallery-create'
 
-    # def get_context_data(self):
-    #     cxt = super().get_context_data()
-    #     # cxt['formset'] = AlbumFormset
-    #     cxt['form'] = GalleryForm(self.request.POST, self.request.FILES)
-    #     print(cxt)
-    #     return cxt
+    def get_context_data(self):
+        cxt = super().get_context_data()
+        cxt['gallery'] = Gallery.objects.all()
+        return cxt
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(self.request.POST, self.request.FILES)

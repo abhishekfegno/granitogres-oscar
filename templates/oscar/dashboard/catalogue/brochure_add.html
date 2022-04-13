@@ -14,5 +14,25 @@
         {% include 'oscar/dashboard/partials/form.html' with includes_files=1 class='wysiwyg' %}
     </div>
 
+ <table class="table">
+                    <thead class=" text-primary">
+                     <th scope="col">#</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Image</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Pdf</th>
+                    </thead>
+                    <tbody>
 
+                    {% for data in brochure %}
+                        <tr>
+                          <td>{{ forloop.counter }}</td>
+                          <td>{{ data.name }}</td>
+                          <td><img style="width:100px;height:100px;"  src="{{ data.image.url }}"></td>
+                          <td>{{ data.type }}</td>
+                          <td><img src="{{ data.file.url }}"></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
 {% endblock dashboard_content %}
