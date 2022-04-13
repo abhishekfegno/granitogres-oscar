@@ -10,6 +10,19 @@
         <button class="btn btn-lg btn-primary" type="submit" data-loading-text="{% trans 'Saving...' %}">{% trans "Save" %}</button>
         {% trans "or" %} <a href="#" onclick="window.history.go(-1);return false" >{% trans "cancel" %}</a>.
     </div>
+<!--<button type="button" class="btn btn-primary" hx-get="{% url 'dashboard-custom:get_album_form' %}" hx-target="#albumforms" hx-swap="beforeend">Add services</button>-->
+
+<!--    <div id="albumforms"></div>-->
+<!--    <input type="hidden" hx-post="{% url 'dashboard-custom:dashboard-gallery-create'%}">-->
 
 </form>
 
+<!--<script src="https://unpkg.com/htmx.org@1.5.0"-->
+<!--        integrity="sha384-oGA+prIp5Vchu6we2YkI51UtVzN9Jpx2Z7PnR1I78PnZlN8LkrCT4lqqqmDkyrvI"-->
+<!--        crossorigin="anonymous">-->
+<!--</script>-->
+<!--<script>-->
+<!--      document.body.addEventListener('htmx:configRequest', (event) => {-->
+<!--        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';-->
+<!--      })-->
+<!--</script>-->

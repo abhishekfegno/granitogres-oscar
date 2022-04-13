@@ -11,7 +11,7 @@ from apps.api_set_v2.views.google_merchant_format import call_merchant
 from apps.catalogue.management.handlers.stockhandler import Handler
 from apps.dashboard.custom.models import models_list, SiteConfig
 from apps.dashboard.custom.views.general import DashboardBlockList, DashboardCustomCreate, DashboardCustomDetail, \
-    DashboardCustomDelete, BrochureCreateView, GalleryCreateView
+    DashboardCustomDelete, BrochureCreateView, GalleryCreateView, get_album_form
 from apps.dashboard.custom.views.offer_banner import OfferBannerList, OfferBannerDetail, OfferBannerCreate, \
     OfferBannerDelete
 
@@ -108,6 +108,7 @@ urlpatterns = [
                                    path("google_merchant_format/", call_merchant, name="product_list_google_merchant"),
                                    path("brochure", BrochureCreateView.as_view(), name="dashboard-brochure-create"),
                                    path("gallery", GalleryCreateView.as_view(), name="dashboard-gallery-create"),
+                                   path("get/albumform/", get_album_form, name="get_album_form"),
                                    path('site-configuration', UpdateSiteConfig.as_view(), name="site-config"),
                                    path('sheet-synchronization', UpdateSheetSynchronization.as_view(), name="sheet-synchronization"),
                                ] + referrers)),

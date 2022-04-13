@@ -21,7 +21,7 @@ class DeliveryBoyRegistrationForm(forms.Form):
 class BrochureForm(forms.ModelForm):
     class Meta:
         model = Brochure
-        fields = ('name', 'image', 'file')
+        fields = ('name', 'image', 'file', 'type')
 
 
 class GalleryForm(forms.ModelForm):
@@ -37,4 +37,10 @@ class GalleryForm(forms.ModelForm):
         fields = ('title', 'description', 'image')
 
 
-AlbumFormset = modelformset_factory(Album, fields=('image',), extra=2)
+# AlbumFormset = modelformset_factory(Album, fields=('image',), extra=2)
+
+class AlbumForm(forms.ModelForm):
+
+    class Meta:
+        model = Album
+        fields = ('image',)

@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, UpdateView, DeleteView
 
-from apps.dashboard.custom.forms import BrochureForm, GalleryForm, AlbumFormset
+from apps.dashboard.custom.forms import BrochureForm, GalleryForm, AlbumForm
 from apps.dashboard.custom.models import OfferBanner, models_list, Brochure, Gallery
 
 
@@ -121,16 +121,24 @@ class GalleryCreateView(CreateView):
 
     def get_context_data(self):
         cxt = super().get_context_data()
-        cxt['formset'] = AlbumFormset
+        # cxt['formset'] = AlbumFormset
         print(cxt)
         return cxt
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(self.request.POST, self.request.FILES)
-        formset = AlbumFormset(self.request.POST, self.request.FILES)
-        if form.is_valid() and formset.is_valid():
+        # formset = AlbumFormset(self.request.POST, self.request.FILES)
+        if form.is_valid():
             instance = form.save(commit=False)
-            for form in formset:
-                form.gallery = instance
-                form.save()
+            # for form in formset:
+            #     form.gallery = instance
+            #     form.save()
         return super().post(request, *args, **kwargs)
+
+
+def get_album_form(request):
+    inlines = ''
+    context = {'request': request}
+    if request.method == 'GET':
+        inlines = AlbumForm(context)
+    return render(request, 'oscar/dashboard/catalogue/albumform.html', context={'inlines': inlines})
