@@ -130,6 +130,7 @@ class GalleryCreateView(CreateView):
         # formset = AlbumFormset(self.request.POST, self.request.FILES)
         if form.is_valid():
             instance = form.save(commit=False)
+            form.save()
             # for form in formset:
             #     form.gallery = instance
             #     form.save()
