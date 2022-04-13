@@ -69,7 +69,11 @@ class BrochureListView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         type = self.request.GET.get('type')
-        serializer = self.serializer_class(self.get_queryset().filter(type=type), context={'request': request}, many=True)
+        if type:
+            queryset = self.get_queryset().filter(type=type)
+        else:
+            queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, context={'request': request}, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
