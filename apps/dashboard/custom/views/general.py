@@ -119,11 +119,12 @@ class GalleryCreateView(CreateView):
     form_class = GalleryForm
     success_url = 'dashboard-custom:dashboard-gallery-create'
 
-    def get_context_data(self):
-        cxt = super().get_context_data()
-        # cxt['formset'] = AlbumFormset
-        print(cxt)
-        return cxt
+    # def get_context_data(self):
+    #     cxt = super().get_context_data()
+    #     # cxt['formset'] = AlbumFormset
+    #     cxt['form'] = GalleryForm(self.request.POST, self.request.FILES)
+    #     print(cxt)
+    #     return cxt
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(self.request.POST, self.request.FILES)
