@@ -37,10 +37,16 @@ class GalleryForm(forms.ModelForm):
         fields = ('title', 'description', 'image')
 
 
-# AlbumFormset = modelformset_factory(Album, fields=('image',), extra=2)
-
 class AlbumForm(forms.ModelForm):
-
     class Meta:
         model = Album
         fields = ('image',)
+
+
+AlbumFormset = modelformset_factory(Album, form=AlbumForm, extra=2)
+
+
+
+
+
+
