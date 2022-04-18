@@ -100,5 +100,18 @@ class GalleryListView(GenericAPIView):
     success_url = 'dashboard:gallery-create'
 
     def get(self, request, *args, **kwargs):
+        page_number = int(self.request.GET.get('page', '1'))
+        page_size = int(request.GET.get('page_size', str(settings.DEFAULT_PAGE_SIZE)))
         serializer = self.serializer_class(self.get_queryset(), context={'request': request}, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        paginator = Paginator(self.get_queryset(), page_size)  # Show 18 contacts per page.
+        empty_list = False
+        try:
+            page_number = paginator.validate_number(page_number)
+        except PageNotAnInteger:
+            page_number = 1
+        except EmptyPage:
+            page_number = paginator.num_pages
+            empty_list = True
+        page_obj = paginator.get_page(page_number)
+        data = list_api_formatter(request, paginator, page_obj, results=serializer.data)
+        return Response(data, status=status.HTTP_200_OK)
