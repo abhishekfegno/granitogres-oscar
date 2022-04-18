@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, UpdateView, DeleteView
 
-from apps.dashboard.custom.forms import BrochureForm, GalleryForm, AlbumForm
+from apps.dashboard.custom.forms import BrochureForm, GalleryForm, AlbumForm, AlbumFormset
 from apps.dashboard.custom.models import OfferBanner, models_list, Brochure, Gallery
 
 
@@ -122,22 +122,26 @@ class GalleryCreateView(CreateView):
     template_name = 'oscar/dashboard/catalogue/gallery_add.html'
     model = Gallery
     form_class = GalleryForm
-    success_url = 'dashboard-custom:dashboard-gallery-create'
+    # success_url = 'dashboard-custom:dashboard-gallery-create'
 
-    def get_context_data(self):
+    def get_context_data(self, **kwargs):
         cxt = super().get_context_data()
         cxt['gallery'] = Gallery.objects.all()
+        cxt['form'] = GalleryForm()
+        cxt['formset'] = AlbumFormset()
         return cxt
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(self.request.POST, self.request.FILES)
-        # formset = AlbumFormset(self.request.POST, self.request.FILES)
+        form = GalleryForm(self.request.POST, self.request.FILES)
+        formset = AlbumFormset(self.request.POST, self.request.FILES)
         if form.is_valid():
             instance = form.save(commit=False)
+            # import pdb;pdb.set_trace()
+            for f in formset:
+                f.gallery = instance
+                f.save()
             form.save()
-            # for form in formset:
-            #     form.gallery = instance
-            #     form.save()
+
         return super().post(request, *args, **kwargs)
 
 

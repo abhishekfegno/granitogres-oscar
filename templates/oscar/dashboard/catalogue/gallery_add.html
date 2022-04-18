@@ -15,6 +15,7 @@
     <div class="well">
         {% include 'oscar/dashboard/partials/for_gallery.html' with includes_files=1 class='wysiwyg' %}
     </div>
+
                 <table class="table">
                     <thead class=" text-primary">
                      <th scope="col">#</th>
@@ -27,7 +28,12 @@
                         <tr>
                           <td>{{ forloop.counter }}</td>
                           <td>{{ data.title }}</td>
+                            {% if data.image %}
                           <td><img style="width:100px;height:100px;" src="{{ data.image.url }}"></td>
+                            {% else %}
+                          <td><img style="width:100px;height:100px;" src=""></td>
+                            {% endif %}
+
                         </tr>
                     {% endfor %}
                     </tbody>

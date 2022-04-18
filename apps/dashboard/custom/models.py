@@ -414,6 +414,9 @@ class Gallery(models.Model):
     description = models.CharField(max_length=100, blank=True, null=True)
     image = models.ImageField(upload_to='gallery/', blank=True, null=True)
 
+    def get_absolute_url(self):
+        return reverse('dashboard:index')
+
     def __str__(self):
         return self.title
 
