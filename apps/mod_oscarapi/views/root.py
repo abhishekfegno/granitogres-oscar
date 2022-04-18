@@ -15,7 +15,7 @@ def PUBLIC_APIS(r, f):
             ("Privacy Policy", reverse("policies", request=r, format=f, kwargs={'path': '/legals/privacy-policy/'})),
             ("Return Policy	", reverse("policies", request=r, format=f, kwargs={'path': '/legals/return-policy/'})),
             ("Terms and Conditions", reverse("policies", request=r, format=f, kwargs={'path': '/legals/terms-and-conditions/'})),
-            ("Brochure List", reverse("api-brochure-list-v2", request=r, format=f)),
+            ("Downloads List", reverse("api-downloads-list-v2", request=r, format=f)),
             ("Gallery List", reverse("api-gallery-list-v2", request=r, format=f)),
         ])),
         ("Authorization", collections.OrderedDict([

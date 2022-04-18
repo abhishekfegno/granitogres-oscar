@@ -49,7 +49,7 @@ home_urlpatterns = [
     path("index/", index, name="api-index-v2"),
     path("send-email/", SendEmail.as_view(), name="api-send-email-v2"),
     path("newsletter-subscription/", NewsLetterAPIView.as_view(), name="api-newsletter-subscription-v2"),
-    path("brochure-list/", BrochureListView.as_view(), name="api-brochure-list-v2"),
+    path("downloads-list/", BrochureListView.as_view(), name="api-downloads-list-v2"),
     path("gallery-list/", GalleryListView.as_view(), name="api-gallery-list-v2"),
     path("pincode/", pincode_list, name="api-pincode-v2"),
 
