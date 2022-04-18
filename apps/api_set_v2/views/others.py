@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.mail import send_mail
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from rest_framework import serializers, status
 from rest_framework.generics import CreateAPIView, GenericAPIView
 from rest_framework.views import APIView
@@ -10,6 +11,7 @@ from django.conf import settings
 
 from apps.api_set_v2.serializers.catalogue import BrochureSerializer, GallerySerializer
 from apps.dashboard.custom.models import NewsLetter, Brochure, Gallery
+from apps.utils.urls import list_api_formatter
 
 normalize = lambda request: request.POST if request.POST.keys() else (request.data if request.data.keys() else  request.query_params)
 
@@ -69,12 +71,27 @@ class BrochureListView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         type = self.request.GET.get('type')
+        page_number = int(self.request.GET.get('page', '1'))
+        page_size = int(request.GET.get('page_size', str(settings.DEFAULT_PAGE_SIZE)))
+
         if type:
             queryset = self.get_queryset().filter(type=type)
         else:
             queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, context={'request': request}, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        paginator = Paginator(queryset, page_size)  # Show 18 contacts per page.
+        empty_list = False
+        try:
+            page_number = paginator.validate_number(page_number)
+        except PageNotAnInteger:
+            page_number = 1
+        except EmptyPage:
+            page_number = paginator.num_pages
+            empty_list = True
+        page_obj = paginator.get_page(page_number)
+        data = list_api_formatter(request, paginator, page_obj, results=serializer.data)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class GalleryListView(GenericAPIView):
