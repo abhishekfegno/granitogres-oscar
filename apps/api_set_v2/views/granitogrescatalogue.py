@@ -1,5 +1,6 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
 from apps.api_set.serializers.mixins import ProductPriceFieldMixinLite, ProductAttributeFieldMixin, \
     ProductDetailSerializerMixin
@@ -79,6 +80,9 @@ class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixi
     # price = serializers.SerializerMethodField()
     primary_image = serializers.SerializerMethodField()
 
+    # def get_url(self, instance):
+    #     return reverse('product-detail', kwargs={'slug': instance.slug}, request=self.context.get('request'))
+
     # def get_price(self, product):
     #     key = 'ProductPriceFieldMixinLite__{0}__{1}'
     #
@@ -97,8 +101,8 @@ class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixi
     class Meta:
         model = Product
         fields = (
-            'id', 'title', 'structure', 'primary_image', "effective_price", 'weight', 'url', 'rating', 'review_count', 'brand',
-            'search_tags')
+            'id', 'title', 'slug', 'structure', 'primary_image', "effective_price", 'weight', 'url', 'rating',
+            'review_count', 'brand', 'search_tags')
 
 
 class ProductDetailview(RetrieveAPIView):

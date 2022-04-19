@@ -47,7 +47,7 @@ def PUBLIC_APIS(r, f):
             ("Category API", reverse("wnc-categories-list", request=r, format=f)),
             ("Product API", collections.OrderedDict([
                 ("Product List API", reverse("product_list_granito", request=r, format=f)),
-                ("Product Detail API", reverse("product_detail_granito", request=r, format=f, kwargs={'pk': 1})),
+                ("Product Detail API", reverse("product_detail_granito", request=r, format=f, kwargs={'slug': 'product-slug'})),
             ])),
             ("Products API", collections.OrderedDict([
                 ("v1", reverse("wnc-all-product-list", request=r, format=f)),
