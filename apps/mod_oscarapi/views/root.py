@@ -66,7 +66,7 @@ def PUBLIC_APIS(r, f):
 
             ("Product Details Web", collections.OrderedDict([
                 ("v1", reverse("wnc-category-product-detail-web", request=r, format=f, kwargs={"product": '138'})),
-                ("v2", reverse("wnc-category-product-detail-web-v2", request=r, format=f, kwargs={"product": '138'}))]),
+                ("v2", reverse("wnc-category-product-detail-web-v2", request=r, format=f, kwargs={"product": 'product-slug'}))]),
              ),
             ("Product 360 Image", collections.OrderedDict([
                 ("v2", reverse("wnc-category-product-review-image-360-create-web-v2", request=r, format=f))]),

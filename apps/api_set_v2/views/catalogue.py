@@ -47,7 +47,7 @@ def product_detail_web(request, product):
     serializer_class = ProductDetailWebSerializer
     # product = get_object_or_404(queryset, pk=product)
     try:
-        product = queryset.get(pk=product)
+        product = queryset.get(slug=product)
     except queryset.model.DoesNotExist:
         return Response({
             "response": "Product Doesn't exist."
