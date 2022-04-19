@@ -22,13 +22,10 @@ class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldM
     cimage = serializers.SerializerMethodField()
 
     def get_cimage(self, instance):
-        if instance.product360image_set:
-            return {
-                "image": self.context['request'].build_absolute_uri(instance.product360image_set.first().image.url)
-            }
+        if instance.product360image_set.first() and instance.product360image_set.first().image:
+            return self.context['request'].build_absolute_uri(instance.product360image_set.first().image.url)
         else:
-            print(settings.MEDIA_URL + '/product360/360.jpg')
-            return settings.MEDIA_URL + '/product360/360.jpg'
+            return self.context['request'].build_absolute_uri(settings.MEDIA_URL + 'product360/360.jpg')
 
 
     # def get_price(self, product):

@@ -130,11 +130,9 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
 
     def get_cimage(self, instance):
         if instance.product360image_set.first() and instance.product360image_set.first().image:
-            return {
-                    "image": self.context['request'].build_absolute_uri(instance.product360image_set.first().image.url)
-                    }
+            return self.context['request'].build_absolute_uri(instance.product360image_set.first().image.url)
         else:
-            return settings.MEDIA_URL+'/product360/360.jpg'
+            return self.context['request'].build_absolute_uri(settings.MEDIA_URL+'product360/360.jpg')
 
     class Meta:
         model = Product
