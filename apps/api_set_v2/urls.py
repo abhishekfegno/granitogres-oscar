@@ -84,7 +84,7 @@ catalogue_urlpatterns = [
         path("c/all/", product_list_new_pagination, name="wnc-all-product-list-v2"),                     # category
         # path("google_merchant_format/", product_list_google_merchant, name="product_list_google_merchant"),
         path("product/list/", ProductListView.as_view(), name="product_list_granito"),
-        path("product/detail/<int:pk>/", ProductDetailview.as_view(), name="product_detail_granito"),
+        path("product/detail/<slug:slug>/", ProductDetailview.as_view(), name="product_detail_granito"),
 
 
 

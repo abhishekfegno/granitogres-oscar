@@ -1,8 +1,9 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.response import Response
 
 from apps.api_set.serializers.mixins import ProductPriceFieldMixinLite, ProductAttributeFieldMixin, \
     ProductDetailSerializerMixin
-from rest_framework import serializers
+from rest_framework import serializers, status
 
 from apps.api_set_v2.serializers.mixins import ProductPrimaryImageFieldMixin
 from apps.catalogue.models import Product
@@ -43,6 +44,7 @@ class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldM
             "id",
             "url",
             "title",
+            "slug",
             "description",
             "seo_title",
             "seo_description",
@@ -102,6 +104,11 @@ class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixi
 class ProductDetailview(RetrieveAPIView):
     serializer_class = ProductDetailSerializer
     queryset = Product.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        qs = self.get_queryset().filter(slug=kwargs.get('slug'))
+        serializer = self.serializer_class(qs, context={'request': request}, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ProductListView(ListAPIView):
