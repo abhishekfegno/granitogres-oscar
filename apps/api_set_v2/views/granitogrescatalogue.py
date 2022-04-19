@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -21,8 +22,14 @@ class ProductDetailSerializer(ProductPriceFieldMixinLite, ProductAttributeFieldM
     cimage = serializers.SerializerMethodField()
 
     def get_cimage(self, instance):
-        d = {instance.product360image_set.all().values('id', 'image')}
-        return d
+        if instance.product360image_set:
+            return {
+                "image": self.context['request'].build_absolute_uri(instance.product360image_set.first().image.url)
+            }
+        else:
+            print(settings.MEDIA_URL + '/product360/360.jpg')
+            return settings.MEDIA_URL + '/product360/360.jpg'
+
 
     # def get_price(self, product):
     #     key = 'ProductPriceFieldMixinLite__{0}__{1}'
@@ -101,7 +108,7 @@ class ProductListSerializer(ProductPrimaryImageFieldMixin, ProductPriceFieldMixi
     class Meta:
         model = Product
         fields = (
-            'id', 'title', 'slug', 'structure', 'primary_image', "effective_price", 'weight', 'url', 'rating',
+            'id', 'title', 'structure', 'primary_image', "effective_price", 'weight', 'url', 'rating',
             'review_count', 'brand', 'search_tags')
 
 

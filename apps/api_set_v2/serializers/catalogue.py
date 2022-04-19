@@ -1,4 +1,5 @@
 # /home/jk/code/grocery/apps/api_set_v2/serializers/catalogue.py
+from django.conf import settings
 from django.db.models import Count, Q
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
@@ -128,10 +129,12 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
         }
 
     def get_cimage(self, instance):
-        return {
-            "image": self.context['request'].build_absolute_uri(instance.product360image_set.first().image.url)
-        }
-
+        if instance.product360image_set:
+            return {
+                    "image": self.context['request'].build_absolute_uri(instance.product360image_set.first().image.url)
+                    }
+        else:
+            return settings.MEDIA_URL+'/product360/360.jpg'
 
     class Meta:
         model = Product
