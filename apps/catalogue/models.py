@@ -448,7 +448,7 @@ class Product360Image(models.Model):
     product = models.ManyToManyField(Product, through='ImageVector', through_fields=('image', 'product'), null=True, blank=True)
 
     def __str__(self):
-        return self.title
+        return self.id
 
 
 class ImageVector(models.Model):
