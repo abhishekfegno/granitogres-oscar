@@ -104,7 +104,7 @@ class BrochureCreateView(CreateView):
     template_name = 'oscar/dashboard/catalogue/brochure_add.html'
     model = Brochure
     form_class = BrochureForm
-    success_url = 'dashboard-custom:dashboard-brochure-create'
+    # success_url = 'dashboard-custom:dashboard-brochure-create'
 
     def get_context_data(self):
         cxt = super().get_context_data()
@@ -115,6 +115,7 @@ class BrochureCreateView(CreateView):
         form = self.form_class(self.request.POST, self.request.FILES)
         if form.is_valid():
             form.save()
+            return redirect('dashboard-custom:dashboard-brochure-create')
         return super().post(request, *args, **kwargs)
 
 
