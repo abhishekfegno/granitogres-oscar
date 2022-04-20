@@ -108,7 +108,7 @@ class BrochureCreateView(CreateView):
 
     def get_context_data(self):
         cxt = super().get_context_data()
-        cxt['brochure'] = Brochure.objects.all()
+        cxt['brochure'] = Brochure.objects.all().order_by('-id')
         return cxt
 
     def post(self, request, *args, **kwargs):
@@ -127,7 +127,7 @@ class GalleryCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         cxt = super().get_context_data()
-        cxt['gallery'] = Gallery.objects.all()
+        cxt['gallery'] = Gallery.objects.all().order_by('-id')
         cxt['form'] = GalleryForm()
         cxt['formset'] = AlbumFormset()
         return cxt

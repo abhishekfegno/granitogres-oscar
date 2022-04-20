@@ -316,7 +316,10 @@ class BrochureSerializer(serializers.ModelSerializer):
     file = serializers.SerializerMethodField()
 
     def get_image(self, instance):
-        return self.context['request'].build_absolute_uri(instance.image_url)
+        if instance.image_url:
+            return self.context['request'].build_absolute_uri(instance.image_url)
+        else:
+            return self.context['request'].build_absolute_uri(settings.MEDIA_URL + 'image_not_found.jpg')
 
     def get_file(self, instance):
         file = instance.file
