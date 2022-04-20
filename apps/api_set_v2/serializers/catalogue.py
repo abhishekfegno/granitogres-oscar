@@ -132,7 +132,7 @@ class ProductDetailWebSerializer(ProductPriceFieldMixinLite, ProductAttributeFie
         if instance.product360image_set.first() and instance.product360image_set.first().image:
             return self.context['request'].build_absolute_uri(instance.product360image_set.first().image.url)
         else:
-            return self.context['request'].build_absolute_uri(settings.MEDIA_URL+'product360/360.jpg')
+            return self.context['request'].build_absolute_uri(settings.MEDIA_URL+'product360/07.jpeg')
 
     class Meta:
         model = Product

@@ -65,7 +65,7 @@ class SendEmail(APIView):
 
 
 class BrochureListView(GenericAPIView):
-    queryset = Brochure.objects.all()
+    queryset = Brochure.objects.all().order_by('-id')
     serializer_class = BrochureSerializer
     success_url = 'dashboard:brochure-create'
 
@@ -95,7 +95,7 @@ class BrochureListView(GenericAPIView):
 
 
 class GalleryListView(GenericAPIView):
-    queryset = Gallery.objects.all()
+    queryset = Gallery.objects.all().order_by('-id')
     serializer_class = GallerySerializer
     success_url = 'dashboard:gallery-create'
 
