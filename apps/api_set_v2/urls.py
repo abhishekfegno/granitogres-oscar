@@ -29,6 +29,7 @@ from apps.api_set_v2.views.others import NewsLetterAPIView, SendEmail, BrochureL
 from apps.api_set_v2.views.product_listing_query_based import product_list
 from apps.api_set_v2.views.product_listing_query_pagination import product_list_pagination
 from apps.availability import pincode
+from apps.dashboard.custom.views.general import delete_brochure, delete_gallery
 from apps.mod_oscarapi.views.validate_checkout import CheckoutValidationView
 validate_checkout = never_cache(CheckoutValidationView.as_view())
 

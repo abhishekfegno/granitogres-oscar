@@ -11,7 +11,8 @@ from apps.api_set_v2.views.google_merchant_format import call_merchant
 from apps.catalogue.management.handlers.stockhandler import Handler
 from apps.dashboard.custom.models import models_list, SiteConfig
 from apps.dashboard.custom.views.general import DashboardBlockList, DashboardCustomCreate, DashboardCustomDetail, \
-    DashboardCustomDelete, BrochureCreateView, GalleryCreateView, get_album_form
+    DashboardCustomDelete, BrochureCreateView, GalleryCreateView, get_album_form, delete_brochure, delete_gallery, \
+    BrochureUpdateView, GalleryUpdateView
 from apps.dashboard.custom.views.offer_banner import OfferBannerList, OfferBannerDetail, OfferBannerCreate, \
     OfferBannerDelete
 
@@ -107,7 +108,11 @@ urlpatterns = [
                                    ])),
                                    path("google_merchant_format/", call_merchant, name="product_list_google_merchant"),
                                    path("brochure", BrochureCreateView.as_view(), name="dashboard-brochure-create"),
+                                   path("brochure/delete/<int:id>/", delete_brochure, name="dashboard-brochure-delete"),
+                                   path("brochure/edit/<int:pk>/", BrochureUpdateView.as_view(), name="dashboard-brochure-update"),
                                    path("gallery", GalleryCreateView.as_view(), name="dashboard-gallery-create"),
+                                   path("gallery/edit/<int:pk>/",  GalleryUpdateView.as_view(), name="dashboard-gallery-update"),
+                                   path("gallery/delete/<int:id>/", delete_gallery, name="dashboard-gallery-delete"),
                                    path("get/albumform/", get_album_form, name="get_album_form"),
                                    path('site-configuration', UpdateSiteConfig.as_view(), name="site-config"),
                                    path('sheet-synchronization', UpdateSheetSynchronization.as_view(), name="sheet-synchronization"),

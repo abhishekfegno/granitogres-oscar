@@ -422,6 +422,12 @@ class Gallery(models.Model):
     def get_absolute_url(self):
         return reverse('dashboard:index')
 
+    @property
+    def image_url(self):
+        if self.image and hasattr(self.image, 'url'):
+            return self.image.url
+        return ''
+
     def __str__(self):
         return self.title
 

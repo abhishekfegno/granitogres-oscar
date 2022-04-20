@@ -119,6 +119,26 @@ class BrochureCreateView(CreateView):
         return super().post(request, *args, **kwargs)
 
 
+class BrochureUpdateView(UpdateView):
+    template_name = 'oscar/dashboard/catalogue/brochure_update.html'
+    model = Brochure
+    form_class = BrochureForm
+
+    def form_valid(self, form):
+        print(self.get_object())
+
+        form = BrochureForm(instance=self.get_object())
+        return super().form_valid(form)
+
+
+def delete_brochure(request, id):
+    try:
+        Brochure.objects.get(id=id).delete()
+    except Exception as e:
+        print(e)
+    return redirect('dashboard-custom:dashboard-brochure-create')
+
+
 class GalleryCreateView(CreateView):
     template_name = 'oscar/dashboard/catalogue/gallery_add.html'
     model = Gallery
@@ -144,6 +164,26 @@ class GalleryCreateView(CreateView):
             form.save()
 
         return super().post(request, *args, **kwargs)
+
+
+class GalleryUpdateView(UpdateView):
+    template_name = 'oscar/dashboard/catalogue/gallery_update.html'
+    model = Gallery
+    form_class = GalleryForm
+
+    def form_valid(self, form):
+        print(self.get_object())
+
+        form = GalleryForm(instance=self.get_object())
+        return super().form_valid(form)
+
+
+def delete_gallery(request, id):
+    try:
+        Gallery.objects.get(id=id).delete()
+    except Exception as e:
+        print(e)
+    return redirect('dashboard-custom:dashboard-brochure-create')
 
 
 def get_album_form(request):

@@ -31,6 +31,8 @@
                           <td><img style="width:100px;height:100px;"  src="{{ data.image_url }}"></td>
                           <td>{{ data.type }}</td>
                           <td><img src="{{ data.file.url }}"></td>
+                            <td><a class="btn btn-danger" href="{% url 'dashboard-custom:dashboard-brochure-update' data.pk %}">Edit</a></td>
+                            <td><a class="btn btn-danger" href="{% url 'dashboard-custom:dashboard-brochure-delete' data.pk %}">Delete</a></td>
                         </tr>
                     {% endfor %}
                     </tbody>
