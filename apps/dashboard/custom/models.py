@@ -414,6 +414,7 @@ class Brochure(models.Model):
             return self.image.url
         return ''
 
+
 class Gallery(models.Model):
     title = models.CharField(max_length=100, blank=True, null=True)
     description = models.CharField(max_length=100, blank=True, null=True)
@@ -435,6 +436,13 @@ class Gallery(models.Model):
 class Album(models.Model):
     gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, blank=True, null=True)
     image = models.ImageField(upload_to='gallery/albums/', blank=True, null=True)
+
+    @property
+    def image_url(self):
+        if self.image and hasattr(self.image, 'url'):
+            return self.image.url
+        return ''
+
 # class FAQ(AbstractCURDModel):
 #     referrer = 'faq'
 #

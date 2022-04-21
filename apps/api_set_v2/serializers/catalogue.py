@@ -327,13 +327,21 @@ class BrochureSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Brochure
-        fields = ('name', 'image', 'file', 'type')
+        fields = ('id', 'name', 'image', 'file', 'type')
 
 
 class AlbumSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, instance):
+        if instance.image_url:
+            return self.context['request'].build_absolute_uri(instance.image_url)
+        else:
+            return self.context['request'].build_absolute_uri(settings.MEDIA_URL + 'image_not_found.jpg')
+
     class Meta:
         model = Album
-        fields = ('gallery', 'image')
+        fields = ('image',)
 
 
 class GallerySerializer(serializers.ModelSerializer):
@@ -341,8 +349,9 @@ class GallerySerializer(serializers.ModelSerializer):
 
     def get_album(self, instance):
         queryset = Album.objects.filter(gallery=instance)
-        return AlbumSerializer(queryset, many=True).data
+        print(AlbumSerializer(queryset, many=True, context={'request': self.context.get('request')}).data)
+        return ''
 
     class Meta:
         model = Gallery
-        fields = ('title', 'description', 'image', 'album')
+        fields = ('id', 'title', 'description', 'image', 'album')

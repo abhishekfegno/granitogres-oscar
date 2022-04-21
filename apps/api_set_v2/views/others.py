@@ -39,6 +39,12 @@ class SendEmail(APIView):
         """
         :param request:
         :return:
+        {
+        "name":,
+        "email":,
+        "mobile":,
+        "message":
+        }
         """
         out = {'status': 'failed'}
         body = normalize(request)

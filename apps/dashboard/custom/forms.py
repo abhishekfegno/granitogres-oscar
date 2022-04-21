@@ -30,7 +30,7 @@ class GalleryForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # self.fields['album_images'].queryset = Album.objects.all()
-        # self.fields['album_images'].required = False
+        # self.fields['album_images'].required = True
 
     class Meta:
         model = Gallery
@@ -38,12 +38,17 @@ class GalleryForm(forms.ModelForm):
 
 
 class AlbumForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['image'].required = True
+
     class Meta:
         model = Album
         fields = ('image',)
 
 
-AlbumFormset = modelformset_factory(Album, form=AlbumForm, extra=2)
+AlbumFormset = modelformset_factory(Album, form=AlbumForm, extra=3)
 
 
 

@@ -145,6 +145,13 @@ class GalleryCreateView(CreateView):
     form_class = GalleryForm
     # success_url = 'dashboard-custom:dashboard-gallery-create'
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['title'].widget.attrs.update({'class': 'form-control'})
+        form.fields['description'].widget.attrs.update({'class': 'form-control'})
+        form.fields['image'].widget.attrs.update({'class': 'form-control'})
+        return form
+
     def get_context_data(self, **kwargs):
         cxt = super().get_context_data()
         cxt['gallery'] = Gallery.objects.all().order_by('-id')
@@ -157,8 +164,8 @@ class GalleryCreateView(CreateView):
         formset = AlbumFormset(self.request.POST, self.request.FILES)
         if form.is_valid():
             instance = form.save()
-            # import pdb;pdb.set_trace()
             for f in formset:
+                import pdb;pdb.set_trace()
                 f.gallery = instance
                 f.save()
         return super().post(request, *args, **kwargs)
@@ -181,7 +188,7 @@ def delete_gallery(request, id):
         Gallery.objects.get(id=id).delete()
     except Exception as e:
         print(e)
-    return redirect('dashboard-custom:dashboard-brochure-create')
+    return redirect('dashboard-custom:dashboard-gallery-create')
 
 
 def get_album_form(request):
