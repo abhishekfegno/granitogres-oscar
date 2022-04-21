@@ -156,13 +156,11 @@ class GalleryCreateView(CreateView):
         form = GalleryForm(self.request.POST, self.request.FILES)
         formset = AlbumFormset(self.request.POST, self.request.FILES)
         if form.is_valid():
-            instance = form.save(commit=False)
+            instance = form.save()
             # import pdb;pdb.set_trace()
             for f in formset:
                 f.gallery = instance
                 f.save()
-            form.save()
-
         return super().post(request, *args, **kwargs)
 
 
