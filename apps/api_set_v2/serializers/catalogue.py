@@ -348,9 +348,10 @@ class GallerySerializer(serializers.ModelSerializer):
     album = serializers.SerializerMethodField()
 
     def get_album(self, instance):
-        queryset = Album.objects.filter(gallery=instance)
-        print(AlbumSerializer(queryset, many=True, context={'request': self.context.get('request')}).data)
-        return ''
+        return [{
+            "id": i.id,
+            "image": self.context['request'].build_absolute_uri(i.image_url)
+        } for i in instance.album_set.all()]
 
     class Meta:
         model = Gallery
