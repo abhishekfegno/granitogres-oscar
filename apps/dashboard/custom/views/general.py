@@ -161,9 +161,10 @@ class GalleryCreateView(CreateView):
 
     def post(self, request, *args, **kwargs):
         form = GalleryForm(self.request.POST, self.request.FILES)
-        formset = AlbumFormset(self.request.POST, self.request.FILES, queryset=Album.objects.all())
+        formset = AlbumFormset(self.request.POST, self.request.FILES, queryset=Gallery.objects.all())
         if form.is_valid():
             instance = form.save()
+            formset.instance = instance
             for f in formset:
                 f.gallery = instance
                 f.save()
@@ -177,11 +178,22 @@ class GalleryUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         cxt = super().get_context_data(**kwargs)
-        cxt['form'] = GalleryForm(instance=self.get_object())
-        cxt['formset'] = AlbumFormset(queryset=Album.objects.filter(gallery=self.get_object()))
+        cxt['form'] = GalleryForm(self.request.POST or None, self.request.FILES or None, instance=self.get_object())
+        cxt['formset'] = AlbumFormset(self.request.POST or None, self.request.FILES or None,
+                                      queryset=Album.objects.filter(gallery=self.get_object()))
         return cxt
 
-    def form_valid(self, form):
+    def form_valid(self, form, **kwargs):
+        cxt = super().get_context_data(**kwargs)
+        galleryform = cxt['form']
+        albumform = AlbumFormset(self.request.POST or None, self.request.FILES or None,
+                                      queryset=Album.objects.filter(gallery=self.get_object()))
+        if galleryform.is_valid() and albumform.is_valid():
+            instance = galleryform.save()
+            albumform.instance = instance
+            for album in albumform:
+                album.gallery = instance
+                album.save()
         return super().form_valid(form)
 
 

@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import modelformset_factory
+from django.forms import modelformset_factory, inlineformset_factory
 
 from apps.dashboard.custom.models import Brochure, Gallery, Album
 from apps.users.models import User
@@ -48,7 +48,8 @@ class AlbumForm(forms.ModelForm):
         fields = ('image',)
 
 
-AlbumFormset = modelformset_factory(Album, form=AlbumForm, extra=3)
+# AlbumFormset = modelformset_factory(Album, form=AlbumForm, max_num=3, can_delete=True, extra=3)
+AlbumFormset = inlineformset_factory(model=Album, parent_model=Gallery, form=AlbumForm, max_num=3, can_delete=True, extra=3)
 
 
 
