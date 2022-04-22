@@ -9,7 +9,7 @@ from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, UpdateView, DeleteView
 
 from apps.dashboard.custom.forms import BrochureForm, GalleryForm, AlbumForm, AlbumFormset
-from apps.dashboard.custom.models import OfferBanner, models_list, Brochure, Gallery
+from apps.dashboard.custom.models import OfferBanner, models_list, Brochure, Gallery, Album
 
 
 class ModelSelectorMixin(object):
@@ -161,11 +161,10 @@ class GalleryCreateView(CreateView):
 
     def post(self, request, *args, **kwargs):
         form = GalleryForm(self.request.POST, self.request.FILES)
-        formset = AlbumFormset(self.request.POST, self.request.FILES)
+        formset = AlbumFormset(self.request.POST, self.request.FILES, queryset=Album.objects.all())
         if form.is_valid():
             instance = form.save()
             for f in formset:
-                import pdb;pdb.set_trace()
                 f.gallery = instance
                 f.save()
         return super().post(request, *args, **kwargs)
@@ -176,10 +175,13 @@ class GalleryUpdateView(UpdateView):
     model = Gallery
     form_class = GalleryForm
 
-    def form_valid(self, form):
-        print(self.get_object())
+    def get_context_data(self, **kwargs):
+        cxt = super().get_context_data(**kwargs)
+        cxt['form'] = GalleryForm(instance=self.get_object())
+        cxt['formset'] = AlbumFormset(queryset=Album.objects.filter(gallery=self.get_object()))
+        return cxt
 
-        form = GalleryForm(instance=self.get_object())
+    def form_valid(self, form):
         return super().form_valid(form)
 
 
