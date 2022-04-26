@@ -32,10 +32,10 @@ class SendEmail(APIView):
     """
     {
         "title": "RFQ" or "Contact",
-        "name":,
-        "email":,
-        "mobile":,
-        "message":
+        "name":"abhi",
+        "email":"abhishekfegno@gmail.com",
+        "mobile":7894561231,
+        "message":"hey there !"
     }
     """
     permission_classes = (AllowAny, )
@@ -51,6 +51,7 @@ class SendEmail(APIView):
         recep = [settings.WEBSITE_EMAIL_RECEIVER, ]
 
         from datetime import datetime
+        subject = ''
         if body.get('title') == 'Contact' or None :
             subject = "Received a Response from %s" % body.get('name'),
         elif body.get('title') == 'RFQ':
