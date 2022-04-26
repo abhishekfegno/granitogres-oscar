@@ -30,13 +30,14 @@ class NewsLetterAPIView(CreateAPIView):
 class SendEmail(APIView):
 
     """
-    {
-        "title": "RFQ" or "Contact",
-        "name":"abhi",
+        {
+        "title":"RFQ" or "Contact",
+        "name":"asdf",
         "email":"abhishekfegno@gmail.com",
         "mobile":7894561231,
         "message":"hey there !"
-    }
+        }
+
     """
     permission_classes = (AllowAny, )
 
@@ -44,24 +45,25 @@ class SendEmail(APIView):
         """
         :param request:
         :return:
-
+        {
+        "name":,
+        "email":,
+        "mobile":,
+        "message":
+        }
         """
         out = {'status': 'failed'}
         body = normalize(request)
         recep = [settings.WEBSITE_EMAIL_RECEIVER, ]
-
-        from datetime import datetime
-        subject = ''
-        if body.get('title') == 'Contact' or None :
-            subject = "Received a Response from %s" % body.get('name'),
+        if body.get('title') == 'Contact' or '':
+            subject = f"Received a Response from {body.get('name')}"
         elif body.get('title') == 'RFQ':
-            subject = "Request from Quotation "
-        # import pdb;pdb.set_trace()
+            subject = 'Request from Quotation'
+        from datetime import datetime
         time = (datetime.now()).strftime('%a %H:%M  %d/%m/%y')
         _ = send_mail(
             subject=subject,
             message="""
-            TITLE :{title},
             NAME : {name}
             MOBILE : {mobile} 
             EMAIL : {email}
