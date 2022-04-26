@@ -55,7 +55,7 @@ class SendEmail(APIView):
             subject = "Received a Response from %s" % body.get('name'),
         elif body.get('title') == 'RFQ':
             subject = "Request from Quotation "
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
         time = (datetime.now()).strftime('%a %H:%M  %d/%m/%y')
         _ = send_mail(
             subject=subject,
