@@ -55,10 +55,15 @@ class SendEmail(APIView):
         out = {'status': 'failed'}
         body = normalize(request)
         recep = [settings.WEBSITE_EMAIL_RECEIVER, ]
+        subject = ''
         if body.get('title') == 'Contact' or '':
             subject = f"Received a Response from {body.get('name')}"
         elif body.get('title') == 'RFQ':
             subject = 'Request from Quotation'
+            # m = '\n'
+            # for i in body.get('message').split():
+            #     m.join(i)
+            # import pdb;pdb.set_trace()
         from datetime import datetime
         time = (datetime.now()).strftime('%a %H:%M  %d/%m/%y')
         _ = send_mail(
