@@ -108,8 +108,7 @@ class WishListBrowser(APIView):
         return Response(out)
 
     def post(self, request, *args, **kwargs):
-        # if not self.request.session['wishlist']:
-        #     self.request.session['wishlist'] = {}
+        self.request.session.clear()
         self.request.session[request.data.get('product_id')] = request.data.get('product_id')
         wishlist = self.request.session.values()
 
