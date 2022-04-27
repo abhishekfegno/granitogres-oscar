@@ -45,12 +45,17 @@ class CategorySerializer(serializers.ModelSerializer):
             'description',
             'product_class',
             'children',
+            'product_count'
         )
 
     children = serializers.SerializerMethodField()
     img_thumb_mob = serializers.SerializerMethodField()
     # offers_upto = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
+    product_count = serializers.SerializerMethodField()
+
+    def get_product_count(self, instance):
+        return Product.objects.filter(productcategory__category=instance.id).count()
 
     def get_description(self, instance):
         return strip_tags(instance.description)
