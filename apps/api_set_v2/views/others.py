@@ -96,9 +96,7 @@ class WishListBrowser(APIView):
     """
     def get(self, request, *args, **kwargs):
         wishlist = self.request.session.values()
-        out = {
-            "wishlist": wishlist
-        }
+        out = {}
         try:
             queryset = Product.objects.filter(id__in=wishlist)
             serializer = ProductListSerializer(queryset, many=True, context={'request': request}).data
