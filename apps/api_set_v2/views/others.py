@@ -11,7 +11,10 @@ from rest_framework.permissions import AllowAny
 
 from django.conf import settings
 
+from apps.api_set.serializers.wishlist import WishListSerializer
 from apps.api_set_v2.serializers.catalogue import BrochureSerializer, GallerySerializer
+from apps.api_set_v2.views.granitogrescatalogue import ProductListSerializer
+from apps.catalogue.models import Product
 from apps.dashboard.custom.models import NewsLetter, Brochure, Gallery
 from apps.utils.urls import list_api_formatter
 
@@ -61,7 +64,7 @@ class SendEmail(APIView):
         if body.get('title') == 'Contact' or '':
             subject = f"Received a Response from {body.get('name')}"
         elif body.get('title') == 'RFQ':
-            subject = 'Request from Quotation'
+            subject = 'Request for Quotation'
         else:
             subject = ''
         from datetime import datetime
@@ -96,6 +99,14 @@ class WishListBrowser(APIView):
         out = {
             "wishlist": wishlist
         }
+        try:
+            queryset = Product.objects.filter(id__in=wishlist)
+            serializer = ProductListSerializer(queryset, many=True, context={'request': request}).data
+            out = {
+                "wishlist": serializer
+            }
+        except Exception as e:
+            out["message"] = str(e)
         return Response(out)
 
     def post(self, request, *args, **kwargs):
