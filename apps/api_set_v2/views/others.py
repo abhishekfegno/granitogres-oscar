@@ -1,3 +1,5 @@
+import json
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -35,7 +37,8 @@ class SendEmail(APIView):
         "name":"asdf",
         "email":"abhishekfegno@gmail.com",
         "mobile":7894561231,
-        "message":"hey there !"
+        "message":"hey there !",
+        "url":""
         }
 
     """
@@ -55,15 +58,12 @@ class SendEmail(APIView):
         out = {'status': 'failed'}
         body = normalize(request)
         recep = [settings.WEBSITE_EMAIL_RECEIVER, ]
-        subject = ''
         if body.get('title') == 'Contact' or '':
             subject = f"Received a Response from {body.get('name')}"
         elif body.get('title') == 'RFQ':
             subject = 'Request from Quotation'
-            # m = '\n'
-            # for i in body.get('message').split():
-            #     m.join(i)
-            # import pdb;pdb.set_trace()
+        else:
+            subject = ''
         from datetime import datetime
         time = (datetime.now()).strftime('%a %H:%M  %d/%m/%y')
         _ = send_mail(
@@ -73,7 +73,8 @@ class SendEmail(APIView):
             MOBILE : {mobile} 
             EMAIL : {email}
             ==============================================
-            MESSAGE  : {message}
+            {message}
+            {url}
             ==============================================
            
             """.format(**body, time=time),
@@ -81,6 +82,31 @@ class SendEmail(APIView):
             recipient_list=[body.get('email')], fail_silently=False)
         out['status'] = 'email_sent'
         out['mail_content'] = str(_)
+        return Response(out)
+
+
+class WishListBrowser(APIView):
+    """
+    {
+        "product_id": 1,
+    }
+    """
+    def get(self, request, *args, **kwargs):
+        wishlist = self.request.session.values()
+        out = {
+            "wishlist": wishlist
+        }
+        return Response(out)
+
+    def post(self, request, *args, **kwargs):
+        # if not self.request.session['wishlist']:
+        #     self.request.session['wishlist'] = {}
+        self.request.session[request.data.get('product_id')] = request.data.get('product_id')
+        wishlist = self.request.session.values()
+
+        out = {
+                "wishlist": wishlist
+            }
         return Response(out)
 
 

@@ -17,6 +17,7 @@ def PUBLIC_APIS(r, f):
             ("Terms and Conditions", reverse("policies", request=r, format=f, kwargs={'path': '/legals/terms-and-conditions/'})),
             ("Downloads List", reverse("api-downloads-list-v2", request=r, format=f)),
             ("Gallery List", reverse("api-gallery-list-v2", request=r, format=f)),
+            ("Wish List", reverse("api-wishlist-v2", request=r, format=f)),
         ])),
         ("Authorization", collections.OrderedDict([
             ("Send OTP", reverse("api-v1--send-otp", request=r, format=f)),
