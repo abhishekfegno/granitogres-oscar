@@ -1,5 +1,6 @@
 from django.db.models import F
 
+from apps.catalogue.models import ProductAttribute
 from apps.dashboard.custom.models import empty
 from apps.utils import image_not_found, purchase_info_as_dict, dummy_purchase_info_lite_as_dict, \
     purchase_info_lite_as_dict, get_purchase_info
@@ -39,11 +40,21 @@ class ProductAttributeFieldMixin(object):
                 att_name=F('attribute__name'),
                 att_code=F('attribute__code'),
             ).order_by('attribute__order_in_detail_page')
-            return [{       # saves model mapping and another 5 queries
-                'name': attr.att_name,
-                'value': attr.value_as_text,
-                'code': attr.att_code,
-            } for attr in attrs_value]
+
+            def attr_value(attr):
+                if attr.attribute.type in [ProductAttribute.FILE, ProductAttribute.IMAGE]:
+                    _attr = self.context['request'].build_absolute_uri(attr.value_image)
+                else:
+                    _attr = attr.value_as_text
+
+                return {  # saves model mapping and another 5 queries
+                    'name': attr.att_name,
+                    'value': _attr,
+                    'code': attr.att_code,
+                    'type': attr.attribute.type
+                }
+
+            return [attr_value(attr) for attr in attrs_value]
         return _inner()
 
 
