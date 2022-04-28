@@ -53,7 +53,7 @@ class ProductAttributeFieldMixin(object):
             )
             return [{       # saves model mapping and another 5 queries
                 'name': attr.att_name,
-                'value': attr.value_as_text,
+                'value': attr.value_as_text or attr.value_image,
                 'code': attr.att_code,
             } for attr in attrs_value]
         # cache.delete(cache_key.product_attribute__key(instance.id))
