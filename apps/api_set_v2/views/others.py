@@ -105,15 +105,20 @@ class WishListBrowser(APIView):
             }
         except Exception as e:
             out["message"] = str(e)
+            self.request.session.clear()
+
         return Response(out)
 
     def post(self, request, *args, **kwargs):
-        # self.request.session.clear()
-        self.request.session[request.data.get('product_id')] = request.data.get('product_id')
-        wishlist = self.request.session.values()
-
-        out = {
+        try:
+            self.request.session[request.data.get('product_id')] = request.data.get('product_id')
+            wishlist = self.request.session.values()
+            out = {
                 "wishlist": wishlist
+            }
+        except Exception as e:
+            out = {
+                "message": str(e)
             }
         return Response(out)
 
