@@ -4,7 +4,7 @@ from oscar.apps.catalogue.abstract_models import MissingProductImage
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 
-from apps.catalogue.models import ProductImage
+from apps.catalogue.models import ProductImage, ProductAttribute
 from apps.utils import get_purchase_info, purchase_info_as_dict, purchase_info_lite_as_dict, image_not_found, \
     dummy_purchase_info_lite_as_dict
 from lib import cache_key
@@ -51,11 +51,21 @@ class ProductAttributeFieldMixin(object):
                 att_name=F('attribute__name'),
                 att_code=F('attribute__code'),
             )
-            return [{       # saves model mapping and another 5 queries
-                'name': attr.att_name,
-                'value': attr.value_as_text or self.context['request'].build_absolute_uri(attr.value_image.url),
-                'code': attr.att_code,
-            } for attr in attrs_value]
+
+            def attr_value(attr):
+                if attr.attribute.type in [ProductAttribute.FILE, ProductAttribute.IMAGE]:
+                    _attr = self.context['request'].build_absolute_uri(attr.value_image)
+                else:
+                    _attr = attr.value_as_text
+
+                return {       # saves model mapping and another 5 queries
+                    'name': attr.att_name,
+                    'value': _attr,
+                    'code': attr.att_code,
+                    'type': attr.attribute.type
+                }
+
+            return [attr_value(attr) for attr in attrs_value]
         # cache.delete(cache_key.product_attribute__key(instance.id))
         return cache_library(cache_key.product_attribute__key(instance.id), cb=_inner)
 
