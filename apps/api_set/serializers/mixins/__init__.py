@@ -53,10 +53,10 @@ class ProductAttributeFieldMixin(object):
             )
 
             def attr_value(attr):
-                if attr.attribute.type in [ProductAttribute.FILE, ProductAttribute.IMAGE]:
-                    _attr = self.context['request'].build_absolute_uri(attr.value_image)
-                else:
-                    _attr = attr.value_as_text
+                # if attr.attribute.type in [ProductAttribute.FILE, ProductAttribute.IMAGE]:
+                #     _attr = self.context['request'].build_absolute_uri(attr.value_image)
+                # else:
+                _attr = attr.value_as_text
 
                 return {       # saves model mapping and another 5 queries
                     'name': attr.att_name,
