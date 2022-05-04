@@ -7,6 +7,7 @@ from collections import OrderedDict
 from django.db.models import F
 from django.db.models.fields.files import ImageFieldFile
 
+from apps.catalogue.models import ProductAttributeValue
 from lib import cache_key
 from lib.cache import cache_library
 
@@ -38,7 +39,9 @@ def extract_field_restricted(attr_list, field_to_extract='code', permitted_field
     data = [attr[field_to_extract] for attr in attr_list if attr[filter_field] in permitted_fields]  # KEEPING ORDER
     for index in range(len(data)):
         if isinstance(data[index], ImageFieldFile):
-            data[index] = data[index].url
+            img = data[index]
+            storage = ProductAttributeValue.value_image.field.storage
+            data[index] = storage.url(img.name)
     return data
 
 
