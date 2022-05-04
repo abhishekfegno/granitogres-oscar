@@ -18,7 +18,7 @@ DEFAULT_SEPARATOR = ' '
 
 class empty_request:
     def build_absolute_uri(self, x):
-        return x
+        return ">>> "  + x
 
 
 def get_list_of_objects_as_dict(attr_list, key_field='code', value_field='value'):

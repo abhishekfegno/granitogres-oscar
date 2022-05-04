@@ -43,7 +43,7 @@ class ProductAttributeFieldMixin(object):
 
             def attr_value(attr):
                 if attr.attribute.type in [ProductAttribute.FILE, ProductAttribute.IMAGE]:
-                    _attr = self.context['request'].build_absolute_uri(attr.value_image.url)
+                    _attr = self.context['request'].build_absolute_uri(getattr(attr, f'value_{attr.attribute.type}').url)
                 else:
                     _attr = attr.value_as_text
 
