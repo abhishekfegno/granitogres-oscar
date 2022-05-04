@@ -40,20 +40,24 @@ def extract_field_restricted(attr_list, field_to_extract='code', permitted_field
     print("######################################################3 \n", data)
     for index in range(len(data)):
         if isinstance(data[index], ImageFieldFile):
-            print(index, "   -   ", data[index])
             img = data[index]
             storage = ProductAttributeValue.value_image.field.storage
             data[index] = request.build_absolute_uri(storage.url(img.name))
-            print(index, "   -   ", data[index])
-
     return data
 
 
-def extract_field_restricted_dict(attr_list, field_to_extract='code', permitted_fields=None, filter_field='code'):
+def extract_field_restricted_dict(attr_list, field_to_extract='code', permitted_fields=None, filter_field='code', request=empty_request()):
     if permitted_fields is None:
         permitted_codes = []
-    return {attr['code']: str(attr[field_to_extract]) for attr in attr_list if
-            attr[filter_field] in permitted_fields}  # KEEPING ORDER
+    data = {attr['code']: attr[field_to_extract] for attr in attr_list if attr[filter_field] in permitted_fields}  # KEEPING ORDER
+    for key, value in data.items():
+        if isinstance(value, ImageFieldFile):
+            img = value
+            storage = ProductAttributeValue.value_image.field.storage
+            data[key] = request.build_absolute_uri(storage.url(img.name))
+        else:
+            data[key] = str(data[key])
+    return data
 
 
 def val_generalize(text):
