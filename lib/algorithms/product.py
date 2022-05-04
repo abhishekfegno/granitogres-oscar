@@ -123,6 +123,15 @@ def map_product(product_data, permitted_fields=None, request=empty_request()):
     return mapper, data
 
 
+def get_rendered_value(attr, request=empty_request()):
+    if attr.attribute.type in [ProductAttribute.IMAGE, ProductAttribute.FILE, ]:
+        field_name = f'value_{attr.attribute.type}'
+        # storage = getattr(ProductAttributeValue, field_name).field.storage
+        if getattr(attr, field_name):
+            return request.build_absolute_uri(getattr(attr, field_name).url)
+    return attr.value
+
+
 def get_product_data(parent_product, request):
     if not parent_product.is_parent:
         return
@@ -135,19 +144,12 @@ def get_product_data(parent_product, request):
         # making structure independent of serializer
         # attributes = parent_product.attribute_values.filter(attribute__is_varying=True).select_related('attribute')
         # return SiblingProductsSerializer(children, many=True, context={'request': request}).data
-        def get_value(attr):
-            if attr.attribute.type in [ProductAttribute.IMAGE, ProductAttribute.FILE, ]:
-                field_name = f'value_{attr.attribute.type}'
-                # storage = getattr(ProductAttributeValue, field_name).field.storage
-                if getattr(attr, field_name):
-                    return request.build_absolute_uri(getattr(attr, field_name).url)
-            return attr.value
         return [{
             'title': child.title,
             'slug': str(child.id),
             'attributes': [{
                 "name": attr.attr_name,
-                "value": get_value(attr),
+                "value": get_rendered_value(attr, request=request),
                 "code": attr.attr_code
             } for attr in child.attribute_values.filter(attribute__is_varying=True).annotate(
                 attr_name=F('attribute__name'),
@@ -235,7 +237,7 @@ def siblings_pointer(parent_product, request=empty_request()):
                     attribute_fields[field].append(product_object__attr_dict[field])
 
         optimized_attribute_field_set = {
-            key: list(set([str(request.build_absolute_uri(v.url) if hasattr(v, 'url') else v) for v in value]))
+            key: list(set([get_rendered_value(v, request=request) for v in value]))
             for key, value in attribute_fields.items()
             if len(set(
                 [val_generalize(v) for v in value]            # list comprehension
