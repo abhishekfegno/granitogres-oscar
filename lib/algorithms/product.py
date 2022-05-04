@@ -264,12 +264,13 @@ def siblings_pointer(parent_product, request=empty_request()):
         out['map'], trace = map_product(product_data, permitted_fields=optimized_attribute_field_set.keys(), request=request)
         # out['trace'] = OrderedDict(trace)
         _data = [
-            [product['slug'], extract_field_restricted_dict(
+            (product['slug'], extract_field_restricted_dict(
                 product['attributes'],
                 field_to_extract='value',
                 permitted_fields=optimized_attribute_field_set.keys(),
                 filter_field='code',
-            )]
+                request=request,
+            ))
             for product in product_data
         ]
         out['trace'] = dict(_data)
