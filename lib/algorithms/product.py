@@ -33,7 +33,7 @@ def extract_field(attr_list, field_to_extract='code'):
     return [attr[field_to_extract] for attr in attr_list]  # KEEPING ORDER
 
 
-def extract_field_restricted(attr_list, field_to_extract='code', permitted_fields=None, filter_field='code'):
+def extract_field_restricted(attr_list, field_to_extract='code', permitted_fields=None, filter_field='code', request=empty_request()):
     if permitted_fields is None:
         permitted_codes = []
     data = [attr[field_to_extract] for attr in attr_list if attr[filter_field] in permitted_fields]  # KEEPING ORDER
@@ -43,7 +43,7 @@ def extract_field_restricted(attr_list, field_to_extract='code', permitted_field
             print(index, "   -   ", data[index])
             img = data[index]
             storage = ProductAttributeValue.value_image.field.storage
-            data[index] = storage.url(img.name)
+            data[index] = request.build_absolute_uri(storage.url(img.name))
             print(index, "   -   ", data[index])
 
     return data
@@ -90,6 +90,7 @@ def map_product(product_data, permitted_fields=None, request=empty_request()):
             field_to_extract='value',
             permitted_fields=permitted_fields,
             filter_field='code',
+            request=request
         )]
         for product in product_data
     ]
