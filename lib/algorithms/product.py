@@ -18,7 +18,7 @@ DEFAULT_SEPARATOR = ' '
 
 class empty_request:
     def build_absolute_uri(self, x):
-        return ">>> "  + x
+        return x
 
 
 def get_list_of_objects_as_dict(attr_list, key_field='code', value_field='value'):
@@ -37,11 +37,15 @@ def extract_field_restricted(attr_list, field_to_extract='code', permitted_field
     if permitted_fields is None:
         permitted_codes = []
     data = [attr[field_to_extract] for attr in attr_list if attr[filter_field] in permitted_fields]  # KEEPING ORDER
+    print("######################################################3 \n", data)
     for index in range(len(data)):
         if isinstance(data[index], ImageFieldFile):
+            print(index, "   -   ", data[index])
             img = data[index]
             storage = ProductAttributeValue.value_image.field.storage
             data[index] = storage.url(img.name)
+            print(index, "   -   ", data[index])
+
     return data
 
 
@@ -236,13 +240,16 @@ def siblings_pointer(parent_product, request=empty_request()):
                 if product_object__attr_dict.get(field):
                     attribute_fields[field].append(product_object__attr_dict[field])
 
-        def render_image_field_file_to_url(k, v, request):  
+        def render_image_field_file_to_url(k, v, req_obj):
+            """
+            working perfectly.
+            """
             if isinstance(v, ImageFieldFile):
                 storage = ProductAttributeValue.value_image.field.storage
-                return request.build_absolute_uri(storage.url(v.name))
+                return req_obj.build_absolute_uri(storage.url(v.name))
             return str(v)
         optimized_attribute_field_set = {
-            key: list(set([render_image_field_file_to_url(key, v, request=request) for v in value]))
+            key: list(set([render_image_field_file_to_url(key, v, req_obj=request) for v in value]))
             for key, value in attribute_fields.items()
             if len(set(
                 [val_generalize(v) for v in value]            # list comprehension
