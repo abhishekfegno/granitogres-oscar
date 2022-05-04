@@ -222,10 +222,10 @@ def siblings_pointer(parent_product, request=empty_request()):
                     attribute_fields[field].append(product_object__attr_dict[field])
 
         optimized_attribute_field_set = {
-            key: list(set([str(v) for v in value]))
+            key: list(set([str(request.build_absolute_uri(v.url) if hasattr(v, 'url') else v) for v in value]))
             for key, value in attribute_fields.items()
             if len(set(
-                [val_generalize(request.build_absolute_uri(v.url) if hasattr(v, 'url') else v) for v in value]            # list comprehension
+                [val_generalize(v) for v in value]            # list comprehension
             )) > 1}             # dict comprehension
 
         out['attribute_values'] = optimized_attribute_field_set
