@@ -236,8 +236,13 @@ def siblings_pointer(parent_product, request=empty_request()):
                 if product_object__attr_dict.get(field):
                     attribute_fields[field].append(product_object__attr_dict[field])
 
+        def render_image_field_file_to_url(k, v, request):  
+            if isinstance(v, ImageFieldFile):
+                storage = ProductAttributeValue.value_image.field.storage
+                return storage.url(v.name)
+            return str(v)
         optimized_attribute_field_set = {
-            key: list(set([get_rendered_value(v, request=request) for v in value]))
+            key: list(set([render_image_field_file_to_url(key, v, request=request) for v in value]))
             for key, value in attribute_fields.items()
             if len(set(
                 [val_generalize(v) for v in value]            # list comprehension
