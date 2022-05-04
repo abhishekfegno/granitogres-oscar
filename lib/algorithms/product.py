@@ -34,7 +34,8 @@ def extract_field(attr_list, field_to_extract='code'):
 def extract_field_restricted(attr_list, field_to_extract='code', permitted_fields=None, filter_field='code'):
     if permitted_fields is None:
         permitted_codes = []
-    return [attr[field_to_extract] for attr in attr_list if attr[filter_field] in permitted_fields]  # KEEPING ORDER
+    data = [attr[field_to_extract] for attr in attr_list if attr[filter_field] in permitted_fields]  # KEEPING ORDER
+    return data
 
 
 def extract_field_restricted_dict(attr_list, field_to_extract='code', permitted_fields=None, filter_field='code'):
@@ -224,8 +225,8 @@ def siblings_pointer(parent_product, request=empty_request()):
             key: list(set([str(v) for v in value]))
             for key, value in attribute_fields.items()
             if len(set(
-                [val_generalize(v) for v in value]  # list comprehension
-            )) > 1}  # dict comprehension
+                [val_generalize(request.build_absolute_uri(v.url) if hasattr(v, 'url') else v) for v in value]            # list comprehension
+            )) > 1}             # dict comprehension
 
         out['attribute_values'] = optimized_attribute_field_set
         out['map'], trace = map_product(product_data, permitted_fields=optimized_attribute_field_set.keys())
