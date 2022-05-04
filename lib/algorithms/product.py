@@ -239,7 +239,7 @@ def siblings_pointer(parent_product, request=empty_request()):
         def render_image_field_file_to_url(k, v, request):  
             if isinstance(v, ImageFieldFile):
                 storage = ProductAttributeValue.value_image.field.storage
-                return storage.url(v.name)
+                return request.build_absolute_uri(storage.url(v.name))
             return str(v)
         optimized_attribute_field_set = {
             key: list(set([render_image_field_file_to_url(key, v, request=request) for v in value]))
