@@ -5,6 +5,7 @@ import re
 from collections import OrderedDict
 
 from django.db.models import F
+from django.db.models.fields.files import ImageFieldFile
 
 from lib import cache_key
 from lib.cache import cache_library
@@ -35,6 +36,9 @@ def extract_field_restricted(attr_list, field_to_extract='code', permitted_field
     if permitted_fields is None:
         permitted_codes = []
     data = [attr[field_to_extract] for attr in attr_list if attr[filter_field] in permitted_fields]  # KEEPING ORDER
+    for index in range(len(data)):
+        if isinstance(data[index], ImageFieldFile):
+            data[index] = data[index].url
     return data
 
 
@@ -51,7 +55,7 @@ def val_generalize(text):
     return text
 
 
-def map_product(product_data, permitted_fields=None):
+def map_product(product_data, permitted_fields=None, request=empty_request()):
     """
     product_data  = [
         {               <------------ product 01 - list
@@ -229,7 +233,7 @@ def siblings_pointer(parent_product, request=empty_request()):
             )) > 1}             # dict comprehension
 
         out['attribute_values'] = optimized_attribute_field_set
-        out['map'], trace = map_product(product_data, permitted_fields=optimized_attribute_field_set.keys())
+        out['map'], trace = map_product(product_data, permitted_fields=optimized_attribute_field_set.keys(), request=request)
         # out['trace'] = OrderedDict(trace)
         _data = [
             [product['slug'], extract_field_restricted_dict(
