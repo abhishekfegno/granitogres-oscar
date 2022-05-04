@@ -7,7 +7,7 @@ from collections import OrderedDict
 from django.db.models import F
 from django.db.models.fields.files import ImageFieldFile
 
-from apps.catalogue.models import ProductAttributeValue
+from apps.catalogue.models import ProductAttributeValue, ProductAttribute
 from lib import cache_key
 from lib.cache import cache_library
 
@@ -135,13 +135,19 @@ def get_product_data(parent_product, request):
         # making structure independent of serializer
         # attributes = parent_product.attribute_values.filter(attribute__is_varying=True).select_related('attribute')
         # return SiblingProductsSerializer(children, many=True, context={'request': request}).data
-
+        def get_value(attr):
+            if attr.attribute.type in [ProductAttribute.IMAGE, ProductAttribute.FILE, ]:
+                field_name = f'value_{attr.attribute.type}'
+                # storage = getattr(ProductAttributeValue, field_name).field.storage
+                if getattr(attr, field_name):
+                    return request.build_absolute_uri(getattr(attr, field_name).url)
+            return attr.value
         return [{
             'title': child.title,
             'slug': str(child.id),
             'attributes': [{
                 "name": attr.attr_name,
-                "value": attr.value_as_text,
+                "value": get_value(attr),
                 "code": attr.attr_code
             } for attr in child.attribute_values.filter(attribute__is_varying=True).annotate(
                 attr_name=F('attribute__name'),
