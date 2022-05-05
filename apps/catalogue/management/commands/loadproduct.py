@@ -246,7 +246,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.clear_db()
         # workbook = get_workbook(self.sheet_id)
-        workbook = get_workbook(self.sheet_id, specific_sheets=['One Piece Toilet'])
+        workbook = get_workbook(self.sheet_id, specific_sheets=['Tile'])
         for sheet_title, dataset in workbook:
             pc, created_attrs = prepare_product_class_data_from_datasheet(sheet_title, dataset)
             self.extract_sheet(sheet_title, dataset, pc=pc, attrs=created_attrs)

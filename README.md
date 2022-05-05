@@ -1,5 +1,5 @@
-# ABCHAUZ OSCAR
-###### ABCHAUZ - An OSCAR Based E-Commerce Project By Fegno Technologies.
+# GRANITOGRES OSCAR
+###### GRANITOGRES - An OSCAR Based E-Commerce Project By Fegno Technologies.
 
 ### Features 
 
