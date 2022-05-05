@@ -116,6 +116,7 @@ def filter_options(request, pk):
                 product_count__gt=0,
         ).order_by('-product_count'):
             if value.value not in _inner_out:
+                import pdb;pdb.set_trace()
                 _inner_out[value.value] = 0
             _inner_out[value.value] += value.product_count
         _inner_out = list(_inner_out.items())
