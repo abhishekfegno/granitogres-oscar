@@ -155,7 +155,7 @@ def get_product_data(parent_product, request):
         # return SiblingProductsSerializer(children, many=True, context={'request': request}).data
         return [{
             'title': child.title,
-            'slug': str(child.id),
+            'slug': str(child.slug),
             'attributes': [{
                 "name": attr.attr_name,
                 "value": get_rendered_value(attr, request=request),
