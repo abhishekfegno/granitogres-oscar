@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db.models import Count, Sum, Q, Case, When, Value, F, ForeignKey, SET_NULL, PositiveIntegerField, Prefetch
+from django.db.models.fields.files import ImageFieldFile
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from factory.django import get_model
@@ -115,9 +116,16 @@ def filter_options(request, pk):
         for value in attr.productattributevalue_set.filter(
                 product_count__gt=0,
         ).order_by('-product_count'):
-            if value.value not in _inner_out:
-                _inner_out[value.value] = 0
-            _inner_out[value.value] += value.product_count
+            if isinstance(value.value, ImageFieldFile):
+                img = value.value
+                storage = ProductAttributeValue.value_image.field.storage
+                value_value = request.build_absolute_uri(storage.url(img.name))  # value.value =>value_value  if value_value instance is image
+            else:
+                value_value = value.value
+            if value_value not in _inner_out:
+
+                _inner_out[value_value] = 0
+            _inner_out[value_value] += value.product_count
         _inner_out = list(_inner_out.items())
         _inner_out.sort(key=lambda c: c[1], reverse=True)
         val = {
