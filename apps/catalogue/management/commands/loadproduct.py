@@ -1,7 +1,19 @@
 import os
+import random
+import string
 from pprint import pprint
 from urllib.request import urlopen
+import requests
+from urllib.parse import unquote
+import shutil, os
 
+URL_BASE = '/personal/purchase_morbi_abcmercantile_com/Documents/GRANITOGRES - CATALOGUE FILES/'
+
+SRC_BASE = '/home/abhi/Desktop/OneDrive_2022-05-06/GRANITOGRES_WEBSITE/GRANITOGRES_PRODUCTFILES/'
+DJANGO_MEDIA_URL = './public/media/'
+DEST_BASE = './public/media/product-import/'
+
+sep = os.path.sep
 import gspread
 import requests
 from django.core.files import File
@@ -38,12 +50,50 @@ memory = InMemoryDB()
 abc_hauz = Partner.objects.get_or_create(name="ABC HAUZ")[0]
 
 
+def get_img_url(short_url):
+    # import pdb;pdb.set_trace()
+
+    response = requests.get(short_url)
+    long_url = unquote(response.url)
+    path = long_url.split('id=')[1].split('&')[0]
+    # something like: '/personal/purchase_morbi_abcmercantile_com/Documents/GRANITOGRES - CATALOGUE FILES/300X300 - MOROCCAN/18012 FL.jpg'
+
+    path = path.replace(URL_BASE, SRC_BASE)
+    print(f'Replacing{URL_BASE} to {SRC_BASE}')
+    # now path=: '~/Desktop/OneDrive_2022-05-06/GRANITOGRES - WEBSITE/GRANITO GRES - PRODUCT FILES/300X300 - MOROCCAN/18012 FL.jpg'
+
+    file_name = path.replace(SRC_BASE, '')
+    print(f'file name {file_name}--{SRC_BASE}')
+    # file_name =: '300X300 - MOROCCAN/18012 FL.jpg'
+
+    dest = os.path.join(DEST_BASE, file_name)
+    # dest =: './public/media/product-import/300X300 - MOROCCAN/18012 FL.jpg'
+    if not os.path.exists(dest):
+        if not os.path.exists(DEST_BASE):
+            os.mkdir(DEST_BASE)
+
+        intermediate_dirs = file_name.split(sep)[:-1]
+        currpath = '.'
+        for _dir in intermediate_dirs:
+            currpath += sep + _dir
+            try:
+                os.mkdir(os.path.join(DEST_BASE, currpath))
+            except Exception as e:
+                print(e)
+        shutil.copy2(path, dest)
+    print(DEST_BASE.replace(DJANGO_MEDIA_URL, '').rstrip(sep) + sep + file_name.lstrip(sep))
+    return DEST_BASE.replace(DJANGO_MEDIA_URL, '').rstrip(sep) + sep + file_name.lstrip(sep)
+
+
+
 def prepare_product_class_data_from_datasheet(title, dataset):
-    fields = [f'Attribute_{i}_name' for i in range(1, 10)]
+    # fields = [f'Attribute_{i}_name' for i in range(1, 10)]
+    fields = [f'Attribute_{i}_name' for i in range(1, 8)]
     attrs = defaultdict(int)
     pc, pc_created = ProductClass.objects.get_or_create(name=title)
     for row in dataset:
         for field in fields:
+            # print(attrs, row, field)
             attrs[row[field]] += 1
 
     created_attrs = ProductAttribute.objects.bulk_create([
@@ -70,22 +120,27 @@ def get_remote_images(product, url_list):
     for image_url in url_list.split(','):
         image_url = image_url.strip()
         ext = image_url.split('.')[-1]
-        try:
-            # generate temporary image
-            img_temp = NamedTemporaryFile(delete=True)
-            resp = requests.get(image_url)
-            img_temp.write(resp.content)
-            img_temp.flush()
-            resp.close()
-
-        except Exception as e:
-            print('[x]  Could not fetch the image!' + str(e))
-        else:
-            # saving to model.
-            product_img = ProductImage(caption=product.title, product=product, display_order=i)
-            product_img.original.save(f"{slugify(product.title)}.{ext}", File(img_temp))
-            product_img.save()
-            i += 1
+        pdt_img = ProductImage(caption=product.title, product=product, display_order=i)
+        if not image_url:
+            continue
+        pdt_img.original = get_img_url(image_url)
+        pdt_img.save()
+            # try:
+            #     # generate temporary image
+            #     img_temp = NamedTemporaryFile(delete=True)
+            #     resp = requests.get(image_url)
+            #     img_temp.write(resp.content)
+            #     img_temp.flush()
+            #     resp.close()
+            #
+            # except Exception as e:
+            #     print('[x]  Could not fetch the image!' + str(e))
+            # else:
+            #     # saving to model.
+            #     product_img = ProductImage(caption=product.title, product=product, display_order=i)
+            #     product_img.original.save(f"{slugify(product.title)}.{ext}", File(img_temp))
+            #     product_img.save()
+            #     i += 1
 
 
 class CatalogueData(object):
@@ -103,56 +158,62 @@ class CatalogueData(object):
 
     def save(self, commit=False):
         d = self.d
-        structure = {
-            'variable': Product.PARENT, 'variation': Product.CHILD, 'simple': Product.STANDALONE
-        }[d['Type'].lower().strip()]
+        if d['Type']:
+            structure = {
+                'variable': Product.PARENT, 'variation': Product.CHILD, 'simple': Product.STANDALONE
+            }[d['Type'].lower().strip()]
+            # import pdb;pdb.set_trace()
+            pdt = Product(
+                wordpress_product_text=d['ID'],
+                # wordpress_product_id=d['WOO_ID'],
+                structure=structure,
+                upc=f"{d['SKU']}_{d['ID']}",
+                parent=self.parent_product_queue[d['Parent']] if structure == Product.CHILD else None, # should be uncommented
+                # parent=self.parent_product_queue[d['Type']] if structure == Product.CHILD else None,
+                title=d['Name'],
+                seo_title=d['Name'],
+                # is_public=bool(d['Published']),
+                slug=slugify(d['Name']),
+                description=d['Description'],
+                seo_description=d['Description'][:254],
+                seo_keywords=d['Description'][:254],
+                # custom_search_tags=d['Tags'],
+                product_class=self.pc,
+                length=d['Length(mm)'] or 0,
+                width=d['Width(mm)'] or 0,
+                height=d['Height(mm)'] or 0,
+                weight=d['Weight(kg)'] or 0,
+                effective_price=d['Sale_price'] or 0,
+                retail_price=d['Regular_price'] or 0,
+                is_new_product=True,
+            )
+            s = structure == Product.STANDALONE
+            p = structure == Product.PARENT
+            c = structure == Product.CHILD
+            pdt.save()
+            print(d['SKU'])
+            if p:
+                self.parent_product_queue[d["ID"]] = pdt
+            if c or s:
+                self.end_product_queue.append(pdt)
+                self.add_stock(pdt)
 
-        pdt = Product(
-            wordpress_product_text=d['ID'],
-            wordpress_product_id=d['WOO_ID'],
-            structure=structure,
-            upc=f"{d['SKU']}_{d['ID']}",
-            parent=self.parent_product_queue[d['Parent']] if structure == Product.CHILD else None,
-            title=d['Name'],
-            seo_title=d['Name'],
-            is_public=bool(d['Published']),
-            slug=slugify(d['Name']),
-            description=d['Description'],
-            seo_description=d['Description'][:254],
-            seo_keywords=d['Description'][:254],
-            custom_search_tags=d['Tags'],
-            product_class=self.pc,
-            length=d['Length(mm)'] or 0,
-            width=d['Width(mm)'] or 0,
-            height=d['Height(mm)'] or 0,
-            weight=d['Weight(kg)'] or 0,
-            effective_price=d['Sale_price'] or 0,
-            retail_price=d['Regular_price'] or 0,
-            is_new_product=True,
-        )
-        s = structure == Product.STANDALONE
-        p = structure == Product.PARENT
-        c = structure == Product.CHILD
-        pdt.save()
-        print(d['SKU'])
-        if p:
-            self.parent_product_queue[d["ID"]] = pdt
-        if c or s:
-            self.end_product_queue.append(pdt)
-            self.add_stock(pdt)
+            if p or s:
+                cats = self.cat_info.get(d['ID'], list())
+                for cat in cats:
+                    pdt.categories.add(cat)
 
-        if p or s:
-            cats = self.cat_info.get(d['ID'], list())
-            for cat in cats:
-                pdt.categories.add(cat)
+            if p or s or c:
+                self.add_attributes(pdt)
+            # if d['Images']:
+                # get_remote_images(pdt, url_list=d['Images'])
 
-        if p or s or c:
-            self.add_attributes(pdt)
-        if d['Images']:
-            get_remote_images(pdt, url_list=d['Images'])
+            if d['Tile_images']:
+                get_remote_images(pdt, url_list=d['Tile_images'])
 
     def add_attributes(self, pdt):
-        fields = [(f'Attribute_{i}_name', f'Attribute_{i}_value(s)') for i in range(1, 10)]
+        # fields = [(f'Attribute_{i}_name', f'Attribute_{i}_value(s)') for i in range(1, 10)]
+        fields = [(f'Attribute_{i}_name', f'Attribute_{i}_value(s)') for i in range(1, 8)]
         _attrs = {a.name: a for a in self.attrs}
         for name_field, val_field in fields:
             name = self.d[name_field]
@@ -169,7 +230,8 @@ class CatalogueData(object):
             cost_price=d['Sale_price'] or 0,
             price_excl_tax=d['Sale_price'] or 0,
             price_retail=d['Regular_price'] or 0,
-            partner_sku=d['SKU'],
+            # partner_sku=d['SKU'],  # should be uncommented
+            partner_sku=''.join(random.choices('asdfghk', k=10)),  # should be uncommented
             num_in_stock=100,
             low_stock_threshold=5,
         )
@@ -222,8 +284,9 @@ def cache_all_categories(pc, dataset):
 class Command(BaseCommand):
     analytics = defaultdict(lambda: defaultdict(lambda: 0))
     reporting = defaultdict(list)
-    readable_sheets = ["One Piece Toilet"]
-    sheet_id = "19BFSfp95v1JxirCc03Hh6HWcLrCM7GCumVd9YezcXjE"  # ABC HAUZ Product Data OSCAR
+    readable_sheets = ["Tile"]
+    # sheet_id = "19BFSfp95v1JxirCc03Hh6HWcLrCM7GCumVd9YezcXjE"  # ABC HAUZ Product Data OSCAR
+    sheet_id = "1yalXW7Na26Ev7hyCulEOmZE8h1Cm1lqPYo3tNFlUflE"  # Granitogres Product Data OSCAR
     fields = (
         "ID", "WOO_ID", "Type", "SKU", "Name", "Published", "Is_featured", "Visibility_in_catalog",
         "Short_description", "Description", "Date_sale_price_starts", "Date_sale_price_ends", "Tax_status",
@@ -238,9 +301,9 @@ class Command(BaseCommand):
         "Attribute_5_name", "Attribute_5_value(s)", "Attribute_5_visible", "Attribute_5_global",
         "Attribute_6_name", "Attribute_6_value(s)", "Attribute_6_visible", "Attribute_6_global",
         "Attribute_7_name", "Attribute_7_value(s)", "Attribute_7_visible", "Attribute_7_global",
-        "Attribute_8_name", "Attribute_8_value(s)", "Attribute_8_visible", "Attribute_8_global",
-        "Attribute_9_name", "Attribute_9_value(s)", "Attribute_9_visible", "Attribute_9_global",
-        "Attribute_2_default", "Attribute_1_default", "Attribute_8_default"
+        # "Attribute_8_name", "Attribute_8_value(s)", "Attribute_8_visible", "Attribute_8_global",
+        # "Attribute_9_name", "Attribute_9_value(s)", "Attribute_9_visible", "Attribute_9_global",
+        # "Attribute_2_default", "Attribute_1_default", "Attribute_8_default"
     )
 
     def handle(self, *args, **options):
@@ -248,6 +311,7 @@ class Command(BaseCommand):
         # workbook = get_workbook(self.sheet_id)
         workbook = get_workbook(self.sheet_id, specific_sheets=['Tile'])
         for sheet_title, dataset in workbook:
+            # import pdb;pdb.set_trace()
             pc, created_attrs = prepare_product_class_data_from_datasheet(sheet_title, dataset)
             self.extract_sheet(sheet_title, dataset, pc=pc, attrs=created_attrs)
             # memory.rollback()
@@ -258,6 +322,7 @@ class Command(BaseCommand):
             CatalogueData(row, sheet_name=sheet_title, pc=pc, attrs=attrs, catinfo=catinfo).save()
 
     def clear_db(self):
+        print("Deleting all data")
         Category.objects.all().delete()
         Product.objects.all().delete()
         ProductClass.objects.all().delete()
