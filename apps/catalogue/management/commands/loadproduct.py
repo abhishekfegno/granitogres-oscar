@@ -9,7 +9,8 @@ import shutil, os
 
 URL_BASE = '/personal/purchase_morbi_abcmercantile_com/Documents/GRANITOGRES - CATALOGUE FILES/'
 
-SRC_BASE = '/home/abhi/Desktop/OneDrive_2022-05-06/GRANITOGRES_WEBSITE/GRANITOGRES_PRODUCTFILES/'
+# SRC_BASE = '/home/abhi/Desktop/OneDrive_2022-05-06/GRANITOGRES_WEBSITE/GRANITOGRES_PRODUCTFILES/'
+SRC_BASE = '/home/ubuntu/OneDrive_2022-05-06/GRANITOGRES_WEBSITE/GRANITOGRES_PRODUCTFILES/'
 DJANGO_MEDIA_URL = './public/media/'
 DEST_BASE = './public/media/product-import/'
 
