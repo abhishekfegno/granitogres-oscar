@@ -9,8 +9,8 @@ import shutil, os
 
 URL_BASE = '/personal/purchase_morbi_abcmercantile_com/Documents/GRANITOGRES - CATALOGUE FILES/'
 
-# SRC_BASE = '/home/abhi/Desktop/OneDrive_2022-05-06/GRANITOGRES_WEBSITE/GRANITOGRES_PRODUCTFILES/'
-SRC_BASE = '/home/ubuntu/OneDrive_2022-05-06/GRANITOGRES_WEBSITE/GRANITOGRES_PRODUCTFILES/'
+SRC_BASE = '/home/titan/Desktop/OneDrive_2022-05-06/GRANITOGRES_WEBSITE/GRANITOGRES_PRODUCTFILES/'
+# SRC_BASE = '/home/ubuntu/OneDrive_2022-05-06/GRANITOGRES_WEBSITE/GRANITOGRES_PRODUCTFILES/'
 DJANGO_MEDIA_URL = './public/media/'
 DEST_BASE = './public/media/product-import/'
 
@@ -53,37 +53,44 @@ abc_hauz = Partner.objects.get_or_create(name="ABC HAUZ")[0]
 
 def get_img_url(short_url):
     # import pdb;pdb.set_trace()
+    try:
+        response = requests.get(short_url)
+        long_url = unquote(response.url)
+        path = long_url.split('id=')[1].split('&')[0]
+        # something like: '/personal/purchase_morbi_abcmercantile_com/Documents/GRANITOGRES - CATALOGUE FILES/300X300 - MOROCCAN/18012 FL.jpg'
 
-    response = requests.get(short_url)
-    long_url = unquote(response.url)
-    path = long_url.split('id=')[1].split('&')[0]
-    # something like: '/personal/purchase_morbi_abcmercantile_com/Documents/GRANITOGRES - CATALOGUE FILES/300X300 - MOROCCAN/18012 FL.jpg'
+        path = path.replace(URL_BASE, SRC_BASE)
+        print(f'Replacing{URL_BASE} to {SRC_BASE}')
+        # now path=: '~/Desktop/OneDrive_2022-05-06/GRANITOGRES - WEBSITE/GRANITO GRES - PRODUCT FILES/300X300 - MOROCCAN/18012 FL.jpg'
 
-    path = path.replace(URL_BASE, SRC_BASE)
-    print(f'Replacing{URL_BASE} to {SRC_BASE}')
-    # now path=: '~/Desktop/OneDrive_2022-05-06/GRANITOGRES - WEBSITE/GRANITO GRES - PRODUCT FILES/300X300 - MOROCCAN/18012 FL.jpg'
+        file_name = path.replace(SRC_BASE, '')
+        print(f'file name {file_name}--{SRC_BASE}')
+        # file_name =: '300X300 - MOROCCAN/18012 FL.jpg'
 
-    file_name = path.replace(SRC_BASE, '')
-    print(f'file name {file_name}--{SRC_BASE}')
-    # file_name =: '300X300 - MOROCCAN/18012 FL.jpg'
+        dest = os.path.join(DEST_BASE, file_name)
+        # dest =: './public/media/product-import/300X300 - MOROCCAN/18012 FL.jpg'
 
-    dest = os.path.join(DEST_BASE, file_name)
-    # dest =: './public/media/product-import/300X300 - MOROCCAN/18012 FL.jpg'
-    if not os.path.exists(dest):
-        if not os.path.exists(DEST_BASE):
-            os.mkdir(DEST_BASE)
+        if not os.path.exists(dest):
+            if not os.path.exists(DEST_BASE):
+                os.mkdir(DEST_BASE)
 
-        intermediate_dirs = file_name.split(sep)[:-1]
-        currpath = '.'
-        for _dir in intermediate_dirs:
-            currpath += sep + _dir
-            try:
-                os.mkdir(os.path.join(DEST_BASE, currpath))
-            except Exception as e:
-                print(e)
-        shutil.copy2(path, dest)
-    print(DEST_BASE.replace(DJANGO_MEDIA_URL, '').rstrip(sep) + sep + file_name.lstrip(sep))
-    return DEST_BASE.replace(DJANGO_MEDIA_URL, '').rstrip(sep) + sep + file_name.lstrip(sep)
+            intermediate_dirs = file_name.split(sep)[:-1]
+            currpath = '.'
+            for _dir in intermediate_dirs:
+                currpath += sep + _dir
+                try:
+                    os.mkdir(os.path.join(DEST_BASE, currpath))
+                    print(f'path-{path}, dest-{dest}')
+                    shutil.copy2(path, dest)
+
+                except Exception as e:
+                    print(e, DEST_BASE, currpath)
+                print(DEST_BASE.replace(DJANGO_MEDIA_URL, '').rstrip(sep) + sep + file_name.lstrip(sep))
+        return DEST_BASE.replace(DJANGO_MEDIA_URL, '').rstrip(sep) + sep + file_name.lstrip(sep)
+    except Exception as e:
+        """ Enter Proably due t invalid link or space in image name"""
+        print(e)
+        return None
 
 
 
